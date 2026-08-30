@@ -315,7 +315,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Perlen:</strong> Bleiben nach dem Lauf erhalten und lassen sich im Shop in dauerhafte Verbesserungen investieren.</li>
         <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner – mach dich bereit!</li>
         <li><strong>Verteidigung:</strong> Der Blasenring wehrt kleine Gegnerschüsse ab. Gegen die grossen, roten Treffer hilft nur ein Schutzschild.</li>
-        <li><strong>Heilung:</strong> Die Verbesserung Regeneration heilt dich langsam während des Laufs.</li>
+        <li><strong>Heilung:</strong> Nur die Verbesserung Regeneration heilt dich während des Laufs – langsam, aber zuverlässig.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
       <div class="panel-actions">
@@ -413,7 +413,7 @@ Object.keys(CHARACTER_SPRITES).forEach(function(id){
   spriteImages[id] = img;
 });
 // Welche Richtung ist "vorne" im Bild selbst? 0 = nach rechts gezeichnet, -PI/2 = nach oben gezeichnet.
-const SPRITE_BASE_ANGLE = { standard: -Math.PI/2, turbo: 0, panzer: 0, gluecks: 0 };
+const SPRITE_BASE_ANGLE = { standard: -Math.PI/2, turbo: 0, panzer: 0, gluecks: Math.PI };
 // Draufsicht-Sprites dürfen sich frei drehen (sehen nie "falsch herum" aus).
 // Seitenansicht-Sprites drehen sich nur bis 90° und spiegeln danach, damit sie nie auf dem Kopf stehen.
 const SPRITE_FREE_ROTATE = { standard: true, turbo: false, panzer: false, gluecks: false };
@@ -467,7 +467,7 @@ const PASSIVE_DEFS = {
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
   glueck:        { name: 'Glück',           desc: '+Perlen & seltenere Auswahl.',         maxLevel: 5 },
   schild:        { name: 'Schutzschild',    desc: 'Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.', maxLevel: 5 },
-  regeneration:  { name: 'Regeneration',    desc: 'Heilt langsam kontinuierlich Lebenspunkte.', maxLevel: 5 }
+  regeneration:  { name: 'Regeneration',    desc: 'Heilt kontinuierlich Lebenspunkte.',   maxLevel: 5 }
 };
 
 // ---------- Shop (dauerhafte Verbesserungen) ----------
@@ -638,7 +638,7 @@ let selectedStageId = save.lastStage || 'riff';
 
 let player = null;
 let camera = { x: 0, y: 0 };
-let enemies = [], inkClouds = [], projectiles = [], enemyProjectiles = [], pickups = [], particles = [], ambientBubbles = [];
+let enemies = [], projectiles = [], enemyProjectiles = [], pickups = [], particles = [], ambientBubbles = [], inkClouds = [];
 let orbitAngle = 0;
 let minionEntities = [];
 let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPearls = 0;
@@ -699,7 +699,7 @@ function startRun(charId, stageId) {
     weapons: { blase: 1 }, weaponTimers: { blase: 0 }, passives: {}
   };
   camera = { x: 0, y: 0 };
-  enemies = []; inkClouds = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
+  enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = []; inkClouds = [];
   orbitAngle = 0; minionEntities = [];
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
@@ -739,19 +739,15 @@ function spawnEnemy(typeKey, isBoss) {
     return bossEntity;
   }
   const def = ENEMY_TYPES[typeKey];
-  // Difficulty comes mostly from stronger enemies, not from an ever-growing army.
-  const minutes = runTime / 60;
-  const powerScale = 1 + minutes * 0.13 * stage.difficulty;
-  const hpScale = 1 + minutes * 0.20 * stage.difficulty;
-  const speedScale = 1 + Math.min(0.22, minutes * 0.025 * stage.difficulty);
-  const dmgScale = 1 + minutes * 0.085 * stage.difficulty;
+  const t = runTime / 60;
+  const hpScale = 1 + t * 0.095 * stage.difficulty;
+  const dmgScale = 1 + t * 0.060 * stage.difficulty;
+  const speedScale = 1 + Math.min(0.28, t * 0.018 * stage.difficulty);
+  const xpScale = 1 + t * 0.035 * stage.difficulty;
   const e = {
     isBoss: false, type: typeKey, name: def.name,
-    x: x, y: y, r: def.r * (1 + Math.min(0.12, minutes * 0.01)),
-    hp: def.hp * hpScale, maxHp: def.hp * hpScale,
-    speed: def.speed * speedScale, dmg: Math.max(1, def.dmg * dmgScale),
-    strength: powerScale, color: def.color, accessory: def.accessory,
-    xp: Math.ceil(def.xp * (1 + minutes * 0.035)),
+    x: x, y: y, r: def.r * (1 + Math.min(0.12, t * 0.008)), hp: def.hp * hpScale, maxHp: def.hp * hpScale,
+    speed: def.speed * speedScale, dmg: def.dmg * dmgScale, color: def.color, accessory: def.accessory, xp: Math.max(1, Math.round(def.xp * xpScale)),
     behavior: def.behavior, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
     rangedTimer: 1 + Math.random(), inkTimer: 2 + Math.random() * 2,
     wobble: Math.random() * 10, jitter: Math.random() * Math.PI * 2
@@ -772,16 +768,16 @@ function updateSpawner(dt) {
   const stage = stageOf();
   if (spawnTimer <= 0) {
     const table = SPAWN_TABLE_BY_STAGE[stage.id];
-    const batch = 1 + Math.floor(runTime / 180);
+    const batch = 1 + Math.floor(runTime / 120);
     const n = Math.min(batch, 3);
     for (let i = 0; i < n; i++) {
       const key = table[Math.floor(Math.random() * table.length)];
       spawnEnemy(key, false);
     }
-    spawnInterval = Math.max(0.48, 1.18 - (runTime / 60) * 0.035 * stage.difficulty);
+    spawnInterval = Math.max(0.42, 1.20 - (runTime / 60) * 0.045 * stage.difficulty);
     spawnTimer = spawnInterval;
   }
-  const enemyCap = 75;
+  const enemyCap = 90;
   if (enemies.length > enemyCap) enemies.splice(0, enemies.length - enemyCap);
 
   if (!bossSpawned && runTime >= 300) {
@@ -834,14 +830,13 @@ function killEnemy(en) {
 }
 
 function spawnXpOrb(x,y,amount){ pickups.push({ type:'xp', x:x, y:y, r:7, amount:amount }); }
+function spawnHeal(x,y){ pickups.push({ type:'heal', x:x, y:y, r:8, amount:18 }); }
 function spawnPearl(x,y){ pickups.push({ type:'pearl', x:x, y:y, r:6, amount:1 }); }
 function spawnBurst(x,y,color,count){
   if (prefersReducedMotion) count = Math.min(count, 4);
-  const room = Math.max(0, 180 - particles.length);
-  count = Math.min(count, room);
   for (let i=0;i<count;i++){
     const a = Math.random()*Math.PI*2, sp = 40+Math.random()*90;
-    particles.push({ x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:0.35+Math.random()*0.25, maxLife:0.6, color:color, r:2+Math.random()*3 });
+    if (particles.length < 260) particles.push({ x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:0.35+Math.random()*0.25, maxLife:0.6, color:color, r:2+Math.random()*3 });
   }
 }
 
@@ -864,18 +859,19 @@ function fireWeapon(id, level) {
     }
     Sfx.shoot();
   } else if (type === 'aura') {
-    // Ink trails behind the blobfish; each cloud removes about 20% of max HP once.
-    const radius = 64 + level * 8;
-    const backX = -Math.cos(p.angle || 0), backY = -Math.sin(p.angle || 0);
+    const backX = p.x - Math.cos(p.angle) * (48 + level * 5);
+    const backY = p.y - Math.sin(p.angle) * (48 + level * 5);
     inkClouds.push({
-      x: p.x + backX * (26 + level * 3), y: p.y + backY * (26 + level * 3),
-      r: radius, life: 1.45, maxLife: 1.45, damageRatio: 0.20, hitSet: new WeakSet()
+      x: backX, y: backY,
+      life: 2.0 + level * 0.15,
+      maxLife: 2.0 + level * 0.15,
+      r: 34 + level * 6,
+      driftX: -Math.cos(p.angle) * (8 + level * 2),
+      driftY: -Math.sin(p.angle) * (8 + level * 2),
+      hitSet: new Set()
     });
-    inkClouds.push({
-      x: p.x + backX * (54 + level * 4), y: p.y + backY * (54 + level * 4),
-      r: radius * 0.72, life: 0.9, maxLife: 0.9, damageRatio: 0.20, hitSet: new WeakSet()
-    });
-    spawnBurst(p.x + backX * 22, p.y + backY * 22, '#c65da8', 7);
+    if (inkClouds.length > 6) inkClouds.shift();
+    spawnBurst(backX, backY, '#c65da8', 6);
   } else if (type === 'pierce') {
     const target = findNearestEnemy(p.x, p.y, 900);
     if (!target) return;
@@ -976,25 +972,29 @@ function updateMinion(dt) {
 
   for (let m=0; m<minionEntities.length; m++) {
     const min = minionEntities[m];
-    const target = findNearestEnemy(min.x, min.y, 460);
-    min.timer -= dt;
+    const target = findNearestEnemy(min.x, min.y, 520) || findNearestEnemy(p.x, p.y, 520);
     if (target) {
-      // The friend leaves the player to actively engage enemies instead of orbiting.
       const dx = target.x - min.x, dy = target.y - min.y;
-      const d = Math.hypot(dx,dy) || 1;
-      const desired = d > 155 ? 1 : -0.35;
-      min.x += (dx/d) * 170 * desired * dt;
-      min.y += (dy/d) * 170 * desired * dt;
-      min.angle = Math.atan2(dy, dx);
-      if (min.timer <= 0 && d < 440) {
-        projectiles.push({ x:min.x, y:min.y, vx:(dx/d)*390, vy:(dy/d)*390, r:4, dmg:dmg, life:1.1, color:'#9effc9', pierce:0, minionShot:true });
-        min.timer = fireInterval;
-      }
+      const d = Math.hypot(dx, dy) || 1;
+      let moveX = 0, moveY = 0;
+      if (d > 105) { moveX = dx / d; moveY = dy / d; }
+      else if (d < 70) { moveX = -dx / d; moveY = -dy / d; }
+      min.x += moveX * 205 * dt;
+      min.y += moveY * 205 * dt;
+      min.lastTargetX = target.x;
+      min.lastTargetY = target.y;
+      min.facing = Math.cos(Math.atan2(dy, dx)) >= 0 ? 1 : -1;
     } else {
-      const homeX = p.x + (m ? 28 : -28), homeY = p.y - 26;
-      min.x += (homeX - min.x) * Math.min(1, dt * 2.8);
-      min.y += (homeY - min.y) * Math.min(1, dt * 2.8);
-      min.angle = lerpAngle(min.angle, Math.atan2(homeY-min.y, homeX-min.x), Math.min(1, dt*5));
+      const dx = p.x - min.x, dy = (p.y - 24 - min.y);
+      const d = Math.hypot(dx, dy) || 1;
+      if (d > 70) { min.x += (dx / d) * 180 * dt; min.y += (dy / d) * 180 * dt; }
+      min.facing = dx >= 0 ? 1 : -1;
+    }
+    min.timer -= dt;
+    if (min.timer <= 0 && target) {
+      const ang = Math.atan2(target.y-min.y, target.x-min.x);
+      projectiles.push({ x:min.x, y:min.y, vx:Math.cos(ang)*430, vy:Math.sin(ang)*430, r:4, dmg:dmg, life:1.1, color:'#9effc9', pierce:0, fromMinion:true });
+      min.timer = fireInterval;
     }
   }
 }
@@ -1052,13 +1052,10 @@ function updateEnemies(dt) {
     const speedMult = en.slowTimer > 0 ? 0.65 : 1;
 
     const dx = p.x - en.x, dy = p.y - en.y;
-    const d2 = dx*dx + dy*dy;
-    const d = Math.sqrt(d2) || 1;
+    const d = Math.hypot(dx, dy) || 1;
     let moveX = 0, moveY = 0;
 
-    if (d2 > 950*950 && !en.isBoss) {
-      moveX = dx / d; moveY = dy / d;
-    } else if (en.behavior === 'chase' || en.behavior === 'swarm') {
+    if (en.behavior === 'chase' || en.behavior === 'swarm') {
       moveX = dx / d; moveY = dy / d;
     } else if (en.behavior === 'erratic') {
       en.jitter += dt * 6;
@@ -1112,10 +1109,8 @@ function updateEnemies(dt) {
     en.wobble += dt * 8;
 
     if (en.contactTimer > 0) en.contactTimer -= dt;
-    const cdx = en.x - p.x, cdy = en.y - p.y;
-    const cd2 = cdx*cdx + cdy*cdy;
-    const contactR = en.r + p.r;
-    if (cd2 < contactR*contactR && en.contactTimer <= 0 && invulnTimer <= 0) {
+    const cd = distXY(en.x, en.y, p.x, p.y);
+    if (cd < en.r + p.r && en.contactTimer <= 0 && invulnTimer <= 0) {
       damagePlayer(en.dmg);
       en.contactTimer = 0.55;
     }
@@ -1123,6 +1118,8 @@ function updateEnemies(dt) {
 }
 
 function updateProjectiles(dt) {
+  if (projectiles.length > 180) projectiles.splice(0, projectiles.length - 180);
+  if (enemyProjectiles.length > 90) enemyProjectiles.splice(0, enemyProjectiles.length - 90);
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const pr = projectiles[i];
     pr.x += pr.vx * dt; pr.y += pr.vy * dt;
@@ -1213,19 +1210,18 @@ function updateInkClouds(dt) {
   for (let i = inkClouds.length - 1; i >= 0; i--) {
     const cloud = inkClouds[i];
     cloud.life -= dt;
-    cloud.y += 4 * dt;
+    cloud.x += cloud.driftX * dt;
+    cloud.y += cloud.driftY * dt;
+    if (cloud.life <= 0) { inkClouds.splice(i, 1); continue; }
     for (let j = 0; j < enemies.length; j++) {
       const en = enemies[j];
       if (en.dead || cloud.hitSet.has(en)) continue;
-      const dx = en.x - cloud.x, dy = en.y - cloud.y;
-      const hitRadius = cloud.r + en.r;
-      if (dx*dx + dy*dy <= hitRadius*hitRadius) {
-        applyDamageToEnemy(en, Math.max(1, en.maxHp * cloud.damageRatio));
-        en.slowTimer = 1.1;
+      if (distXY(cloud.x, cloud.y, en.x, en.y) <= cloud.r + en.r) {
+        applyDamageToEnemy(en, en.maxHp * 0.20);
+        en.slowTimer = Math.max(en.slowTimer || 0, 0.8);
         cloud.hitSet.add(en);
       }
     }
-    if (cloud.life <= 0) inkClouds.splice(i, 1);
   }
 }
 
@@ -1247,6 +1243,10 @@ function updatePickups(dt) {
         const luckMult = 1 + (p.luck||0)*0.1;
         runPearls += Math.round(pk.amount * luckMult);
         Sfx.pickup();
+      } else if (pk.type === 'heal') {
+        p.hp = Math.min(p.maxHp, p.hp + pk.amount);
+        spawnBurst(pk.x, pk.y, '#ff6b8a', 8);
+        Sfx.heal();
       }
       pickups.splice(i,1);
     }
@@ -1503,26 +1503,22 @@ function drawBlob(x, y, r, color, dark, opts) {
   ctx.translate(x, y);
   ctx.scale(1/squash, squash);
 
-  const fast = !!opts.fast;
-  if (!fast) {
-    ctx.shadowColor = color;
-    ctx.shadowBlur = opts.glow || 12;
-    const grad = ctx.createRadialGradient(-r*0.3,-r*0.35,r*0.15, 0,0,r);
-    grad.addColorStop(0, lighten(color, 0.35));
-    grad.addColorStop(0.6, color);
-    grad.addColorStop(1, dark || color);
-    ctx.fillStyle = grad;
-  } else {
-    ctx.fillStyle = color;
-  }
+  ctx.shadowColor = color;
+  ctx.shadowBlur = opts.glow || 12;
+
+  const grad = ctx.createRadialGradient(-r*0.3,-r*0.35,r*0.15, 0,0,r);
+  grad.addColorStop(0, lighten(color, 0.35));
+  grad.addColorStop(0.6, color);
+  grad.addColorStop(1, dark || color);
+  ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.arc(0,0,r,0,Math.PI*2);
   ctx.fill();
-  if (!fast) ctx.shadowBlur = 0;
+  ctx.shadowBlur = 0;
 
   if (opts.accessory) drawAccessory(opts.accessory, r, color, dark, opts);
 
-  if (!fast && opts.accessory !== 'spikes') {
+  if (opts.accessory !== 'spikes') {
     const fx = opts.facing || 1;
     drawEye(-r*0.16*fx - r*0.05, -r*0.08, r*0.22);
     drawEye(r*0.16*fx + r*0.15, -r*0.08, r*0.22);
@@ -1747,7 +1743,7 @@ function render() {
 
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
   if (inRun) {
-    const pickupColors = { pearl:'#ffe9b8', xp:'#5ef2c0' };
+    const pickupColors = { pearl:'#ffe9b8', xp:'#5ef2c0', heal:'#ff6b8a' };
     for (let i=0;i<pickups.length;i++){
       const pk = pickups[i];
       const sx = pk.x - camera.x + W/2, sy = pk.y - camera.y + H/2;
@@ -1757,6 +1753,23 @@ function render() {
       ctx.fillStyle = pc;
       ctx.beginPath(); ctx.arc(sx,sy,pk.r,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
+      if (pk.type === 'heal') {
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx-3.5,sy); ctx.lineTo(sx+3.5,sy); ctx.moveTo(sx,sy-3.5); ctx.lineTo(sx,sy+3.5); ctx.stroke();
+      }
+    }
+    for (let i=0;i<inkClouds.length;i++){
+      const cloud = inkClouds[i];
+      const sx = cloud.x-camera.x+W/2, sy = cloud.y-camera.y+H/2;
+      if (sx < -cloud.r || sx > W+cloud.r || sy < -cloud.r || sy > H+cloud.r) continue;
+      const alpha = Math.max(0, Math.min(0.42, cloud.life / cloud.maxLife * 0.42));
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#c65da8';
+      ctx.beginPath(); ctx.arc(sx, sy, cloud.r, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = alpha * 0.55;
+      ctx.beginPath(); ctx.arc(sx - cloud.r*0.35, sy + cloud.r*0.1, cloud.r*0.65, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
     }
     for (let i=0;i<enemyProjectiles.length;i++){
       const pr = enemyProjectiles[i];
@@ -1781,9 +1794,9 @@ function render() {
     for (let i=0;i<enemies.length;i++){
       const en = enemies[i];
       const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2;
-      if (sx < -100 || sx > W+100 || sy < -100 || sy > H+100) continue;
+      if (sx < -70 || sx > W+70 || sy < -70 || sy > H+70) continue;
       const color = en.hitFlash > 0 ? '#ffffff' : en.color;
-      drawBlob(sx, sy, en.r, color, null, { wobble: en.wobble, accessory: en.accessory, glow: en.isBoss ? 22 : 0, fast: !en.isBoss });
+      drawBlob(sx, sy, en.r, color, null, { wobble: en.wobble, accessory: en.accessory, glow: en.isBoss ? 22 : 8 });
     }
     if (player.weapons.ring) {
       const bubbles = getOrbitBubbleWorldPositions();
@@ -1798,7 +1811,7 @@ function render() {
       for (let mi=0; mi<minionEntities.length; mi++) {
         const min = minionEntities[mi];
         const sx = min.x-camera.x+W/2, sy = min.y-camera.y+H/2;
-        drawBlob(sx, sy, 11, '#9effc9', null, { wobble: runTime*6 + mi*3, accessory:'fin', glow:6 });
+        drawBlob(sx, sy, 11, '#9effc9', null, { wobble: runTime*6 + mi*3, accessory:'fin', facing: min.facing || 1, glow:6 });
       }
     }
     {
@@ -1979,7 +1992,7 @@ function renderAchievements() {
   });
 }
 
-const LEVELUP_ICONS = { blase:'◎', ring:'◉', tintenwolke:'\uD83D\uDFE3', harpune:'\uD83D\uDD31', elektro:'\u26A1', speer:'\uD83D\uDD3A', begleiter:'\uD83D\uDC1F',
+const LEVELUP_ICONS = { blase:'○', ring:'\u2B55', tintenwolke:'\uD83D\uDFE3', harpune:'\uD83D\uDD31', elektro:'\u26A1', speer:'\uD83D\uDD3A', begleiter:'\uD83D\uDC1F',
   tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40',
   schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A' };
 
@@ -2050,7 +2063,21 @@ function initUI() {
   document.getElementById('btn-pause').addEventListener('click', function(){ Sfx.click(); togglePause(); });
   document.getElementById('btn-resume').addEventListener('click', function(){ Sfx.click(); togglePause(); });
   document.getElementById('btn-restart-pause').addEventListener('click', function(){ Sfx.click(); startRun(selectedCharacterId, selectedStageId); });
-  document.getElementById('btn-quit-pause').addEventListener('click', function(){ Sfx.click(); save.totalPearls += runPearls; save.stats.totalPearlsEarned += runPearls; runPearls = 0; persistSave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); });
+  document.getElementById('btn-quit-pause').addEventListener('click', function(){
+    Sfx.click();
+    if (gameState === 'paused') {
+      save.totalPearls += runPearls;
+      save.stats.totalPearlsEarned += runPearls;
+      if (runTime > save.stats.bestTime) save.stats.bestTime = runTime;
+      if (runLevel > (save.stats.bestLevel || 0)) save.stats.bestLevel = runLevel;
+      persistSave();
+    }
+    runPearls = 0;
+    gameState='menu';
+    setHudVisible(false);
+    updateMenuPearlsLabel();
+    showScreen('screen-menu');
+  });
 
   document.getElementById('btn-retry').addEventListener('click', function(){ startRun(selectedCharacterId, selectedStageId); });
   document.getElementById('btn-gameover-menu').addEventListener('click', function(){ Sfx.click(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); });
