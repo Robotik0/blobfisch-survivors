@@ -314,6 +314,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Level-Ups:</strong> Sammle die Kerne besiegter Gegner und wähle neue Waffen oder Verbesserungen.</li>
         <li><strong>Perlen:</strong> Bleiben nach dem Lauf erhalten und lassen sich im Shop in dauerhafte Verbesserungen investieren.</li>
         <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner – mach dich bereit!</li>
+        <li><strong>Verteidigung:</strong> Der Blasenring wehrt kleine Gegnerschüsse ab. Gegen die grossen, roten Treffer hilft nur ein Schutzschild.</li>
+        <li><strong>Heilung:</strong> Manche Gegner hinterlassen Heiltropfen, und die Verbesserung Regeneration heilt dich während des Laufs.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
       <div class="panel-actions">
@@ -463,7 +465,9 @@ const PASSIVE_DEFS = {
   panzerung:     { name: 'Panzerung',       desc: 'Reduziert erlittenen Schaden.',        maxLevel: 5 },
   anziehung:     { name: 'Anziehungskraft', desc: '+Aufsammel-Radius pro Stufe.',         maxLevel: 5 },
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
-  glueck:        { name: 'Glück',           desc: '+Perlen & seltenere Auswahl.',         maxLevel: 5 }
+  glueck:        { name: 'Glück',           desc: '+Perlen & seltenere Auswahl.',         maxLevel: 5 },
+  schild:        { name: 'Schutzschild',    desc: 'Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.', maxLevel: 5 },
+  regeneration:  { name: 'Regeneration',    desc: 'Heilt kontinuierlich Lebenspunkte.',   maxLevel: 5 }
 };
 
 // ---------- Shop (dauerhafte Verbesserungen) ----------
@@ -570,7 +574,10 @@ const Sfx = {
   hurt: function(){ playTone(120, 0.15, 'sawtooth', 0.09); },
   boss: function(){ playTone(90, 0.5, 'sawtooth', 0.11); },
   click: function(){ playTone(440, 0.04, 'triangle', 0.05); },
-  gameover: function(){ playTone(200,0.2,'sawtooth',0.09); setTimeout(function(){playTone(140,0.3,'sawtooth',0.09);}, 150); }
+  gameover: function(){ playTone(200,0.2,'sawtooth',0.09); setTimeout(function(){playTone(140,0.3,'sawtooth',0.09);}, 150); },
+  deflect: function(){ playTone(950, 0.05, 'sine', 0.06); },
+  shieldBlock: function(){ playTone(650,0.08,'sine',0.1); setTimeout(function(){playTone(950,0.12,'sine',0.08);}, 60); },
+  heal: function(){ playTone(700,0.07,'sine',0.07); setTimeout(function(){playTone(900,0.1,'sine',0.07);}, 70); }
 };
 
 const keys = {};
@@ -633,7 +640,7 @@ let player = null;
 let camera = { x: 0, y: 0 };
 let enemies = [], projectiles = [], enemyProjectiles = [], pickups = [], particles = [], ambientBubbles = [];
 let orbitAngle = 0;
-let minionEntity = null;
+let minionEntities = [];
 let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPearls = 0;
 let spawnTimer = 0, spawnInterval = 1.15;
 let bossSpawned = false, bossEntity = null, bossWarningTimer = 0;
@@ -688,11 +695,12 @@ function startRun(charId, stageId) {
     magnet: cs.magnet, luck: cs.luck, armor: 0,
     color: cs.color, dark: cs.dark,
     facing: 1, angle: 0, bob: 0, hitFlash: 0, slowTimer: 0,
+    shieldReady: false, shieldTimer: 0,
     weapons: { blase: 1 }, weaponTimers: { blase: 0 }, passives: {}
   };
   camera = { x: 0, y: 0 };
   enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
-  orbitAngle = 0; minionEntity = null;
+  orbitAngle = 0; minionEntities = [];
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
   spawnTimer = 0; spawnInterval = 1.15;
@@ -723,7 +731,8 @@ function spawnEnemy(typeKey, isBoss) {
       isBoss: true, type: typeKey, name: def.name,
       x: x, y: y, r: def.r, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
       speed: def.speed, dmg: def.dmg, color: def.color, accessory: def.accessory, xp: def.xp,
-      behavior: 'chase', hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, specialTimer: 3, wobble: Math.random() * 10
+      behavior: 'chase', hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
+      specialTimer: 3, heavyTimer: 6, wobble: Math.random() * 10
     };
     enemies.push(bossEntity);
     Sfx.boss();
@@ -735,7 +744,7 @@ function spawnEnemy(typeKey, isBoss) {
     isBoss: false, type: typeKey, name: def.name,
     x: x, y: y, r: def.r, hp: def.hp * scale, maxHp: def.hp * scale,
     speed: def.speed, dmg: def.dmg, color: def.color, accessory: def.accessory, xp: def.xp,
-    behavior: def.behavior, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0,
+    behavior: def.behavior, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
     rangedTimer: 1 + Math.random(), inkTimer: 2 + Math.random() * 2,
     wobble: Math.random() * 10, jitter: Math.random() * Math.PI * 2
   };
@@ -806,6 +815,7 @@ function killEnemy(en) {
   const pearlCount = en.isBoss ? (8 + Math.floor(Math.random()*6)) : (Math.random() < 0.32 ? 1 : 0);
   spawnXpOrb(en.x, en.y, en.xp);
   for (let i=0;i<pearlCount;i++) spawnPearl(en.x + (Math.random()-0.5)*24, en.y + (Math.random()-0.5)*24);
+  if (en.isBoss || Math.random() < 0.05) spawnHeal(en.x, en.y);
   spawnBurst(en.x, en.y, en.color, en.isBoss ? 26 : 10);
   Sfx.death();
   if (en.isBoss) {
@@ -817,6 +827,7 @@ function killEnemy(en) {
 }
 
 function spawnXpOrb(x,y,amount){ pickups.push({ type:'xp', x:x, y:y, r:7, amount:amount }); }
+function spawnHeal(x,y){ pickups.push({ type:'heal', x:x, y:y, r:8, amount:18 }); }
 function spawnPearl(x,y){ pickups.push({ type:'pearl', x:x, y:y, r:6, amount:1 }); }
 function spawnBurst(x,y,color,count){
   if (prefersReducedMotion) count = Math.min(count, 4);
@@ -845,14 +856,17 @@ function fireWeapon(id, level) {
     }
     Sfx.shoot();
   } else if (type === 'aura') {
-    const radius = 60 + level*16;
-    const dmg = (3 + level*2.1) * p.damage;
+    const radius = 70 + level*20;
+    const dmg = (5 + level*3) * p.damage;
     for (let i=0;i<enemies.length;i++){
       const en = enemies[i];
       if (en.dead) continue;
-      if (distXY(en.x,en.y,p.x,p.y) <= radius) applyDamageToEnemy(en, dmg);
+      if (distXY(en.x,en.y,p.x,p.y) <= radius) {
+        applyDamageToEnemy(en, dmg);
+        en.slowTimer = 1.5;
+      }
     }
-    spawnBurst(p.x, p.y, '#c65da8', 6);
+    spawnBurst(p.x, p.y, '#c65da8', 10);
   } else if (type === 'pierce') {
     const target = findNearestEnemy(p.x, p.y, 900);
     if (!target) return;
@@ -884,7 +898,7 @@ function fireWeapon(id, level) {
   }
 }
 
-const WEAPON_COOLDOWNS = { blase:0.85, ring:99, tintenwolke:1.6, harpune:1.1, elektro:1.3, speer:1.4, begleiter:99 };
+const WEAPON_COOLDOWNS = { blase:0.85, ring:99, tintenwolke:1.2, harpune:1.1, elektro:1.3, speer:1.4, begleiter:99 };
 
 function updateWeapons(dt) {
   const p = player;
@@ -903,23 +917,35 @@ function updateWeapons(dt) {
   updateMinion(dt);
 }
 
+function orbitBubbleRadius(level) { return 52 + level*7; }
+
+function getOrbitBubbleWorldPositions() {
+  const level = player.weapons.ring;
+  if (!level) return [];
+  const radius = orbitBubbleRadius(level);
+  const positions = [];
+  for (let i=0;i<level;i++){
+    const a = orbitAngle + (i / level) * Math.PI * 2;
+    positions.push({ x: player.x + Math.cos(a)*radius, y: player.y + Math.sin(a)*radius });
+  }
+  return positions;
+}
+
 function updateOrbitWeapon(dt) {
   const p = player;
   const level = p.weapons.ring;
   if (!level) return;
   orbitAngle += dt * 2.4;
-  const radius = 58;
-  const dmg = (4 + level*2) * p.damage;
-  for (let i=0;i<level;i++){
-    const a = orbitAngle + (i / level) * Math.PI * 2;
-    const ox = p.x + Math.cos(a)*radius;
-    const oy = p.y + Math.sin(a)*radius;
+  const dmg = (6 + level*3) * p.damage;
+  const bubbles = getOrbitBubbleWorldPositions();
+  for (let i=0;i<bubbles.length;i++){
+    const ox = bubbles[i].x, oy = bubbles[i].y;
     for (let j=0;j<enemies.length;j++){
       const en = enemies[j];
       if (en.dead || en.orbitHitTimer > 0) continue;
       if (distXY(ox,oy,en.x,en.y) <= 14 + en.r) {
         applyDamageToEnemy(en, dmg);
-        en.orbitHitTimer = 0.35;
+        en.orbitHitTimer = 0.3;
       }
     }
   }
@@ -928,22 +954,33 @@ function updateOrbitWeapon(dt) {
 function updateMinion(dt) {
   const p = player;
   const level = p.weapons.begleiter;
-  if (!level) { minionEntity = null; return; }
-  if (!minionEntity) minionEntity = { x:p.x-40, y:p.y-10, angle:0, timer:0 };
-  minionEntity.angle += dt*1.6;
-  const targetX = p.x + Math.cos(minionEntity.angle)*46;
-  const targetY = p.y + Math.sin(minionEntity.angle)*46 - 10;
-  minionEntity.x += (targetX-minionEntity.x)*Math.min(1,dt*4);
-  minionEntity.y += (targetY-minionEntity.y)*Math.min(1,dt*4);
-  minionEntity.timer -= dt;
-  if (minionEntity.timer <= 0) {
-    const target = findNearestEnemy(minionEntity.x, minionEntity.y, 340);
-    if (target) {
-      const ang = Math.atan2(target.y-minionEntity.y, target.x-minionEntity.x);
-      const dmg = (5 + level*2.4) * p.damage;
-      projectiles.push({ x:minionEntity.x, y:minionEntity.y, vx:Math.cos(ang)*360, vy:Math.sin(ang)*360, r:4, dmg:dmg, life:1, color:'#9effc9', pierce:0 });
+  if (!level) { minionEntities = []; return; }
+  const count = level >= 3 ? 2 : 1;
+  while (minionEntities.length < count) {
+    const idx = minionEntities.length;
+    minionEntities.push({ x: p.x-40, y: p.y-10, angle: idx*Math.PI, timer: idx*0.6 });
+  }
+  if (minionEntities.length > count) minionEntities.length = count;
+
+  const fireInterval = Math.max(0.5, 1.3 - level*0.15);
+  const dmg = (6 + level*3) * p.damage;
+
+  for (let m=0; m<minionEntities.length; m++) {
+    const min = minionEntities[m];
+    min.angle += dt*1.6;
+    const targetX = p.x + Math.cos(min.angle)*46;
+    const targetY = p.y + Math.sin(min.angle)*46 - 10;
+    min.x += (targetX-min.x)*Math.min(1,dt*4);
+    min.y += (targetY-min.y)*Math.min(1,dt*4);
+    min.timer -= dt;
+    if (min.timer <= 0) {
+      const target = findNearestEnemy(min.x, min.y, 340);
+      if (target) {
+        const ang = Math.atan2(target.y-min.y, target.x-min.x);
+        projectiles.push({ x:min.x, y:min.y, vx:Math.cos(ang)*360, vy:Math.sin(ang)*360, r:4, dmg:dmg, life:1, color:'#9effc9', pierce:0 });
+      }
+      min.timer = fireInterval;
     }
-    minionEntity.timer = 1.3;
   }
 }
 
@@ -976,6 +1013,15 @@ function updatePlayer(dt) {
   p.bob += dt * (mv.mag > 0 ? 9 : 4);
   if (p.hitFlash > 0) p.hitFlash -= dt;
   if (invulnTimer > 0) invulnTimer -= dt;
+
+  if (p.passives.schild && !p.shieldReady) {
+    p.shieldTimer -= dt;
+    if (p.shieldTimer <= 0) { p.shieldReady = true; p.shieldTimer = 0; }
+  }
+  if (p.passives.regeneration && p.hp < p.maxHp) {
+    p.hp = Math.min(p.maxHp, p.hp + p.passives.regeneration * 0.6 * dt);
+  }
+
   camera.x += (p.x - camera.x) * Math.min(1, dt * 6);
   camera.y += (p.y - camera.y) * Math.min(1, dt * 6);
 }
@@ -987,6 +1033,8 @@ function updateEnemies(dt) {
     if (en.dead) { enemies.splice(i, 1); continue; }
     if (en.hitFlash > 0) en.hitFlash -= dt;
     if (en.orbitHitTimer > 0) en.orbitHitTimer -= dt;
+    if (en.slowTimer > 0) en.slowTimer -= dt;
+    const speedMult = en.slowTimer > 0 ? 0.65 : 1;
 
     const dx = p.x - en.x, dy = p.y - en.y;
     const d = Math.hypot(dx, dy) || 1;
@@ -1022,6 +1070,7 @@ function updateEnemies(dt) {
 
     if (en.isBoss) {
       en.specialTimer -= dt;
+      en.heavyTimer -= dt;
       moveX = dx / d; moveY = dy / d;
       if (en.specialTimer <= 0 && d < 700) {
         en.specialTimer = 4.5;
@@ -1031,10 +1080,17 @@ function updateEnemies(dt) {
         }
         Sfx.boss();
       }
+      if (en.heavyTimer <= 0 && d < 800) {
+        en.heavyTimer = 7 + Math.random()*1.5;
+        const ang = Math.atan2(p.y-en.y, p.x-en.x);
+        enemyProjectiles.push({ x: en.x, y: en.y, vx: Math.cos(ang)*115, vy: Math.sin(ang)*115, r: 15, dmg: en.dmg*1.4, life: 5, color: '#ff3355', heavy: true });
+        spawnBurst(en.x, en.y, '#ff3355', 8);
+        Sfx.boss();
+      }
     }
 
-    en.x += moveX * en.speed * dt;
-    en.y += moveY * en.speed * dt;
+    en.x += moveX * en.speed * speedMult * dt;
+    en.y += moveY * en.speed * speedMult * dt;
     en.wobble += dt * 8;
 
     if (en.contactTimer > 0) en.contactTimer -= dt;
@@ -1071,11 +1127,26 @@ function updateProjectiles(dt) {
     if (remove) projectiles.splice(i, 1);
   }
 
+  let ringBubbles = null;
   for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
     const pr = enemyProjectiles[i];
     pr.x += pr.vx * dt; pr.y += pr.vy * dt;
     pr.life -= dt;
     let remove = pr.life <= 0;
+
+    if (!remove && !pr.heavy && player.weapons.ring) {
+      if (ringBubbles === null) ringBubbles = getOrbitBubbleWorldPositions();
+      for (let k = 0; k < ringBubbles.length; k++) {
+        if (distXY(pr.x, pr.y, ringBubbles[k].x, ringBubbles[k].y) < 16) {
+          spawnBurst(pr.x, pr.y, '#bdeeff', 8);
+          Sfx.deflect();
+          player.hp = Math.min(player.maxHp, player.hp + 1);
+          remove = true;
+          break;
+        }
+      }
+    }
+
     if (!remove && distXY(pr.x, pr.y, player.x, player.y) < pr.r + player.r && invulnTimer <= 0) {
       damagePlayer(pr.dmg);
       if (pr.isInk) player.slowTimer = 2.2;
@@ -1085,8 +1156,18 @@ function updateProjectiles(dt) {
   }
 }
 
+function shieldRechargeTime(level) { return Math.max(5, 16 - level*2.2); }
+
 function damagePlayer(amount) {
   const p = player;
+  if (p.shieldReady) {
+    p.shieldReady = false;
+    p.shieldTimer = shieldRechargeTime(p.passives.schild || 1);
+    invulnTimer = 0.4;
+    spawnBurst(p.x, p.y, '#5ef2c0', 16);
+    Sfx.shieldBlock();
+    return;
+  }
   const reduced = Math.max(1, amount - p.armor);
   p.hp -= reduced;
   p.hitFlash = 0.25;
@@ -1127,6 +1208,10 @@ function updatePickups(dt) {
         const luckMult = 1 + (p.luck||0)*0.1;
         runPearls += Math.round(pk.amount * luckMult);
         Sfx.pickup();
+      } else if (pk.type === 'heal') {
+        p.hp = Math.min(p.maxHp, p.hp + pk.amount);
+        spawnBurst(pk.x, pk.y, '#ff6b8a', 8);
+        Sfx.heal();
       }
       pickups.splice(i,1);
     }
@@ -1215,6 +1300,7 @@ function chooseUpgrade(choice) {
   } else {
     p.passives[choice.id] = choice.next;
     if (choice.id === 'leben') { p.maxHp += 20; p.hp += 20; }
+    if (choice.id === 'schild' && choice.level === 0) { p.shieldReady = true; p.shieldTimer = 0; }
     recomputeDerivedStats();
   }
   Sfx.levelup();
@@ -1621,19 +1707,34 @@ function render() {
 
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
   if (inRun) {
+    const pickupColors = { pearl:'#ffe9b8', xp:'#5ef2c0', heal:'#ff6b8a' };
     for (let i=0;i<pickups.length;i++){
       const pk = pickups[i];
       const sx = pk.x - camera.x + W/2, sy = pk.y - camera.y + H/2;
-      ctx.shadowColor = pk.type==='pearl' ? '#ffe9b8' : '#5ef2c0';
+      const pc = pickupColors[pk.type] || '#5ef2c0';
+      ctx.shadowColor = pc;
       ctx.shadowBlur = 8;
-      ctx.fillStyle = pk.type==='pearl' ? '#ffe9b8' : '#5ef2c0';
+      ctx.fillStyle = pc;
       ctx.beginPath(); ctx.arc(sx,sy,pk.r,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
+      if (pk.type === 'heal') {
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx-3.5,sy); ctx.lineTo(sx+3.5,sy); ctx.moveTo(sx,sy-3.5); ctx.lineTo(sx,sy+3.5); ctx.stroke();
+      }
     }
     for (let i=0;i<enemyProjectiles.length;i++){
       const pr = enemyProjectiles[i];
       const sx = pr.x-camera.x+W/2, sy = pr.y-camera.y+H/2;
-      ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
+      if (pr.heavy) {
+        ctx.shadowColor = '#ff3355'; ctx.shadowBlur = 14 + Math.sin(runTime*14)*4;
+        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(sx,sy,pr.r+4,0,Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
+      }
     }
     for (let i=0;i<projectiles.length;i++){
       const pr = projectiles[i];
@@ -1650,22 +1751,33 @@ function render() {
       drawBlob(sx, sy, en.r, color, null, { wobble: en.wobble, accessory: en.accessory, glow: en.isBoss ? 22 : 8 });
     }
     if (player.weapons.ring) {
-      const level = player.weapons.ring;
-      const psx = player.x-camera.x+W/2, psy = player.y-camera.y+H/2;
-      for (let i=0;i<level;i++){
-        const a = orbitAngle + (i/level)*Math.PI*2;
-        const ox = psx + Math.cos(a)*58, oy = psy + Math.sin(a)*58;
+      const bubbles = getOrbitBubbleWorldPositions();
+      for (let i=0;i<bubbles.length;i++){
+        const ox = bubbles[i].x-camera.x+W/2, oy = bubbles[i].y-camera.y+H/2;
         ctx.fillStyle = '#bdeeff'; ctx.shadowColor='#bdeeff'; ctx.shadowBlur=8;
         ctx.beginPath(); ctx.arc(ox,oy,10,0,Math.PI*2); ctx.fill();
         ctx.shadowBlur=0;
       }
     }
-    if (minionEntity && player.weapons.begleiter) {
-      const sx = minionEntity.x-camera.x+W/2, sy = minionEntity.y-camera.y+H/2;
-      drawBlob(sx, sy, 11, '#9effc9', null, { wobble: runTime*6, accessory:'fin', glow:6 });
+    if (player.weapons.begleiter) {
+      for (let mi=0; mi<minionEntities.length; mi++) {
+        const min = minionEntities[mi];
+        const sx = min.x-camera.x+W/2, sy = min.y-camera.y+H/2;
+        drawBlob(sx, sy, 11, '#9effc9', null, { wobble: runTime*6 + mi*3, accessory:'fin', glow:6 });
+      }
     }
     {
       const sx = player.x-camera.x+W/2, sy = player.y-camera.y+H/2;
+      if (player.shieldReady) {
+        const pulse = 0.75 + Math.sin(runTime*4) * 0.2;
+        ctx.save();
+        ctx.globalAlpha = pulse;
+        ctx.strokeStyle = '#5ef2c0';
+        ctx.shadowColor = '#5ef2c0'; ctx.shadowBlur = 12;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(sx, sy, player.r + 9, 0, Math.PI*2); ctx.stroke();
+        ctx.restore();
+      }
       const alphaBlink = invulnTimer > 0 ? (Math.sin(runTime*30) > 0 ? 1 : 0.4) : 1;
       ctx.globalAlpha = alphaBlink;
       drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: player.angle, flashAmount: player.hitFlash, glow: 16 });
@@ -1833,7 +1945,8 @@ function renderAchievements() {
 }
 
 const LEVELUP_ICONS = { blase:'\uD83E\uDEE7', ring:'\u2B55', tintenwolke:'\uD83D\uDFE3', harpune:'\uD83D\uDD31', elektro:'\u26A1', speer:'\uD83D\uDD3A', begleiter:'\uD83D\uDC1F',
-  tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40' };
+  tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40',
+  schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A' };
 
 function renderLevelUpScreen(picks) {
   const wrap = UI['levelup-choices'];
