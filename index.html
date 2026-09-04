@@ -836,6 +836,23 @@ function spawnBurst(x,y,color,count){
   }
 }
 
+const INK_CLOUD_TINTS = ['#8a4d99', '#c46fd6', '#5c3068'];
+function makeInkCloudParticle(x, y, radius) {
+  const puffCount = prefersReducedMotion ? 3 : 6;
+  const puffs = [];
+  for (let i=0;i<puffCount;i++){
+    const a = (i / puffCount) * Math.PI * 2 + Math.random()*0.5;
+    const dist = radius * (0.12 + Math.random()*0.34);
+    puffs.push({
+      dx: Math.cos(a)*dist, dy: Math.sin(a)*dist,
+      rScale: 0.4 + Math.random()*0.32,
+      tint: INK_CLOUD_TINTS[Math.floor(Math.random()*INK_CLOUD_TINTS.length)],
+      spin: (Math.random()-0.5) * 1.4
+    });
+  }
+  return { x:x, y:y, isCloud:true, life:1.6, maxLife:1.6, r: radius*0.62, puffs: puffs };
+}
+
 /* ============================================================
    WAFFEN
    ============================================================ */
@@ -870,7 +887,7 @@ function fireWeapon(id, level) {
       }
     }
     spawnBurst(cx, cy, '#c65da8', 10);
-    particles.push({ x:cx, y:cy, isCloud:true, life:1.6, maxLife:1.6, r: radius*0.6, color:'#8a4d99' });
+    particles.push(makeInkCloudParticle(cx, cy, radius));
   } else if (type === 'pierce') {
     const target = findNearestEnemy(p.x, p.y, 900);
     if (!target) return;
@@ -926,10 +943,11 @@ function orbitBubbleRadius(level) { return 52 + level*7; }
 function getOrbitBubbleWorldPositions() {
   const level = player.weapons.ring;
   if (!level) return [];
+  const count = level * 2;
   const radius = orbitBubbleRadius(level);
   const positions = [];
-  for (let i=0;i<level;i++){
-    const a = orbitAngle + (i / level) * Math.PI * 2;
+  for (let i=0;i<count;i++){
+    const a = orbitAngle + (i / count) * Math.PI * 2;
     positions.push({ x: player.x + Math.cos(a)*radius, y: player.y + Math.sin(a)*radius });
   }
   return positions;
@@ -1294,15 +1312,20 @@ function getAvailableUpgrades() {
   return options;
 }
 
+let levelUpProcessing = false;
+
 function presentLevelUpChoices() {
   const pool = getAvailableUpgrades();
   if (pool.length === 0) {
     runPearls += 5;
-    pendingLevelUps--;
+    Sfx.pickup();
+    pendingLevelUps = Math.max(0, pendingLevelUps - 1);
+    levelUpProcessing = false;
     if (pendingLevelUps > 0) { presentLevelUpChoices(); return; }
     gameState = 'playing'; showScreen(null); return;
   }
   gameState = 'levelup';
+  levelUpProcessing = false;
   const poolCopy = pool.slice();
   const count = Math.min(3, poolCopy.length);
   const picks = [];
@@ -1314,6 +1337,8 @@ function presentLevelUpChoices() {
 }
 
 function chooseUpgrade(choice) {
+  if (levelUpProcessing || gameState !== 'levelup') return;
+  levelUpProcessing = true;
   const p = player;
   if (choice.kind === 'weapon') {
     p.weapons[choice.id] = choice.next;
@@ -1325,9 +1350,9 @@ function chooseUpgrade(choice) {
     recomputeDerivedStats();
   }
   Sfx.levelup();
-  pendingLevelUps--;
+  pendingLevelUps = Math.max(0, pendingLevelUps - 1);
   if (pendingLevelUps > 0) presentLevelUpChoices();
-  else { gameState = 'playing'; showScreen(null); }
+  else { levelUpProcessing = false; gameState = 'playing'; showScreen(null); }
 }
 
 /* ============================================================
@@ -1869,9 +1894,26 @@ function render() {
       if (pt.isCloud) {
         const sx = pt.x-camera.x+W/2, sy = pt.y-camera.y+H/2;
         const lifeRatio = Math.max(0, pt.life/pt.maxLife);
-        ctx.globalAlpha = Math.min(0.32, lifeRatio*0.4);
-        ctx.fillStyle = pt.color;
-        ctx.beginPath(); ctx.arc(sx,sy,pt.r*(1.15-lifeRatio*0.15),0,Math.PI*2); ctx.fill();
+        const age = 1 - lifeRatio;
+        const growth = 1 + age*0.35;
+        const fadeAlpha = Math.min(0.4, lifeRatio*0.5);
+        for (let pi=0; pi<pt.puffs.length; pi++){
+          const puff = pt.puffs[pi];
+          const swirl = age * puff.spin;
+          const cosS = Math.cos(swirl), sinS = Math.sin(swirl);
+          const rdx = puff.dx*cosS - puff.dy*sinS;
+          const rdy = puff.dx*sinS + puff.dy*cosS;
+          const px = sx + rdx*growth, py = sy + rdy*growth;
+          const pr = Math.max(1, pt.r * puff.rScale * growth);
+          const rgb = hexToRgb(puff.tint);
+          const grad = ctx.createRadialGradient(px,py,0, px,py,pr);
+          grad.addColorStop(0, puff.tint);
+          grad.addColorStop(0.55, puff.tint);
+          grad.addColorStop(1, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+          ctx.globalAlpha = fadeAlpha;
+          ctx.fillStyle = grad;
+          ctx.beginPath(); ctx.arc(px,py,pr,0,Math.PI*2); ctx.fill();
+        }
         ctx.globalAlpha = 1;
         continue;
       }
@@ -2034,6 +2076,7 @@ const LEVELUP_ICONS = { blase:'\uD83D\uDD35', ring:'\u2B55', tintenwolke:'\uD83D
 function renderLevelUpScreen(picks) {
   const wrap = UI['levelup-choices'];
   wrap.innerHTML = '';
+  wrap.style.pointerEvents = '';
   picks.forEach(function(choice){
     const def = choice.kind==='weapon' ? WEAPON_DEFS[choice.id] : PASSIVE_DEFS[choice.id];
     const div = document.createElement('div');
@@ -2041,7 +2084,7 @@ function renderLevelUpScreen(picks) {
     div.innerHTML = '<span class="levelup-choice-icon">'+(LEVELUP_ICONS[choice.id]||'\u2728')+'</span>' +
       '<div><span class="levelup-choice-name">'+def.name+(choice.level>0?(' Stufe '+choice.next):' (Neu)')+'</span>' +
       '<span class="levelup-choice-desc">'+def.desc+'</span></div>';
-    div.addEventListener('click', function(){ chooseUpgrade(choice); });
+    div.addEventListener('click', function(){ wrap.style.pointerEvents = 'none'; chooseUpgrade(choice); });
     wrap.appendChild(div);
   });
   showScreen('screen-levelup');
