@@ -775,7 +775,16 @@ function updateSpawner(dt) {
     spawnTimer = spawnInterval;
   }
   const enemyCap = 70;
-  if (enemies.length > enemyCap) enemies.splice(0, enemies.length - enemyCap);
+  if (enemies.length > enemyCap) {
+    let excess = enemies.length - enemyCap;
+    for (let i = 0; i < enemies.length && excess > 0; i++) {
+      const en = enemies[i];
+      if (!en.isBoss && !en.dead) {
+        en.dead = true;
+        excess--;
+      }
+    }
+  }
 
   if (!bossSpawned && runTime >= 300) {
     bossSpawned = true;
