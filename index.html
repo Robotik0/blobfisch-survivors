@@ -250,6 +250,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       </div>
       <p class="tagline">Überlebe endlose Wellen im tiefen Ozean.</p>
       <div class="menu-buttons">
+        <button class="btn btn-primary btn-large" id="btn-continue-run" style="display:none;">Weiterspielen</button>
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
         <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
         <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge</button>
@@ -643,7 +644,7 @@ let orbitAngle = 0;
 let minionEntities = [];
 let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPearls = 0;
 let spawnTimer = 0, spawnInterval = 1.15;
-let bossSpawned = false, bossEntity = null, bossWarningTimer = 0;
+let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTimer = 0;
 let reviveAvailable = false, invulnTimer = 0;
 let pendingLevelUps = 0;
 let lastTime = 0, rafId = null;
@@ -679,8 +680,79 @@ function recomputeDerivedStats() {
   p.armor = (p.passives.panzerung || 0) * 1.2;
 }
 
+// ---------- Lauf-Snapshot (übersteht Tab-Wechsel, AFK, Browser-Neuladen) ----------
+function saveRunSnapshot() {
+  if (!player) return;
+  const snap = {
+    v: 1,
+    characterId: selectedCharacterId, stageId: selectedStageId,
+    runTime: runTime, runLevel: runLevel, runXp: runXp, runXpToNext: runXpToNext,
+    runKills: runKills, runPearls: runPearls,
+    nextBossTime: nextBossTime, bossEncounterCount: bossEncounterCount,
+    spawnTimer: spawnTimer, spawnInterval: spawnInterval,
+    reviveAvailable: reviveAvailable,
+    player: {
+      hp: player.hp, maxHp: player.maxHp, speed: player.speed, damage: player.damage,
+      cooldownMult: player.cooldownMult, magnet: player.magnet, luck: player.luck, armor: player.armor,
+      weapons: player.weapons, weaponTimers: player.weaponTimers, passives: player.passives,
+      shieldReady: player.shieldReady, shieldTimer: player.shieldTimer,
+      x: player.x, y: player.y, angle: player.angle
+    }
+  };
+  Storage.set('blobfischSurvivorsRunSnapshot', snap);
+}
+
+function saveRunSnapshotIfActive() {
+  if (gameState === 'playing' || gameState === 'paused' || gameState === 'levelup') saveRunSnapshot();
+}
+
+function clearRunSnapshot() {
+  Storage.set('blobfischSurvivorsRunSnapshot', null);
+}
+
+function hasResumableRun() {
+  const snap = Storage.get('blobfischSurvivorsRunSnapshot', null);
+  if (!snap || !snap.player) return null;
+  if (!CHARACTERS.some(function(c){ return c.id === snap.characterId; })) return null;
+  if (!STAGES.some(function(s){ return s.id === snap.stageId; })) return null;
+  return snap;
+}
+
+function resumeRunSnapshot(snap) {
+  ensureAudio();
+  selectedCharacterId = snap.characterId;
+  selectedStageId = snap.stageId;
+  save.lastCharacter = selectedCharacterId;
+  save.lastStage = selectedStageId;
+  persistSave();
+
+  const cs = computeCharacterStats(selectedCharacterId);
+  player = Object.assign({
+    r: 19, facing: 1, angle: 0, bob: 0, hitFlash: 0, slowTimer: 0,
+    color: cs.color, dark: cs.dark
+  }, snap.player);
+  camera = { x: player.x, y: player.y };
+  enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
+  orbitAngle = 0; minionEntities = [];
+  runTime = snap.runTime; runLevel = snap.runLevel; runXp = snap.runXp; runXpToNext = snap.runXpToNext;
+  runKills = snap.runKills; runPearls = snap.runPearls;
+  spawnTimer = snap.spawnTimer || 0; spawnInterval = snap.spawnInterval || 1.15;
+  nextBossTime = (typeof snap.nextBossTime === 'number') ? snap.nextBossTime : Math.max(runTime + 30, 300);
+  bossEncounterCount = snap.bossEncounterCount || 0;
+  bossEntity = null; bossWarningTimer = 0;
+  reviveAvailable = !!snap.reviveAvailable;
+  invulnTimer = 1.5;
+  pendingLevelUps = 0;
+
+  gameState = 'playing';
+  showScreen(null);
+  setHudVisible(true);
+  lastTime = 0;
+}
+
 function startRun(charId, stageId) {
   ensureAudio();
+  clearRunSnapshot();
   selectedCharacterId = charId;
   selectedStageId = stageId;
   save.lastCharacter = charId;
@@ -704,7 +776,7 @@ function startRun(charId, stageId) {
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
   spawnTimer = 0; spawnInterval = 1.15;
-  bossSpawned = false; bossEntity = null; bossWarningTimer = 0;
+  nextBossTime = 300; bossEncounterCount = 0; bossEntity = null; bossWarningTimer = 0;
   reviveAvailable = (save.shopLevels.shop_revive || 0) > 0;
   invulnTimer = 1;
   pendingLevelUps = 0;
@@ -726,14 +798,17 @@ function spawnEnemy(typeKey, isBoss) {
   const stage = stageOf();
   if (isBoss) {
     const def = BOSS_TYPES[typeKey];
-    const hpMult = 1 + (stage.difficulty - 1) * 0.5;
+    const encounterMult = 1 + bossEncounterCount * 0.4;
+    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult;
+    const dmgMult = 1 + bossEncounterCount * 0.2;
     bossEntity = {
-      isBoss: true, type: typeKey, name: def.name,
+      isBoss: true, type: typeKey, name: def.name, encounterNumber: bossEncounterCount + 1,
       x: x, y: y, r: def.r, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
-      speed: def.speed, dmg: def.dmg, color: def.color, accessory: def.accessory, xp: def.xp,
+      speed: def.speed, dmg: def.dmg * dmgMult, color: def.color, accessory: def.accessory, xp: def.xp,
       behavior: 'chase', hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
       specialTimer: 3, heavyTimer: 6, wobble: Math.random() * 10
     };
+    bossEncounterCount++;
     enemies.push(bossEntity);
     Sfx.boss();
     return bossEntity;
@@ -786,8 +861,7 @@ function updateSpawner(dt) {
     }
   }
 
-  if (!bossSpawned && runTime >= 300) {
-    bossSpawned = true;
+  if (!bossEntity && bossWarningTimer <= 0 && runTime >= nextBossTime) {
     bossWarningTimer = 3;
   }
 }
@@ -831,6 +905,7 @@ function killEnemy(en) {
     save.stats.bossesDefeated++;
     if (save.stats.uniqueBossesDefeated.indexOf(en.type) === -1) save.stats.uniqueBossesDefeated.push(en.type);
     bossEntity = null;
+    nextBossTime = runTime + 240;
     checkAchievements();
   }
 }
@@ -1394,6 +1469,7 @@ function bankRunProgress() {
   if (runLevel >= 15 && save.unlockedCharacters.indexOf('gluecks') === -1) {
     save.unlockedCharacters.push('gluecks');
   }
+  clearRunSnapshot();
   persistSave();
 }
 
@@ -1428,8 +1504,10 @@ function togglePause() {
   if (gameState === 'playing') { gameState = 'paused'; showScreen('screen-pause'); }
   else if (gameState === 'paused') { gameState = 'playing'; showScreen(null); }
 }
-window.addEventListener('blur', function(){ if (gameState === 'playing') togglePause(); });
-document.addEventListener('visibilitychange', function(){ if (document.hidden && gameState === 'playing') togglePause(); });
+window.addEventListener('blur', function(){ if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); });
+document.addEventListener('visibilitychange', function(){ if (document.hidden) { if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); } });
+window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
+setInterval(function(){ saveRunSnapshotIfActive(); }, 8000);
 
 function gameLoop(timestamp) {
   if (!lastTime) lastTime = timestamp;
@@ -1979,7 +2057,7 @@ function updateHud() {
   if (bossEntity) {
     UI['hud-boss'].classList.add('active');
     UI['hud-boss-fill'].style.width = Math.max(0,(bossEntity.hp/bossEntity.maxHp)*100) + '%';
-    UI['hud-boss-name'].textContent = bossEntity.name;
+    UI['hud-boss-name'].textContent = bossEntity.name + (bossEntity.encounterNumber > 1 ? ' \u00D7' + bossEntity.encounterNumber : '');
   } else {
     UI['hud-boss'].classList.remove('active');
   }
@@ -1990,6 +2068,23 @@ function updateMenuPearlsLabel() {
   if (UI['menu-best-time']) {
     const bt = save.stats.bestTime||0;
     UI['menu-best-time'].textContent = bt > 0 ? ('Beste Zeit: ' + Math.floor(bt/60)+':'+String(Math.floor(bt%60)).padStart(2,'0')) : '';
+  }
+  updateContinueButton();
+}
+
+function updateContinueButton() {
+  const snap = hasResumableRun();
+  const contBtn = document.getElementById('btn-continue-run');
+  const playBtn = document.getElementById('btn-goto-play');
+  if (!contBtn || !playBtn) return;
+  if (snap) {
+    contBtn.style.display = '';
+    playBtn.className = 'btn btn-secondary';
+    playBtn.textContent = 'Neuer Tauchgang';
+  } else {
+    contBtn.style.display = 'none';
+    playBtn.className = 'btn btn-primary btn-large';
+    playBtn.textContent = 'Spielen';
   }
 }
 
@@ -2128,6 +2223,10 @@ function renderGameOverScreen() {
 function initUI() {
   cacheUI();
 
+  document.getElementById('btn-continue-run').addEventListener('click', function(){
+    const snap = hasResumableRun();
+    if (snap) { Sfx.click(); resumeRunSnapshot(snap); }
+  });
   document.getElementById('btn-goto-play').addEventListener('click', function(){
     Sfx.click(); ensureAudio();
     renderCharacterGrid();
