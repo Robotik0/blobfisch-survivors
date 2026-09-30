@@ -314,9 +314,10 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Angreifen:</strong> Automatisch – konzentriere dich ganz aufs Ausweichen!</li>
         <li><strong>Level-Ups:</strong> Sammle die Kerne besiegter Gegner und wähle neue Waffen oder Verbesserungen.</li>
         <li><strong>Perlen:</strong> Bleiben nach dem Lauf erhalten und lassen sich im Shop in dauerhafte Verbesserungen investieren.</li>
-        <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner – mach dich bereit!</li>
+        <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner. Besiegst du ihn, kehrt nach 4 Minuten ein noch stärkerer zurück – mach dich bereit!</li>
         <li><strong>Verteidigung:</strong> Der Blasenring wehrt kleine Gegnerschüsse ab. Gegen die grossen, roten Treffer hilft nur ein Schutzschild.</li>
-        <li><strong>Heilung:</strong> Die Verbesserung Regeneration heilt dich langsam während des Laufs.</li>
+        <li><strong>Heilung:</strong> Regeneration heilt dich langsam während des Laufs. Extra-Leben erhöht dauerhaft deine maximalen Lebenspunkte (und heilt dich dabei) – es ist keine Wiederbelebung.</li>
+        <li><strong>Wiederbelebung:</strong> Die Shop-Verbesserung Zweite Chance rettet dich einmal pro Lauf automatisch mit halben Lebenspunkten, wenn du sonst sterben würdest. Ein grünes Herz neben deinen Lebenspunkten zeigt, dass sie bereit ist. Sie muss vor dem Lauf im Shop gekauft werden.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
       <div class="panel-actions">
@@ -462,7 +463,7 @@ const WEAPON_DEFS = {
 // ---------- Passive Upgrades ----------
 const PASSIVE_DEFS = {
   tempo:         { name: 'Flossen-Tempo',   desc: '+4% Bewegungstempo pro Stufe.',       maxLevel: 5 },
-  leben:         { name: 'Extra-Leben',     desc: '+20 maximale Lebenspunkte pro Stufe.', maxLevel: 5 },
+  leben:         { name: 'Extra-Leben',     desc: '+20 maximale Lebenspunkte pro Stufe und heilt dich sofort. Keine Wiederbelebung.', maxLevel: 5 },
   panzerung:     { name: 'Panzerung',       desc: 'Reduziert erlittenen Schaden.',        maxLevel: 5 },
   anziehung:     { name: 'Anziehungskraft', desc: '+Aufsammel-Radius pro Stufe.',         maxLevel: 5 },
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
@@ -478,7 +479,7 @@ const SHOP_UPGRADES = [
   { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, baseCost: 55,  costMult: 1.7 },
   { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, baseCost: 35,  costMult: 1.5 },
   { id: 'shop_luck',   name: 'Glücksbringer',          desc: 'Bessere Upgrade-Auswahl.',       maxLevel: 3, baseCost: 70,  costMult: 1.8 },
-  { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Einmal pro Lauf wiederbeleben.', maxLevel: 1, baseCost: 180, costMult: 1 }
+  { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Belebt dich einmal pro Lauf automatisch mit halber Gesundheit wieder.', maxLevel: 1, baseCost: 180, costMult: 1 }
 ];
 
 // ---------- Erfolge ----------
@@ -578,7 +579,8 @@ const Sfx = {
   gameover: function(){ playTone(200,0.2,'sawtooth',0.09); setTimeout(function(){playTone(140,0.3,'sawtooth',0.09);}, 150); },
   deflect: function(){ playTone(950, 0.05, 'sine', 0.06); },
   shieldBlock: function(){ playTone(650,0.08,'sine',0.1); setTimeout(function(){playTone(950,0.12,'sine',0.08);}, 60); },
-  heal: function(){ playTone(700,0.07,'sine',0.07); setTimeout(function(){playTone(900,0.1,'sine',0.07);}, 70); }
+  heal: function(){ playTone(700,0.07,'sine',0.07); setTimeout(function(){playTone(900,0.1,'sine',0.07);}, 70); },
+  revive: function(){ playTone(300,0.1,'sine',0.08); setTimeout(function(){playTone(500,0.12,'sine',0.09);}, 100); setTimeout(function(){playTone(760,0.2,'sine',0.1);}, 220); }
 };
 
 const keys = {};
@@ -645,7 +647,7 @@ let minionEntities = [];
 let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPearls = 0;
 let spawnTimer = 0, spawnInterval = 1.15;
 let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTimer = 0;
-let reviveAvailable = false, invulnTimer = 0;
+let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0;
 let pendingLevelUps = 0;
 let lastTime = 0, rafId = null;
 
@@ -742,6 +744,7 @@ function resumeRunSnapshot(snap) {
   bossEntity = null; bossWarningTimer = 0;
   reviveAvailable = !!snap.reviveAvailable;
   invulnTimer = 1.5;
+  reviveFlashTimer = 0;
   pendingLevelUps = 0;
 
   gameState = 'playing';
@@ -779,6 +782,7 @@ function startRun(charId, stageId) {
   nextBossTime = 300; bossEncounterCount = 0; bossEntity = null; bossWarningTimer = 0;
   reviveAvailable = (save.shopLevels.shop_revive || 0) > 0;
   invulnTimer = 1;
+  reviveFlashTimer = 0;
   pendingLevelUps = 0;
 
   gameState = 'playing';
@@ -1311,7 +1315,9 @@ function onPlayerDeath() {
     reviveAvailable = false;
     player.hp = Math.ceil(player.maxHp * 0.5);
     invulnTimer = 2;
-    spawnBurst(player.x, player.y, '#5ef2c0', 20);
+    reviveFlashTimer = 2.4;
+    spawnBurst(player.x, player.y, '#5ef2c0', 24);
+    Sfx.revive();
     return;
   }
   endRun();
@@ -1444,6 +1450,7 @@ function chooseUpgrade(choice) {
    ============================================================ */
 function update(dt) {
   runTime += dt;
+  if (reviveFlashTimer > 0) reviveFlashTimer -= dt;
   if (bossWarningTimer > 0) {
     bossWarningTimer -= dt;
     if (bossWarningTimer <= 0) {
@@ -1683,6 +1690,22 @@ function drawEnemySprite(x, y, r, color, accessory, wobble) {
   ctx.restore();
 }
 
+const whiteSilhouetteCache = {};
+function getWhiteSilhouette(id, img) {
+  const cached = whiteSilhouetteCache[id];
+  if (cached) return cached;
+  const off = document.createElement('canvas');
+  off.width = img.naturalWidth;
+  off.height = img.naturalHeight;
+  const octx = off.getContext('2d');
+  octx.drawImage(img, 0, 0);
+  octx.globalCompositeOperation = 'source-in';
+  octx.fillStyle = '#ffffff';
+  octx.fillRect(0, 0, off.width, off.height);
+  whiteSilhouetteCache[id] = off;
+  return off;
+}
+
 function drawPlayerSprite(x, y, r, opts) {
   opts = opts || {};
   const angle = opts.angle || 0;
@@ -1719,12 +1742,11 @@ function drawPlayerSprite(x, y, r, opts) {
   ctx.shadowBlur = 0;
 
   if (opts.flashAmount > 0) {
-    ctx.globalCompositeOperation = 'source-atop';
-    ctx.globalAlpha = Math.min(1, opts.flashAmount * 4);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(-targetW/2, -targetH/2, targetW, targetH);
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
+    const sil = getWhiteSilhouette(selectedCharacterId, img);
+    const baseAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = baseAlpha * Math.min(1, opts.flashAmount * 4);
+    ctx.drawImage(sil, -targetW/2, -targetH/2, targetW, targetH);
+    ctx.globalAlpha = baseAlpha;
   }
 
   ctx.restore();
@@ -1887,6 +1909,25 @@ function drawBossWarning() {
   ctx.fillText('\u26A0 Ein Boss n\u00E4hert sich! \u26A0', W/2, 90);
   ctx.restore();
 }
+function drawReviveBanner() {
+  ctx.save();
+  const fade = Math.min(1, reviveFlashTimer / 0.5);
+  ctx.globalAlpha = fade;
+  ctx.fillStyle = '#5ef2c0';
+  ctx.shadowColor = '#5ef2c0'; ctx.shadowBlur = 16;
+  ctx.textAlign = 'center';
+  const text = '\uD83D\uDC9A Zweite Chance genutzt! \uD83D\uDC9A';
+  let size = 28;
+  ctx.font = '700 ' + size + 'px "Baloo 2", sans-serif';
+  const width = ctx.measureText(text).width;
+  const maxWidth = W - 32;
+  if (width > maxWidth) {
+    size = Math.max(12, Math.floor(size * maxWidth / width));
+    ctx.font = '700 ' + size + 'px "Baloo 2", sans-serif';
+  }
+  ctx.fillText(text, W/2, 104);
+  ctx.restore();
+}
 
 function render() {
   drawBackground();
@@ -2013,6 +2054,7 @@ function render() {
 
     if (gameState === 'playing') updateHud();
     if (bossWarningTimer > 0) drawBossWarning();
+    if (reviveFlashTimer > 0) drawReviveBanner();
     if (touchState.active && gameState === 'playing') drawTouchStick();
   }
 }
@@ -2047,7 +2089,7 @@ function updateHud() {
   const p = player;
   const hpPct = Math.max(0, p.hp/p.maxHp)*100;
   UI['hud-hp-fill'].style.width = hpPct + '%';
-  UI['hud-hp-text'].textContent = Math.ceil(p.hp) + ' / ' + Math.round(p.maxHp);
+  UI['hud-hp-text'].textContent = Math.ceil(p.hp) + ' / ' + Math.round(p.maxHp) + (reviveAvailable ? ' \uD83D\uDC9A' : '');
   const xpPct = Math.max(0, Math.min(1, runXp/runXpToNext))*100;
   UI['hud-xp-fill'].style.width = xpPct + '%';
   UI['hud-level'].textContent = 'Lv. ' + runLevel;
