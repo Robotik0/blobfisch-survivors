@@ -135,6 +135,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .pick-card .pick-swatch { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .pick-card .pick-swatch img { width: 88%; height: 88%; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35)); }
 .pick-card .pick-name { font-weight: 800; font-size: 13.5px; display: block; }
+.pick-card .pick-stats { font-size: 10.5px; font-weight: 800; color: var(--bioluma); display: block; margin-top: 4px; line-height: 1.35; }
 .pick-card .pick-desc { font-size: 11px; color: var(--foam-dim); display: block; margin-top: 4px; line-height: 1.3; }
 
 /* ---------- Shop & Erfolge ---------- */
@@ -329,7 +330,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   <div class="screen" id="screen-levelup">
     <div class="panel levelup-panel">
       <h2>Level erreicht!</h2>
-      <p class="levelup-sub">Wähle eine Verbesserung</p>
+      <p class="levelup-sub" id="levelup-sub">Wähle eine Verbesserung</p>
       <div class="levelup-choices" id="levelup-choices"></div>
     </div>
   </div>
@@ -397,7 +398,7 @@ const CHARACTERS = [
     base: { hp: 75, speed: 196, damage: 0.9, cooldown: 1, luck: 0 } },
   { id: 'panzer', name: 'Panzer-Blobi', desc: 'Zäh und robust, dafür etwas gemütlicher unterwegs.', color: '#b28dff', dark: '#8a63d9', unlocked: true,
     base: { hp: 145, speed: 122, damage: 1, cooldown: 1.05, luck: 0 } },
-  { id: 'gluecks', name: 'Glücks-Blobi', desc: 'Findet bessere Beute und öfter seltene Upgrades.', color: '#ffd76a', dark: '#e0ab2e', unlocked: false,
+  { id: 'gluecks', name: 'Glücks-Blobi', desc: 'Findet mehr Perlen und bekommt öfter eine vierte Upgrade-Karte.', color: '#ffd76a', dark: '#e0ab2e', unlocked: false,
     unlockDesc: 'Erreiche Level 15 in einem Lauf.', base: { hp: 90, speed: 155, damage: 1, cooldown: 0.95, luck: 3 } }
 ];
 
@@ -467,7 +468,7 @@ const PASSIVE_DEFS = {
   panzerung:     { name: 'Panzerung',       desc: 'Reduziert erlittenen Schaden.',        maxLevel: 5 },
   anziehung:     { name: 'Anziehungskraft', desc: '+Aufsammel-Radius pro Stufe.',         maxLevel: 5 },
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
-  glueck:        { name: 'Glück',           desc: '+Perlen & seltenere Auswahl.',         maxLevel: 5 },
+  glueck:        { name: 'Glück',           desc: '+10% Perlen pro Stufe und öfter eine vierte Upgrade-Karte.',         maxLevel: 5 },
   schild:        { name: 'Schutzschild',    desc: 'Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.', maxLevel: 5 },
   regeneration:  { name: 'Regeneration',    desc: 'Heilt langsam, aber stetig Lebenspunkte.', maxLevel: 5 }
 };
@@ -478,7 +479,7 @@ const SHOP_UPGRADES = [
   { id: 'shop_speed',  name: 'Bessere Flossen',        desc: '+3% Start-Tempo pro Stufe.',    maxLevel: 5, baseCost: 40,  costMult: 1.6 },
   { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, baseCost: 55,  costMult: 1.7 },
   { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, baseCost: 35,  costMult: 1.5 },
-  { id: 'shop_luck',   name: 'Glücksbringer',          desc: 'Bessere Upgrade-Auswahl.',       maxLevel: 3, baseCost: 70,  costMult: 1.8 },
+  { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück: mehr Perlen und öfter eine vierte Upgrade-Karte.',       maxLevel: 3, baseCost: 70,  costMult: 1.8 },
   { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Belebt dich einmal pro Lauf automatisch mit halber Gesundheit wieder.', maxLevel: 1, baseCost: 180, costMult: 1 }
 ];
 
@@ -647,7 +648,7 @@ let minionEntities = [];
 let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPearls = 0;
 let spawnTimer = 0, spawnInterval = 1.15;
 let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTimer = 0;
-let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0;
+let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0, pearlFrac = 0;
 let pendingLevelUps = 0;
 let lastTime = 0, rafId = null;
 
@@ -690,7 +691,7 @@ function saveRunSnapshot() {
     characterId: selectedCharacterId, stageId: selectedStageId,
     runTime: runTime, runLevel: runLevel, runXp: runXp, runXpToNext: runXpToNext,
     runKills: runKills, runPearls: runPearls,
-    nextBossTime: nextBossTime, bossEncounterCount: bossEncounterCount,
+    nextBossTime: nextBossTime, bossEncounterCount: bossEntity ? Math.max(0, bossEncounterCount - 1) : bossEncounterCount,
     spawnTimer: spawnTimer, spawnInterval: spawnInterval,
     reviveAvailable: reviveAvailable,
     player: {
@@ -745,6 +746,7 @@ function resumeRunSnapshot(snap) {
   reviveAvailable = !!snap.reviveAvailable;
   invulnTimer = 1.5;
   reviveFlashTimer = 0;
+  pearlFrac = 0;
   pendingLevelUps = 0;
 
   gameState = 'playing';
@@ -783,6 +785,7 @@ function startRun(charId, stageId) {
   reviveAvailable = (save.shopLevels.shop_revive || 0) > 0;
   invulnTimer = 1;
   reviveFlashTimer = 0;
+  pearlFrac = 0;
   pendingLevelUps = 0;
 
   gameState = 'playing';
@@ -875,11 +878,12 @@ function updateSpawner(dt) {
    ============================================================ */
 function distXY(x1,y1,x2,y2){ return Math.hypot(x1-x2, y1-y2); }
 
-function findNearestEnemy(x, y, maxRange) {
+function findNearestEnemy(x, y, maxRange, exclude) {
   let best = null, bestD = maxRange ? maxRange*maxRange : Infinity;
   for (let i=0;i<enemies.length;i++){
     const en = enemies[i];
     if (en.dead) continue;
+    if (exclude && exclude.indexOf(en) !== -1) continue;
     const dx = en.x-x, dy = en.y-y;
     const d = dx*dx+dy*dy;
     if (d < bestD) { bestD = d; best = en; }
@@ -989,8 +993,8 @@ function fireWeapon(id, level) {
     const jumps = 2 + level;
     const dmg = (6 + level*2.6) * p.damage;
     for (let i=0;i<jumps;i++){
-      const t = findNearestEnemy(source.x, source.y, 260);
-      if (!t || hit.indexOf(t) !== -1) break;
+      const t = findNearestEnemy(source.x, source.y, 260, hit);
+      if (!t) break;
       hit.push(t);
       particles.push({ x:source.x, y:source.y, tx:t.x, ty:t.y, isBolt:true, life:0.15, maxLife:0.15, color:'#5ef2c0' });
       applyDamageToEnemy(t, dmg);
@@ -1339,7 +1343,10 @@ function updatePickups(dt) {
       if (pk.type === 'xp') { gainXp(pk.amount); Sfx.pickup(); }
       else if (pk.type === 'pearl') {
         const luckMult = 1 + (p.luck||0)*0.1;
-        runPearls += Math.round(pk.amount * luckMult);
+        pearlFrac += pk.amount * luckMult;
+        const wholePearls = Math.floor(pearlFrac + 1e-9);
+        runPearls += wholePearls;
+        pearlFrac -= wholePearls;
         Sfx.pickup();
       }
       pickups.splice(i,1);
@@ -1404,6 +1411,8 @@ function getAvailableUpgrades() {
 
 let levelUpProcessing = false;
 
+function luckCardChance() { return Math.min(0.6, (player.luck || 0) * 0.06); }
+
 function presentLevelUpChoices() {
   const pool = getAvailableUpgrades();
   if (pool.length === 0) {
@@ -1417,13 +1426,14 @@ function presentLevelUpChoices() {
   gameState = 'levelup';
   levelUpProcessing = false;
   const poolCopy = pool.slice();
-  const count = Math.min(3, poolCopy.length);
+  const bonusCard = Math.random() < luckCardChance();
+  const count = Math.min(bonusCard ? 4 : 3, poolCopy.length);
   const picks = [];
   for (let i=0;i<count;i++){
     const idx = Math.floor(Math.random()*poolCopy.length);
     picks.push(poolCopy.splice(idx,1)[0]);
   }
-  renderLevelUpScreen(picks);
+  renderLevelUpScreen(picks, bonusCard && count === 4);
 }
 
 function chooseUpgrade(choice) {
@@ -2130,6 +2140,16 @@ function updateContinueButton() {
   }
 }
 
+function fmtNum(n) { return String(Math.round(n * 100) / 100); }
+
+function characterStatLine(ch) {
+  const cs = computeCharacterStats(ch.id);
+  const chips = ['HP ' + Math.round(cs.maxHp), 'Tempo ' + Math.round(cs.speed), 'Schaden \u00D7' + fmtNum(cs.damage)];
+  if (Math.abs(cs.cooldownMult - 1) > 0.001) chips.push('Abklingzeit \u00D7' + fmtNum(cs.cooldownMult));
+  if (cs.luck > 0) chips.push('Gl\u00FCck +' + cs.luck);
+  return chips.join(' \u00B7 ');
+}
+
 function renderCharacterGrid() {
   const grid = UI['character-grid'];
   grid.innerHTML = '';
@@ -2139,6 +2159,7 @@ function renderCharacterGrid() {
     div.className = 'pick-card' + (ch.id===selectedCharacterId?' selected':'') + (!unlocked?' locked':'');
     div.innerHTML = '<div class="pick-swatch" style="background:'+ch.color+'"><img src="'+(CHARACTER_SPRITES[ch.id]||'')+'" alt=""></div>' +
       '<span class="pick-name">'+ch.name+'</span>' +
+      '<span class="pick-stats">'+characterStatLine(ch)+'</span>' +
       '<span class="pick-desc">'+(unlocked ? ch.desc : ('\uD83D\uDD12 ' + ch.unlockDesc))+'</span>';
     if (unlocked) {
       div.addEventListener('click', function(){
@@ -2159,6 +2180,7 @@ function renderStageGrid() {
     div.className = 'pick-card' + (st.id===selectedStageId?' selected':'');
     div.innerHTML = '<div class="pick-swatch" style="background:linear-gradient(135deg,'+st.bgTop+','+st.bgBottom+')"></div>' +
       '<span class="pick-name">'+st.name+'</span>' +
+      '<span class="pick-stats">Schwierigkeit \u00D7'+fmtNum(st.difficulty)+' \u00B7 Boss: '+BOSS_TYPES[st.boss].name+'</span>' +
       '<span class="pick-desc">'+st.desc+'</span>';
     div.addEventListener('click', function(){
       selectedStageId = st.id;
@@ -2219,7 +2241,9 @@ const LEVELUP_ICONS = { blase:'\uD83D\uDD35', ring:'\u2B55', tintenwolke:'\uD83D
   tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40',
   schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A' };
 
-function renderLevelUpScreen(picks) {
+function renderLevelUpScreen(picks, bonus) {
+  const sub = document.getElementById('levelup-sub');
+  if (sub) sub.textContent = bonus ? '\uD83C\uDF40 Glück! Eine zusätzliche Auswahl' : 'Wähle eine Verbesserung';
   const wrap = UI['levelup-choices'];
   wrap.innerHTML = '';
   wrap.style.pointerEvents = '';

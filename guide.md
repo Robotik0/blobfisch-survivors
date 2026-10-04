@@ -1,6 +1,6 @@
 # Blobfisch Survivors — Complete Reference
 
-Every number below is pulled directly from the current game code, not from memory — so this reflects exactly what's shipped right now. Percentages and damage values are shown *before* your character's damage multiplier and any Shop bonuses are applied, except where noted.
+Every number below is pulled directly from the current game code, not from memory — and the weapon/passive tables below have also been checked against the running game level by level, so this reflects what's shipped right now. Percentages and damage values are shown *before* your character's damage multiplier and any Shop bonuses are applied, except where noted.
 
 ---
 
@@ -13,7 +13,7 @@ Every number below is pulled directly from the current game code, not from memor
 | **Panzer-Blobi** | Available from the start | 145 | 122 | ×1.0 | ×1.05 (5% *slower*) | 0 | Side-view art — mirrors left/right, tilts up to 90° |
 | **Glücks-Blobi** | Reach level 15 in one run | 90 | 155 | ×1.0 | ×0.95 (5% *faster*) | +3 | Side-view art — mirrors left/right, tilts up to 90° |
 
-These are *base* stats. Shop upgrades (Section 8) add flat/percentage bonuses on top of whichever character you pick, every run.
+The character-select cards now show the real, current numbers (including any Shop bonuses), and the stage cards show their difficulty multiplier and boss. These are *base* stats. Shop upgrades (Section 8) add flat/percentage bonuses on top of whichever character you pick, every run.
 
 Turbo, Panzer, and Glücks are drawn from the side, so instead of spinning all the way around (which would flip them upside-down), they mirror horizontally once you're heading more than 90° away from their natural facing, and only tilt within that ±90° window. Standard is the only one drawn from directly above, so it turns freely in a full circle.
 
@@ -180,14 +180,14 @@ The 2nd companion unlocks at level 3, orbiting on the opposite side from the fir
 | **Panzerung** | Flat damage reduction on every hit (min. 1 damage always gets through) | −1.2 | −2.4 | −3.6 | −4.8 | −6.0 |
 | **Anziehungskraft** | +pickup radius | +20 | +40 | +60 | +80 | +100 |
 | **Angriffstempo** | Reduces cooldowns on Blasenschuss/Tintenwolke/Harpune/Elektroschlag/Korallenspeer (not Ring or Friend, which don't use cooldowns) | −8% | −16% | −24% | −32% | −40% |
-| **Glück** | +10% pearls collected per level | +10% | +20% | +30% | +40% | +50% |
+| **Glück** | +1 Luck per level (see Luck below) | +1 | +2 | +3 | +4 | +5 |
 | **Schutzschild** | Recharge time for a shield charge that fully blocks your next hit — any hit, including a boss's heavy shot | 13.8s | 11.6s | 9.4s | 7.2s | 5.0s |
 | **Regeneration** | Continuous healing per second | 0.15/s | 0.30/s | 0.45/s | 0.60/s | 0.75/s |
 
 Notes:
 - **Extra-Leben is *not* a revive.** Despite the name, it permanently raises your max HP for the run and heals you by the same amount when picked — it never brings you back from death. The only revive in the game is **Zweite Chance** in the Shop (Section 8).
 - **Schutzschild** grants an immediate free charge the moment you first pick it, then recharges on the timer above after each block.
-- **Glück's** in-game description also claims "rarer upgrade selection" — I checked the actual code and that part isn't implemented; right now it only affects pearl gain. Worth knowing if you're balancing around it, and easy to either fix the wording or actually build if you want it to do that.
+- **Luck** is a shared stat: it comes from your character (Glücks-Blobi starts at +3), the Shop's Glücksbringer (+1 per level), and this passive (+1 per level). Each point of Luck does two things: **+10% pearls from every pearl pickup** (tracked fractionally, so +10% really does mean one extra pearl per ten collected), and **+6% chance that a level-up offers a 4th upgrade card instead of 3** (capped at 60%). When the bonus card appears, the level-up screen says so.
 - Regeneration and the shield are the only two ways to recover HP mid-run (a healing-pickup mechanic existed briefly and was removed a few turns back for being too strong stacked with these).
 
 ---
@@ -213,7 +213,7 @@ Cost to go from level *N* to *N+1* is `base cost × multiplier^N`, rounded.
 | Bessere Flossen | +3% starting speed | 5 | 40 → 64 → 102 → 164 → 262 |
 | Schärfere Stacheln | +4% weapon damage | 5 | 55 → 94 → 159 → 270 → 459 |
 | Perlen-Magnet | +22 pickup radius (base becomes 70 + 22×level) | 5 | 35 → 53 → 79 → 118 → 177 |
-| Glücksbringer | +1 starting Luck | 3 | 70 → 126 → 227 |
+| Glücksbringer | +1 starting Luck (more pearls, more often a 4th upgrade card) | 3 | 70 → 126 → 227 |
 | Zweite Chance | Revive once per run at 50% max HP | 1 (one-time) | 180 |
 
 **How Zweite Chance works:** it's a one-time, permanent purchase — once bought, every run starts with a revive "armed", shown as a green heart (💚) next to your HP numbers in the HUD. The first time you'd die, you're automatically brought back at 50% max HP with 2 seconds of invulnerability and a "Zweite Chance genutzt!" banner; the heart then disappears for the rest of that run. There's no button to press and it can't be found or picked up mid-run — it has to be bought in the Shop before you start.
@@ -242,7 +242,7 @@ These stack with your character's base stats and any in-run passives you pick �
 ## 10. Fortschritt & Speichern (Saving)
 
 - **Between runs:** pearls, Shop levels, achievements, best stats, and character unlocks save automatically to the browser's local storage every time they change, and persist across sessions once this is live on your actual site.
-- **Mid-run:** the game also snapshots your *current* run — level, weapons, passives, HP, elapsed time, pearls so far, position — whenever the tab is backgrounded, right before the page is hidden, and every ~8 seconds while playing. If the browser discards or reloads the tab (common on mobile after being away a while), the main menu offers a **"Weiterspielen"** button that restores the run exactly, instead of losing it. Starting a genuinely new run discards the pending snapshot.
+- **Mid-run:** the game also snapshots your *current* run — level, weapons, passives, HP, elapsed time, pearls so far, position — whenever the tab is backgrounded, right before the page is hidden, and every ~8 seconds while playing. If the browser discards or reloads the tab (common on mobile after being away a while), the main menu offers a **"Weiterspielen"** button that restores your **progress** instead of losing it: level, XP, weapons, passives, HP, elapsed time, pearls and position all come back. What does *not* come back is the live scene — enemies, projectiles and pickups on screen are cleared, so you resume into open water with 1.5 seconds of invulnerability. If a boss was alive when you left, that same boss encounter restarts at full HP a few seconds after you resume (it does not skip ahead to the next, tougher one). Starting a genuinely new run discards the pending snapshot.
 - **Quitting via pause** banks your pearls and stats just like dying does — it doesn't throw away progress.
 
 ---
