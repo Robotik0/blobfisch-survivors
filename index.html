@@ -188,6 +188,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .instructions-list li { font-size: 13.5px; line-height: 1.5; color: var(--foam-dim); background: rgba(126,224,255,0.06); border-radius: 12px; padding: 10px 12px; }
 .instructions-list strong { color: var(--foam); }
 
+#toast{position:absolute;top:86px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+
 @media (max-width: 380px) {
   .panel { padding: 22px 16px; }
   .game-logo h1 { font-size: 25px; }
@@ -243,6 +246,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     </div>
   </div>
 
+  <div id="toast"></div>
+
   <div class="screen active" id="screen-menu">
     <div class="panel menu-panel">
       <div class="game-logo">
@@ -250,6 +255,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <h1>Blobfisch<br><span class="logo-accent">Survivors</span></h1>
       </div>
       <p class="tagline">Überlebe endlose Wellen im tiefen Ozean.</p>
+      <p id="storage-warning" style="display:none;color:#ff8a9a;font-size:12px;font-weight:700;margin:-10px 0 12px;">⚠ Speichern nicht möglich – Fortschritt geht beim Schliessen verloren.</p>
       <div class="menu-buttons">
         <button class="btn btn-primary btn-large" id="btn-continue-run" style="display:none;">Weiterspielen</button>
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
@@ -317,8 +323,12 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Perlen:</strong> Bleiben nach dem Lauf erhalten und lassen sich im Shop in dauerhafte Verbesserungen investieren.</li>
         <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner. Besiegst du ihn, kehrt nach 4 Minuten ein noch stärkerer zurück – mach dich bereit!</li>
         <li><strong>Verteidigung:</strong> Der Blasenring wehrt kleine Gegnerschüsse ab. Gegen die grossen, roten Treffer hilft nur ein Schutzschild.</li>
-        <li><strong>Heilung:</strong> Regeneration heilt dich langsam während des Laufs. Extra-Leben erhöht dauerhaft deine maximalen Lebenspunkte (und heilt dich dabei) – es ist keine Wiederbelebung.</li>
+        <li><strong>Heilung:</strong> Nur Regeneration heilt dich über Zeit. Lebenskraft erhöht deine maximalen Lebenspunkte nur für diesen Lauf und heilt dich einmalig um 20.</li>
         <li><strong>Wiederbelebung:</strong> Die Shop-Verbesserung Zweite Chance rettet dich einmal pro Lauf automatisch mit halben Lebenspunkten, wenn du sonst sterben würdest. Ein grünes Herz neben deinen Lebenspunkten zeigt, dass sie bereit ist. Sie muss vor dem Lauf im Shop gekauft werden.</li>
+        <li><strong>Freischalten:</strong> Besiege den Boss eines Gebiets, um das nächste zu öffnen. Goldumrandete Elite-Gegner geben mehr Beute.</li>
+        <li><strong>Gebiete:</strong> Kelpwald: Tang bremst dich. Tiefsee-Graben: Dunkelheit – du siehst nur in deiner Nähe. Vulkanschlucht: Lavazonen – raus, sobald sie aufglühen! Das Korallenriff ist gefahrlos.</li>
+        <li><strong>Boss-Tricks:</strong> Hai-König: Sturmangriff (danach erschöpft). Riesenkrake: Tentakelschläge auf markierte Kreise. Meeresungeheuer: Sog – schwimm weg! Lava-Titan: Magmawelle – such die Lücke. Ein roter Pfeil zeigt zum Boss.</li>
+        <li><strong>Erfolge:</strong> Jeder Erfolg gibt einmalig Perlen.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
       <div class="panel-actions">
@@ -370,6 +380,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 // ---------- Persistenter Speicher (mit sicherem Fallback) ----------
 const MemoryFallback = {};
 let storageAvailable = true;
+try { localStorage.setItem('__bs_t', '1'); localStorage.removeItem('__bs_t'); } catch (e) { storageAvailable = false; }
 const Storage = {
   get(key, fallback) {
     try {
@@ -390,6 +401,9 @@ const Storage = {
   }
 };
 
+// Freischalt-Schwellen (Level innerhalb eines Laufs)
+const GLUECKS_LEVEL = 25, ENTWICKELT_LEVEL = 30;
+
 // ---------- Charaktere ----------
 const CHARACTERS = [
   { id: 'standard', name: 'Standard-Blobi', desc: 'Ausgeglichene Werte – ein fairer Start für jede Tiefe.', color: '#ff9eb5', dark: '#d9718f', unlocked: true,
@@ -399,7 +413,7 @@ const CHARACTERS = [
   { id: 'panzer', name: 'Panzer-Blobi', desc: 'Zäh und robust, dafür etwas gemütlicher unterwegs.', color: '#b28dff', dark: '#8a63d9', unlocked: true,
     base: { hp: 145, speed: 122, damage: 1, cooldown: 1.05, luck: 0 } },
   { id: 'gluecks', name: 'Glücks-Blobi', desc: 'Findet mehr Perlen und bekommt öfter eine vierte Upgrade-Karte.', color: '#ffd76a', dark: '#e0ab2e', unlocked: false,
-    unlockDesc: 'Erreiche Level 15 in einem Lauf.', base: { hp: 90, speed: 155, damage: 1, cooldown: 0.95, luck: 3 } }
+    unlockDesc: 'Erreiche Level ' + GLUECKS_LEVEL + ' in einem Lauf.', base: { hp: 90, speed: 155, damage: 1, cooldown: 0.95, luck: 3 } }
 ];
 
 // ---------- Charakter-Sprites (bereitgestellte Bilder, als Data-URI eingebettet) ----------
@@ -423,10 +437,10 @@ const SPRITE_FREE_ROTATE = { standard: true, turbo: false, panzer: false, glueck
 
 // ---------- Gebiete ----------
 const STAGES = [
-  { id: 'riff', name: 'Korallenriff', desc: 'Ruhige, helle Gewässer – ideal für den Einstieg.', bgTop: '#0d5a78', bgBottom: '#012230', difficulty: 1, boss: 'haikoenig' },
-  { id: 'kelp', name: 'Kelpwald', desc: 'Dichte Tangwälder verstecken hungrige Mäuler.', bgTop: '#0a4a3a', bgBottom: '#021712', difficulty: 1.35, boss: 'kraken' },
-  { id: 'graben', name: 'Tiefsee-Graben', desc: 'Kaum Licht dringt hier noch hinunter.', bgTop: '#0a2050', bgBottom: '#020617', difficulty: 1.75, boss: 'seeungeheuer' },
-  { id: 'vulkan', name: 'Vulkanschlucht', desc: 'Glühende Spalten – nur für erfahrene Taucher.', bgTop: '#5c1a08', bgBottom: '#180400', difficulty: 2.2, boss: 'lavatitan' }
+  { id: 'riff', name: 'Korallenriff', desc: 'Ruhig und gefahrlos – ideal für den Einstieg.', bgTop: '#0d5a78', bgBottom: '#012230', difficulty: 1, boss: 'haikoenig' },
+  { id: 'kelp', name: 'Kelpwald', desc: 'Tangfelder bremsen dich – schwimm drumherum.', bgTop: '#0a4a3a', bgBottom: '#021712', difficulty: 1.35, boss: 'kraken' },
+  { id: 'graben', name: 'Tiefsee-Graben', desc: 'Dunkelheit: Du siehst nur in deiner Nähe.', bgTop: '#0a2050', bgBottom: '#020617', difficulty: 1.75, boss: 'seeungeheuer' },
+  { id: 'vulkan', name: 'Vulkanschlucht', desc: 'Lavazonen glühen auf – nicht stehen bleiben!', bgTop: '#5c1a08', bgBottom: '#180400', difficulty: 2.2, boss: 'lavatitan' }
 ];
 
 // ---------- Gegnertypen ----------
@@ -455,22 +469,23 @@ const WEAPON_DEFS = {
   blase:       { name: 'Blasenschuss',  desc: 'Feuert Blasen auf den nächsten Gegner.',     type: 'projectile', maxLevel: 5 },
   ring:        { name: 'Blasenring',    desc: 'Rotierende Blasen kreisen um dich.',          type: 'orbit',      maxLevel: 5 },
   tintenwolke: { name: 'Tintenwolke',   desc: 'Periodischer Flächenschaden um dich herum.',  type: 'aura',       maxLevel: 5 },
-  harpune:     { name: 'Harpune',       desc: 'Durchbohrt mehrere Gegner in einer Linie.',   type: 'pierce',     maxLevel: 5 },
+  harpune:     { name: 'Harpune',       desc: 'Zielt dorthin, wo die meisten Gegner in einer Linie stehen.',   type: 'pierce',     maxLevel: 5 },
   elektro:     { name: 'Elektroschlag', desc: 'Springt zwischen nahen Gegnern hin und her.', type: 'chain',      maxLevel: 5 },
-  speer:       { name: 'Korallenspeer', desc: 'Ein einzelner, sehr harter Treffer.',         type: 'lance',      maxLevel: 5 },
+  speer:       { name: 'Korallenspeer', desc: 'Ein harter Treffer auf den stärksten Gegner in Reichweite.',         type: 'lance',      maxLevel: 5 },
   begleiter:   { name: 'Schwarm-Freund',desc: 'Ein kleiner Fisch sucht sich Gegner und greift sie eigenständig an.', type: 'minion',     maxLevel: 5 }
 };
 
 // ---------- Passive Upgrades ----------
 const PASSIVE_DEFS = {
   tempo:         { name: 'Flossen-Tempo',   desc: '+4% Bewegungstempo pro Stufe.',       maxLevel: 5 },
-  leben:         { name: 'Extra-Leben',     desc: '+20 maximale Lebenspunkte pro Stufe und heilt dich sofort. Keine Wiederbelebung.', maxLevel: 5 },
+  leben:         { name: 'Lebenskraft', desc: '+20 max. Lebenspunkte pro Stufe (nur für diesen Lauf) und heilt dich um 20.', maxLevel: 5 },
   panzerung:     { name: 'Panzerung',       desc: 'Reduziert erlittenen Schaden.',        maxLevel: 5 },
   anziehung:     { name: 'Anziehungskraft', desc: '+Aufsammel-Radius pro Stufe.',         maxLevel: 5 },
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
   glueck:        { name: 'Glück',           desc: '+10% Perlen pro Stufe und öfter eine vierte Upgrade-Karte.',         maxLevel: 5 },
   schild:        { name: 'Schutzschild',    desc: 'Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.', maxLevel: 5 },
-  regeneration:  { name: 'Regeneration',    desc: 'Heilt langsam, aber stetig Lebenspunkte.', maxLevel: 5 }
+  regeneration:  { name: 'Regeneration',    desc: 'Heilt langsam, aber stetig Lebenspunkte.', maxLevel: 5 },
+  schlag:        { name: 'Schlagkraft',     desc: '+8% Schaden pro Stufe (nicht für die Tintenwolke).', maxLevel: 5 }
 };
 
 // ---------- Shop (dauerhafte Verbesserungen) ----------
@@ -493,9 +508,11 @@ const ACHIEVEMENTS = [
   { id: 'boss_1',         name: 'Königsschlächter',    desc: 'Besiege einen Boss.' },
   { id: 'boss_all',       name: 'Boss-Bezwinger',      desc: 'Besiege alle vier Bossarten.' },
   { id: 'pearls_1000',    name: 'Perlensammler',       desc: 'Sammle insgesamt 1000 Perlen.' },
-  { id: 'level_20',       name: 'Voll entwickelt',     desc: 'Erreiche Level 20 in einem Lauf.' },
+  { id: 'level_20',       name: 'Voll entwickelt',     desc: 'Erreiche Level ' + ENTWICKELT_LEVEL + ' in einem Lauf.' },
   { id: 'all_characters', name: 'Ganze Blobi-Familie', desc: 'Schalte alle Charaktere frei.' }
 ];
+
+const ACH_REWARDS = { first_blood:10, kills_100:25, kills_1000:100, survive_5:40, survive_15:150, boss_1:60, boss_all:200, pearls_1000:100, level_20:75, all_characters:50 };
 
 // ---------- Speicherstand laden ----------
 function defaultSave() {
@@ -507,7 +524,9 @@ function defaultSave() {
     stats: { totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [] },
     muted: false,
     lastCharacter: 'standard',
-    lastStage: 'riff'
+    lastStage: 'riff',
+    rewarded: [],
+    stagesUnlocked: ['riff']
   };
 }
 let save = defaultSave();
@@ -519,6 +538,8 @@ let save = defaultSave();
     save.achievements = Array.isArray(loaded.achievements) ? loaded.achievements : [];
     save.unlockedCharacters = Array.isArray(loaded.unlockedCharacters) ? loaded.unlockedCharacters : ['standard', 'turbo', 'panzer'];
     save.stats = Object.assign({ totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [] }, loaded.stats || {});
+    save.stagesUnlocked = Array.isArray(loaded.stagesUnlocked) ? loaded.stagesUnlocked : ((save.stats.totalKills > 0 || save.stats.bestTime > 0) ? ['riff', 'kelp', 'graben', 'vulkan'] : ['riff']);
+    if (save.stagesUnlocked.indexOf('riff') === -1) save.stagesUnlocked.unshift('riff');
   }
 })();
 function persistSave() { Storage.set('blobfischSurvivorsSave', save); }
@@ -551,8 +572,15 @@ function ensureAudio() {
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(function(){});
 }
+const toneLast = {};
+let toneWin = 0, toneCnt = 0;
 function playTone(freq, dur, type, vol) {
   if (save.muted || !audioCtx) return;
+  const tn = performance.now(), tk = freq + (type || 'sine');
+  if (toneLast[tk] && tn - toneLast[tk] < 45) return;
+  toneLast[tk] = tn;
+  if (tn - toneWin > 100) { toneWin = tn; toneCnt = 0; }
+  if (++toneCnt > 5) return;
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -589,7 +617,7 @@ window.addEventListener('keydown', function(e){
   const k = e.key.toLowerCase();
   keys[k] = true;
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(k) !== -1) e.preventDefault();
-  if (k === 'escape') togglePause();
+  if (k === 'escape' && !e.repeat) togglePause();
 });
 window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
 
@@ -600,16 +628,20 @@ function pointerUp() { touchState.active = false; touchState.id = null; }
 
 canvas.addEventListener('touchstart', function(e){
   if (gameState !== 'playing') return;
-  const t = e.changedTouches[0];
-  pointerDown(t.clientX, t.clientY, t.identifier);
+  if (!touchState.active) { const t = e.changedTouches[0]; pointerDown(t.clientX, t.clientY, t.identifier); }
   e.preventDefault();
 }, { passive: false });
 canvas.addEventListener('touchmove', function(e){
   for (let i=0;i<e.changedTouches.length;i++) { if (e.changedTouches[i].identifier === touchState.id) pointerMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }
   e.preventDefault();
 }, { passive: false });
-canvas.addEventListener('touchend', function(e){ pointerUp(); e.preventDefault(); }, { passive: false });
-canvas.addEventListener('touchcancel', function(){ pointerUp(); }, { passive: false });
+function touchEnded(e){
+  for (let i = 0; i < e.changedTouches.length; i++) if (e.changedTouches[i].identifier === touchState.id) pointerUp();
+  e.preventDefault();
+}
+canvas.addEventListener('touchend', touchEnded, { passive: false });
+canvas.addEventListener('touchcancel', touchEnded, { passive: false });
+
 canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
 function getMoveVector() {
@@ -638,7 +670,7 @@ function getMoveVector() {
    ============================================================ */
 let gameState = 'menu';
 let selectedCharacterId = (save.lastCharacter && save.unlockedCharacters.indexOf(save.lastCharacter) !== -1) ? save.lastCharacter : 'standard';
-let selectedStageId = save.lastStage || 'riff';
+let selectedStageId = (save.lastStage && save.stagesUnlocked.indexOf(save.lastStage) !== -1) ? save.lastStage : 'riff';
 
 let player = null;
 let camera = { x: 0, y: 0 };
@@ -650,6 +682,7 @@ let spawnTimer = 0, spawnInterval = 1.15;
 let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTimer = 0;
 let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0, pearlFrac = 0;
 let pendingLevelUps = 0;
+let zones = [], shockwaves = [], hazardTimer = 7, ringTime = 120, eliteTime = 180, currentLevelUp = null, runNewAch = [], playerInKelp = false;
 let lastTime = 0, rafId = null;
 
 function xpForLevel(level) { return Math.floor(6 + level * 4.6); }
@@ -681,6 +714,7 @@ function recomputeDerivedStats() {
   p.magnet = cs.magnet + (p.passives.anziehung || 0) * 20;
   p.luck = cs.luck + (p.passives.glueck || 0);
   p.armor = (p.passives.panzerung || 0) * 1.2;
+  p.damage = cs.damage * (1 + (p.passives.schlag || 0) * 0.08);
 }
 
 // ---------- Lauf-Snapshot (übersteht Tab-Wechsel, AFK, Browser-Neuladen) ----------
@@ -694,6 +728,7 @@ function saveRunSnapshot() {
     nextBossTime: nextBossTime, bossEncounterCount: bossEntity ? Math.max(0, bossEncounterCount - 1) : bossEncounterCount,
     spawnTimer: spawnTimer, spawnInterval: spawnInterval,
     reviveAvailable: reviveAvailable,
+    pendingLevelUps: pendingLevelUps, levelUp: (gameState === 'levelup' ? currentLevelUp : null),
     player: {
       hp: player.hp, maxHp: player.maxHp, speed: player.speed, damage: player.damage,
       cooldownMult: player.cooldownMult, magnet: player.magnet, luck: player.luck, armor: player.armor,
@@ -737,6 +772,7 @@ function resumeRunSnapshot(snap) {
   camera = { x: player.x, y: player.y };
   enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
   orbitAngle = 0; minionEntities = [];
+  zones = []; shockwaves = []; hazardTimer = 7; ringTime = snap.runTime + 60; eliteTime = snap.runTime + 30; resetHudCache();
   runTime = snap.runTime; runLevel = snap.runLevel; runXp = snap.runXp; runXpToNext = snap.runXpToNext;
   runKills = snap.runKills; runPearls = snap.runPearls;
   spawnTimer = snap.spawnTimer || 0; spawnInterval = snap.spawnInterval || 1.15;
@@ -747,17 +783,23 @@ function resumeRunSnapshot(snap) {
   invulnTimer = 1.5;
   reviveFlashTimer = 0;
   pearlFrac = 0;
-  pendingLevelUps = 0;
-
-  gameState = 'playing';
-  showScreen(null);
+  pendingLevelUps = snap.pendingLevelUps || 0;
+  currentLevelUp = null; levelUpProcessing = false;
   setHudVisible(true);
   lastTime = 0;
+  if (snap.levelUp && snap.levelUp.picks && pendingLevelUps > 0) {
+    currentLevelUp = snap.levelUp;
+    gameState = 'levelup';
+    renderLevelUpScreen(snap.levelUp.picks, snap.levelUp.bonus);
+  } else {
+    gameState = 'playing';
+    showScreen(null);
+  }
 }
 
 function startRun(charId, stageId) {
   ensureAudio();
-  clearRunSnapshot();
+  bankOldRun();
   selectedCharacterId = charId;
   selectedStageId = stageId;
   save.lastCharacter = charId;
@@ -778,6 +820,7 @@ function startRun(charId, stageId) {
   camera = { x: 0, y: 0 };
   enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
   orbitAngle = 0; minionEntities = [];
+  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; ringTime = 120; eliteTime = 180; resetHudCache();
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
   spawnTimer = 0; spawnInterval = 1.15;
@@ -813,7 +856,7 @@ function spawnEnemy(typeKey, isBoss) {
       x: x, y: y, r: def.r, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
       speed: def.speed, dmg: def.dmg * dmgMult, color: def.color, accessory: def.accessory, xp: def.xp,
       behavior: 'chase', hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
-      specialTimer: 3, heavyTimer: 6, wobble: Math.random() * 10
+      specialTimer: 3, heavyTimer: 6, abil: 3.5, state: 'walk', stT: 0, ang: 0, wobble: Math.random() * 10
     };
     bossEncounterCount++;
     enemies.push(bossEntity);
@@ -838,8 +881,8 @@ function spawnEnemy(typeKey, isBoss) {
 const SPAWN_TABLE_BY_STAGE = {
   riff:   ['qualle', 'kleinhai', 'krebs', 'angler', 'piranha'],
   kelp:   ['qualle', 'kleinhai', 'krebs', 'muraene', 'tinte', 'piranha', 'seeigel'],
-  graben: ['muraene', 'tinte', 'angler', 'seeigel', 'riesenkrebs', 'kleinhai', 'krebs'],
-  vulkan: ['riesenkrebs', 'tinte', 'muraene', 'angler', 'seeigel', 'krebs', 'piranha']
+  graben: ['kleinhai', 'muraene', 'tinte', 'krebs', 'angler', 'seeigel', 'riesenkrebs'],
+  vulkan: ['tinte', 'muraene', 'krebs', 'piranha', 'angler', 'seeigel', 'riesenkrebs']
 };
 
 function updateSpawner(dt) {
@@ -850,24 +893,34 @@ function updateSpawner(dt) {
     const batch = 1 + Math.floor(runTime / 100);
     const n = Math.min(batch, 4);
     for (let i = 0; i < n; i++) {
-      const key = table[Math.floor(Math.random() * table.length)];
-      spawnEnemy(key, false);
+      const avail = Math.min(table.length, 1 + Math.floor(runTime / 25));
+      const key = table[Math.floor(Math.random() * avail)];
+      if (key === 'piranha') {
+        const school = 4 + Math.min(5, Math.floor(runTime / 90));
+        let first = null;
+        for (let k = 0; k < school; k++) {
+          if (!freeEnemySlot()) break;
+          const e = spawnEnemy('piranha', false);
+          if (!first) first = e; else { e.x = first.x + (Math.random() - 0.5) * 80; e.y = first.y + (Math.random() - 0.5) * 80; }
+        }
+      } else if (freeEnemySlot()) {
+        const e = spawnEnemy(key, false);
+        if (runTime >= eliteTime) { eliteTime = runTime + 55; makeElite(e); }
+      }
     }
     spawnInterval = Math.max(0.45, 1.2 - (runTime / 60) * 0.055 * stage.difficulty);
     spawnTimer = spawnInterval;
   }
-  const enemyCap = 70;
-  if (enemies.length > enemyCap) {
-    let excess = enemies.length - enemyCap;
-    for (let i = 0; i < enemies.length && excess > 0; i++) {
-      const en = enemies[i];
-      if (!en.isBoss && !en.dead) {
-        en.dead = true;
-        excess--;
-      }
+  if (runTime >= ringTime && !bossEntity && SPAWN_TABLE_BY_STAGE[stage.id].indexOf('piranha') !== -1) {
+    ringTime = runTime + 100;
+    const rd = Math.hypot(W, H) / 2 + 80;
+    for (let k = 0; k < 12; k++) {
+      if (!freeEnemySlot()) break;
+      const e = spawnEnemy('piranha', false), a = (k / 12) * Math.PI * 2;
+      e.x = player.x + Math.cos(a) * rd; e.y = player.y + Math.sin(a) * rd;
     }
+    showToast('\uD83D\uDC1F Piranha-Ring!');
   }
-
   if (!bossEntity && bossWarningTimer <= 0 && runTime >= nextBossTime) {
     bossWarningTimer = 3;
   }
@@ -893,7 +946,7 @@ function findNearestEnemy(x, y, maxRange, exclude) {
 
 function applyDamageToEnemy(en, dmg) {
   if (en.dead) return;
-  en.hp -= dmg;
+  en.hp -= (en.state === 'tired' ? dmg * 1.3 : dmg);
   en.hitFlash = 0.12;
   if (en.hp <= 0) {
     en.dead = true;
@@ -904,7 +957,7 @@ function applyDamageToEnemy(en, dmg) {
 function killEnemy(en) {
   runKills++;
   save.stats.totalKills++;
-  const pearlCount = en.isBoss ? (8 + Math.floor(Math.random()*6)) : (Math.random() < 0.32 ? 1 : 0);
+  const pearlCount = en.isBoss ? (8 + Math.floor(Math.random()*6)) : (Math.random() < 0.32 ? 1 : 0) + (en.elite ? 3 : 0);
   spawnXpOrb(en.x, en.y, en.xp);
   for (let i=0;i<pearlCount;i++) spawnPearl(en.x + (Math.random()-0.5)*24, en.y + (Math.random()-0.5)*24);
   spawnBurst(en.x, en.y, en.color, en.isBoss ? 26 : 10);
@@ -952,7 +1005,7 @@ function fireWeapon(id, level) {
   const p = player;
   const type = WEAPON_DEFS[id].type;
   if (type === 'projectile') {
-    const target = findNearestEnemy(p.x, p.y, 900);
+    const target = findNearestEnemy(p.x, p.y, 560 * rangeScale());
     if (!target) return;
     const count = 1 + Math.floor((level-1)/2);
     const dmg = (7 + level*3.4) * p.damage;
@@ -981,9 +1034,8 @@ function fireWeapon(id, level) {
     spawnBurst(cx, cy, '#c65da8', 10);
     particles.push(makeInkCloudParticle(cx, cy, radius));
   } else if (type === 'pierce') {
-    const target = findNearestEnemy(p.x, p.y, 900);
-    if (!target) return;
-    const ang = Math.atan2(target.y-p.y, target.x-p.x);
+    const ang = bestLineAngle(560 * rangeScale());
+    if (ang === null) return;
     const dmg = (10 + level*4.2) * p.damage;
     projectiles.push({ x:p.x, y:p.y, vx:Math.cos(ang)*560, vy:Math.sin(ang)*560, r:5, dmg:dmg, life:1.1, color:'#7ee0ff', pierce: 2+level, hitSet:new Set() });
     Sfx.shoot();
@@ -991,9 +1043,9 @@ function fireWeapon(id, level) {
     let source = { x:p.x, y:p.y };
     const hit = [];
     const jumps = 2 + level;
-    const dmg = (6 + level*2.6) * p.damage;
+    const dmg = (7 + level*2.9) * p.damage;
     for (let i=0;i<jumps;i++){
-      const t = findNearestEnemy(source.x, source.y, 260, hit);
+      const t = findNearestEnemy(source.x, source.y, 280 * Math.sqrt(rangeScale()), hit);
       if (!t) break;
       hit.push(t);
       particles.push({ x:source.x, y:source.y, tx:t.x, ty:t.y, isBolt:true, life:0.15, maxLife:0.15, color:'#5ef2c0' });
@@ -1002,7 +1054,7 @@ function fireWeapon(id, level) {
     }
     if (hit.length) Sfx.shoot();
   } else if (type === 'lance') {
-    const target = findNearestEnemy(p.x, p.y, 900);
+    const target = strongestEnemy(560 * rangeScale());
     if (!target) return;
     const ang = Math.atan2(target.y-p.y, target.x-p.x);
     const dmg = (22 + level*9) * p.damage;
@@ -1011,7 +1063,7 @@ function fireWeapon(id, level) {
   }
 }
 
-const WEAPON_COOLDOWNS = { blase:0.85, ring:99, tintenwolke:1.2, harpune:1.1, elektro:1.3, speer:1.4, begleiter:99 };
+const WEAPON_COOLDOWNS = { blase:0.85, ring:99, tintenwolke:1.2, harpune:1.1, elektro:1.2, speer:1.4, begleiter:99 };
 
 function updateWeapons(dt) {
   const p = player;
@@ -1021,7 +1073,10 @@ function updateWeapons(dt) {
     if (type === 'orbit' || type === 'minion') continue;
     p.weaponTimers[id] = (p.weaponTimers[id]||0) - dt;
     if (p.weaponTimers[id] <= 0) {
+      const n0 = projectiles.length;
       fireWeapon(id, level);
+      const sv = Math.sqrt(rangeScale());
+      for (let i = n0; i < projectiles.length; i++) { projectiles[i].vx *= sv; projectiles[i].vy *= sv; projectiles[i].life *= sv; }
       const mult = Math.max(0.4, p.cooldownMult - (p.passives.angriffstempo||0)*0.08);
       p.weaponTimers[id] = WEAPON_COOLDOWNS[id] * mult;
     }
@@ -1072,7 +1127,7 @@ function updateMinion(dt) {
   const count = level >= 3 ? 2 : 1;
   while (minionEntities.length < count) {
     const idx = minionEntities.length;
-    minionEntities.push({ x: p.x-40, y: p.y-10, angle: idx*Math.PI, timer: idx*0.6, targetEnemy: null });
+    minionEntities.push({ x: p.x-40+idx*44, y: p.y-10, angle: idx*Math.PI, timer: idx*0.6, targetEnemy: null });
   }
   if (minionEntities.length > count) minionEntities.length = count;
 
@@ -1083,7 +1138,9 @@ function updateMinion(dt) {
   for (let m=0; m<minionEntities.length; m++) {
     const min = minionEntities[m];
     if (!min.targetEnemy || min.targetEnemy.dead || distXY(min.targetEnemy.x, min.targetEnemy.y, p.x, p.y) > leash) {
-      min.targetEnemy = findNearestEnemy(p.x, p.y, leash);
+      const taken = [];
+      for (let o = 0; o < minionEntities.length; o++) if (o !== m && minionEntities[o].targetEnemy) taken.push(minionEntities[o].targetEnemy);
+      min.targetEnemy = findNearestEnemy(p.x, p.y, leash, taken) || findNearestEnemy(p.x, p.y, leash);
     }
 
     let targetX, targetY;
@@ -1107,6 +1164,12 @@ function updateMinion(dt) {
     }
     min.x += (targetX - min.x) * Math.min(1, dt * 5);
     min.y += (targetY - min.y) * Math.min(1, dt * 5);
+    for (let o = 0; o < m; o++) {
+      const q = minionEntities[o];
+      let sx = min.x - q.x, sy = min.y - q.y, sd = Math.hypot(sx, sy);
+      if (sd < 0.5) { sx = Math.cos(m * 2.4 + 1); sy = Math.sin(m * 2.4 + 1); sd = 1; }
+      if (sd < 34) { const push = (34 - sd) / 2; min.x += sx / sd * push; min.y += sy / sd * push; q.x -= sx / sd * push; q.y -= sy / sd * push; }
+    }
 
     min.timer -= dt;
     if (min.timer <= 0) {
@@ -1139,7 +1202,8 @@ function updatePlayer(dt) {
   const p = player;
   if (p.slowTimer > 0) p.slowTimer -= dt;
   const mv = getMoveVector();
-  const slowMult = p.slowTimer > 0 ? 0.55 : 1;
+  playerInKelp = stageOf().id === 'kelp' && inKelp(p.x, p.y);
+  const slowMult = (p.slowTimer > 0 ? 0.55 : 1) * (playerInKelp ? 0.6 : 1);
   p.x += mv.x * p.speed * slowMult * dt;
   p.y += mv.y * p.speed * slowMult * dt;
   if (mv.mag > 0) {
@@ -1208,7 +1272,9 @@ function updateEnemies(dt) {
       en.specialTimer -= dt;
       en.heavyTimer -= dt;
       moveX = dx / d; moveY = dy / d;
-      if (en.specialTimer <= 0 && d < 700) {
+      const ov = bossAbility(en, dt, d);
+      if (ov) { moveX = ov.mx; moveY = ov.my; }
+      if (en.encounterNumber >= 2 && en.specialTimer <= 0 && d < 700) {
         en.specialTimer = 4.5;
         for (let a = 0; a < 10; a++) {
           const ang = (a / 10) * Math.PI * 2;
@@ -1225,8 +1291,9 @@ function updateEnemies(dt) {
       }
     }
 
-    en.x += moveX * en.speed * speedMult * dt;
-    en.y += moveY * en.speed * speedMult * dt;
+    const spd = (en.isBoss && en.spd != null ? en.spd : en.speed) * speedMult;
+    en.x += moveX * spd * dt;
+    en.y += moveY * spd * dt;
     en.wobble += dt * 8;
 
     if (en.contactTimer > 0) en.contactTimer -= dt;
@@ -1321,6 +1388,11 @@ function onPlayerDeath() {
     invulnTimer = 2;
     reviveFlashTimer = 2.4;
     spawnBurst(player.x, player.y, '#5ef2c0', 24);
+    enemyProjectiles.length = 0; zones.length = 0; shockwaves.length = 0;
+    for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i], rx = e.x - player.x, ry = e.y - player.y, rd = Math.hypot(rx, ry) || 1;
+      if (rd < 320) { const push = e.isBoss ? 140 : 340 - rd; e.x += rx / rd * push; e.y += ry / rd * push; }
+    }
     Sfx.revive();
     return;
   }
@@ -1433,12 +1505,14 @@ function presentLevelUpChoices() {
     const idx = Math.floor(Math.random()*poolCopy.length);
     picks.push(poolCopy.splice(idx,1)[0]);
   }
-  renderLevelUpScreen(picks, bonusCard && count === 4);
+  currentLevelUp = { picks: picks, bonus: bonusCard && count === 4 };
+  renderLevelUpScreen(picks, currentLevelUp.bonus);
 }
 
 function chooseUpgrade(choice) {
   if (levelUpProcessing || gameState !== 'levelup') return;
   levelUpProcessing = true;
+  currentLevelUp = null;
   const p = player;
   if (choice.kind === 'weapon') {
     p.weapons[choice.id] = choice.next;
@@ -1473,17 +1547,422 @@ function update(dt) {
   updateWeapons(dt);
   updateEnemies(dt);
   updateProjectiles(dt);
+  updateHazards(dt);
+  if (gameState !== 'playing') return;
   updatePickups(dt);
+  mergeFarPickups(dt);
   updateParticles(dt);
 
   if (pendingLevelUps > 0) presentLevelUpChoices();
   if (runTime > save.stats.bestTime) save.stats.bestTime = runTime;
 }
 
+
+/* ============================================================
+   GEFAHREN, BOSS-MECHANIKEN, HILFSFUNKTIONEN
+   ============================================================ */
+function rangeScale() { return Math.min(2.4, Math.max(1, Math.max(W, H) / 850)); }
+
+function freeEnemySlot() {
+  if (enemies.length < 70) return true;
+  let far = null, fd = Math.hypot(W, H) / 2 + 60;
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    if (e.isBoss || e.dead || e.elite) continue;
+    const d = distXY(e.x, e.y, player.x, player.y);
+    if (d > fd) { fd = d; far = e; }
+  }
+  if (!far) return false;
+  far.dead = true;
+  return true;
+}
+
+function clearInput() { for (const k in keys) keys[k] = false; pointerUp(); }
+
+let toastTimer = 0;
+function showToast(text) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = text; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
+}
+
+function bankOldRun() {
+  if (gameState === 'playing' || gameState === 'paused' || gameState === 'levelup') bankRunProgress();
+  else {
+    const sn = hasResumableRun();
+    if (sn) {
+      const pr = sn.runPearls || 0;
+      save.totalPearls += pr; save.stats.totalPearlsEarned += pr;
+      if ((sn.runLevel || 0) >= GLUECKS_LEVEL && save.unlockedCharacters.indexOf('gluecks') === -1) save.unlockedCharacters.push('gluecks');
+    }
+  }
+  clearRunSnapshot();
+  checkAchievements();
+  persistSave();
+}
+
+const KELP_CELL = 380;
+function kelpAt(cx, cy) {
+  if (hashCell(cx * 5 + 1, cy * 7 + 2) > 0.4) return null;
+  const x = cx * KELP_CELL + hashCell(cx * 3 + 7, cy * 5 + 11) * KELP_CELL * 0.7 + KELP_CELL * 0.15;
+  const y = cy * KELP_CELL + hashCell(cx * 13 + 1, cy * 17 + 3) * KELP_CELL * 0.7 + KELP_CELL * 0.15;
+  const r = 70 + hashCell(cx * 19 + 4, cy * 23 + 6) * 60;
+  if (Math.hypot(x, y) < 240 + r) return null;
+  return { x: x, y: y, r: r };
+}
+function inKelp(px, py) {
+  const cx = Math.floor(px / KELP_CELL), cy = Math.floor(py / KELP_CELL);
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const k = kelpAt(cx + i, cy + j);
+    if (k && distXY(px, py, k.x, k.y) < k.r) return true;
+  }
+  return false;
+}
+
+// Einzigartige Boss-Mechanik pro Boss. Gibt ggf. eine Bewegungs-Überschreibung zurück.
+function bossAbility(en, dt, d) {
+  const p = player;
+  const ph = (en.hp < en.maxHp * 0.5 ? 0.75 : 1) * Math.max(0.6, 1 - (en.encounterNumber - 1) * 0.12);
+  en.spd = null;
+  en.abil -= dt;
+  if (en.state === 'tired') {
+    en.stT -= dt; en.spd = en.speed * 0.25;
+    if (en.stT <= 0) { en.state = 'walk'; en.abil = 6.5 * ph; }
+    return null;
+  }
+  if (en.type === 'haikoenig') {            // Sturmangriff
+    if (en.state === 'walk') {
+      if (en.abil <= 0 && d < 650) { en.state = 'windup'; en.stT = 0.9; en.ang = Math.atan2(p.y - en.y, p.x - en.x); }
+    } else if (en.state === 'windup') {
+      en.stT -= dt;
+      if (en.stT > 0.3) en.ang = Math.atan2(p.y - en.y, p.x - en.x);
+      if (en.stT <= 0) { en.state = 'dash'; en.stT = 0.6; }
+      return { mx: 0, my: 0 };
+    } else if (en.state === 'dash') {
+      en.stT -= dt; en.spd = 600;
+      if (en.stT <= 0) { en.state = 'tired'; en.stT = 1.4; }
+      return { mx: Math.cos(en.ang), my: Math.sin(en.ang) };
+    }
+  } else if (en.type === 'kraken') {        // Tentakelschläge auf markierte Kreise
+    if (en.abil <= 0 && d < 750) {
+      en.abil = 5.5 * ph;
+      const n = 3 + Math.min(2, en.encounterNumber - 1), mv = getMoveVector();
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, off = i === 0 ? 0 : 110 + Math.random() * 170;
+        const lead = i === 0 ? 0.55 * p.speed : 0;
+        zones.push({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 52, t: 0, warn: 1.1, life: 0.4, kind: 'slam', dmg: en.dmg * 1.1, hit: false });
+      }
+      Sfx.boss();
+    }
+  } else if (en.type === 'seeungeheuer') {  // Sog
+    if (en.state === 'walk') {
+      if (en.abil <= 0 && d < 750) { en.state = 'windup'; en.stT = 1.0; }
+    } else if (en.state === 'windup') {
+      en.stT -= dt;
+      if (en.stT <= 0) { en.state = 'sog'; en.stT = 2.4; }
+      return { mx: 0, my: 0 };
+    } else if (en.state === 'sog') {
+      en.stT -= dt;
+      p.x += (en.x - p.x) / d * 105 * dt; p.y += (en.y - p.y) / d * 105 * dt;
+      if (en.stT <= 0) {
+        en.state = 'walk'; en.abil = 9 * ph;
+        for (let a = 0; a < 8; a++) { const ang = (a / 8) * Math.PI * 2; enemyProjectiles.push({ x: en.x, y: en.y, vx: Math.cos(ang) * 150, vy: Math.sin(ang) * 150, r: 7, dmg: en.dmg * 0.7, life: 2.6, color: '#9ad7ff' }); }
+        Sfx.boss();
+      }
+      return { mx: 0, my: 0 };
+    }
+  } else if (en.type === 'lavatitan') {     // Magmawelle mit Lücken
+    if (en.state === 'walk') {
+      if (en.abil <= 0 && d < 800) { en.state = 'windup'; en.stT = 0.9; }
+    } else if (en.state === 'windup') {
+      en.stT -= dt;
+      if (en.stT <= 0) {
+        en.state = 'walk'; en.abil = 7 * ph;
+        const g0 = Math.random() * Math.PI * 2;
+        shockwaves.push({ x: en.x, y: en.y, r: en.r, gaps: [g0, g0 + Math.PI * 2 / 3, g0 + Math.PI * 4 / 3], dmg: en.dmg, hit: false });
+        spawnBurst(en.x, en.y, '#ff7a30', 18); Sfx.boss();
+      }
+      return { mx: 0, my: 0 };
+    }
+  }
+  return null;
+}
+
+// Gebiets-Gefahren (Lavazonen) + Boss-Zonen + Schockwellen
+function updateHazards(dt) {
+  const p = player, stage = stageOf();
+  if (stage.id === 'vulkan') {
+    hazardTimer -= dt;
+    if (hazardTimer <= 0 && runTime > 12) {
+      hazardTimer = Math.max(3.2, 7 - runTime / 90);
+      const n = Math.min(3, 1 + Math.floor(runTime / 200)), mv = getMoveVector();
+      const dmg = 9 * (1 + (runTime / 60) * 0.10 * stage.difficulty);
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, off = i === 0 ? 0 : 110 + Math.random() * 230;
+        const lead = i === 0 ? p.speed * 0.7 : 0;
+        zones.push({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.5, life: 3.5, kind: 'lava', dmg: dmg });
+      }
+    }
+  }
+  for (let i = zones.length - 1; i >= 0; i--) {
+    const z = zones[i];
+    z.t += dt;
+    if (z.t >= z.warn) {
+      if (z.kind === 'slam' && !z.hit) {
+        z.hit = true; spawnBurst(z.x, z.y, '#c98bff', 12);
+        if (distXY(z.x, z.y, p.x, p.y) < z.r + p.r * 0.5 && invulnTimer <= 0) damagePlayer(z.dmg);
+      } else if (z.kind === 'lava' && distXY(z.x, z.y, p.x, p.y) < z.r && invulnTimer <= 0) {
+        damagePlayer(z.dmg);
+      }
+    }
+    if (z.t >= z.warn + z.life) zones.splice(i, 1);
+  }
+  for (let i = shockwaves.length - 1; i >= 0; i--) {
+    const sw = shockwaves[i];
+    sw.r += 230 * dt;
+    const dd = distXY(sw.x, sw.y, p.x, p.y);
+    if (!sw.hit && invulnTimer <= 0 && Math.abs(dd - sw.r) < 14 + p.r * 0.5) {
+      const a = Math.atan2(p.y - sw.y, p.x - sw.x);
+      if (!sw.gaps.some(function(g){ return Math.abs(normalizeAngle(a - g)) < 0.33; })) { sw.hit = true; damagePlayer(sw.dmg); }
+    }
+    if (sw.r > 900) shockwaves.splice(i, 1);
+  }
+}
+
+function drawHazards() {
+  const ox = camera.x - W / 2, oy = camera.y - H / 2, TAU = Math.PI * 2;
+  for (let i = 0; i < zones.length; i++) {
+    const z = zones[i], sx = z.x - ox, sy = z.y - oy, lava = z.kind === 'lava';
+    ctx.save();
+    if (z.t < z.warn) {
+      ctx.globalAlpha = 0.25 + 0.15 * Math.sin(runTime * 12);
+      ctx.fillStyle = lava ? '#ff7a30' : '#c98bff';
+      ctx.beginPath(); ctx.arc(sx, sy, z.r * (z.t / z.warn), 0, TAU); ctx.fill();
+      ctx.globalAlpha = 0.9; ctx.lineWidth = 3; ctx.strokeStyle = lava ? '#ffb070' : '#e0c0ff'; ctx.setLineDash([10, 8]);
+      ctx.beginPath(); ctx.arc(sx, sy, z.r, 0, TAU); ctx.stroke();
+    } else {
+      ctx.globalAlpha = lava ? 0.6 : 0.7 * Math.max(0, 1 - (z.t - z.warn) / z.life);
+      ctx.fillStyle = lava ? '#ff4a14' : '#f0dcff';
+      ctx.beginPath(); ctx.arc(sx, sy, z.r, 0, TAU); ctx.fill();
+      if (lava) { ctx.globalAlpha = 0.9; ctx.lineWidth = 3; ctx.strokeStyle = '#ffd27a'; ctx.beginPath(); ctx.arc(sx, sy, z.r, 0, TAU); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+  for (let i = 0; i < shockwaves.length; i++) {
+    const sw = shockwaves[i], sx = sw.x - ox, sy = sw.y - oy;
+    ctx.save();
+    ctx.strokeStyle = '#ff7a30'; ctx.lineWidth = 16; ctx.globalAlpha = 0.85; ctx.shadowColor = '#ff4a14'; ctx.shadowBlur = 12;
+    for (let g = 0; g < 3; g++) { ctx.beginPath(); ctx.arc(sx, sy, sw.r, sw.gaps[g] + 0.33, sw.gaps[g] + TAU / 3 - 0.33); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+
+function drawBossTelegraph(en, sx, sy) {
+  ctx.save(); ctx.translate(sx, sy);
+  const f = 0.3 + 0.2 * Math.sin(runTime * 20);
+  if (en.state === 'sog') {
+    ctx.strokeStyle = 'rgba(120,200,255,0.55)'; ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) { const k = 1 - ((runTime * 1.2 + i / 3) % 1); ctx.beginPath(); ctx.arc(0, 0, en.r + k * 260, 0, Math.PI * 2); ctx.stroke(); }
+  } else if (en.type === 'haikoenig') {
+    ctx.rotate(en.ang); ctx.fillStyle = 'rgba(255,60,80,' + f + ')'; ctx.fillRect(0, -en.r * 0.9, 380, en.r * 1.8);
+  } else {
+    ctx.strokeStyle = (en.type === 'lavatitan' ? 'rgba(255,140,60,' : 'rgba(120,200,255,') + (f + 0.3) + ')'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, 0, en.r + 14 + 40 * (1 - en.stT), 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawKelp(camX, camY) {
+  const c0 = Math.floor((camX - W / 2 - 140) / KELP_CELL), c1 = Math.floor((camX + W / 2 + 140) / KELP_CELL);
+  const r0 = Math.floor((camY - H / 2 - 140) / KELP_CELL), r1 = Math.floor((camY + H / 2 + 140) / KELP_CELL);
+  const t = performance.now() / 1000;
+  ctx.lineCap = 'round';
+  for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) {
+    const k = kelpAt(cx, cy);
+    if (!k) continue;
+    const sx = k.x - camX + W / 2, sy = k.y - camY + H / 2;
+    ctx.fillStyle = 'rgba(30,140,80,0.22)';
+    ctx.beginPath(); ctx.arc(sx, sy, k.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(70,200,120,0.5)'; ctx.lineWidth = 6;
+    for (let i = 0; i < 9; i++) {
+      const a = (i / 9) * Math.PI * 2 + k.r, bx = sx + Math.cos(a) * k.r * 0.6, by = sy + Math.sin(a) * k.r * 0.6;
+      ctx.beginPath(); ctx.moveTo(bx, by + 18);
+      ctx.quadraticCurveTo(bx + Math.sin(t * 1.5 + i) * 10, by - 6, bx + Math.sin(t * 1.5 + i + 1) * 14, by - 34);
+      ctx.stroke();
+    }
+  }
+}
+
+// Tiefsee-Graben: Dunkelheit. Leuchtendes (Kerne, Gegnerschüsse, Boss, Angler-Lichter) bleibt sichtbar.
+function drawDarkness() {
+  const sx = player.x - camera.x + W / 2, sy = player.y - camera.y + H / 2;
+  const R = Math.min(420, Math.max(230, Math.min(W, H) * 0.5)) * (1 + Math.sin(runTime * 1.3) * 0.03);
+  const g = ctx.createRadialGradient(sx, sy, R * 0.4, sx, sy, R * 1.3);
+  g.addColorStop(0, 'rgba(1,4,14,0)'); g.addColorStop(1, 'rgba(1,4,14,0.9)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const ox = camera.x - W / 2, oy = camera.y - H / 2;
+  for (let i = 0; i < pickups.length; i++) {
+    const pk = pickups[i], qx = pk.x - ox, qy = pk.y - oy;
+    if (qx < -20 || qx > W + 20 || qy < -20 || qy > H + 20) continue;
+    ctx.fillStyle = pk.type === 'pearl' ? '#ffe9b8' : '#5ef2c0';
+    ctx.beginPath(); ctx.arc(qx, qy, pk.r, 0, Math.PI * 2); ctx.fill();
+  }
+  for (let i = 0; i < enemyProjectiles.length; i++) {
+    const pr = enemyProjectiles[i];
+    ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(pr.x - ox, pr.y - oy, pr.r, 0, Math.PI * 2); ctx.fill();
+  }
+  for (let i = 0; i < enemies.length; i++) {
+    const en = enemies[i], ex = en.x - ox, ey = en.y - oy;
+    if (ex < -80 || ex > W + 80 || ey < -80 || ey > H + 80) continue;
+    if (en.isBoss) drawBlob(ex, ey, en.r, en.color, null, { wobble: en.wobble, accessory: en.accessory, glow: 22 });
+    else if (en.type === 'angler') {
+      const lx = ex + en.r * 0.2, ly = ey - en.r * 1.9;
+      const lg = ctx.createRadialGradient(lx, ly, 0, lx, ly, 60);
+      lg.addColorStop(0, 'rgba(189,242,255,0.6)'); lg.addColorStop(1, 'rgba(189,242,255,0)');
+      ctx.fillStyle = lg; ctx.fillRect(lx - 60, ly - 60, 120, 120);
+    }
+  }
+}
+
+function drawBossArrow() {
+  const b = bossEntity;
+  if (!b || gameState === 'gameover') return;
+  const sx = b.x - camera.x + W / 2, sy = b.y - camera.y + H / 2;
+  if (sx > 0 && sx < W && sy > 0 && sy < H) return;
+  const a = Math.atan2(sy - H / 2, sx - W / 2);
+  const ax = Math.max(30, Math.min(W - 30, sx)), ay = Math.max(120, Math.min(H - 30, sy));
+  ctx.save(); ctx.translate(ax, ay); ctx.rotate(a);
+  ctx.fillStyle = 'rgba(255,92,114,' + (0.75 + Math.sin(runTime * 8) * 0.2) + ')';
+  ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-10, -13); ctx.lineTo(-10, 13); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+
+/* ============================================================
+   ERGÄNZUNGEN: Upgrade-Details, Zielwahl, Pickups, Gebiete
+   ============================================================ */
+function fmtN(n, dg) { const f = dg === 2 ? 100 : 10; return String(Math.round(n * f) / f).replace('.', ','); }
+function cdMult() { const p = player; return Math.max(0.4, p.cooldownMult - (p.passives.angriffstempo || 0) * 0.08); }
+const WEAPON_STATS = {
+  blase:       function(l, d, c) { return [['Schaden', (7 + l * 3.4) * d], ['Blasen', 1 + Math.floor((l - 1) / 2)], ['Abklingzeit', 0.85 * c, ' s']]; },
+  ring:        function(l, d) { return [['Schaden', (6 + l * 3) * d], ['Blasen', l * 2], ['Radius', 52 + l * 7]]; },
+  tintenwolke: function(l, d, c) { return [['Schaden (% der Gegner-HP)', 8 + l * 2.5, '%'], ['Radius', 70 + l * 20], ['Abklingzeit', 1.2 * c, ' s']]; },
+  harpune:     function(l, d, c) { return [['Schaden', (10 + l * 4.2) * d], ['Durchschlag', 2 + l], ['Abklingzeit', 1.1 * c, ' s']]; },
+  elektro:     function(l, d, c) { return [['Schaden', (7 + l * 2.9) * d], ['Sprünge', 2 + l], ['Abklingzeit', 1.2 * c, ' s']]; },
+  speer:       function(l, d, c) { return [['Schaden', (22 + l * 9) * d], ['Abklingzeit', 1.4 * c, ' s']]; },
+  begleiter:   function(l, d) { return [['Schaden', (6 + l * 3) * d], ['Angriffspause', Math.max(0.5, 1.3 - l * 0.15), ' s'], ['Fische', l >= 3 ? 2 : 1]]; }
+};
+const PASSIVE_STATS = {
+  tempo:         function(l) { return [['Tempo-Bonus', l * 4, '%']]; },
+  leben:         function(l, d, c, p) { return [['Max. Lebenspunkte', p.maxHp - (p.passives.leben || 0) * 20 + l * 20]]; },
+  panzerung:     function(l) { return [['Schadensminderung', l * 1.2, ' pro Treffer']]; },
+  anziehung:     function(l, d, c, p) { return [['Sammelradius', p.magnet - (p.passives.anziehung || 0) * 20 + l * 20]]; },
+  angriffstempo: function(l, d, c, p) { return [['Abklingzeit aller Waffen', Math.max(0.4, p.cooldownMult - l * 0.08) * 100, '%']]; },
+  glueck:        function(l, d, c, p) { const b = p.luck - (p.passives.glueck || 0); return [['Perlen-Bonus', (b + l) * 10, '%'], ['Chance auf 4. Karte', Math.min(0.6, (b + l) * 0.06) * 100, '%']]; },
+  schild:        function(l) { return [['Aufladezeit', shieldRechargeTime(l), ' s']]; },
+  regeneration:  function(l) { return [['Heilung', l * 0.15, ' HP/s']]; },
+  schlag:        function(l) { return [['Schaden-Bonus', l * 8, '%']]; }
+};
+function upgradeDetail(ch) {
+  const p = player, fn = (ch.kind === 'weapon' ? WEAPON_STATS : PASSIVE_STATS)[ch.id];
+  if (!fn) return '';
+  const d = p.damage, c = cdMult();
+  const fmt = function(s) { return fmtN(s[1], s[2] === ' s' ? 2 : 1) + (s[2] || ''); };
+  if (ch.level === 0) return 'Neu: ' + fn(1, d, c, p).map(function(s) { return s[0] + ' ' + fmt(s); }).join(' \u00B7 ');
+  const a = fn(ch.level, d, c, p), b = fn(ch.next, d, c, p), out = [];
+  for (let i = 0; i < a.length; i++) if (fmt(a[i]) !== fmt(b[i])) out.push(a[i][0] + ' ' + fmt(a[i]) + ' \u2192 ' + fmt(b[i]));
+  return 'Stufe ' + ch.level + ' \u2192 ' + ch.next + ': ' + (out.join(' \u00B7 ') || 'kleine Verbesserungen');
+}
+
+// Harpune: Richtung mit den meisten Gegnern in einer Linie. Speer: stärkster Gegner.
+function bestLineAngle(range) {
+  const p = player, list = [];
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    if (e.dead) continue;
+    const d = distXY(e.x, e.y, p.x, p.y);
+    if (d < range) list.push({ e: e, d: d });
+  }
+  if (!list.length) return null;
+  list.sort(function(a, b) { return a.d - b.d; });
+  let bestA = 0, bestS = -1;
+  for (let i = 0; i < Math.min(24, list.length); i++) {
+    const a = Math.atan2(list[i].e.y - p.y, list[i].e.x - p.x), ca = Math.cos(a), sa = Math.sin(a);
+    let sc = 0;
+    for (let j = 0; j < list.length; j++) {
+      const q = list[j].e, rx = q.x - p.x, ry = q.y - p.y;
+      if (rx * ca + ry * sa > 0 && Math.abs(ry * ca - rx * sa) < q.r + 6) sc += q.isBoss ? 3 : 1;
+    }
+    if (sc > bestS) { bestS = sc; bestA = a; }
+  }
+  return bestA;
+}
+function strongestEnemy(range) {
+  const p = player;
+  let best = null, bh = -1;
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    if (e.dead || distXY(e.x, e.y, p.x, p.y) > range) continue;
+    const h = e.hp + (e.isBoss ? 1e6 : 0);
+    if (h > bh) { bh = h; best = e; }
+  }
+  return best;
+}
+
+// Pickups: vorgerendertes Leuchten + Zusammenfassen weit entfernter Kugeln
+const GLOW_COL = { pearl: '#ffe9b8', xp: '#5ef2c0', heal: '#ff6b8a' };
+const glowCache = {};
+function glowSprite(type) {
+  if (glowCache[type]) return glowCache[type];
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d'), col = GLOW_COL[type] || '#5ef2c0';
+  g.shadowColor = col; g.shadowBlur = 10; g.fillStyle = col;
+  g.beginPath(); g.arc(32, 32, 16, 0, Math.PI * 2); g.fill();
+  glowCache[type] = c;
+  return c;
+}
+let pickMergeT = 0;
+function mergeFarPickups(dt) {
+  pickMergeT -= dt;
+  if (pickMergeT > 0) return;
+  pickMergeT = 1.5;
+  const crowded = pickups.length > 200, p = player, cells = {};
+  const lim = crowded ? p.magnet + 60 : Math.hypot(W, H) / 2 + 150, cs = crowded ? 120 : 220;
+  for (let i = pickups.length - 1; i >= 0; i--) {
+    const pk = pickups[i];
+    if (distXY(pk.x, pk.y, p.x, p.y) < lim) continue;
+    const key = pk.type + ':' + Math.floor(pk.x / cs) + ':' + Math.floor(pk.y / cs);
+    const t = cells[key];
+    if (t) { t.amount += pk.amount; pickups.splice(i, 1); } else cells[key] = pk;
+  }
+  for (const k in cells) { const pk = cells[k]; if (pk.amount > 1) pk.r = Math.min(12, (pk.type === 'pearl' ? 6 : 7) + Math.sqrt(pk.amount) * 0.4); }
+}
+
+function makeElite(e) { e.elite = true; e.hp *= 3; e.maxHp = e.hp; e.dmg *= 1.25; e.r *= 1.3; e.xp *= 4; }
+
+// Gebiete werden durch Besiegen des Bosses des vorherigen Gebiets freigeschaltet
+const STAGE_UNLOCK = { kelp: 'haikoenig', graben: 'kraken', vulkan: 'seeungeheuer' };
+function checkStageUnlocks() {
+  const done = save.stats.uniqueBossesDefeated, fresh = [];
+  for (const id in STAGE_UNLOCK) {
+    if (save.stagesUnlocked.indexOf(id) === -1 && done.indexOf(STAGE_UNLOCK[id]) !== -1) {
+      save.stagesUnlocked.push(id);
+      fresh.push(STAGES.filter(function(st) { return st.id === id; })[0].name);
+    }
+  }
+  return fresh;
+}
+
+let bgGrad = null, bgGradKey = '';
+
 function bankRunProgress() {
   save.totalPearls += runPearls;
   save.stats.totalPearlsEarned += runPearls;
-  if (runLevel >= 15 && save.unlockedCharacters.indexOf('gluecks') === -1) {
+  if (runLevel >= GLUECKS_LEVEL && save.unlockedCharacters.indexOf('gluecks') === -1) {
     save.unlockedCharacters.push('gluecks');
   }
   clearRunSnapshot();
@@ -1511,18 +1990,32 @@ function checkAchievements() {
   if (s.bossesDefeated >= 1) grant('boss_1');
   if (s.uniqueBossesDefeated.length >= 4) grant('boss_all');
   if (save.totalPearls >= 1000 || s.totalPearlsEarned >= 1000) grant('pearls_1000');
-  if (s.bestLevel >= 20) grant('level_20');
+  if (s.bestLevel >= ENTWICKELT_LEVEL) grant('level_20'); // interne ID bleibt 'level_20' (alte Spielstände)
   if (save.unlockedCharacters.length >= 4) grant('all_characters');
-  if (newly.length) persistSave();
+  if (!Array.isArray(save.rewarded)) save.rewarded = [];
+  let gained = 0;
+  save.achievements.forEach(function(id){
+    if (save.rewarded.indexOf(id) !== -1) return;
+    save.rewarded.push(id);
+    gained += ACH_REWARDS[id] || 0;
+    if (newly.indexOf(id) === -1) newly.push(id);
+  });
+  save.totalPearls += gained;
+  const newStages = checkStageUnlocks();
+  if (newly.length || newStages.length) {
+    persistSave();
+    newly.forEach(function(id){ if (runNewAch.indexOf(id) === -1) runNewAch.push(id); });
+    showToast((newly.length ? '\uD83C\uDFC6 Erfolg! +' + gained + ' \uD83D\uDCA7' : '') + (newly.length && newStages.length ? ' \u00B7 ' : '') + (newStages.length ? '\uD83D\uDDFA\uFE0F Neues Gebiet: ' + newStages.join(', ') : ''));
+  }
   return newly;
 }
 
 function togglePause() {
-  if (gameState === 'playing') { gameState = 'paused'; showScreen('screen-pause'); }
+  if (gameState === 'playing') { gameState = 'paused'; clearInput(); showScreen('screen-pause'); }
   else if (gameState === 'paused') { gameState = 'playing'; showScreen(null); }
 }
-window.addEventListener('blur', function(){ if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); });
-document.addEventListener('visibilitychange', function(){ if (document.hidden) { if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); } });
+window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); });
+document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); } });
 window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
 setInterval(function(){ saveRunSnapshotIfActive(); }, 8000);
 
@@ -1867,9 +2360,14 @@ function drawDeepGlows(camX, camY) {
 function drawBackground() {
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
   const stage = inRun ? stageOf() : STAGES[0];
-  const grad = ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0, stage.bgTop);
-  grad.addColorStop(1, stage.bgBottom);
+  const gk = stage.id + ':' + H;
+  if (!bgGrad || bgGradKey !== gk) {
+    bgGrad = ctx.createLinearGradient(0,0,0,H);
+    bgGrad.addColorStop(0, stage.bgTop);
+    bgGrad.addColorStop(1, stage.bgBottom);
+    bgGradKey = gk;
+  }
+  const grad = bgGrad;
   ctx.fillStyle = grad;
   ctx.fillRect(0,0,W,H);
 
@@ -1877,16 +2375,19 @@ function drawBackground() {
 
   drawDeepGlows(camX, camY);
   drawFloorScenery(camX, camY, stage.id);
+  if (stage.id === 'kelp') drawKelp(camX, camY);
 
   const tile = 64;
   ctx.fillStyle = 'rgba(255,255,255,0.09)';
   const offX = ((camX % tile) + tile) % tile;
   const offY = ((camY % tile) + tile) % tile;
+  ctx.beginPath();
   for (let x = -offX; x < W+tile; x += tile) {
     for (let y = -offY; y < H+tile; y += tile) {
-      ctx.beginPath(); ctx.arc(x,y,2.4,0,Math.PI*2); ctx.fill();
+      ctx.moveTo(x + 2.4, y); ctx.arc(x,y,2.4,0,Math.PI*2);
     }
   }
+  ctx.fill();
 }
 function drawAmbientBubbles() {
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
@@ -1945,16 +2446,14 @@ function render() {
 
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
   if (inRun) {
-    const pickupColors = { pearl:'#ffe9b8', xp:'#5ef2c0', heal:'#ff6b8a' };
+    drawHazards();
+    const gm = 40;
     for (let i=0;i<pickups.length;i++){
       const pk = pickups[i];
       const sx = pk.x - camera.x + W/2, sy = pk.y - camera.y + H/2;
-      const pc = pickupColors[pk.type] || '#5ef2c0';
-      ctx.shadowColor = pc;
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = pc;
-      ctx.beginPath(); ctx.arc(sx,sy,pk.r,0,Math.PI*2); ctx.fill();
-      ctx.shadowBlur = 0;
+      if (sx < -gm || sx > W + gm || sy < -gm || sy > H + gm) continue;
+      const sz = pk.r * 4;
+      ctx.drawImage(glowSprite(pk.type), sx - sz / 2, sy - sz / 2, sz, sz);
     }
     for (let i=0;i<enemyProjectiles.length;i++){
       const pr = enemyProjectiles[i];
@@ -1980,11 +2479,13 @@ function render() {
       const en = enemies[i];
       const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2;
       if (sx < -100 || sx > W+100 || sy < -100 || sy > H+100) continue;
-      const color = en.hitFlash > 0 ? '#ffffff' : en.color;
+      const color = en.hitFlash > 0 ? '#ffffff' : (en.state === 'tired' ? '#e0d890' : en.color);
       if (en.isBoss) {
+        if (en.state === 'windup' || en.state === 'sog') drawBossTelegraph(en, sx, sy);
         drawBlob(sx, sy, en.r, color, null, { wobble: en.wobble, accessory: en.accessory, glow: 22 });
       } else {
         drawEnemySprite(sx, sy, en.r, color, en.accessory, en.wobble);
+        if (en.elite) { ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, en.r + 6, 0, Math.PI * 2); ctx.stroke(); }
       }
     }
     if (player.weapons.ring) {
@@ -2062,7 +2563,9 @@ function render() {
       ctx.globalAlpha = 1;
     }
 
+    if (stageOf().id === 'graben') drawDarkness();
     if (gameState === 'playing') updateHud();
+    drawBossArrow();
     if (bossWarningTimer > 0) drawBossWarning();
     if (reviveFlashTimer > 0) drawReviveBanner();
     if (touchState.active && gameState === 'playing') drawTouchStick();
@@ -2095,27 +2598,35 @@ function showScreen(id) {
   }
 }
 
+const hudCache = {};
+function resetHudCache() {
+  for (const k in hudCache) delete hudCache[k];
+  if (UI['hud-boss']) UI['hud-boss'].classList.remove('active');
+}
+function hudSet(id, prop, val) {
+  const k = id + prop;
+  if (hudCache[k] === val) return;
+  hudCache[k] = val;
+  if (prop === 'text') UI[id].textContent = val; else UI[id].style.width = val;
+}
 function updateHud() {
   const p = player;
-  const hpPct = Math.max(0, p.hp/p.maxHp)*100;
-  UI['hud-hp-fill'].style.width = hpPct + '%';
-  UI['hud-hp-text'].textContent = Math.ceil(p.hp) + ' / ' + Math.round(p.maxHp) + (reviveAvailable ? ' \uD83D\uDC9A' : '');
-  const xpPct = Math.max(0, Math.min(1, runXp/runXpToNext))*100;
-  UI['hud-xp-fill'].style.width = xpPct + '%';
-  UI['hud-level'].textContent = 'Lv. ' + runLevel;
-  const mins = Math.floor(runTime/60), secs = Math.floor(runTime%60);
-  UI['hud-timer'].textContent = mins + ':' + String(secs).padStart(2,'0');
-  UI['hud-pearls'].textContent = runPearls;
+  hudSet('hud-hp-fill', 'w', (Math.max(0, p.hp / p.maxHp) * 100).toFixed(1) + '%');
+  hudSet('hud-hp-text', 'text', Math.ceil(p.hp) + ' / ' + Math.round(p.maxHp) + (reviveAvailable ? ' \uD83D\uDC9A' : ''));
+  hudSet('hud-xp-fill', 'w', (Math.max(0, Math.min(1, runXp / runXpToNext)) * 100).toFixed(1) + '%');
+  hudSet('hud-level', 'text', 'Lv. ' + runLevel);
+  const mins = Math.floor(runTime / 60), secs = Math.floor(runTime % 60);
+  hudSet('hud-timer', 'text', mins + ':' + String(secs).padStart(2, '0'));
+  hudSet('hud-pearls', 'text', String(runPearls));
   if (bossEntity) {
-    UI['hud-boss'].classList.add('active');
-    UI['hud-boss-fill'].style.width = Math.max(0,(bossEntity.hp/bossEntity.maxHp)*100) + '%';
-    UI['hud-boss-name'].textContent = bossEntity.name + (bossEntity.encounterNumber > 1 ? ' \u00D7' + bossEntity.encounterNumber : '');
-  } else {
-    UI['hud-boss'].classList.remove('active');
-  }
+    if (!hudCache.boss) { UI['hud-boss'].classList.add('active'); hudCache.boss = 1; }
+    hudSet('hud-boss-fill', 'w', Math.max(0, (bossEntity.hp / bossEntity.maxHp) * 100).toFixed(1) + '%');
+    hudSet('hud-boss-name', 'text', bossEntity.name + (bossEntity.encounterNumber > 1 ? ' \u00D7' + bossEntity.encounterNumber : ''));
+  } else if (hudCache.boss) { UI['hud-boss'].classList.remove('active'); hudCache.boss = 0; }
 }
 
 function updateMenuPearlsLabel() {
+  const sw = document.getElementById('storage-warning'); if (sw) sw.style.display = storageAvailable ? 'none' : 'block';
   if (UI['menu-pearls-label']) UI['menu-pearls-label'].textContent = save.totalPearls + ' \uD83D\uDCA7';
   if (UI['menu-best-time']) {
     const bt = save.stats.bestTime||0;
@@ -2176,15 +2687,17 @@ function renderStageGrid() {
   const grid = UI['stage-grid'];
   grid.innerHTML = '';
   STAGES.forEach(function(st){
+    const locked = save.stagesUnlocked.indexOf(st.id) === -1;
     const div = document.createElement('div');
-    div.className = 'pick-card' + (st.id===selectedStageId?' selected':'');
+    div.className = 'pick-card' + (st.id===selectedStageId?' selected':'') + (locked?' locked':'');
     div.innerHTML = '<div class="pick-swatch" style="background:linear-gradient(135deg,'+st.bgTop+','+st.bgBottom+')"></div>' +
-      '<span class="pick-name">'+st.name+'</span>' +
+      '<span class="pick-name">'+(locked?'\uD83D\uDD12 ':'')+st.name+'</span>' +
       '<span class="pick-stats">Schwierigkeit \u00D7'+fmtNum(st.difficulty)+' \u00B7 Boss: '+BOSS_TYPES[st.boss].name+'</span>' +
-      '<span class="pick-desc">'+st.desc+'</span>';
+      '<span class="pick-desc">'+(locked?('Freischalten: Besiege '+BOSS_TYPES[STAGE_UNLOCK[st.id]].name+'.'):st.desc)+'</span>';
     div.addEventListener('click', function(){
-      selectedStageId = st.id;
       Sfx.click();
+      if (locked) return;
+      selectedStageId = st.id;
       renderStageGrid();
     });
     grid.appendChild(div);
@@ -2232,14 +2745,14 @@ function renderAchievements() {
     div.className = 'achievement-item ' + (unlocked?'unlocked':'locked');
     div.innerHTML = '<span class="achievement-icon">'+(unlocked?'\uD83C\uDFC6':'\uD83D\uDD12')+'</span>' +
       '<div class="achievement-item-info"><span class="achievement-item-name">'+a.name+'</span>' +
-      '<span class="achievement-item-desc">'+a.desc+'</span></div>';
+      '<span class="achievement-item-desc">'+a.desc+' \u00B7 +'+(ACH_REWARDS[a.id]||0)+' \uD83D\uDCA7</span></div>';
     list.appendChild(div);
   });
 }
 
 const LEVELUP_ICONS = { blase:'\uD83D\uDD35', ring:'\u2B55', tintenwolke:'\uD83D\uDFE3', harpune:'\uD83D\uDD31', elektro:'\u26A1', speer:'\uD83D\uDD3A', begleiter:'\uD83D\uDC1F',
   tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40',
-  schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A' };
+  schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A', schlag:'\uD83D\uDCA5' };
 
 function renderLevelUpScreen(picks, bonus) {
   const sub = document.getElementById('levelup-sub');
@@ -2253,7 +2766,7 @@ function renderLevelUpScreen(picks, bonus) {
     div.className = 'levelup-choice';
     div.innerHTML = '<span class="levelup-choice-icon">'+(LEVELUP_ICONS[choice.id]||'\u2728')+'</span>' +
       '<div><span class="levelup-choice-name">'+def.name+(choice.level>0?(' Stufe '+choice.next):' (Neu)')+'</span>' +
-      '<span class="levelup-choice-desc">'+def.desc+'</span></div>';
+      '<span class="levelup-choice-desc">'+(choice.level===0?def.desc+'<br>':'')+upgradeDetail(choice)+'</span></div>';
     div.addEventListener('click', function(){ wrap.style.pointerEvents = 'none'; chooseUpgrade(choice); });
     wrap.appendChild(div);
   });
@@ -2261,7 +2774,8 @@ function renderLevelUpScreen(picks, bonus) {
 }
 
 function renderGameOverScreen() {
-  const newly = checkAchievements();
+  checkAchievements();
+  const newly = runNewAch.slice();
   UI['gameover-title'].textContent = 'Spiel vorbei';
   const stats = [
     { label:'\u00DCberlebt', value: Math.floor(runTime/60)+':'+String(Math.floor(runTime%60)).padStart(2,'0') },
@@ -2278,7 +2792,7 @@ function renderGameOverScreen() {
     achWrap.innerHTML = '<p style="font-size:12px;color:var(--foam-dim);font-weight:700;margin:8px 0 4px;">Neue Erfolge:</p>' +
       newly.map(function(id){
         const a = ACHIEVEMENTS.filter(function(x){return x.id===id;})[0];
-        return '<span class="gameover-achieve-badge">\uD83C\uDFC6 '+(a?a.name:id)+'</span>';
+        return '<span class="gameover-achieve-badge">\uD83C\uDFC6 '+(a?a.name:id)+' +'+(ACH_REWARDS[id]||0)+' \uD83D\uDCA7</span>';
       }).join('');
   } else {
     achWrap.innerHTML = '';
@@ -2335,6 +2849,7 @@ function initUI() {
   UI['btn-mute-pause'].addEventListener('click', function(){ toggleMute(); });
   if (save.muted && UI['btn-mute']) UI['btn-mute'].textContent = '\uD83D\uDD07';
 
+  checkAchievements();
   updateMenuPearlsLabel();
 }
 
