@@ -215,8 +215,43 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .instructions-list li { font-size: 13.5px; line-height: 1.5; color: var(--foam-dim); background: rgba(126,224,255,0.06); border-radius: 12px; padding: 10px 12px; }
 .instructions-list strong { color: var(--foam); }
 
+/* ---------- Online ---------- */
+.beta-tag { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font: 900 11px 'Nunito', sans-serif; letter-spacing: 0.6px; background: linear-gradient(135deg, #7eb6ff, #5ef2c0); color: #04241a; }
+.online-panel { max-width: 460px; text-align: left; padding-block: 20px; }
+.online-panel h2 { text-align: center; }
+.online-panel .panel-actions { margin-top: 10px; }
+.online-note { color: var(--foam-dim); font-size: 12.5px; font-weight: 600; margin: -4px 0 8px; text-align: center; line-height: 1.4; }
+.online-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--foam-dim); margin: 10px 0 5px; }
+.online-row { display: flex; gap: 8px; align-items: center; }
+.online-input { flex: 1; min-width: 0; font: 800 16px 'Nunito', sans-serif; color: var(--foam); background: rgba(5,20,35,0.7); border: 1px solid rgba(126,224,255,0.3); border-radius: 12px; padding: 10px 12px; outline: none; -webkit-user-select: text; user-select: text; }
+.online-input:focus { border-color: var(--bioluma); }
+.online-input.code { text-transform: uppercase; letter-spacing: 6px; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; }
+.online-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.online-chip { flex: 1 1 0; min-width: 84px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 12px; border: 2px solid rgba(126,224,255,0.18); background: rgba(126,224,255,0.06); color: var(--foam); font: 800 12px 'Nunito', sans-serif; cursor: pointer; text-align: left; }
+#online-areas { display: grid; grid-template-columns: 1fr 1fr; }
+.online-chip.selected { border-color: var(--bioluma); background: rgba(94,242,192,0.12); }
+.online-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.online-chip img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+.online-chip .sw { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+.online-box { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(126,224,255,0.05); border: 1px solid rgba(126,224,255,0.14); }
+.online-box .online-label { margin-top: 0; }
+.online-box > .btn { margin-top: 10px; }
+.online-row .btn { width: auto; flex-shrink: 0; }
+.online-status { min-height: 18px; margin: 8px 0 0; font-size: 12.5px; font-weight: 800; color: var(--bioluma); text-align: center; line-height: 1.4; }
+.online-status.bad { color: #ff8a9a; }
+.hud-room { margin-left: 6px; border-color: rgba(126,182,255,0.5); color: #cfe4ff; }
+.pause-room { color: var(--foam-dim); font-size: 13px; font-weight: 700; margin: -6px 0 14px; line-height: 1.4; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.4); box-shadow: none; }
+@media (max-height: 760px) {
+  .online-panel .online-label { margin: 6px 0 4px; }
+  .online-panel .online-input { padding: 7px 12px; }
+  .online-panel .online-note { margin-bottom: 4px; }
+  .online-panel .online-box > .btn { margin-top: 8px; padding-block: 10px; }
+}
+
 #toast{position:absolute;top:86px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
+#toast.low{top:122px}
 
 @media (max-width: 380px) {
   .panel { padding: 22px 16px; }
@@ -267,7 +302,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="hud-bar-wrap xp-wrap">
       <div class="hud-bar-fill xp-fill" id="hud-xp-fill"></div>
     </div>
-    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div>
+    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;"></div>
     <div class="hud-boss-wrap" id="hud-boss">
       <span class="hud-boss-name" id="hud-boss-name"></span>
       <div class="hud-bar-wrap boss-wrap"><div class="hud-bar-fill boss-fill" id="hud-boss-fill"></div><i class="boss-notch" style="left:33%"></i><i class="boss-notch" style="left:66%"></i></div>
@@ -287,6 +322,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       <div class="menu-buttons">
         <button class="btn btn-primary btn-large" id="btn-continue-run" style="display:none;">Weiterspielen</button>
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
+        <button class="btn btn-secondary" id="btn-goto-online">🌐 Online spielen <span class="beta-tag">Beta</span></button>
         <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
         <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
         <button class="btn btn-secondary" id="btn-goto-instructions">Anleitung</button>
@@ -316,6 +352,36 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-stage-back">Zurück</button>
         <button class="btn btn-primary" id="btn-stage-start">Eintauchen!</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-online">
+    <div class="panel online-panel">
+      <h2>Online spielen <span class="beta-tag">Beta</span></h2>
+      <p class="online-note">Spiel mit Freunden in einem privaten Raum: Jeder hat seine eigenen Gegner, Level und Perlen – aber ihr seht euch, kämpft zusammen und bekommt beide Beute.</p>
+      <label class="online-label" for="online-name">Dein Name</label>
+      <div class="online-row">
+        <input id="online-name" class="online-input" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Dein Name">
+        <button class="icon-btn" id="btn-online-dice" aria-label="Zufallsname">🎲</button>
+      </div>
+      <span class="online-label">Dein Blobi</span>
+      <div class="online-chips" id="online-chars"></div>
+      <div class="online-box">
+        <span class="online-label">Neuer Raum im Gebiet</span>
+        <div class="online-chips" id="online-areas"></div>
+        <button class="btn btn-primary" id="btn-online-create">Raum erstellen</button>
+      </div>
+      <div class="online-box">
+        <label class="online-label" for="online-code">Code eines Freundes</label>
+        <div class="online-row">
+          <input id="online-code" class="online-input code" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false" aria-label="Raum-Code">
+          <button class="btn btn-secondary" id="btn-online-join">Beitreten</button>
+        </div>
+      </div>
+      <p class="online-status" id="online-status"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-online-back">Zurück</button>
       </div>
     </div>
   </div>
@@ -358,6 +424,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Freischalten:</strong> Besiege den Boss eines Gebiets, um das nächste zu öffnen. Goldumrandete Elite-Gegner geben mehr Beute.</li>
         <li><strong>Gebiete:</strong> Kelpwald: Tang bremst dich. Tiefsee-Graben: Dunkelheit – du siehst nur in deiner Nähe. Vulkanschlucht: Lavazonen – raus, sobald sie aufglühen! Das Korallenriff ist gefahrlos.</li>
         <li><strong>Boss-Tricks:</strong> Bei zwei Dritteln und einem Drittel Leben brüllt der Boss, ruft Verstärkung und kämpft härter (siehe Kerben im Lebensbalken). Hai-König: Sturmangriff, später doppelt und dreifach (danach erschöpft). Riesenkrake: Tentakelschläge auf markierte Kreise. Meeresungeheuer: Sog – schwimm weg! Lava-Titan: Magmawelle – such die Lücke. Ein roter Pfeil zeigt zum Boss.</li>
+        <li><strong>Champions:</strong> Ab 4 Minuten erscheint ab und zu ein Champion – ein viel stärkerer Gegner mit Krone, Namensschild und einer besonderen Eigenschaft: Flink (leuchtet auf und sprintet auf dich zu – ausweichen!), Gepanzert (sein Panzer schluckt Schaden, bis er bricht), Vampir (heilt sich, wenn er dich trifft), Teilend (zerfällt in drei), Explosiv (hinterlässt einen Kreis, der nach 1 Sekunde platzt) oder Anführer (macht Gegner in seiner Nähe schneller und stärker). Besiegt lässt er eine Schatztruhe voller Perlen fallen. Ab der dritten Begegnung kommt der Boss als wütender Champion-Boss: doppelte Perlen, und seine Truhe enthält eine Gratis-Verbesserung.</li>
+        <li><strong>Online (Beta):</strong> Unter „Online spielen“ erstellst du einen privaten Raum und gibst deinen Freunden den Code aus 4 Buchstaben. Jeder spielt seinen eigenen Lauf mit eigenen Gegnern, Leveln und Perlen – aber ihr seht euch, eure Gegner jagen den nächsten Blobi, und wer bei einem Sieg mitgeholfen hat, bekommt seine eigene Beute (auch die Schatztruhe). Farbige Pfeile zeigen zu deinen Mitspielern. Pausierst du, warten deine Gegner, bis du zurück bist.</li>
         <li><strong>Erfolge:</strong> Jeder Erfolg gibt einmalig Perlen. Neue Erfolge sind mit NEU markiert – hol dir die Belohnung im Menü unter Erfolge mit „Einlösen“ ab.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
@@ -369,7 +437,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div class="screen" id="screen-levelup">
     <div class="panel levelup-panel">
-      <h2>Level erreicht!</h2>
+      <h2 id="levelup-title">Level erreicht!</h2>
       <p class="levelup-sub" id="levelup-sub">Wähle eine Verbesserung</p>
       <div class="levelup-choices" id="levelup-choices"></div>
     </div>
@@ -378,6 +446,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   <div class="screen" id="screen-pause">
     <div class="panel">
       <h2>Pause</h2>
+      <p class="pause-room" id="pause-room" style="display:none;"></p>
       <div class="menu-buttons">
         <button class="btn btn-primary" id="btn-resume">Fortsetzen</button>
         <button class="btn btn-secondary" id="btn-mute-pause">Ton umschalten</button>
@@ -495,6 +564,37 @@ const BOSS_TYPES = {
   lavatitan:    { name: 'Lava-Titan',      hp: 3200, speed: 52, dmg: 34, r: 58, color: '#c73e1d', xp: 340, accessory: 'spikes',    minion: 'krebs' }
 };
 
+// ---------- Champions: seltene, viel stärkere Gegner mit einer besonderen Eigenschaft (Stellschrauben) ----------
+const CHAMPION_START = 240;                               // der erste Champion kommt bei 4:00
+const CHAMPION_GAP_MIN = 120, CHAMPION_GAP_MAX = 150;     // danach alle 120–150 s (zufällig), nie während eines Boss-Kampfs
+const CHAMPION_LATE = 900;                                // ab 15:00: bis zu 2 gleichzeitig, jeder mit 2 Eigenschaften
+const CHAMPION_HP = 8, CHAMPION_DMG = 1.4, CHAMPION_SIZE = 1.5, CHAMPION_XP = 10;   // HP zusätzlich × Level-Faktor (wie bei Bossen)
+const CHAMPION_CHEST = 12;                                // Schatztruhe: 12 × Perlenwert des Gebiets
+const CHAMPION_EXCLUDE = ['piranha', 'seeigel'];          // zu klein / kann sich nicht bewegen
+const CHAMPION_BOSS_FROM = 3;                             // ab der 3. Boss-Begegnung eines Laufs kommt der Boss als Champion-Boss
+const CHAMPION_BOSS_HP = 1.3;                             // Champion-Boss: HP × 1,3 zusätzlich, startet wütend in Phase 2
+const CHAMPION_BOSS_TRAITS = ['flink', 'gepanzert', 'vampir', 'anfuehrer'];
+const CHAMPION_TRAITS = {
+  flink:     { name: 'Flink',     adj: 'flink',      color: '#5ef2ff', rgb: '94,242,255' },
+  gepanzert: { name: 'Gepanzert', adj: 'gepanzert',  color: '#c3ccd6', rgb: '205,214,224' },
+  vampir:    { name: 'Vampir',    adj: 'vampirisch', color: '#ff4d6a', rgb: '255,77,106' },
+  teilend:   { name: 'Teilend',   adj: 'teilend',    color: '#7dff7a', rgb: '125,255,122' },
+  explosiv:  { name: 'Explosiv',  adj: 'explosiv',   color: '#ff9a3c', rgb: '255,154,60' },
+  anfuehrer: { name: 'Anführer',  adj: null,         color: '#ffd76a', rgb: '255,215,106' }
+};
+const CHAMPION_TRAIT_KEYS = Object.keys(CHAMPION_TRAITS);
+// Namen auf dem Namensschild: Eigenschaft als Adjektiv vor dem Namen ("Flinker Krebs"), Anführer als Vorsilbe ("Anführer-Krebs")
+const CHAMPION_NOUNS = { qualle: ['Qualle', 'f'], kleinhai: ['Hai', 'm'], krebs: ['Krebs', 'm'], angler: ['Anglerfisch', 'm'], muraene: ['Muräne', 'f'],
+  tinte: ['Tintenfisch', 'm'], riesenkrebs: ['Riesenkrebs', 'm'], haikoenig: ['Hai-König', 'm'], kraken: ['Riesenkrake', 'f'],
+  seeungeheuer: ['Meeresungeheuer', 'n'], lavatitan: ['Lava-Titan', 'm'] };
+const FLINK_SPEED = 1.6, FLINK_BOSS_SPEED = 1.35;         // Flink: 60 % schneller (Bosse 35 %)
+const FLINK_EVERY = 4, FLINK_FLASH = 0.6, FLINK_LOCK = 0.2, FLINK_DASH_T = 0.35, FLINK_DASH_SPEED = 480, FLINK_RANGE = 520;
+const SHELL_BLOCK = 0.6, SHELL_BREAK = 0.3;               // Gepanzert: der Panzer blockt 60 % des Schadens, bis 30 % der HP weg sind
+const VAMPIR_HEAL = 0.1;                                  // Vampir: heilt sich bei jedem Treffer an dir um 10 % seiner max. HP
+const SPLIT_N = 3, SPLIT_HP = 1.5;                        // Teilend: zerfällt in 3 normale Gegner seiner Art mit 1,5-fachen HP
+const BURST_R = 110, BURST_WARN = 1, BURST_DMG = 2;       // Explosiv: markierter Kreis, platzt nach 1 s für 2 × Berührungsschaden
+const LEADER_R = 220, LEADER_SPEED = 1.25, LEADER_DMG = 1.2;   // Anführer: Gegner in 220 Einheiten sind 25 % schneller und treffen 20 % härter
+
 // ---------- Waffen ----------
 const WEAPON_DEFS = {
   blase:       { name: 'Blasenschuss',  desc: 'Feuert Blasen auf den nächsten Gegner.',     type: 'projectile', maxLevel: 5 },
@@ -540,10 +640,12 @@ const ACHIEVEMENTS = [
   { id: 'boss_all',       name: 'Boss-Bezwinger',      desc: 'Besiege alle vier Bossarten.' },
   { id: 'pearls_1000',    name: 'Perlensammler',       desc: 'Sammle insgesamt 1000 Perlen.' },
   { id: 'level_20',       name: 'Voll entwickelt',     desc: 'Erreiche Level ' + ENTWICKELT_LEVEL + ' in einem Lauf.' },
-  { id: 'all_characters', name: 'Ganze Blobi-Familie', desc: 'Schalte alle Charaktere frei.' }
+  { id: 'all_characters', name: 'Ganze Blobi-Familie', desc: 'Schalte alle Charaktere frei.' },
+  { id: 'champ_25',       name: 'Champion-Jäger',      desc: 'Besiege 25 Champions.' },
+  { id: 'champ_boss',     name: 'Kronenbrecher',       desc: 'Besiege einen Champion-Boss.' }
 ];
 
-const ACH_REWARDS = { first_blood:10, kills_100:25, kills_1000:100, survive_5:40, survive_15:150, boss_1:60, boss_all:200, pearls_1000:100, level_20:75, all_characters:50 };
+const ACH_REWARDS = { first_blood:10, kills_100:25, kills_1000:100, survive_5:40, survive_15:150, boss_1:60, boss_all:200, pearls_1000:100, level_20:75, all_characters:50, champ_25:60, champ_boss:120 };
 
 // ---------- Speicherstand laden ----------
 function defaultSave() {
@@ -552,7 +654,7 @@ function defaultSave() {
     unlockedCharacters: ['standard', 'turbo', 'panzer'],
     shopLevels: {},
     achievements: [],
-    stats: { totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [] },
+    stats: { totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [], championsDefeated: 0, championBossesDefeated: 0 },
     muted: false,
     lastCharacter: 'standard',
     lastStage: 'riff',
@@ -568,7 +670,7 @@ let save = defaultSave();
     save.shopLevels = Object.assign({}, loaded.shopLevels || {});
     save.achievements = Array.isArray(loaded.achievements) ? loaded.achievements : [];
     save.unlockedCharacters = Array.isArray(loaded.unlockedCharacters) ? loaded.unlockedCharacters : ['standard', 'turbo', 'panzer'];
-    save.stats = Object.assign({ totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [] }, loaded.stats || {});
+    save.stats = Object.assign({ totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [], championsDefeated: 0, championBossesDefeated: 0 }, loaded.stats || {});
     save.stagesUnlocked = Array.isArray(loaded.stagesUnlocked) ? loaded.stagesUnlocked : ((save.stats.totalKills > 0 || save.stats.bestTime > 0) ? ['riff', 'kelp', 'graben', 'vulkan'] : ['riff']);
     if (save.stagesUnlocked.indexOf('riff') === -1) save.stagesUnlocked.unshift('riff');
   }
@@ -642,11 +744,16 @@ const Sfx = {
   heal: function(){ playTone(700,0.07,'sine',0.07); setTimeout(function(){playTone(900,0.1,'sine',0.07);}, 70); },
   claim: function(){ playTone(660,0.08,'sine',0.09); setTimeout(function(){playTone(880,0.09,'sine',0.09);}, 80); setTimeout(function(){playTone(1180,0.16,'sine',0.1);}, 170); },
   pop: function(){ playTone(1300,0.05,'sine',0.08); setTimeout(function(){playTone(820,0.07,'triangle',0.06);}, 35); },
-  revive: function(){ playTone(300,0.1,'sine',0.08); setTimeout(function(){playTone(500,0.12,'sine',0.09);}, 100); setTimeout(function(){playTone(760,0.2,'sine',0.1);}, 220); }
+  revive: function(){ playTone(300,0.1,'sine',0.08); setTimeout(function(){playTone(500,0.12,'sine',0.09);}, 100); setTimeout(function(){playTone(760,0.2,'sine',0.1);}, 220); },
+  champion: function(){ playTone(392,0.12,'triangle',0.09); setTimeout(function(){playTone(523,0.12,'triangle',0.09);}, 110); setTimeout(function(){playTone(784,0.22,'triangle',0.1);}, 220); },
+  chest: function(){ playTone(880,0.08,'sine',0.09); setTimeout(function(){playTone(1175,0.1,'sine',0.09);}, 70); setTimeout(function(){playTone(1568,0.18,'sine',0.1);}, 150); },
+  crack: function(){ playTone(260,0.09,'square',0.07); setTimeout(function(){playTone(170,0.12,'sawtooth',0.06);}, 50); },
+  ping: function(){ playTone(1046,0.07,'sine',0.07); setTimeout(function(){playTone(1318,0.1,'sine',0.07);}, 80); }
 };
 
 const keys = {};
 window.addEventListener('keydown', function(e){
+  if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // Tippen im Namens- oder Code-Feld
   const k = e.key.toLowerCase();
   keys[k] = true;
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(k) !== -1) e.preventDefault();
@@ -714,8 +821,9 @@ let runTime = 0, runLevel = 1, runXp = 0, runXpToNext = 10, runKills = 0, runPea
 let spawnTimer = 0, spawnInterval = 1.15;
 let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTimer = 0;
 let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0, pearlFrac = 0;
-let pendingLevelUps = 0;
+let pendingLevelUps = 0, pendingFreeCards = 0;
 let zones = [], shockwaves = [], hazardTimer = 7, ringTime = 120, eliteTime = 180, currentLevelUp = null, runNewAch = [], playerInKelp = false;
+let champTime = CHAMPION_START, enemySeq = 0;
 let lastTime = 0, rafId = null;
 
 function xpForLevel(level) { return Math.floor(6 + level * 4.6); }
@@ -752,7 +860,7 @@ function recomputeDerivedStats() {
 
 // ---------- Lauf-Snapshot (übersteht Tab-Wechsel, AFK, Browser-Neuladen) ----------
 function saveRunSnapshot() {
-  if (!player) return;
+  if (!player || Net.on || Net.wantOpen) return;       // Online-Läufe lassen sich nicht fortsetzen
   const snap = {
     v: 1,
     characterId: selectedCharacterId, stageId: selectedStageId,
@@ -760,8 +868,8 @@ function saveRunSnapshot() {
     runKills: runKills, runPearls: runPearls,
     nextBossTime: nextBossTime, bossEncounterCount: bossEntity ? Math.max(0, bossEncounterCount - 1) : bossEncounterCount,
     spawnTimer: spawnTimer, spawnInterval: spawnInterval,
-    reviveAvailable: reviveAvailable,
-    pendingLevelUps: pendingLevelUps, levelUp: (gameState === 'levelup' ? currentLevelUp : null),
+    reviveAvailable: reviveAvailable, champTime: champTime,
+    pendingLevelUps: pendingLevelUps, pendingFreeCards: pendingFreeCards, levelUp: (gameState === 'levelup' ? currentLevelUp : null),
     player: {
       hp: player.hp, maxHp: player.maxHp, speed: player.speed, damage: player.damage,
       cooldownMult: player.cooldownMult, magnet: player.magnet, luck: player.luck, armor: player.armor,
@@ -818,13 +926,15 @@ function resumeRunSnapshot(snap) {
   reviveFlashTimer = 0;
   pearlFrac = 0;
   pendingLevelUps = snap.pendingLevelUps || 0;
+  pendingFreeCards = snap.pendingFreeCards || 0;
+  champTime = (typeof snap.champTime === 'number') ? Math.max(snap.champTime, runTime + 20) : Math.max(runTime + 60, CHAMPION_START);
   currentLevelUp = null; levelUpProcessing = false;
   setHudVisible(true);
   lastTime = 0;
-  if (snap.levelUp && snap.levelUp.picks && pendingLevelUps > 0) {
+  if (snap.levelUp && snap.levelUp.picks && (snap.levelUp.free ? pendingFreeCards > 0 : pendingLevelUps > 0)) {
     currentLevelUp = snap.levelUp;
     gameState = 'levelup';
-    renderLevelUpScreen(snap.levelUp.picks, snap.levelUp.bonus);
+    renderLevelUpScreen(snap.levelUp.picks, snap.levelUp.bonus, snap.levelUp.free);
   } else {
     gameState = 'playing';
     showScreen(null);
@@ -837,7 +947,7 @@ function startRun(charId, stageId) {
   selectedCharacterId = charId;
   selectedStageId = stageId;
   save.lastCharacter = charId;
-  save.lastStage = stageId;
+  if (!Net.on) save.lastStage = stageId;              // online bestimmt der Raum das Gebiet
   persistSave();
 
   const cs = computeCharacterStats(charId);
@@ -851,10 +961,11 @@ function startRun(charId, stageId) {
     shieldReady: false, shieldTimer: 0,
     weapons: { blase: 1 }, weaponTimers: { blase: 0 }, passives: {}
   };
-  camera = { x: 0, y: 0 };
+  if (Net.on) { const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 110; player.x = Math.cos(a) * d; player.y = Math.sin(a) * d; }   // online: nahe der Raummitte
+  camera = { x: player.x, y: player.y };
   enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
   orbitAngle = 0; minionEntities = [];
-  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; ringTime = 120; eliteTime = 180; resetHudCache();
+  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; ringTime = 120; eliteTime = 180; champTime = CHAMPION_START; resetHudCache();
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
   spawnTimer = 0; spawnInterval = 1.15;
@@ -863,7 +974,7 @@ function startRun(charId, stageId) {
   invulnTimer = 1;
   reviveFlashTimer = 0;
   pearlFrac = 0;
-  pendingLevelUps = 0;
+  pendingLevelUps = 0; pendingFreeCards = 0;
 
   gameState = 'playing';
   showScreen(null);
@@ -874,6 +985,9 @@ function startRun(charId, stageId) {
 /* ============================================================
    GEGNER-SPAWNER
    ============================================================ */
+// Level-Faktor für Bosse und Champions: (Level ÷ 21)^1,3, begrenzt auf 0,7 – 6 (je stärker du bist, desto zäher)
+function levelFactor(level) { return Math.min(6, Math.max(0.7, Math.pow(level / 21, 1.3))); }
+
 function spawnEnemy(typeKey, isBoss) {
   const angle = Math.random() * Math.PI * 2;
   const dist = Math.max(W, H) * 0.62 + 60;
@@ -882,18 +996,20 @@ function spawnEnemy(typeKey, isBoss) {
   const stage = stageOf();
   if (isBoss) {
     const def = BOSS_TYPES[typeKey];
+    const champ = bossEncounterCount + 1 >= CHAMPION_BOSS_FROM;   // ab der 3. Begegnung kommt der Boss als Champion-Boss
     const encounterMult = 1 + bossEncounterCount * 0.15;
-    const levelMult = Math.min(6, Math.max(0.7, Math.pow(runLevel / 21, 1.3)));   // je stärker du bist, desto zäher der Boss
-    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult;
+    const levelMult = levelFactor(runLevel);
+    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult * (champ ? CHAMPION_BOSS_HP : 1);
     const dmgMult = 1 + bossEncounterCount * 0.2;
     bossEntity = {
-      isBoss: true, type: typeKey, name: def.name, encounterNumber: bossEncounterCount + 1,
+      id: ++enemySeq, isBoss: true, type: typeKey, name: def.name, encounterNumber: bossEncounterCount + 1,
       x: x, y: y, r: def.r, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
       speed: def.speed, dmg: def.dmg * dmgMult, color: def.color, accessory: def.accessory, xp: def.xp,
       behavior: 'chase', hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
       specialTimer: 3, heavyTimer: 6, abil: 3.5, state: 'walk', stT: 0, ang: 0, wobble: Math.random() * 10,
       phase: 1, tier: 1, waveLeft: 0, waveT: 0, waveIdx: 0, gap: 0, dashLeft: 0
     };
+    if (champ) makeChampionBoss(bossEntity, CHAMPION_BOSS_TRAITS[Math.floor(Math.random() * CHAMPION_BOSS_TRAITS.length)]);
     bossEncounterCount++;
     enemies.push(bossEntity);
     Sfx.boss();
@@ -903,7 +1019,7 @@ function spawnEnemy(typeKey, isBoss) {
   const hpScale = 1 + (runTime / 60) * 0.24 * stage.difficulty;
   const dmgScale = 1 + (runTime / 60) * 0.10 * stage.difficulty;
   const e = {
-    isBoss: false, type: typeKey, name: def.name,
+    id: ++enemySeq, isBoss: false, type: typeKey, name: def.name,
     x: x, y: y, r: def.r, hp: def.hp * hpScale, maxHp: def.hp * hpScale,
     speed: def.speed, dmg: def.dmg * dmgScale, color: def.color, accessory: def.accessory, xp: def.xp,
     behavior: def.behavior, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0,
@@ -958,6 +1074,11 @@ function updateSpawner(dt) {
     }
     showToast('\uD83D\uDC1F Piranha-Ring!');
   }
+  if (runTime >= champTime && !bossEntity && bossWarningTimer <= 0) {   // Champions: ab 4:00, nie w\u00E4hrend eines Boss-Kampfs
+    if (championCount() < (runTime >= CHAMPION_LATE ? 2 : 1) && spawnChampion()) {
+      champTime = runTime + CHAMPION_GAP_MIN + Math.random() * (CHAMPION_GAP_MAX - CHAMPION_GAP_MIN);
+    }
+  }
   if (!bossEntity && bossWarningTimer <= 0 && runTime >= nextBossTime) {
     bossWarningTimer = 3;
   }
@@ -968,10 +1089,14 @@ function updateSpawner(dt) {
    ============================================================ */
 function distXY(x1,y1,x2,y2){ return Math.hypot(x1-x2, y1-y2); }
 
+// Alle Gegner, die du treffen kannst: deine eigenen und (online) die deiner Mitspieler in der Nähe
+function allEnemies() { return remoteEnemyList.length ? enemies.concat(remoteEnemyList) : enemies; }
+
 function findNearestEnemy(x, y, maxRange, exclude) {
   let best = null, bestD = maxRange ? maxRange*maxRange : Infinity;
-  for (let i=0;i<enemies.length;i++){
-    const en = enemies[i];
+  const list = allEnemies();
+  for (let i=0;i<list.length;i++){
+    const en = list[i];
     if (en.dead) continue;
     if (exclude && exclude.indexOf(en) !== -1) continue;
     const dx = en.x-x, dy = en.y-y;
@@ -981,34 +1106,67 @@ function findNearestEnemy(x, y, maxRange, exclude) {
   return best;
 }
 
-function applyDamageToEnemy(en, dmg) {
+// Treffer-Merkmale (auch für Treffer an Gegnern anderer Spieler): Verlangsamung (Tintenwolke), Vampir-Heilung
+const NET_HIT_SLOW = 2, NET_HIT_VAMPIR = 4;
+// src: Spieler-Nummer eines Mitspielers, dessen Treffer hier ankommt (online); sonst dein eigener Treffer
+function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.dead) return;
-  en.hp -= (en.state === 'tired' ? dmg * 1.3 : dmg);
+  if (en.remote) { netQueueHit(en, dmg, flags || 0); en.hitFlash = 0.12; return; }   // Gegner eines Mitspielers: sein Spiel zieht die HP ab
+  if (en.state === 'tired') dmg *= 1.3;
+  if (en.shell) dmg *= (1 - SHELL_BLOCK);                                          // Gepanzert: der Panzer schluckt 60 %
+  en.hp -= dmg;
   en.hitFlash = 0.12;
+  if (src) (en.helpers || (en.helpers = new Set())).add(src); else en.hitByMe = true;
+  if (en.shell && en.hp <= en.maxHp * (1 - SHELL_BREAK)) crackShell(en);
   if (en.hp <= 0) {
     en.dead = true;
     killEnemy(en);
   }
 }
+function crackShell(en) {
+  en.shell = false;
+  spawnBurst(en.x, en.y, '#d8dde2', 14);
+  Sfx.crack();
+}
 
+// Persönliche Beute: allein bekommst immer du sie; online jeder, der den Gegner getroffen hat (Mitspieler über eine Nachricht)
 function killEnemy(en) {
+  const mine = !Net.on || !!en.hitByMe;
+  const k = killInfo(en);
+  if (mine) grantKill(k);
+  spawnBurst(en.x, en.y, en.color, en.isBoss ? 26 : 10);
+  Sfx.death();
+  if (en.champ) championDeath(en);
+  if (Net.on) netEnemyKilled(en, k);
+  if (en.isBoss) {
+    bossEntity = null;
+    nextBossTime = runTime + 240;
+    champTime = Math.max(champTime, runTime + 20);   // nach einem Boss kurz durchatmen, bevor ein Champion kommt
+  }
+  if (mine && (en.isBoss || en.champ)) checkAchievements();
+}
+function killInfo(en) {
+  return { x: en.x, y: en.y, type: en.type, xp: en.xp, elite: !!en.elite, champ: !!en.champ, isBoss: !!en.isBoss, enc: en.encounterNumber || 1 };
+}
+function grantKill(k) {
   runKills++;
   save.stats.totalKills++;
   const st = stageOf();
   let pearlAmt = st.pearlValue;
-  const pearlCount = en.isBoss ? (8 + Math.floor(Math.random()*6)) : (Math.random() < st.pearlChance ? 1 : 0) + (en.elite ? 3 : 0);
-  if (en.isBoss) pearlAmt = st.pearlValue * (2 + (en.encounterNumber || 1));   // Bosse lassen eine richtige Schatzkiste fallen
-  spawnXpOrb(en.x, en.y, en.xp);
-  if (en.isBoss) pickups.push({ type: 'heal', x: en.x, y: en.y, r: 10, amount: 0.4 });   // Boss-Beute: ein Herz (+40 % Leben)
-  for (let i=0;i<pearlCount;i++) spawnPearl(en.x + (Math.random()-0.5)*24, en.y + (Math.random()-0.5)*24, pearlAmt);
-  spawnBurst(en.x, en.y, en.color, en.isBoss ? 26 : 10);
-  Sfx.death();
-  if (en.isBoss) {
+  const pearlCount = k.isBoss ? (8 + Math.floor(Math.random()*6)) : (Math.random() < st.pearlChance ? 1 : 0) + (k.elite ? 3 : 0);
+  if (k.isBoss) pearlAmt = st.pearlValue * (2 + k.enc) * (k.champ ? 2 : 1);   // Bosse lassen eine Schatzkiste fallen, Champion-Bosse die doppelte
+  spawnXpOrb(k.x, k.y, k.xp);
+  if (k.isBoss) pickups.push({ type: 'heal', x: k.x, y: k.y, r: 10, amount: 0.4 });   // Boss-Beute: ein Herz (+40 % Leben)
+  for (let i=0;i<pearlCount;i++) spawnPearl(k.x + (Math.random()-0.5)*24, k.y + (Math.random()-0.5)*24, pearlAmt);
+  if (k.champ) {                                   // Champion: Schatztruhe (Champion-Boss: mit einer Gratis-Verbesserung)
+    pickups.push(k.isBoss ? { type: 'chest', x: k.x, y: k.y + 16, r: 13, amount: 0, card: true }
+                          : { type: 'chest', x: k.x, y: k.y, r: 13, amount: CHAMPION_CHEST * st.pearlValue });
+    save.stats.championsDefeated = (save.stats.championsDefeated || 0) + 1;
+    if (k.isBoss) save.stats.championBossesDefeated = (save.stats.championBossesDefeated || 0) + 1;
+  }
+  if (k.isBoss) {
     save.stats.bossesDefeated++;
-    if (save.stats.uniqueBossesDefeated.indexOf(en.type) === -1) save.stats.uniqueBossesDefeated.push(en.type);
-    bossEntity = null;
-    nextBossTime = runTime + 240;
-    checkAchievements();
+    if (save.stats.uniqueBossesDefeated.indexOf(k.type) === -1) save.stats.uniqueBossesDefeated.push(k.type);
   }
 }
 
@@ -1064,17 +1222,19 @@ function fireWeapon(id, level) {
     const trailOffset = 34;
     const cx = p.x - Math.cos(p.angle) * trailOffset;
     const cy = p.y - Math.sin(p.angle) * trailOffset;
-    for (let i=0;i<enemies.length;i++){
-      const en = enemies[i];
+    const list = allEnemies();
+    for (let i=0;i<list.length;i++){
+      const en = list[i];
       if (en.dead) continue;
       if (distXY(en.x,en.y,cx,cy) <= radius) {
         const dmg = en.maxHp * (en.isBoss ? pctDmg*0.15 : pctDmg);
-        applyDamageToEnemy(en, dmg);
+        applyDamageToEnemy(en, dmg, NET_HIT_SLOW);
         en.slowTimer = 1.5;
       }
     }
     spawnBurst(cx, cy, '#c65da8', 10);
     particles.push(makeInkCloudParticle(cx, cy, radius));
+    netFx('c', cx, cy, radius);
   } else if (type === 'pierce') {
     const ang = bestLineAngle(560 * rangeScale());
     if (ang === null) return;
@@ -1091,6 +1251,7 @@ function fireWeapon(id, level) {
       if (!t) break;
       hit.push(t);
       particles.push({ x:source.x, y:source.y, tx:t.x, ty:t.y, isBolt:true, life:0.15, maxLife:0.15, color:'#5ef2c0' });
+      netFx('b', source.x, source.y, t.x, t.y);
       applyDamageToEnemy(t, dmg);
       source = t;
     }
@@ -1118,7 +1279,7 @@ function updateWeapons(dt) {
       const n0 = projectiles.length;
       fireWeapon(id, level);
       const sv = Math.sqrt(rangeScale());
-      for (let i = n0; i < projectiles.length; i++) { projectiles[i].vx *= sv; projectiles[i].vy *= sv; projectiles[i].life *= sv; }
+      for (let i = n0; i < projectiles.length; i++) { projectiles[i].vx *= sv; projectiles[i].vy *= sv; projectiles[i].life *= sv; netShotFx(projectiles[i]); }
       const mult = Math.max(0.4, p.cooldownMult - (p.passives.angriffstempo||0)*0.08);
       p.weaponTimers[id] = WEAPON_COOLDOWNS[id] * mult;
     }
@@ -1203,10 +1364,11 @@ function updateOrbitWeapon(dt) {
   if (p.ringFlash) for (let i = 0; i < p.ringFlash.length; i++) if (p.ringFlash[i] > 0) p.ringFlash[i] -= dt;
   const dmg = (6 + level*3) * p.damage;
   const bubbles = getOrbitBubbleWorldPositions();
+  const list = allEnemies();
   for (let i=0;i<bubbles.length;i++){
     const ox = bubbles[i].x, oy = bubbles[i].y;
-    for (let j=0;j<enemies.length;j++){
-      const en = enemies[j];
+    for (let j=0;j<list.length;j++){
+      const en = list[j];
       if (en.dead || en.orbitHitTimer > 0) continue;
       if (distXY(ox,oy,en.x,en.y) <= 14 + en.r) {
         applyDamageToEnemy(en, dmg);
@@ -1273,6 +1435,7 @@ function updateMinion(dt) {
       if (shootAt) {
         const ang = Math.atan2(shootAt.y-min.y, shootAt.x-min.x);
         projectiles.push({ x:min.x, y:min.y, vx:Math.cos(ang)*380, vy:Math.sin(ang)*380, r:4, dmg:dmg, life:1, color:'#9effc9', pierce:0 });
+        netShotFx(projectiles[projectiles.length - 1]);
       }
       min.timer = fireInterval;
     }
@@ -1322,8 +1485,38 @@ function updatePlayer(dt) {
   camera.y += (p.y - camera.y) * Math.min(1, dt * 6);
 }
 
+// Wen ein Gegner jagt: allein immer dich. Online den nächsten Blobi in Sync-Reichweite (siehe Netz-Teil).
+function targetOf(en) { return Net.on ? netTargetOf(en) : player; }
+// Bewegungsrichtung eines Ziels (für vorausgezielte Angriffe): dein Steuer-Vektor oder die geschätzte Richtung eines Mitspielers
+function moveOf(t) { return t === player ? getMoveVector() : (t.mv || { x: 0, y: 0, mag: 0 }); }
+
+// Flink: alle 4 s (in Reichweite) leuchtet er 0,6 s auf und sprintet dann kurz auf sein Ziel zu. Zielt bis 0,2 s vor dem Sprint.
+function flinkStep(en, dt, tg, d) {
+  if (en.cst === 'walk') {
+    en.cT -= dt;
+    if (en.cT <= 0 && d < FLINK_RANGE) { en.cst = 'flash'; en.cT = FLINK_FLASH; en.dAng = Math.atan2(tg.y - en.y, tg.x - en.x); }
+    return null;
+  }
+  if (en.cst === 'flash') {
+    en.cT -= dt;
+    if (en.cT > FLINK_LOCK) en.dAng = Math.atan2(tg.y - en.y, tg.x - en.x);
+    if (en.cT <= 0) { en.cst = 'dash'; en.cT = FLINK_DASH_T; }
+    return { mx: 0, my: 0, spd: 0 };
+  }
+  en.cT -= dt;
+  if (en.cT <= 0) { en.cst = 'walk'; en.cT = FLINK_EVERY; }
+  return { mx: Math.cos(en.dAng), my: Math.sin(en.dAng), spd: Math.max(FLINK_DASH_SPEED, en.speed * 2.5) };
+}
+function vampirHeal(en) {
+  if (en.remote) { netQueueHit(en, 0, NET_HIT_VAMPIR); return; }
+  en.hp = Math.min(en.maxHp, en.hp + en.maxHp * VAMPIR_HEAL);
+  spawnBurst(en.x, en.y, CHAMPION_TRAITS.vampir.color, 8);
+}
+
 function updateEnemies(dt) {
   const p = player;
+  let leaders = null;                     // Anführer-Champions: wer in ihrer Nähe ist, wird schneller und trifft härter
+  for (let i = 0; i < enemies.length; i++) { const L = enemies[i]; if (L.champ && !L.dead && hasTrait(L, 'anfuehrer')) (leaders || (leaders = [])).push(L); }
   for (let i = enemies.length - 1; i >= 0; i--) {
     const en = enemies[i];
     if (en.dead) { enemies.splice(i, 1); continue; }
@@ -1331,8 +1524,12 @@ function updateEnemies(dt) {
     if (en.orbitHitTimer > 0) en.orbitHitTimer -= dt;
     if (en.slowTimer > 0) en.slowTimer -= dt;
     const speedMult = en.slowTimer > 0 ? 0.65 : 1;
+    en.lead = (leaders && !en.isBoss) ? leaderOf(en, leaders) : null;
+    const buff = en.lead ? LEADER_SPEED : 1, hitMult = en.lead ? LEADER_DMG : 1;
 
-    const dx = p.x - en.x, dy = p.y - en.y;
+    const tg = targetOf(en);
+    en.tg = tg;
+    const dx = tg.x - en.x, dy = tg.y - en.y;
     const d = Math.hypot(dx, dy) || 1;
     let moveX = 0, moveY = 0;
 
@@ -1349,14 +1546,14 @@ function updateEnemies(dt) {
       en.rangedTimer -= dt;
       if (en.rangedTimer <= 0 && d < 620) {
         en.rangedTimer = 1.8;
-        enemyProjectiles.push({ x: en.x, y: en.y, vx: (dx/d)*190, vy: (dy/d)*190, r: 6, dmg: en.dmg, life: 3, color: '#c9a6ff' });
+        pushEnemyShot({ x: en.x, y: en.y, vx: (dx/d)*190, vy: (dy/d)*190, r: 6, dmg: en.dmg * hitMult, life: 3, color: '#c9a6ff' });
       }
     } else if (en.behavior === 'inker') {
       moveX = dx / d; moveY = dy / d;
       en.inkTimer -= dt;
       if (en.inkTimer <= 0 && d < 500) {
         en.inkTimer = 3.2;
-        enemyProjectiles.push({ x: en.x, y: en.y, vx: (dx/d)*130, vy: (dy/d)*130, r: 9, dmg: en.dmg*0.6, life: 3, color: '#c65da8', isInk: true });
+        pushEnemyShot({ x: en.x, y: en.y, vx: (dx/d)*130, vy: (dy/d)*130, r: 9, dmg: en.dmg * 0.6 * hitMult, life: 3, color: '#c65da8', isInk: true });
       }
     } else if (en.behavior === 'stationary') {
       moveX = 0; moveY = 0;
@@ -1378,14 +1575,15 @@ function updateEnemies(dt) {
       }
       if (en.heavyTimer <= 0 && d < 800 && !calm) {
         en.heavyTimer = (7 + Math.random() * 1.5) * BOSS_CD[en.tier - 1];
-        const ang = Math.atan2(p.y-en.y, p.x-en.x);
-        enemyProjectiles.push({ x: en.x, y: en.y, vx: Math.cos(ang)*115, vy: Math.sin(ang)*115, r: 15, dmg: en.dmg*1.4, life: 5, color: '#ff3355', heavy: true });
+        const ang = Math.atan2(tg.y-en.y, tg.x-en.x);
+        pushEnemyShot({ x: en.x, y: en.y, vx: Math.cos(ang)*115, vy: Math.sin(ang)*115, r: 15, dmg: en.dmg*1.4, life: 5, color: '#ff3355', heavy: true });
         spawnBurst(en.x, en.y, '#ff3355', 8);
         Sfx.boss();
       }
     }
 
-    const spd = (en.isBoss && en.spd != null ? en.spd : en.speed) * speedMult;
+    let spd = (en.isBoss && en.spd != null ? en.spd : en.speed) * speedMult * buff;
+    if (en.cst) { const o = flinkStep(en, dt, tg, d); if (o) { moveX = o.mx; moveY = o.my; spd = o.spd; } }
     en.x += moveX * spd * dt;
     en.y += moveY * spd * dt;
     en.wobble += dt * 8;
@@ -1393,20 +1591,21 @@ function updateEnemies(dt) {
     if (en.contactTimer > 0) en.contactTimer -= dt;
     const cd = distXY(en.x, en.y, p.x, p.y);
     if (cd < en.r + p.r && en.contactTimer <= 0 && invulnTimer <= 0) {
-      damagePlayer(en.dmg);
+      if (damagePlayer(en.dmg * hitMult) && hasTrait(en, 'vampir')) vampirHeal(en);
       en.contactTimer = 0.55;
     }
   }
 }
 
 function updateProjectiles(dt) {
+  const list = allEnemies();
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const pr = projectiles[i];
     pr.x += pr.vx * dt; pr.y += pr.vy * dt;
     pr.life -= dt;
     let remove = pr.life <= 0;
-    for (let j=0;j<enemies.length;j++){
-      const en = enemies[j];
+    for (let j=0;j<list.length;j++){
+      const en = list[j];
       if (en.dead) continue;
       if (pr.hitSet && pr.hitSet.has(en)) continue;
       if (distXY(pr.x, pr.y, en.x, en.y) < pr.r + en.r) {
@@ -1456,6 +1655,7 @@ function updateProjectiles(dt) {
 
 function shieldRechargeTime(level) { return Math.max(5, 16 - level*2.2); }
 
+// Gibt true zurück, wenn der Treffer Lebenspunkte gekostet hat (false: vom Schutzschild geblockt)
 function damagePlayer(amount) {
   const p = player;
   if (p.shieldReady) {
@@ -1464,7 +1664,7 @@ function damagePlayer(amount) {
     invulnTimer = 0.4;
     spawnBurst(p.x, p.y, '#5ef2c0', 16);
     Sfx.shieldBlock();
-    return;
+    return false;
   }
   const reduced = Math.max(1, amount - p.armor);
   p.hp -= reduced;
@@ -1475,6 +1675,7 @@ function damagePlayer(amount) {
     p.hp = 0;
     onPlayerDeath();
   }
+  return true;
 }
 
 function onPlayerDeath() {
@@ -1529,10 +1730,27 @@ function updatePickups(dt) {
         pearlFrac -= wholePearls;
         Sfx.pickup();
       }
+      else if (pk.type === 'chest') openChest(pk);
       pk.gone = true;
       pickups.splice(i,1);
     }
   }
+}
+
+// Schatztruhe eines Champions: Perlen (mit Glück-Bonus); die Truhe eines Champion-Bosses enthält eine Gratis-Verbesserung
+function openChest(pk) {
+  const p = player;
+  if (pk.amount > 0) {
+    const before = runPearls;
+    pearlFrac += pk.amount * (1 + (p.luck || 0) * 0.1);
+    const whole = Math.floor(pearlFrac + 1e-9);
+    runPearls += whole;
+    pearlFrac -= whole;
+    showToast('🎁 Schatztruhe: +' + (runPearls - before) + ' 💧');
+  }
+  if (pk.card) { pendingFreeCards++; showToast('🎁 Schatztruhe: eine Gratis-Verbesserung!'); }
+  spawnBurst(p.x, p.y, '#ffd76a', 18);
+  Sfx.chest();
 }
 
 function gainXp(amount) {
@@ -1596,14 +1814,15 @@ let levelUpProcessing = false;
 function luckCardChance() { return Math.min(0.6, (player.luck || 0) * 0.06); }
 
 function presentLevelUpChoices() {
+  const free = pendingLevelUps <= 0 && pendingFreeCards > 0;   // Gratis-Verbesserung aus einer Schatztruhe (ohne XP)
   const pool = getAvailableUpgrades();
   if (pool.length === 0) {
     runPearls += 3 * stageOf().pearlValue;
     if (player.weapons.ring) { player.ringLock = false; player.ringPin = false; }
     Sfx.pickup();
-    pendingLevelUps = Math.max(0, pendingLevelUps - 1);
+    if (free) pendingFreeCards = Math.max(0, pendingFreeCards - 1); else pendingLevelUps = Math.max(0, pendingLevelUps - 1);
     levelUpProcessing = false;
-    if (pendingLevelUps > 0) { presentLevelUpChoices(); return; }
+    if (pendingLevelUps > 0 || pendingFreeCards > 0) { presentLevelUpChoices(); return; }
     gameState = 'playing'; showScreen(null); return;
   }
   gameState = 'levelup';
@@ -1622,13 +1841,14 @@ function presentLevelUpChoices() {
     player.ringPin = false;
   }
   if (player.weapons.ring) player.ringLock = false;   // ab jetzt darf wieder eine Blase platzen
-  currentLevelUp = { picks: picks, bonus: bonusCard && count === 4 };
-  renderLevelUpScreen(picks, currentLevelUp.bonus);
+  currentLevelUp = { picks: picks, bonus: bonusCard && count === 4, free: free };
+  renderLevelUpScreen(picks, currentLevelUp.bonus, free);
 }
 
 function chooseUpgrade(choice) {
   if (levelUpProcessing || gameState !== 'levelup') return;
   levelUpProcessing = true;
+  const free = !!(currentLevelUp && currentLevelUp.free);
   currentLevelUp = null;
   const p = player;
   if (choice.kind === 'weapon') {
@@ -1645,8 +1865,8 @@ function chooseUpgrade(choice) {
     recomputeDerivedStats();
   }
   Sfx.levelup();
-  pendingLevelUps = Math.max(0, pendingLevelUps - 1);
-  if (pendingLevelUps > 0) presentLevelUpChoices();
+  if (free) pendingFreeCards = Math.max(0, pendingFreeCards - 1); else pendingLevelUps = Math.max(0, pendingLevelUps - 1);
+  if (pendingLevelUps > 0 || pendingFreeCards > 0) presentLevelUpChoices();
   else { levelUpProcessing = false; gameState = 'playing'; showScreen(null); }
 }
 
@@ -1674,7 +1894,7 @@ function update(dt) {
   mergeFarPickups(dt);
   updateParticles(dt);
 
-  if (pendingLevelUps > 0) presentLevelUpChoices();
+  if (pendingLevelUps > 0 || pendingFreeCards > 0) presentLevelUpChoices();
   if (runTime > save.stats.bestTime) save.stats.bestTime = runTime;
 }
 
@@ -1689,7 +1909,7 @@ function freeEnemySlot() {
   let far = null, fd = Math.hypot(W, H) / 2 + 60;
   for (let i = 0; i < enemies.length; i++) {
     const e = enemies[i];
-    if (e.isBoss || e.dead || e.elite) continue;
+    if (e.isBoss || e.dead || e.elite || e.champ) continue;
     const d = distXY(e.x, e.y, player.x, player.y);
     if (d > fd) { fd = d; far = e; }
   }
@@ -1705,6 +1925,7 @@ function showToast(text) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = text; el.classList.add('show');
+  el.classList.toggle('low', !!bossEntity);          // nicht über dem Boss-Lebensbalken
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
 }
@@ -1745,21 +1966,22 @@ function inKelp(px, py) {
 // ---------- Boss-Phasen: bei 66 % und 33 % Leben brüllt der Boss, ruft Verstärkung und greift härter an ----------
 const BOSS_CD = [1, 0.85, 0.7];      // Wartezeit-Faktor je Phase
 const BOSS_SPD = [1, 1.1, 1.2];      // Lauftempo-Faktor je Phase
-function bossPhaseOf(en) { const f = en.hp / en.maxHp; return f > 0.66 ? 1 : (f > 0.33 ? 2 : 3); }
+function bossPhaseOf(en) { const f = en.hp / en.maxHp; return Math.max(en.minPhase || 1, f > 0.66 ? 1 : (f > 0.33 ? 2 : 3)); }   // Champion-Boss: mindestens Phase 2
 
 function bossRing(en, n, rot, speed, dmg, color, ink) {
   for (let k = 0; k < n; k++) {
     const a = rot + (k / n) * Math.PI * 2;
     const pr = { x: en.x, y: en.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, r: 7, dmg: dmg, life: 2.6, color: color };
     if (ink) pr.isInk = true;
-    enemyProjectiles.push(pr);
+    pushEnemyShot(pr);
   }
 }
 function bossFan(en, n, spread, speed, dmg, color) {
-  const base = Math.atan2(player.y - en.y, player.x - en.x);
+  const t = en.tg || player;
+  const base = Math.atan2(t.y - en.y, t.x - en.x);
   for (let k = 0; k < n; k++) {
     const a = base + (k / (n - 1) - 0.5) * spread;
-    enemyProjectiles.push({ x: en.x, y: en.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, r: 6, dmg: dmg, life: 2.4, color: color });
+    pushEnemyShot({ x: en.x, y: en.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, r: 6, dmg: dmg, life: 2.4, color: color });
   }
 }
 function bossSummon(en, n) {
@@ -1771,26 +1993,27 @@ function bossSummon(en, n) {
   }
 }
 function krakenSalvo(en, n) {
-  const p = player, mv = getMoveVector();
+  const p = en.tg || player, mv = moveOf(p);
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, off = i === 0 ? 0 : 110 + Math.random() * 170;
     const lead = i === 0 ? 0.55 * p.speed : 0;
-    zones.push({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 52, t: 0, warn: 1.1, life: 0.4, kind: 'slam', dmg: en.dmg * 1.1, hit: false });
+    pushZone({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 52, t: 0, warn: 1.1, life: 0.4, kind: 'slam', dmg: en.dmg * 1.1, hit: false });
   }
   Sfx.boss();
 }
 // Tentakelpeitsche: eine Reihe von Schlägen läuft vom Boss auf den Spieler zu (Warnzeit steigt mit dem Abstand)
 function krakenWhip(en) {
-  const base = Math.atan2(player.y - en.y, player.x - en.x);
+  const t = en.tg || player;
+  const base = Math.atan2(t.y - en.y, t.x - en.x);
   for (let k = 0; k < 6; k++) {
     const dd = en.r + 50 + k * 72;
-    zones.push({ x: en.x + Math.cos(base) * dd, y: en.y + Math.sin(base) * dd, r: 44, t: 0, warn: 0.9 + k * 0.13, life: 0.4, kind: 'slam', dmg: en.dmg * 1.1, hit: false });
+    pushZone({ x: en.x + Math.cos(base) * dd, y: en.y + Math.sin(base) * dd, r: 44, t: 0, warn: 0.9 + k * 0.13, life: 0.4, kind: 'slam', dmg: en.dmg * 1.1, hit: false });
   }
   Sfx.boss();
 }
 function magmaWave(en, shift) {
   const g0 = en.gap + shift;
-  shockwaves.push({ x: en.x, y: en.y, r: en.r, gaps: [g0, g0 + Math.PI * 2 / 3, g0 + Math.PI * 4 / 3], dmg: en.dmg, hit: false });
+  pushWave({ x: en.x, y: en.y, r: en.r, gaps: [g0, g0 + Math.PI * 2 / 3, g0 + Math.PI * 4 / 3], dmg: en.dmg, hit: false });
   spawnBurst(en.x, en.y, '#ff7a30', 18); Sfx.boss();
 }
 // Folgeangriffe (zweite/dritte Salve, Welle oder Schussring) kommen nach en.waveT Sekunden
@@ -1807,13 +2030,14 @@ function bossWave(en) {
 
 // Einzigartige Boss-Mechanik pro Boss. Gibt ggf. eine Bewegungs-Überschreibung zurück.
 function bossAbility(en, dt, d) {
-  const p = player;
+  const p = en.tg || player;                 // sein Ziel (allein immer du)
   const phNow = bossPhaseOf(en);
   if (phNow > en.phase) {                    // neue Phase: Brüllen und Verstärkung rufen
     en.phase = phNow;
     en.state = 'roar'; en.stT = 1.1; en.waveLeft = 0; en.abil = Math.max(en.abil, 2.2);
     spawnBurst(en.x, en.y, '#ffd0a0', 24); Sfx.boss();
-    showToast('⚠ ' + en.name + (en.phase >= 3 ? ' tobt vor Wut!' : ' wird wütend!'));
+    if (en.champ && !en.entered) { en.entered = true; showToast('\uD83D\uDC51 Champion-Boss: ' + en.name + ' \u2013 w\u00FCtend von Anfang an!'); Sfx.champion(); }
+    else showToast('⚠ ' + en.name + (en.phase >= 3 ? ' tobt vor Wut!' : ' wird wütend!'));
     bossSummon(en, (en.phase >= 3 ? 5 : 3) + Math.min(2, en.encounterNumber - 1));
   }
   en.tier = Math.min(3, en.phase + en.encounterNumber - 1);   // spätere Begegnungen fangen schon mit den Angriffen der nächsten Phase an
@@ -1868,7 +2092,7 @@ function bossAbility(en, dt, d) {
       return { mx: 0, my: 0 };
     } else if (en.state === 'sog') {
       en.stT -= dt;
-      p.x += (en.x - p.x) / d * 105 * dt; p.y += (en.y - p.y) / d * 105 * dt;
+      sogPull(en, dt, p === player ? d : distXY(en.x, en.y, player.x, player.y) || 1);
       if (en.stT <= 0) {
         en.state = 'walk'; en.abil = 9 * ph;
         bossRing(en, en.tier >= 2 ? 12 : 8, 0, 150, en.dmg * 0.7, '#9ad7ff'); Sfx.boss();
@@ -1886,10 +2110,10 @@ function bossAbility(en, dt, d) {
         magmaWave(en, 0);
         if (en.tier >= 2) { en.waveLeft = en.tier - 1; en.waveT = 1.3; en.waveIdx = 0; }
         if (en.tier >= 3) {
-          const mv = getMoveVector();
+          const mv = moveOf(p);
           for (let k = 0; k < 2; k++) {
             const a = Math.random() * Math.PI * 2, off = k === 0 ? 0 : 130 + Math.random() * 160, lead = k === 0 ? p.speed * 0.7 : 0;
-            zones.push({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.6, life: 3.5, kind: 'lava', dmg: en.dmg * 0.3 });
+            pushZone({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.6, life: 3.5, kind: 'lava', dmg: en.dmg * 0.3 });
           }
         }
       }
@@ -1897,6 +2121,18 @@ function bossAbility(en, dt, d) {
     }
   }
   return null;
+}
+
+// Gegnerschüsse, Zonen und Magmawellen entstehen nur hier: online sieht jeder Mitspieler in der Nähe dieselben (Netz-Teil)
+function pushEnemyShot(pr) { enemyProjectiles.push(pr); if (Net.live) netAnnounce('s', pr); }
+function pushZone(z) { zones.push(z); if (Net.live) netAnnounce('z', z); }
+function pushWave(sw) { shockwaves.push(sw); if (Net.live) netAnnounce('w', sw); }
+// Meeresungeheuer-Sog: zieht deinen Blobi zum Boss (online nur in der Nähe; den Sog eines Mitspieler-Bosses wendet der Netz-Teil an)
+const SOG_RANGE = 900;
+function sogPull(en, dt, dl) {
+  const p = player;
+  if (Net.on && dl > SOG_RANGE) return;
+  p.x += (en.x - p.x) / dl * 105 * dt; p.y += (en.y - p.y) / dl * 105 * dt;
 }
 
 // Gebiets-Gefahren (Lavazonen) + Boss-Zonen + Schockwellen
@@ -1911,7 +2147,7 @@ function updateHazards(dt) {
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, off = i === 0 ? 0 : 110 + Math.random() * 230;
         const lead = i === 0 ? p.speed * 0.7 : 0;
-        zones.push({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.5, life: 3.5, kind: 'lava', dmg: dmg });
+        pushZone({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.5, life: 3.5, kind: 'lava', dmg: dmg });
       }
     }
   }
@@ -1922,6 +2158,9 @@ function updateHazards(dt) {
     if (z.t >= z.warn) {
       if (z.kind === 'slam' && !z.hit) {
         z.hit = true; spawnBurst(z.x, z.y, '#c98bff', 12);
+        if (distXY(z.x, z.y, p.x, p.y) < z.r + p.r * 0.5 && invulnTimer <= 0) damagePlayer(z.dmg);
+      } else if (z.kind === 'burst' && !z.hit) {          // Explosiv-Champion: der Kreis platzt einmal
+        z.hit = true; spawnBurst(z.x, z.y, '#ff9a3c', 20); Sfx.crack();
         if (distXY(z.x, z.y, p.x, p.y) < z.r + p.r * 0.5 && invulnTimer <= 0) damagePlayer(z.dmg);
       } else if (z.kind === 'lava' && distXY(z.x, z.y, p.x, p.y) < z.r && invulnTimer <= 0) {
         damagePlayer(z.dmg);
@@ -1949,7 +2188,9 @@ function drawHazards() {
     if (sx < -z.r - 40 || sx > W + z.r + 40 || sy < -z.r - 40 || sy > H + z.r + 40) continue;
     ctx.save(); ctx.translate(sx, sy);
     const seed = bhash(z.x * 0.0131 + z.y * 0.0177);
-    if (z.t < z.warn) {
+    if (z.kind === 'burst') {
+      if (z.t < z.warn) drawBurstWarn(ctx, z.r, z.t / z.warn, runTime); else drawBurstHit(ctx, z.r, Math.min(1, (z.t - z.warn) / z.life));
+    } else if (z.t < z.warn) {
       if (lava) drawLavaWarn(ctx, z.r, z.t / z.warn, runTime, seed); else drawSlamWarn(ctx, z.r, z.t / z.warn, runTime);
     } else if (lava) drawLavaPool(ctx, z.r, z.t - z.warn, z.warn + z.life - z.t, runTime, seed);
     else drawSlamHit(ctx, z.r, Math.min(1, (z.t - z.warn) / z.life));
@@ -2028,16 +2269,23 @@ function drawDarkness() {
   for (let i = 0; i < pickups.length; i++) {
     const pk = pickups[i], qx = pk.x - ox, qy = pk.y - oy;
     if (qx < -20 || qx > W + 20 || qy < -20 || qy > H + 20) continue;
-    ctx.fillStyle = pk.type === 'pearl' ? '#ffe9b8' : (pk.type === 'heal' ? '#ff6b8a' : '#5ef2c0');
+    ctx.fillStyle = GLOW_COL[pk.type] || '#5ef2c0';
     ctx.beginPath(); ctx.arc(qx, qy, pk.r, 0, Math.PI * 2); ctx.fill();
+    if (pk.type === 'chest') { ctx.save(); ctx.translate(qx, qy); drawChest(ctx, 22, pk.card); ctx.restore(); }
   }
   for (let i = 0; i < enemyProjectiles.length; i++) {
     const pr = enemyProjectiles[i];
     ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(pr.x - ox, pr.y - oy, pr.r, 0, Math.PI * 2); ctx.fill();
   }
-  for (let i = 0; i < enemies.length; i++) {
-    const en = enemies[i], ex = en.x - ox, ey = en.y - oy;
+  const dl = (remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies;
+  for (let i = 0; i < dl.length; i++) {
+    const en = dl[i], ex = en.x - ox, ey = en.y - oy;
     if (ex < -80 || ex > W + 80 || ey < -80 || ey > H + 80) continue;
+    if (en.champ && !en.isBoss) {                 // Champions leuchten: im Dunkeln gut sichtbar
+      drawChampionUnder(en, ex, ey);
+      ctx.globalAlpha = 0.8; drawEnemySprite(ex, ey, en.r, en.color, en.accessory, en.wobble); ctx.globalAlpha = 1;
+      drawChampionOver(en, ex, ey);
+    }
     if (en.isBoss) drawBossSprite(en, ex, ey, 1);
     else if (en.type === 'angler') {
       const lx = ex + en.r * 0.2, ly = ey - en.r * 1.9;
@@ -2048,18 +2296,35 @@ function drawDarkness() {
   }
 }
 
-function drawBossArrow() {
-  const b = bossEntity;
-  if (!b || gameState === 'gameover') return;
-  const sx = b.x - camera.x + W / 2, sy = b.y - camera.y + H / 2;
-  if (sx > 0 && sx < W && sy > 0 && sy < H) return;
+// Pfeile am Bildschirmrand: zum Boss (rot), zu Champions (klein, in der Farbe ihrer Eigenschaft) und online zu Mitspielern
+function edgeArrow(wx, wy, rgb, scale, label) {
+  const sx = wx - camera.x + W / 2, sy = wy - camera.y + H / 2;
+  if (sx > 0 && sx < W && sy > 0 && sy < H) return false;
   const a = Math.atan2(sy - H / 2, sx - W / 2);
   const ax = Math.max(30, Math.min(W - 30, sx)), ay = Math.max(120, Math.min(H - 30, sy));
-  ctx.save(); ctx.translate(ax, ay); ctx.rotate(a);
-  ctx.fillStyle = 'rgba(255,92,114,' + (0.75 + Math.sin(runTime * 8) * 0.2) + ')';
+  ctx.save(); ctx.translate(ax, ay);
+  ctx.save(); ctx.rotate(a); ctx.scale(scale, scale);
+  ctx.fillStyle = 'rgba(' + rgb + ',' + (0.75 + Math.sin(runTime * 8) * 0.2) + ')';
   ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-10, -13); ctx.lineTo(-10, 13); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
+  if (label) {
+    const ly = ay > H / 2 ? -22 : 24, lx = Math.max(-ax + 50, Math.min(W - ax - 50, ax < W / 2 ? 26 : -26));
+    ctx.font = '800 11px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, lx, ly);
+    ctx.fillStyle = 'rgb(' + rgb + ')'; ctx.fillText(label, lx, ly);
+  }
+  ctx.restore();
+  return true;
+}
+function drawEdgeArrows() {
+  if (gameState === 'gameover') return;
+  if (bossEntity) edgeArrow(bossEntity.x, bossEntity.y, '255,92,114', 1);
+  for (let i = 0; i < enemies.length; i++) {
+    const en = enemies[i];
+    if (en.champ && !en.isBoss && !en.dead) edgeArrow(en.x, en.y, CHAMPION_TRAITS[en.champ[0]].rgb, 0.72);
+  }
+  if (Net.on) drawPeerArrows();
 }
 
 
@@ -2102,9 +2367,9 @@ function upgradeDetail(ch) {
 
 // Harpune: Richtung mit den meisten Gegnern in einer Linie. Speer: stärkster Gegner.
 function bestLineAngle(range) {
-  const p = player, list = [];
-  for (let i = 0; i < enemies.length; i++) {
-    const e = enemies[i];
+  const p = player, list = [], all = allEnemies();
+  for (let i = 0; i < all.length; i++) {
+    const e = all[i];
     if (e.dead) continue;
     const d = distXY(e.x, e.y, p.x, p.y);
     if (d < range) list.push({ e: e, d: d });
@@ -2124,10 +2389,10 @@ function bestLineAngle(range) {
   return bestA;
 }
 function strongestEnemy(range) {
-  const p = player;
+  const p = player, all = allEnemies();
   let best = null, bh = -1;
-  for (let i = 0; i < enemies.length; i++) {
-    const e = enemies[i];
+  for (let i = 0; i < all.length; i++) {
+    const e = all[i];
     if (e.dead || distXY(e.x, e.y, p.x, p.y) > range) continue;
     const h = e.hp + (e.isBoss ? 1e6 : 0);
     if (h > bh) { bh = h; best = e; }
@@ -2136,7 +2401,7 @@ function strongestEnemy(range) {
 }
 
 // Pickups: vorgerendertes Leuchten + Zusammenfassen weit entfernter Kugeln
-const GLOW_COL = { pearl: '#ffe9b8', xp: '#5ef2c0', heal: '#ff6b8a' };
+const GLOW_COL = { pearl: '#ffe9b8', xp: '#5ef2c0', heal: '#ff6b8a', chest: '#ffd76a' };
 const glowCache = {};
 function glowSprite(type) {
   if (glowCache[type]) return glowCache[type];
@@ -2160,7 +2425,7 @@ function mergeFarPickups(dt) {
   const near = crowded ? p.magnet + 60 : off;
   for (let i = pickups.length - 1; i >= 0; i--) {
     const pk = pickups[i];
-    if (pk.drift || pk.type === 'heal') continue;
+    if (pk.drift || pk.type === 'heal' || pk.type === 'chest') continue;
     const d = distXY(pk.x, pk.y, p.x, p.y);
     if (d < near) continue;
     const hidden = d > off, cs = hidden ? 220 : 120;
@@ -2173,6 +2438,75 @@ function mergeFarPickups(dt) {
 }
 
 function makeElite(e) { e.elite = true; e.hp *= 3; e.maxHp = e.hp; e.dmg *= 1.25; e.r *= 1.3; e.xp *= 4; }
+
+// ---------- Champions ----------
+function hasTrait(en, t) { return !!(en.champ && en.champ.indexOf(t) !== -1); }
+function championName(type, traits) {
+  const nn = CHAMPION_NOUNS[type] || [(ENEMY_TYPES[type] || BOSS_TYPES[type] || { name: type }).name, 'm'];
+  const end = nn[1] === 'f' ? 'e' : (nn[1] === 'n' ? 'es' : 'er');
+  const adjs = traits.filter(function(t){ return CHAMPION_TRAITS[t] && CHAMPION_TRAITS[t].adj; }).map(function(t, i){
+    const a = CHAMPION_TRAITS[t].adj + end;
+    return i === 0 ? a.charAt(0).toUpperCase() + a.slice(1) : a;
+  });
+  const noun = (traits.indexOf('anfuehrer') !== -1 ? 'Anführer-' : '') + nn[0];
+  return adjs.length ? adjs.join(', ') + ' ' + noun : noun;
+}
+function makeChampion(e, traits) {
+  e.champ = traits.slice();
+  e.hp *= CHAMPION_HP * championScale(); e.maxHp = e.hp;          // passt sich dem Level an (wie ein Boss), online auch der Spielerzahl
+  e.dmg *= CHAMPION_DMG; e.r *= CHAMPION_SIZE; e.xp *= CHAMPION_XP;
+  if (hasTrait(e, 'flink')) { e.speed *= FLINK_SPEED; e.cst = 'walk'; e.cT = FLINK_EVERY * (0.5 + Math.random() * 0.5); e.dAng = 0; }
+  if (hasTrait(e, 'gepanzert')) e.shell = true;
+  e.name = championName(e.type, e.champ);
+}
+function makeChampionBoss(en, trait) {
+  en.champ = [trait]; en.minPhase = 2;                              // "wütend": brüllt beim Erscheinen und kämpft gleich in Phase 2
+  en.name = championName(en.type, en.champ);
+  if (trait === 'flink') en.speed *= FLINK_BOSS_SPEED;
+  if (trait === 'gepanzert') en.shell = true;
+}
+function championCount() {
+  let n = 0;
+  for (let i = 0; i < enemies.length; i++) if (enemies[i].champ && !enemies[i].isBoss && !enemies[i].dead) n++;
+  return n;
+}
+function spawnChampion() {
+  const table = SPAWN_TABLE_BY_STAGE[stageOf().id];
+  const avail = table.slice(0, Math.min(table.length, 1 + Math.floor(runTime / 25))).filter(function(k){ return CHAMPION_EXCLUDE.indexOf(k) === -1; });
+  if (!avail.length) return null;
+  freeEnemySlot();                                   // macht wenn möglich Platz; ein Champion darf die 70er-Grenze aber knapp überschreiten
+  const key = avail[Math.floor(Math.random() * avail.length)];
+  const pool = CHAMPION_TRAIT_KEYS.slice(), traits = [];
+  for (let i = 0, n = runTime >= CHAMPION_LATE ? 2 : 1; i < n; i++) traits.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  const e = spawnEnemy(key, false);
+  makeChampion(e, traits);
+  showToast('👑 Champion erschienen: ' + e.name);
+  Sfx.champion();
+  return e;
+}
+// Gegner, die gerade im Umkreis eines lebenden Anführers sind (wird in updateEnemies gesetzt)
+function leaderOf(en, leaders) {
+  for (let i = 0; i < leaders.length; i++) {
+    const L = leaders[i];
+    if (L !== en && distXY(L.x, L.y, en.x, en.y) <= LEADER_R) return L;
+  }
+  return null;
+}
+// Teilend: zerfällt beim Tod in 3 normale Gegner seiner Art mit 1,5-fachen HP. Explosiv: markierter Kreis, der nach 1 s platzt.
+function championDeath(en) {
+  if (hasTrait(en, 'teilend') && !en.isBoss) {
+    for (let k = 0; k < SPLIT_N; k++) {
+      if (!freeEnemySlot()) break;
+      const e = spawnEnemy(en.type, false), a = (k / SPLIT_N) * Math.PI * 2 + Math.random() * 0.6, dd = en.r * 0.6 + 16;
+      e.x = en.x + Math.cos(a) * dd; e.y = en.y + Math.sin(a) * dd;
+      e.hp *= SPLIT_HP; e.maxHp = e.hp;
+    }
+    spawnBurst(en.x, en.y, CHAMPION_TRAITS.teilend.color, 16);
+  }
+  if (hasTrait(en, 'explosiv')) {
+    pushZone({ x: en.x, y: en.y, r: BURST_R, t: 0, warn: BURST_WARN, life: 0.3, kind: 'burst', dmg: en.dmg * BURST_DMG, hit: false });
+  }
+}
 
 // Gebiete werden durch Besiegen des Bosses des vorherigen Gebiets freigeschaltet
 const STAGE_UNLOCK = { kelp: 'haikoenig', graben: 'kraken', vulkan: 'seeungeheuer' };
@@ -2240,6 +2574,8 @@ function checkAchievements() {
   if (save.totalPearls >= 1000 || s.totalPearlsEarned >= 1000) grant('pearls_1000');
   if (s.bestLevel >= ENTWICKELT_LEVEL) grant('level_20'); // interne ID bleibt 'level_20' (alte Spielstände)
   if (save.unlockedCharacters.length >= 4) grant('all_characters');
+  if ((s.championsDefeated || 0) >= 25) grant('champ_25');
+  if ((s.championBossesDefeated || 0) >= 1) grant('champ_boss');
   if (!Array.isArray(save.rewarded)) save.rewarded = [];
   const newStages = checkStageUnlocks();
   if (newly.length || newStages.length) {
@@ -2264,7 +2600,11 @@ function claimAchievement(id) {
 }
 
 function togglePause() {
-  if (gameState === 'playing') { gameState = 'paused'; clearInput(); showScreen('screen-pause'); }
+  if (gameState === 'playing') {
+    gameState = 'paused'; clearInput(); showScreen('screen-pause');
+    const pr = document.getElementById('pause-room');
+    if (pr) { pr.style.display = Net.on ? '' : 'none'; if (Net.on) pr.textContent = '\uD83C\uDF10 Raum ' + Net.code + ' \u00B7 ' + (Net.peers.size + 1) + ' Spieler \u2013 deine Gegner warten, bis du weiterspielst.'; }
+  }
   else if (gameState === 'paused') { gameState = 'playing'; showScreen(null); }
 }
 window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); });
@@ -2280,6 +2620,7 @@ function gameLoop(timestamp) {
     dt = Math.min(dt, 0.05);
     lastTime = timestamp;
     updateAmbientBubbles(dt);
+    if (Net.on) netFrame(dt);
     if (gameState === 'playing') update(dt);
     render();
   } catch (err) {
@@ -3016,13 +3357,83 @@ function drawSlamHit(g, r, p) {   // p = 0..1 seit dem Einschlag
 }
 /* @@BOSSART-END */
 
+/* @@CHAMPART-BEGIN */
+/* ---- Champion-Kunst: Explosionskreis, Aura, Krone, Panzerplatten, Schatztruhe ----
+   Wie die Boss-Kunst: alles wird in den 2D-Kontext `g` um den Nullpunkt gezeichnet (Lite backt dieselben Funktionen in Kostüme). */
+function drawBurstWarn(g, r, k, tm) {        // Explosiv-Champion: markierter Kreis, k = 0..1 bis zum Platzen
+  const TAU = Math.PI * 2, fast = k > 0.7 ? 26 : 12;
+  g.save();
+  g.globalAlpha = 0.18 + 0.14 * Math.sin(tm * fast);
+  g.fillStyle = '#ff7a1a'; g.beginPath(); g.arc(0, 0, r * (0.25 + 0.75 * k), 0, TAU); g.fill();
+  g.globalAlpha = 0.92; g.lineWidth = 3; g.strokeStyle = '#ffc070'; g.setLineDash([12, 7]); g.lineDashOffset = tm * 22;
+  g.beginPath(); g.arc(0, 0, r, 0, TAU); g.stroke(); g.setLineDash([]);
+  g.globalAlpha = 0.45 + 0.5 * k; g.lineWidth = 2; g.strokeStyle = '#fff1d6';
+  g.beginPath(); g.arc(0, 0, r * (1 - k * 0.75), 0, TAU); g.stroke();
+  g.fillStyle = 'rgba(255,214,120,' + (0.35 + 0.5 * k) + ')';      // Funken am Rand
+  for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU - tm * 1.5; g.beginPath(); g.arc(Math.cos(a) * r * 0.86, Math.sin(a) * r * 0.86, 2 + 3 * k, 0, TAU); g.fill(); }
+  g.restore();
+}
+function drawBurstHit(g, r, p) {             // p = 0..1 seit dem Platzen
+  const TAU = Math.PI * 2, a = Math.max(0, 1 - p), R = r * (0.85 + 0.3 * p);
+  g.save();
+  const fg = g.createRadialGradient(0, 0, 0, 0, 0, R);
+  fg.addColorStop(0, 'rgba(255,250,230,' + (0.95 * a) + ')'); fg.addColorStop(0.45, 'rgba(255,170,60,' + (0.8 * a) + ')'); fg.addColorStop(1, 'rgba(255,90,20,0)');
+  g.fillStyle = fg; g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+  g.strokeStyle = 'rgba(255,230,180,' + a + ')'; g.lineWidth = 4 * a + 1;
+  g.beginPath(); g.arc(0, 0, r * (0.75 + 0.45 * p), 0, TAU); g.stroke();
+  g.lineWidth = 2.5; g.strokeStyle = 'rgba(255,200,120,' + a + ')';
+  for (let i = 0; i < 12; i++) { const an = (i / 12) * TAU + 0.13; g.beginPath(); g.moveTo(Math.cos(an) * r * (0.35 + 0.35 * p), Math.sin(an) * r * (0.35 + 0.35 * p)); g.lineTo(Math.cos(an) * r * (0.75 + 0.55 * p), Math.sin(an) * r * (0.75 + 0.55 * p)); g.stroke(); }
+  g.restore();
+}
+function drawChampAura(g, R, rgb, a) {       // weiches Leuchten in der Farbe der Eigenschaft, R = Gegner-Radius
+  const ag = g.createRadialGradient(0, 0, R * 0.5, 0, 0, R * 2.1);
+  ag.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); ag.addColorStop(0.55, 'rgba(' + rgb + ',' + (a * 0.45) + ')'); ag.addColorStop(1, 'rgba(' + rgb + ',0)');
+  g.fillStyle = ag; g.beginPath(); g.arc(0, 0, R * 2.1, 0, Math.PI * 2); g.fill();
+}
+function drawChampCrown(g, w) {              // kleine Krone, Unterkante auf y = 0
+  const h = w * 0.62;
+  const cg = g.createLinearGradient(0, -h, 0, 0); cg.addColorStop(0, '#fff3a8'); cg.addColorStop(1, '#e0a020');
+  g.beginPath();
+  g.moveTo(-w / 2, 0); g.lineTo(-w / 2, -h * 0.62); g.lineTo(-w * 0.25, -h * 0.3); g.lineTo(0, -h);
+  g.lineTo(w * 0.25, -h * 0.3); g.lineTo(w / 2, -h * 0.62); g.lineTo(w / 2, 0); g.closePath();
+  g.fillStyle = cg; g.fill(); g.lineWidth = Math.max(1, w * 0.07); g.strokeStyle = '#7a4a0c'; g.stroke();
+  g.fillStyle = '#ff3d55'; g.beginPath(); g.arc(0, -h * 0.28, w * 0.09, 0, Math.PI * 2); g.fill();
+}
+function drawChampShell(g, R) {              // Gepanzert: sechs Panzerplatten um den Gegner, solange der Panzer hält
+  const TAU = Math.PI * 2;
+  g.save();
+  for (let i = 0; i < 6; i++) {
+    const a0 = (i / 6) * TAU + 0.12, a1 = a0 + TAU / 6 - 0.24;
+    g.beginPath(); g.arc(0, 0, R * 1.22, a0, a1); g.arc(0, 0, R * 0.98, a1, a0, true); g.closePath();
+    g.fillStyle = 'rgba(176,186,198,0.88)'; g.fill();
+    g.lineWidth = Math.max(1, R * 0.05); g.strokeStyle = 'rgba(40,48,60,0.8)'; g.stroke();
+    const am = (a0 + a1) / 2;
+    g.fillStyle = 'rgba(240,244,250,0.9)'; g.beginPath(); g.arc(Math.cos(am) * R * 1.1, Math.sin(am) * R * 1.1, Math.max(1, R * 0.05), 0, TAU); g.fill();
+  }
+  g.restore();
+}
+function drawChest(g, s, card) {             // Schatztruhe (s = Breite); card: Champion-Boss-Truhe mit Gratis-Verbesserung
+  const w = s, h = s * 0.72, lid = h * 0.42;
+  g.save();
+  g.fillStyle = card ? '#6b3fa0' : '#8a4b1c'; g.strokeStyle = '#3a1a06'; g.lineWidth = Math.max(1, s * 0.05);
+  g.beginPath(); g.rect(-w / 2, -h / 2 + lid, w, h - lid); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(-w / 2, -h / 2 + lid); g.quadraticCurveTo(0, -h / 2 - lid * 0.45, w / 2, -h / 2 + lid); g.closePath();
+  g.fillStyle = card ? '#8a5bc8' : '#a8612a'; g.fill(); g.stroke();
+  g.fillStyle = '#ffd76a';
+  g.fillRect(-w / 2, -h / 2 + lid - s * 0.04, w, s * 0.08);
+  g.fillRect(-w * 0.3, -h / 2 + lid * 0.5, s * 0.1, h - lid * 0.5); g.fillRect(w * 0.2, -h / 2 + lid * 0.5, s * 0.1, h - lid * 0.5);
+  g.fillStyle = card ? '#7af7ff' : '#ff3d55'; g.beginPath(); g.arc(0, -h / 2 + lid + s * 0.12, s * 0.09, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+/* @@CHAMPART-END */
+
 // ---------- Boss-Sprite: die Kunst wird in einen Puffer gezeichnet (nur jedes 2. Bild neu), dann gedreht/gequetscht aufs Bild gelegt ----------
 const BOSS_AURA = { haikoenig: '190,225,255', kraken: '225,120,255', seeungeheuer: '110,225,255', lavatitan: '255,120,40' };
-let bossBuf = null, bossBufCtx = null, tintBuf = null, tintCtx = null, bossArtKey = '', bossArtFrame = -9, renderFrame = 0;
+let tintBuf = null, tintCtx = null, renderFrame = 0;
 // mode 0 = normal, mode 1 = Dunkelheits-Ebene im Tiefsee-Graben (halbhell + leuchtende Teile obendrauf; benutzt den Puffer des Hauptdurchgangs)
 function drawBossSprite(en, sx, sy, mode) {
   const R = en.r, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.7), dim = pad * 2, px = Math.ceil(dim * DPR);
-  const dxp = player.x - en.x, dyp = player.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer';
+  const tg = en.tg || player, dxp = tg.x - en.x, dyp = tg.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer';
   let dirx = dxp, diry = dyp;
   if (en.type === 'haikoenig' && (st === 'windup' || st === 'dash')) { dirx = Math.cos(en.ang); diry = Math.sin(en.ang); }
   if (!en.face) { en.face = dirx >= 0 ? 1 : -1; en.faceS = en.face; en.tilt = 0; }
@@ -3037,22 +3448,22 @@ function drawBossSprite(en, sx, sy, mode) {
     lookX: Math.max(-1, Math.min(1, dxp / 160)), lookY: Math.max(-1, Math.min(1, dyp / 160)), open: open < 0 ? undefined : open, roar: st === 'roar' ? 1 : 0 };
 
   const key = en.type + '|' + ph + '|' + faceSign + '|' + open + '|' + px;
-  if (!bossBuf || key !== bossArtKey || renderFrame - bossArtFrame >= 2) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel
-    if (!bossBuf) { bossBuf = document.createElement('canvas'); bossBufCtx = bossBuf.getContext('2d'); }
-    if (bossBuf.width !== px) { bossBuf.width = px; bossBuf.height = px; }
-    const bx = bossBufCtx;
+  if (!en.artBuf || key !== en.artKey || renderFrame - en.artFrame >= 2) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel (eigener Puffer je Boss)
+    if (!en.artBuf) { en.artBuf = document.createElement('canvas'); en.artCtx = en.artBuf.getContext('2d'); }
+    if (en.artBuf.width !== px) { en.artBuf.width = px; en.artBuf.height = px; }
+    const bx = en.artCtx;
     bx.setTransform(1, 0, 0, 1, 0, 0); bx.clearRect(0, 0, px, px);
     bx.setTransform(DPR, 0, 0, DPR, 0, 0); bx.translate(pad, pad);
     drawBossArt(bx, en.type, R, o);
-    bossArtKey = key; bossArtFrame = renderFrame;
+    en.artKey = key; en.artFrame = renderFrame;
   }
-  let img = bossBuf;
+  let img = en.artBuf;
   const flash = en.hitFlash > 0 ? Math.min(1, en.hitFlash / 0.12) : 0;
   if (st === 'tired' || flash) {   // Treffer-Blitz / Erschöpfung als Überzug nur auf den Boss-Pixeln
     if (!tintBuf) { tintBuf = document.createElement('canvas'); tintCtx = tintBuf.getContext('2d'); }
     if (tintBuf.width !== px) { tintBuf.width = px; tintBuf.height = px; }
     const tx = tintCtx;
-    tx.globalCompositeOperation = 'source-over'; tx.setTransform(1, 0, 0, 1, 0, 0); tx.clearRect(0, 0, px, px); tx.drawImage(bossBuf, 0, 0);
+    tx.globalCompositeOperation = 'source-over'; tx.setTransform(1, 0, 0, 1, 0, 0); tx.clearRect(0, 0, px, px); tx.drawImage(en.artBuf, 0, 0);
     tx.globalCompositeOperation = 'source-atop';
     if (st === 'tired') { tx.fillStyle = 'rgba(235,225,120,0.3)'; tx.fillRect(0, 0, px, px); }
     if (flash) { tx.fillStyle = 'rgba(255,255,255,' + (0.62 * flash) + ')'; tx.fillRect(0, 0, px, px); }
@@ -3131,6 +3542,85 @@ function drawEnemySprite(x, y, r, color, accessory, wobble) {
   ctx.restore();
 }
 
+// ---------- Champions zeichnen: unter dem Gegner Aura, zweite Eigenschaft und Flink-Warnung, darüber Panzer, Krone, Namensschild ----------
+const champAuraCache = {};
+function champAuraSprite(rgb) {            // vorgerendert: Gegner-Radius 30 entspricht 128 px Breite
+  if (champAuraCache[rgb]) return champAuraCache[rgb];
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); g.translate(64, 64); drawChampAura(g, 30, rgb, 0.6);
+  return (champAuraCache[rgb] = c);
+}
+function roundRectPath(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function drawChampionUnder(en, sx, sy) {
+  const R = en.r, t0 = CHAMPION_TRAITS[en.champ[0]], t1 = en.champ[1] ? CHAMPION_TRAITS[en.champ[1]] : null;
+  const sz = R / 30 * 128 * (1 + 0.1 * Math.sin(runTime * 4 + (en.wobble || 0)));
+  ctx.drawImage(champAuraSprite(t0.rgb), sx - sz / 2, sy - sz / 2, sz, sz);
+  if (t1) {                                // zweite Eigenschaft: gestrichelter Ring in ihrer Farbe
+    ctx.save(); ctx.globalAlpha *= 0.85; ctx.strokeStyle = t1.color; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -runTime * 20;
+    ctx.beginPath(); ctx.arc(sx, sy, R * 1.45, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+  }
+  if (en.cst === 'flash') {                // Flink: leuchtet auf und zeigt, wohin er gleich sprintet
+    const f = 0.5 + 0.5 * Math.sin(runTime * 30);
+    ctx.save(); ctx.translate(sx, sy);
+    ctx.strokeStyle = 'rgba(94,242,255,' + (0.5 + 0.4 * f) + ')'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, 0, R * (1.3 + 0.25 * f), 0, Math.PI * 2); ctx.stroke();
+    ctx.rotate(en.dAng || 0);
+    const len = FLINK_DASH_SPEED * FLINK_DASH_T + R, lg = ctx.createLinearGradient(0, 0, len, 0);
+    lg.addColorStop(0, 'rgba(94,242,255,0.45)'); lg.addColorStop(1, 'rgba(94,242,255,0.05)');
+    ctx.fillStyle = lg; ctx.fillRect(R * 0.6, -R * 0.75, len, R * 1.5);
+    ctx.restore();
+  } else if (en.cst === 'dash') {
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(en.dAng || 0);
+    ctx.strokeStyle = 'rgba(190,250,255,0.6)'; ctx.lineWidth = 2;
+    for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(-R * 1.1, k * R * 0.5); ctx.lineTo(-R * 2.6, k * R * 0.5); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+function drawChampionOver(en, sx, sy) {
+  if (en.shell) { ctx.save(); ctx.translate(sx, sy); drawChampShell(ctx, en.r); ctx.restore(); }
+  const cw = Math.max(14, en.r * 0.8);
+  ctx.save(); ctx.translate(sx, sy - en.r - 3); drawChampCrown(ctx, cw); ctx.restore();
+  drawChampionTag(en, sx, sy - en.r - 6 - cw * 0.62);
+}
+function drawChampionTag(en, cx, bottom) {    // Namensschild mit eigenem HP-Balken
+  ctx.save();
+  ctx.font = '800 11px "Nunito", sans-serif';
+  if (en.tagW == null || en.tagName !== en.name) { en.tagW = ctx.measureText(en.name).width; en.tagName = en.name; }
+  const w = Math.max(60, en.tagW + 14), h = 25, x0 = cx - w / 2, y0 = bottom - h;
+  ctx.fillStyle = 'rgba(5,20,35,0.8)'; roundRectPath(x0, y0, w, h, 7); ctx.fill();
+  ctx.strokeStyle = CHAMPION_TRAITS[en.champ[0]].color; ctx.globalAlpha *= 0.7; ctx.lineWidth = 1; roundRectPath(x0 + 0.5, y0 + 0.5, w - 1, h - 1, 7); ctx.stroke();
+  ctx.globalAlpha /= 0.7;
+  ctx.fillStyle = '#ffe9b8'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(en.name, cx, y0 + 9);
+  const bw = w - 14, frac = Math.max(0, Math.min(1, en.hp / en.maxHp));
+  ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.fillRect(x0 + 7, y0 + 17, bw, 4);
+  ctx.fillStyle = '#ff5c72'; ctx.fillRect(x0 + 7, y0 + 17, bw * frac, 4);
+  ctx.restore();
+}
+function drawChampionBossUnder(en, sx, sy) {  // Champion-Boss: rotierender Ring in der Farbe seiner Eigenschaft
+  const t = CHAMPION_TRAITS[en.champ[0]];
+  ctx.save(); ctx.translate(sx, sy); ctx.rotate(runTime * 0.8);
+  ctx.strokeStyle = t.color; ctx.globalAlpha *= 0.75 + 0.2 * Math.sin(runTime * 5); ctx.lineWidth = 5; ctx.setLineDash([18, 10]);
+  ctx.beginPath(); ctx.arc(0, 0, en.r * 1.55, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+// Anführer: dünne goldene Linien zu den Gegnern, die er gerade antreibt
+function drawLeaderLinks(list) {
+  const ox = camera.x - W / 2, oy = camera.y - H / 2;
+  let any = false;
+  for (let i = 0; i < list.length; i++) {
+    const en = list[i], L = en.lead;
+    if (!L || en.dead || L.dead) continue;
+    const ax = en.x - ox, ay = en.y - oy, bx = L.x - ox, by = L.y - oy;
+    if ((ax < -40 || ax > W + 40 || ay < -40 || ay > H + 40) && (bx < -40 || bx > W + 40 || by < -40 || by > H + 40)) continue;
+    if (!any) { ctx.save(); ctx.strokeStyle = 'rgba(255,215,106,0.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); any = true; }
+    ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+  }
+  if (any) { ctx.stroke(); ctx.restore(); }
+}
+
 const whiteSilhouetteCache = {};
 function getWhiteSilhouette(id, img) {
   const cached = whiteSilhouetteCache[id];
@@ -3150,10 +3640,11 @@ function getWhiteSilhouette(id, img) {
 function drawPlayerSprite(x, y, r, opts) {
   opts = opts || {};
   const angle = opts.angle || 0;
-  const img = spriteImages[selectedCharacterId];
+  const cid = opts.charId || selectedCharacterId, col = opts.color || player.color;   // charId/color: Blobi eines Mitspielers
+  const img = spriteImages[cid];
   if (!img || !img.complete || !img.naturalWidth) {
     const flip = Math.cos(angle) < 0 ? -1 : 1;
-    drawBlob(x, y, r, player.color, player.dark, Object.assign({ accessory: 'fin', facing: flip }, opts));
+    drawBlob(x, y, r, col, opts.dark || player.dark, Object.assign({ accessory: 'fin', facing: flip }, opts));
     return;
   }
   const wobble = opts.wobble || 0;
@@ -3161,11 +3652,11 @@ function drawPlayerSprite(x, y, r, opts) {
   const aspect = img.naturalWidth / img.naturalHeight;
   const targetH = r * 2.6;
   const targetW = targetH * aspect;
-  const baseAngle = SPRITE_BASE_ANGLE[selectedCharacterId] || 0;
+  const baseAngle = SPRITE_BASE_ANGLE[cid] || 0;
 
   let rel = normalizeAngle(angle - baseAngle);
   let mirrored = false;
-  if (!SPRITE_FREE_ROTATE[selectedCharacterId]) {
+  if (!SPRITE_FREE_ROTATE[cid]) {
     if (rel > Math.PI/2) { rel -= Math.PI; mirrored = true; }
     else if (rel < -Math.PI/2) { rel += Math.PI; mirrored = true; }
   }
@@ -3176,14 +3667,14 @@ function drawPlayerSprite(x, y, r, opts) {
   ctx.scale((mirrored ? -1 : 1) * bob, bob);
 
   if (opts.glow) {
-    ctx.shadowColor = player.color;
+    ctx.shadowColor = col;
     ctx.shadowBlur = opts.glow;
   }
   ctx.drawImage(img, -targetW/2, -targetH/2, targetW, targetH);
   ctx.shadowBlur = 0;
 
   if (opts.flashAmount > 0) {
-    const sil = getWhiteSilhouette(selectedCharacterId, img);
+    const sil = getWhiteSilhouette(cid, img);
     const baseAlpha = ctx.globalAlpha;
     ctx.globalAlpha = baseAlpha * Math.min(1, opts.flashAmount * 4);
     ctx.drawImage(sil, -targetW/2, -targetH/2, targetW, targetH);
@@ -3452,6 +3943,7 @@ function render() {
       if (sx < -gm || sx > W + gm || sy < -gm || sy > H + gm) continue;
       const sz = pk.r * 4;
       ctx.drawImage(glowSprite(pk.type), sx - sz / 2, sy - sz / 2, sz, sz);
+      if (pk.type === 'chest') { ctx.save(); ctx.translate(sx, sy + Math.sin(runTime * 3) * 2); drawChest(ctx, 26, pk.card); ctx.restore(); }
       if (pk.type === 'heal') { ctx.fillStyle = '#fff'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('\u2665', sx, sy + 5 + Math.sin(runTime * 4) * 1.5); }
     }
     for (let i=0;i<enemyProjectiles.length;i++){
@@ -3474,18 +3966,28 @@ function render() {
       ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
     }
-    for (let i=0;i<enemies.length;i++){
-      const en = enemies[i];
+    if (Net.shots.length) drawNetShots();
+    drawLeaderLinks(enemies);
+    if (remoteEnemyList.length || remoteFrozen.length) drawLeaderLinks(remoteDrawList());
+    const drawList = (remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies;
+    for (let i=0;i<drawList.length;i++){
+      const en = drawList[i];
       const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2;
       if (sx < -100 || sx > W+100 || sy < -100 || sy > H+100) continue;
       const color = en.hitFlash > 0 ? '#ffffff' : (en.state === 'tired' ? '#e0d890' : en.color);
+      if (en.frozen) ctx.globalAlpha = 0.45;      // Gegner eines Mitspielers, der gerade pausiert
       if (en.isBoss) {
         if (en.state === 'windup' || en.state === 'sog' || en.state === 'roar') drawBossTelegraph(en, sx, sy);
+        if (en.champ) drawChampionBossUnder(en, sx, sy);
         drawBossSprite(en, sx, sy, 0);
+        if (en.shell) { ctx.save(); ctx.translate(sx, sy); drawChampShell(ctx, en.r); ctx.restore(); }
       } else {
+        if (en.champ) drawChampionUnder(en, sx, sy);
         drawEnemySprite(sx, sy, en.r, color, en.accessory, en.wobble);
         if (en.elite) { ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, en.r + 6, 0, Math.PI * 2); ctx.stroke(); }
+        if (en.champ) drawChampionOver(en, sx, sy);
       }
+      ctx.globalAlpha = 1;
     }
     if (player.weapons.ring) drawRingBubbles();
     if (player.weapons.begleiter) {
@@ -3495,8 +3997,10 @@ function render() {
         drawBlob(sx, sy, 11, '#9effc9', null, { wobble: runTime*6 + mi*3, accessory:'fin', glow:6 });
       }
     }
+    if (Net.on) drawPeers();
     {
       const sx = player.x-camera.x+W/2, sy = player.y-camera.y+H/2;
+      if (Net.on) drawNetRing(sx, sy, player.r, Net.col);
       if (player.shieldReady) {
         const pulse = 0.75 + Math.sin(runTime*4) * 0.2;
         ctx.save();
@@ -3554,9 +4058,9 @@ function render() {
       ctx.globalAlpha = 1;
     }
 
-    if (stageOf().id === 'graben') drawDarkness();
+    if (stageOf().id === 'graben') { drawDarkness(); if (Net.on) drawPeers(); }
     if (gameState === 'playing') updateHud();
-    drawBossArrow();
+    drawEdgeArrows();
     if (bossWarningTimer > 0) drawBossWarning();
     if (reviveFlashTimer > 0) drawReviveBanner();
     if (touchState.active && gameState === 'playing') drawTouchStick();
@@ -3572,7 +4076,7 @@ function cacheUI() {
    'hud-boss','hud-boss-fill','hud-boss-name','hud-ring',
    'character-grid','stage-grid','shop-list','shop-pearls-total','achievement-list',
    'levelup-choices','gameover-stats','gameover-achievements','gameover-title',
-   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause'
+   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room'
   ].forEach(function(id){ UI[id] = document.getElementById(id); });
 }
 
@@ -3616,11 +4120,14 @@ function updateHud() {
     hudSet('hud-ring', 'text', '\u2B55 ' + alive + '/' + (ringLvl * 2));
     hudSet('hud-ring', 'cls', 'hud-pill hud-ring' + (alive < ringLvl * 2 ? ' hurt' : ''));
   } else hudSet('hud-ring', 'disp', 'none');
-  if (bossEntity) {
+  const B = bossEntity || (Net.on ? netHudBoss() : null);
+  if (B) {
     if (!hudCache.boss) { UI['hud-boss'].classList.add('active'); hudCache.boss = 1; }
-    hudSet('hud-boss-fill', 'w', Math.max(0, (bossEntity.hp / bossEntity.maxHp) * 100).toFixed(1) + '%');
-    hudSet('hud-boss-name', 'text', bossEntity.name + (bossEntity.encounterNumber > 1 ? ' \u00D7' + bossEntity.encounterNumber : '') + ' \u00B7 Phase ' + bossEntity.phase);
+    hudSet('hud-boss-fill', 'w', Math.max(0, (B.hp / B.maxHp) * 100).toFixed(1) + '%');
+    hudSet('hud-boss-name', 'text', (B.champ ? '\uD83D\uDC51 ' : '') + B.name + (B.encounterNumber > 1 ? ' \u00D7' + B.encounterNumber : '') + ' \u00B7 Phase ' + B.phase + (B.remote ? ' \u00B7 ' + B.peer.name : ''));
   } else if (hudCache.boss) { UI['hud-boss'].classList.remove('active'); hudCache.boss = 0; }
+  if (Net.on) { hudSet('hud-room', 'disp', 'inline-block'); hudSet('hud-room', 'text', netRoomLabel()); }
+  else hudSet('hud-room', 'disp', 'none');
 }
 
 function updateMenuPearlsLabel() {
@@ -3798,9 +4305,12 @@ const LEVELUP_ICONS = { blase:'\uD83D\uDD35', ring:'\u2B55', tintenwolke:'\uD83D
   tempo:'\uD83D\uDCA8', leben:'\u2764\uFE0F', panzerung:'\uD83D\uDEE1\uFE0F', anziehung:'\uD83E\uDDF2', angriffstempo:'\u23F1\uFE0F', glueck:'\uD83C\uDF40',
   schild:'\uD83D\uDD30', regeneration:'\uD83D\uDC9A', schlag:'\uD83D\uDCA5' };
 
-function renderLevelUpScreen(picks, bonus) {
+function renderLevelUpScreen(picks, bonus, free) {
+  const title = document.getElementById('levelup-title');
+  if (title) title.textContent = free ? '\uD83C\uDF81 Schatztruhe!' : 'Level erreicht!';
   const sub = document.getElementById('levelup-sub');
-  if (sub) sub.textContent = bonus ? '\uD83C\uDF40 Glück! Eine zusätzliche Auswahl' : 'Wähle eine Verbesserung';
+  if (sub) sub.textContent = free ? ('Eine Gratis-Verbesserung' + (bonus ? ' \u00B7 \uD83C\uDF40 Glück: eine zusätzliche Auswahl' : ' \u2013 wähle eine Karte'))
+                                  : (bonus ? '\uD83C\uDF40 Glück! Eine zusätzliche Auswahl' : 'Wähle eine Verbesserung');
   const wrap = UI['levelup-choices'];
   wrap.innerHTML = '';
   wrap.style.pointerEvents = '';
@@ -3867,7 +4377,7 @@ function initUI() {
   document.getElementById('btn-goto-shop').addEventListener('click', function(){ Sfx.click(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-goto-achievements').addEventListener('click', function(){ Sfx.click(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-ach-claim-all').addEventListener('click', function(){ claimAllAchievements(); });
-  document.getElementById('btn-gameover-achievements').addEventListener('click', function(){ Sfx.click(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderAchievements(); showScreen('screen-achievements'); });
+  document.getElementById('btn-gameover-achievements').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-instructions').addEventListener('click', function(){ Sfx.click(); showScreen('screen-instructions'); });
 
   document.getElementById('btn-character-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
@@ -3885,13 +4395,14 @@ function initUI() {
   document.getElementById('btn-restart-pause').addEventListener('click', function(){ Sfx.click(); startRun(selectedCharacterId, selectedStageId); });
   document.getElementById('btn-quit-pause').addEventListener('click', function(){
     Sfx.click();
+    netLeave();
     bankRunProgress();
     checkAchievements();
     gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu');
   });
 
   document.getElementById('btn-retry').addEventListener('click', function(){ startRun(selectedCharacterId, selectedStageId); });
-  document.getElementById('btn-gameover-menu').addEventListener('click', function(){ Sfx.click(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); });
+  document.getElementById('btn-gameover-menu').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); });
 
   function toggleMute() {
     save.muted = !save.muted;
@@ -3903,9 +4414,676 @@ function initUI() {
   UI['btn-mute-pause'].addEventListener('click', function(){ toggleMute(); });
   if (save.muted && UI['btn-mute']) UI['btn-mute'].textContent = '\uD83D\uDD07';
 
+  initOnlineUI();
   checkAchievements();
   updateMenuPearlsLabel();
 }
+
+// ---------- Bildschirm "Online spielen" ----------
+let onlineArea = null;
+function renderOnlineScreen() {
+  const nameEl = document.getElementById('online-name');
+  if (nameEl && document.activeElement !== nameEl) nameEl.value = onlineName();
+  const chars = document.getElementById('online-chars');
+  if (chars) {
+    chars.innerHTML = '';
+    CHARACTERS.forEach(function(ch){
+      const unlocked = save.unlockedCharacters.indexOf(ch.id) !== -1;
+      const b = document.createElement('button');
+      b.className = 'online-chip' + (ch.id === selectedCharacterId ? ' selected' : '');
+      b.disabled = !unlocked;
+      b.innerHTML = '<img src="' + (CHARACTER_SPRITES[ch.id] || '') + '" alt="">' + (unlocked ? '' : '\uD83D\uDD12 ') + ch.name.replace('-Blobi', '');
+      b.addEventListener('click', function(){ selectedCharacterId = ch.id; save.lastCharacter = ch.id; persistSave(); Sfx.click(); renderOnlineScreen(); });
+      chars.appendChild(b);
+    });
+  }
+  if (!onlineArea || save.stagesUnlocked.indexOf(onlineArea) === -1) onlineArea = save.stagesUnlocked.indexOf(selectedStageId) !== -1 ? selectedStageId : 'riff';
+  const areas = document.getElementById('online-areas');
+  if (areas) {
+    areas.innerHTML = '';
+    STAGES.forEach(function(st){
+      const unlocked = save.stagesUnlocked.indexOf(st.id) !== -1;
+      const b = document.createElement('button');
+      b.className = 'online-chip' + (st.id === onlineArea ? ' selected' : '');
+      b.disabled = !unlocked;
+      b.innerHTML = '<span class="sw" style="background:linear-gradient(135deg,' + st.bgTop + ',' + st.bgBottom + ')"></span>' + (unlocked ? '' : '\uD83D\uDD12 ') + st.name;
+      b.addEventListener('click', function(){ onlineArea = st.id; Sfx.click(); renderOnlineScreen(); });
+      areas.appendChild(b);
+    });
+  }
+  const ok = netConfigured();
+  ['btn-online-create', 'btn-online-join'].forEach(function(id){ const b = document.getElementById(id); if (b) b.disabled = !ok || !!Net.ws; });
+  if (!ok) onlineStatus('Der Online-Server ist noch nicht eingerichtet (Anleitung: blobfisch-online/README.md).', true);
+}
+function onlineStatus(text, bad) {
+  const el = document.getElementById('online-status');
+  if (el) { el.textContent = text || ''; el.className = 'online-status' + (bad ? ' bad' : ''); }
+  if (bad) ['btn-online-create', 'btn-online-join'].forEach(function(id){ const b = document.getElementById(id); if (b) b.disabled = !netConfigured(); });
+}
+function onlineCheckName() {
+  const el = document.getElementById('online-name');
+  const v = el ? el.value.replace(/\s+/g, ' ').trim() : onlineName();
+  if (!NET_NAME_RE.test(v)) { onlineStatus('Name: 3–12 Zeichen – Buchstaben, Ziffern, Leerzeichen, - und _.', true); return false; }
+  save.onlineName = v; persistSave();
+  return true;
+}
+function initOnlineUI() {
+  Net.onStatus = onlineStatus;
+  document.getElementById('btn-goto-online').addEventListener('click', function(){
+    Sfx.click(); ensureAudio(); onlineStatus(''); renderOnlineScreen(); showScreen('screen-online');
+  });
+  document.getElementById('btn-online-dice').addEventListener('click', function(){
+    Sfx.click(); const el = document.getElementById('online-name'); if (el) el.value = randomOnlineName(); onlineCheckName(); onlineStatus('');
+  });
+  document.getElementById('online-name').addEventListener('change', function(){ if (onlineCheckName()) onlineStatus(''); });
+  document.getElementById('online-code').addEventListener('input', function(e){
+    const el = e.target, v = el.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
+    if (el.value !== v) el.value = v;
+  });
+  document.getElementById('online-code').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('btn-online-join').click(); });
+  document.getElementById('btn-online-create').addEventListener('click', function(){
+    Sfx.click();
+    if (!onlineCheckName()) return;
+    this.disabled = true; document.getElementById('btn-online-join').disabled = true;
+    netCreateRoom(onlineArea || 'riff');
+  });
+  document.getElementById('btn-online-join').addEventListener('click', function(){
+    Sfx.click();
+    if (!onlineCheckName()) return;
+    const code = document.getElementById('online-code').value.toUpperCase();
+    if (!NET_CODE_RE.test(code)) { onlineStatus('Der Code hat 4 Buchstaben (ohne I, L und O).', true); return; }
+    this.disabled = true; document.getElementById('btn-online-create').disabled = true;
+    netJoin(code, false);
+  });
+  document.getElementById('btn-online-back').addEventListener('click', function(){
+    Sfx.click(); if (!Net.on) netDisconnect(); onlineStatus(''); updateMenuPearlsLabel(); showScreen('screen-menu');
+  });
+}
+
+/* ============================================================
+   NETZ (Online-Modus): private Räume mit Code
+   Jeder Browser spielt seinen eigenen Blobi und die Gegner um ihn herum ("Besitzer"). Der Server leitet nur weiter:
+   Zustand + Gegner alle 0,1 s an Mitspieler in der Nähe, Treffer an den Besitzer des Gegners, Siege an alle Helfer.
+   Allein (Net.on = false) ist alles hier abgeschaltet: das Spiel läuft genau wie bisher.
+   ============================================================ */
+// Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
+const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
+const NET_PROTOCOL = 1;             // muss zu PROTOCOL in room-core.js passen
+const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
+const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
+const NET_TICK_NEAR = 100, NET_TICK_FAR = 500;    // ms zwischen zwei Zustands-Nachrichten (mit / ohne Mitspieler in der Nähe)
+const NET_DELAY = 130;              // ms: Mitspieler und ihre Gegner werden so weit in der Vergangenheit gezeigt (dafür glatt)
+const NET_ASLEEP = 2500;            // ms ohne Nachricht: der Mitspieler "schläft" (Tab im Hintergrund)
+const NET_COLORS = ['#5ef2c0', '#ffd76a', '#ff7ab8', '#7eb6ff', '#ff9a3c', '#b98cff', '#c8ff6a', '#ffffff'];
+const NET_STATES = ['walk', 'windup', 'dash', 'tired', 'roar', 'sog'];
+const NET_CST = ['walk', 'flash', 'dash'];
+const NET_TYPES = Object.keys(ENEMY_TYPES).concat(Object.keys(BOSS_TYPES));
+const NET_TYPE_IDX = {}; NET_TYPES.forEach(function(k, i){ NET_TYPE_IDX[k] = i; });
+const NF_PAUSED = 1, NF_DEAD = 2;
+const NET_NAME_RE = /^[A-Za-z0-9ÄÖÜäöüßÀÂÇÈÉÊËÎÏÔÙÛàâçèéêëîïôùû _-]{3,12}$/;
+const NET_CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/;
+const CHAMPION_GROUP_HP = 0.5;      // online: Champions +50 % HP pro weiterem Spieler in der Nähe
+const NET_MAX_DMG = 1000, NET_MAX_HIT = 5000, NET_MAX_XP = 1000;   // Obergrenzen für Werte von Mitspielern (gegen manipulierte Spiele)
+function netClamp(v, hi) { v = +v; return isFinite(v) ? Math.max(0, Math.min(hi, v)) : 0; }
+
+const Net = {
+  on: false, live: false, ws: null, id: 0, code: '', area: '', name: '', col: 0, cap: 8, created: false,
+  peers: new Map(), lastSend: 0, tick: 0, fxOut: [], hitsOut: new Map(), toOut: new Set(), hitsIn: [], fxIn: [], shots: [],
+  wantOpen: false, retries: 0, startedRun: false, onStatus: null, pingTimer: 0, stamp: 0
+};
+let remoteEnemyList = [], remoteFrozen = [];
+function remoteDrawList() { return remoteFrozen.length ? remoteEnemyList.concat(remoteFrozen) : remoteEnemyList; }
+function netR1(v) { return Math.round(v * 10) / 10; }
+function netR2(v) { return Math.round(v * 100) / 100; }
+
+// ---------- Server-Adresse: ?server=http://localhost:8787 ist nur für lokale Tests erlaubt ----------
+function netServerBase() {
+  try {
+    const q = new URLSearchParams(location.search).get('server');
+    if (q) { const u = new URL(q); if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return u.origin; }
+  } catch (e) { /* kein location (Test) */ }
+  return ONLINE_SERVER.replace(/\/+$/, '');
+}
+function netConfigured() { return netServerBase().indexOf('DEIN-KONTO') === -1; }
+function netWsBase() { return netServerBase().replace(/^http/, 'ws'); }
+
+function randomOnlineName() { return 'Blubbi' + (100 + Math.floor(Math.random() * 900)); }
+function onlineName() {
+  if (!save.onlineName || !NET_NAME_RE.test(save.onlineName)) { save.onlineName = randomOnlineName(); persistSave(); }
+  return save.onlineName;
+}
+function netStatus(text, bad) { if (Net.onStatus) Net.onStatus(text, !!bad); }
+
+// ---------- Verbinden, Raum erstellen / beitreten, verlassen ----------
+function netCreateRoom(area) {
+  netStatus('Raum wird erstellt …');
+  Net.created = true;
+  fetch(netServerBase() + '/new?area=' + encodeURIComponent(area))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.code) netJoin(d.code, true);
+      else netStatus(d && d.error === 'busy' ? 'Gerade ist kein Raum frei – versuch es gleich nochmal.' : 'Der Raum konnte nicht erstellt werden.', true);
+    })
+    .catch(function(){ netStatus('Der Online-Server ist nicht erreichbar (oder für heute voll). Spiel solange allein!', true); });
+}
+function netJoin(code, created) {
+  netDisconnect();
+  Net.code = code; Net.created = !!created; Net.wantOpen = true; Net.retries = 0; Net.startedRun = false;
+  netStatus('Verbinde mit Raum ' + code + ' …');
+  netOpen();
+}
+function netOpen() {
+  const url = netWsBase() + '/join/' + Net.code + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId);
+  let ws;
+  try { ws = new WebSocket(url); } catch (e) { netStatus('Der Online-Server ist nicht erreichbar.', true); return; }
+  Net.ws = ws;
+  ws.onmessage = function(ev){ if (Net.ws === ws) netReceive(ev.data); };
+  ws.onclose = function(ev){ if (Net.ws === ws) netClosed(ev.code); };
+  ws.onerror = function(){};
+  clearInterval(Net.pingTimer);
+  Net.pingTimer = setInterval(function(){ if (Net.ws === ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 20000);   // hält die Verbindung im Hintergrund-Tab offen
+}
+function netDisconnect() {
+  Net.wantOpen = false;
+  clearInterval(Net.pingTimer);
+  if (Net.ws) { const ws = Net.ws; Net.ws = null; try { ws.close(1000, 'bye'); } catch (e) {} }
+  Net.on = false; Net.live = false;
+  netClearRemote();
+}
+function netClearRemote() {
+  Net.peers.clear(); remoteEnemyList = []; remoteFrozen = []; Net.shots = [];
+  Net.fxIn = []; Net.hitsIn = []; Net.fxOut = []; Net.hitsOut.clear(); Net.toOut.clear();
+  for (let i = 0; i < enemies.length; i++) if (enemies[i].helpers) enemies[i].helpers = null;
+}
+// Raum verlassen (Menü): danach wieder ganz normales Einzelspiel
+function netLeave() {
+  if (!Net.on && !Net.ws) return;
+  netDisconnect();
+  if (save.stagesUnlocked.indexOf(selectedStageId) === -1) selectedStageId = (save.lastStage && save.stagesUnlocked.indexOf(save.lastStage) !== -1) ? save.lastStage : 'riff';
+  if (UI['hud-room']) UI['hud-room'].style.display = 'none';
+}
+function netClosed(code) {
+  Net.ws = null;
+  clearInterval(Net.pingTimer);
+  if (!Net.wantOpen) return;
+  const msg = code === 4004 ? 'Raum ' + Net.code + ' gibt es nicht (mehr). Prüf den Code.' :
+              code === 4001 ? 'Raum ' + Net.code + ' ist voll (' + Net.cap + ' Spieler).' :
+              code === 4002 ? 'Bitte lade die Seite neu – das Spiel wurde aktualisiert.' :
+              code === 4000 ? 'Der Raum hat die Verbindung abgelehnt.' : '';
+  if (!Net.startedRun) { Net.wantOpen = false; netStatus(msg || 'Der Online-Server ist nicht erreichbar (oder für heute voll). Spiel solange allein!', true); return; }
+  if (!msg && Net.retries < 4) {                     // während des Laufs: neu verbinden
+    Net.retries++;
+    Net.on = false; netClearRemote();
+    showToast('📡 Verbindung unterbrochen – verbinde neu …');
+    setTimeout(function(){ if (Net.wantOpen && !Net.ws) netOpen(); }, 1000 * Net.retries);
+    return;
+  }
+  Net.wantOpen = false; Net.on = false; netClearRemote();
+  if (UI['hud-room']) UI['hud-room'].style.display = 'none';
+  showToast(msg || '📡 Verbindung verloren – du spielst allein weiter.');
+}
+
+// ---------- Nachrichten empfangen ----------
+function netReceive(data) {
+  if (typeof data !== 'string' || data === 'pong') return;
+  let m;
+  try { m = JSON.parse(data); } catch (e) { return; }
+  if (!m) return;
+  if (m.f && m.t === 's') netOnTick(m);
+  else if (m.t === 'p') netOnFar(m);
+  else if (m.t === 'welcome') netOnWelcome(m);
+  else if (m.t === 'join') netAddPeer(m.p, true);
+  else if (m.t === 'leave') netRemovePeer(m.id, true);
+  else if (m.t === 'err') netOnError(m.m);
+}
+// Der Server lehnt ab (Code falsch, Raum voll, alte Version): gleich melden, nicht erst auf das Schliessen warten
+function netOnError(why) {
+  const ws = Net.ws;
+  netClosed(why === 'notfound' ? 4004 : why === 'full' ? 4001 : why === 'version' ? 4002 : 4000);
+  if (ws) { try { ws.close(); } catch (e) {} }
+}
+function netOnWelcome(m) {
+  const first = !Net.startedRun;
+  Net.id = m.id; Net.code = m.code; Net.area = m.area; Net.name = m.name; Net.col = m.col || 0; Net.cap = m.cap || 8;
+  netClearRemote();
+  (m.players || []).forEach(function(p){ netAddPeer(p, false); });
+  Net.retries = 0; Net.lastSend = 0;
+  if (m.renamed) { save.onlineName = m.name; persistSave(); }
+  Net.on = true;
+  if (first) {
+    Net.startedRun = true;
+    netStatus('');
+    startRun(selectedCharacterId, m.area);
+    const others = (m.players || []).map(function(p){ return p.name; });
+    showToast(m.renamed ? 'Dein Name war nicht erlaubt – du heisst jetzt ' + m.name + '.' :
+      (Net.created ? '🌐 Raum ' + m.code + ' – gib deinen Freunden diesen Code!' :
+       '🌐 Raum ' + m.code + (others.length ? ' · mit ' + others.join(', ') : '')));
+  } else showToast('📡 Wieder verbunden!');
+}
+function netAddPeer(p, announce) {
+  if (!p || p.id === Net.id) return;
+  Net.peers.set(p.id, { id: p.id, name: String(p.name || '?'), ch: p.ch || 'standard', col: p.col || 0, x: 0, y: 0, r: 19, a: 0, hp: 1, mh: 1, lv: 1, fl: 0,
+    last: 0, seen: false, snaps: [], off: null, speed: 0, mv: { x: 0, y: 0, mag: 0 }, bob: 0, enemies: new Map(), active: false, asleep: false });
+  if (announce) { showToast('👋 ' + p.name + ' ist da!'); Sfx.ping(); }
+}
+function netRemovePeer(id, announce) {
+  const pe = Net.peers.get(id);
+  if (!pe) return;
+  netDropEnemies(pe, true);
+  Net.peers.delete(id);
+  netRebuildLists();
+  if (announce) showToast(pe.name + ' hat den Raum verlassen');
+}
+// Gegner eines Mitspielers verschwinden (er ist weg oder gestorben): mit einem kleinen Puff, wenn man sie sieht
+function netDropEnemies(pe, puff) {
+  pe.enemies.forEach(function(en){
+    en.dead = true;
+    if (puff && Math.abs(en.x - camera.x) < W / 2 + 60 && Math.abs(en.y - camera.y) < H / 2 + 60) spawnBurst(en.x, en.y, '#bfe7ff', 6);
+  });
+  pe.enemies.clear();
+}
+function netOnFar(m) {
+  const pe = Net.peers.get(m.f);
+  if (!pe) return;
+  const now = performance.now();
+  pe.last = now; pe.seen = true;
+  pe.snaps = [{ t: now - NET_DELAY, x: m.x, y: m.y, a: pe.a, far: true }];
+  pe.x = m.x; pe.y = m.y; pe.lv = m.lv; pe.hp = m.hp; pe.mh = m.mh; pe.fl = m.fl | 0; if (m.ch) pe.ch = m.ch;
+  netDropEnemies(pe, false);
+}
+function netOnTick(m) {
+  const pe = Net.peers.get(m.f);
+  if (!pe || typeof m.ts !== 'number') return;
+  const now = performance.now();
+  const sample = now - m.ts;                    // Uhr des Mitspielers + Laufzeit: die kleinste Differenz ist die beste Schätzung
+  if (pe.off === null || sample < pe.off) pe.off = sample; else pe.off += (sample - pe.off) * 0.02;
+  const t = m.ts + pe.off;
+  pe.last = now; pe.seen = true;
+  pe.fl = m.fl | 0; pe.hp = m.hp; pe.mh = m.mh; pe.lv = m.lv; if (m.ch) pe.ch = m.ch;
+  if (pe.snaps.length && (t <= pe.snaps[pe.snaps.length - 1].t || pe.snaps[pe.snaps.length - 1].far)) pe.snaps.length = 0;   // nach Fern-Meldungen: springen statt gleiten
+  pe.snaps.push({ t: t, x: m.x, y: m.y, a: m.a || 0 });
+  if (pe.snaps.length > 8) pe.snaps.shift();
+  if (pe.fl & NF_DEAD) netDropEnemies(pe, true);
+  else if (m.e) netApplyEnemies(pe, m.e, t);
+  else netDropEnemies(pe, false);
+  if (m.fx) for (let i = 0; i < m.fx.length; i++) { const f = m.fx[i]; if (Array.isArray(f)) Net.fxIn.push({ pe: pe, f: f, due: t - (f[1] || 0) + NET_DELAY }); }
+  if (m.h) for (let i = 0; i < m.h.length; i++) { const h = m.h[i]; if (Array.isArray(h) && h[0] === Net.id) Net.hitsIn.push({ src: m.f, id: h[1], dmg: netClamp(h[2], NET_MAX_HIT), fl: h[3] | 0, at: now }); }
+}
+// Gegner-Liste eines Mitspielers: [id, Art, x, y, HP, max. HP, Radius, Schaden, Merkmale, Extras]
+function netApplyEnemies(pe, list, t) {
+  const stamp = ++Net.stamp;
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i];
+    if (!Array.isArray(r)) continue;
+    if (r.length < 9) {                         // kurz: [id, x, y, HP %, Merkmale] – nur für schon bekannte Gegner
+      const k = pe.enemies.get(r[0]);
+      if (!k) continue;
+      if (k.snaps.length && t <= k.snaps[k.snaps.length - 1].t) k.snaps.length = 0;
+      k.snaps.push({ t: t, x: r[1], y: r[2] });
+      if (k.snaps.length > 4) k.snaps.shift();
+      k.hp = k.maxHp * netClamp(r[3], 100) / 100;
+      const sf = r[4] | 0;
+      if (sf & 2) k.hitFlash = Math.max(k.hitFlash, 0.12);
+      k.shell = !!(sf & 4);
+      k.stamp = stamp;
+      continue;
+    }
+    let en = pe.enemies.get(r[0]);
+    if (!en) {
+      const type = NET_TYPES[r[1]] || 'qualle', isBoss = !!BOSS_TYPES[type], def = isBoss ? BOSS_TYPES[type] : ENEMY_TYPES[type];
+      en = { remote: true, owner: pe.id, peer: pe, rid: r[0], type: type, isBoss: isBoss, name: def.name, color: def.color, accessory: def.accessory,
+        x: r[2], y: r[3], r: 10, hp: 1, maxHp: 1, dmg: 0, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, slowTimer: 0, wobble: Math.random() * 10,
+        phase: 1, state: 'walk', stT: 0, ang: 0, gap: 0, encounterNumber: 1, champ: null, champKey: '', cst: null, dAng: 0, lead: null, tg: null,
+        frozen: false, dead: false, snaps: [] };
+      pe.enemies.set(r[0], en);
+    }
+    if (en.snaps.length && t <= en.snaps[en.snaps.length - 1].t) en.snaps.length = 0;
+    en.snaps.push({ t: t, x: r[2], y: r[3] });
+    if (en.snaps.length > 4) en.snaps.shift();
+    en.hp = netClamp(r[4], 1e9); en.maxHp = Math.max(1, netClamp(r[5], 1e9)); en.r = Math.max(4, netClamp(r[6], 200)); en.dmg = netClamp(r[7], NET_MAX_DMG);
+    const f = r[8] | 0;
+    en.elite = !!(f & 1); if (f & 2) en.hitFlash = Math.max(en.hitFlash, 0.12); en.shell = !!(f & 4);
+    const ex = r[9] || null;
+    en.ldId = ex && ex.ld ? ex.ld : 0;
+    if (ex && ex.c) {
+      const key = ex.c.join(',');
+      if (key !== en.champKey) {
+        en.champKey = key;
+        en.champ = ex.c.map(function(k){ return CHAMPION_TRAIT_KEYS[k]; }).filter(Boolean);
+        if (!en.champ.length) en.champ = null;
+        en.name = en.champ ? championName(en.type, en.champ) : (en.isBoss ? BOSS_TYPES[en.type].name : ENEMY_TYPES[en.type].name);
+      }
+    } else if (en.champ) { en.champ = null; en.champKey = ''; en.name = en.isBoss ? BOSS_TYPES[en.type].name : ENEMY_TYPES[en.type].name; }
+    if (ex && ex.cs != null) { en.cst = NET_CST[ex.cs] || null; en.dAng = ex.da || 0; } else en.cst = null;
+    if (en.isBoss && ex) {
+      en.state = NET_STATES[ex.s] || 'walk'; en.stT = ex.st || 0; en.phase = ex.ph || 1; en.ang = ex.an || 0; en.gap = ex.gp || 0; en.encounterNumber = ex.n || 1;
+      en.tgId = ex.tg || 0;
+    }
+    en.stamp = stamp;
+  }
+  pe.enemies.forEach(function(en, id){ if (en.stamp !== stamp) { en.dead = true; pe.enemies.delete(id); } });
+  pe.enemies.forEach(function(en){
+    en.lead = en.ldId ? (pe.enemies.get(en.ldId) || null) : null;
+    if (en.isBoss) en.tg = en.tgId === Net.id ? player : (en.tgId && Net.peers.get(en.tgId)) || pe;
+  });
+}
+
+// ---------- jedes Bild: Mitspieler und ihre Gegner glätten, Treffer und Ereignisse anwenden, Zustand senden ----------
+function netSample(snaps, tD, out) {
+  const n = snaps.length;
+  if (!n) return;
+  if (n === 1 || tD <= snaps[0].t) { out.x = snaps[0].x; out.y = snaps[0].y; return; }
+  for (let i = n - 1; i > 0; i--) {
+    const a = snaps[i - 1], b = snaps[i];
+    if (tD < a.t) continue;
+    if (tD <= b.t) { const k = b.t > a.t ? (tD - a.t) / (b.t - a.t) : 1; out.x = a.x + (b.x - a.x) * k; out.y = a.y + (b.y - a.y) * k; return; }
+    const span = b.t - a.t, k = span > 0 ? Math.min(tD - b.t, 150) / span : 0;     // etwas vorausrechnen, höchstens 150 ms
+    out.x = b.x + (b.x - a.x) * k; out.y = b.y + (b.y - a.y) * k; return;
+  }
+}
+function netPeerActive(pe) { return pe.seen && !pe.asleep && !(pe.fl & (NF_PAUSED | NF_DEAD)); }
+function netUpdatePeers(now, dt) {
+  const tD = now - NET_DELAY;
+  let live = false;
+  Net.peers.forEach(function(pe){
+    pe.asleep = pe.seen && now - pe.last > NET_ASLEEP;
+    if (pe.snaps.length) {
+      const ox = pe.x, oy = pe.y;
+      netSample(pe.snaps, tD, pe);
+      const s = pe.snaps[pe.snaps.length - 1];
+      pe.a = s.a;
+      const vx = dt > 0 ? (pe.x - ox) / dt : 0, vy = dt > 0 ? (pe.y - oy) / dt : 0, sp = Math.hypot(vx, vy);
+      pe.speed += (sp - pe.speed) * 0.2;
+      pe.mv = sp > 8 ? { x: vx / sp, y: vy / sp, mag: 1 } : { x: 0, y: 0, mag: 0 };
+      pe.bob += dt * (sp > 8 ? 9 : 4);
+    }
+    pe.active = netPeerActive(pe);
+    if (player && pe.seen && !pe.asleep && !(pe.fl & NF_DEAD) && distXY(pe.x, pe.y, player.x, player.y) <= NET_LIVE) live = true;
+    pe.enemies.forEach(function(en){
+      netSample(en.snaps, tD, en);
+      if (en.hitFlash > 0) en.hitFlash -= dt;
+      if (en.isBoss && en.stT > 0 && pe.active) en.stT = Math.max(0, en.stT - dt);
+      if (pe.active) en.wobble += dt * 8;
+    });
+  });
+  Net.live = live;
+  netRebuildLists();
+}
+function netRebuildLists() {
+  const act = [], frz = [];
+  Net.peers.forEach(function(pe){
+    const on = netPeerActive(pe);
+    pe.enemies.forEach(function(en){ if (en.dead) return; en.frozen = !on; (on ? act : frz).push(en); });
+  });
+  remoteEnemyList = act; remoteFrozen = frz;
+}
+// Gegner eines Mitspielers können dich berühren (dein Browser entscheidet über deinen Schaden), der Sog seines Bosses zieht dich
+function netRemoteUpdate(dt) {
+  const p = player;
+  for (let i = 0; i < remoteEnemyList.length; i++) {
+    const en = remoteEnemyList[i];
+    if (en.orbitHitTimer > 0) en.orbitHitTimer -= dt;
+    if (en.contactTimer > 0) en.contactTimer -= dt;
+    if (en.dead || gameState !== 'playing') continue;
+    if (distXY(en.x, en.y, p.x, p.y) < en.r + p.r && en.contactTimer <= 0 && invulnTimer <= 0) {
+      if (damagePlayer(en.dmg) && hasTrait(en, 'vampir')) vampirHeal(en);
+      en.contactTimer = 0.55;
+    }
+    if (en.isBoss && en.state === 'sog') sogPull(en, dt, distXY(en.x, en.y, p.x, p.y) || 1);
+  }
+}
+// Treffer von Mitspielern an deinen Gegnern (nur während du spielst; alte verfallen)
+function netProcessHits(now) {
+  if (!Net.hitsIn.length) return;
+  const list = Net.hitsIn; Net.hitsIn = [];
+  for (let i = 0; i < list.length; i++) {
+    const h = list[i];
+    if (now - h.at > 3000) continue;
+    let en = null;
+    for (let j = 0; j < enemies.length; j++) if (enemies[j].id === h.id) { en = enemies[j]; break; }
+    if (!en || en.dead) continue;
+    if (h.fl & NET_HIT_VAMPIR) vampirHeal(en);
+    if (h.dmg > 0) applyDamageToEnemy(en, h.dmg, h.fl, h.src);
+    if (h.fl & NET_HIT_SLOW) en.slowTimer = 1.5;
+  }
+}
+// Ereignisse der Mitspieler (Schüsse, Zonen, Wellen, Siege, Effekte) zur richtigen Zeit nachspielen
+function netProcessFx(now) {
+  if (!Net.fxIn.length) return;
+  const keep = [], playing = gameState === 'playing';
+  for (let i = 0; i < Net.fxIn.length; i++) {
+    const ev = Net.fxIn[i];
+    if (ev.due > now) { keep.push(ev); continue; }
+    const late = (now - ev.due) / 1000;
+    if (ev.f[0] === 'k') { netApplyKill(ev.pe, ev.f); continue; }       // Siege nie verwerfen (Beute!)
+    if (!playing) { if (late < 1.5) keep.push(ev); continue; }
+    if (late > 1.5) continue;
+    netApplyFx(ev.pe, ev.f, late);
+  }
+  Net.fxIn = keep;
+}
+function netApplyFx(pe, f, late) {
+  const k = f[0];
+  if (k === 's') {            // Gegnerschuss: ['s', Alter, x, y, vx, vy, r, Schaden, Lebensdauer, Farbe, Merkmale]
+    if (f[8] - late <= 0) return;
+    enemyProjectiles.push({ x: f[2] + f[4] * late, y: f[3] + f[5] * late, vx: f[4], vy: f[5], r: netClamp(f[6], 40), dmg: netClamp(f[7], NET_MAX_DMG), life: Math.min(8, f[8] - late), color: f[9] || '#c9a6ff',
+      heavy: !!(f[10] & 1), isInk: !!(f[10] & 2), remote: true });
+  } else if (k === 'z') {     // Zone: ['z', Alter, x, y, r, Warnzeit, Dauer, Art, Schaden]
+    zones.push({ x: f[2], y: f[3], r: netClamp(f[4], 200), t: late, warn: netClamp(f[5], 5), life: netClamp(f[6], 8), kind: ['lava', 'slam', 'burst'].indexOf(f[7]) !== -1 ? f[7] : 'slam', dmg: netClamp(f[8], NET_MAX_DMG), hit: false, remote: true });
+  } else if (k === 'w') {     // Magmawelle: ['w', Alter, x, y, r, Lücke1, Lücke2, Lücke3, Schaden]
+    shockwaves.push({ x: f[2], y: f[3], r: f[4] + 230 * late, gaps: [f[5], f[6], f[7]], dmg: netClamp(f[8], NET_MAX_DMG), hit: false, remote: true });
+  } else if (k === 'c') {     // Tintenwolke eines Mitspielers (nur Effekt)
+    spawnBurst(f[2], f[3], '#c65da8', 6);
+    particles.push(makeInkCloudParticle(f[2], f[3], f[4]));
+  } else if (k === 'b') {     // Elektroschlag eines Mitspielers (nur Effekt)
+    particles.push({ x: f[2], y: f[3], tx: f[4], ty: f[5], isBolt: true, life: 0.15, maxLife: 0.15, color: '#5ef2c0' });
+  } else if (k === 'p') {     // Schuss eines Mitspielers (nur Effekt; seine Treffer meldet er selbst)
+    if (f[7] - late > 0) Net.shots.push({ x: f[2] + f[4] * late, y: f[3] + f[5] * late, vx: f[4], vy: f[5], r: f[6], life: f[7] - late, color: f[8] || '#bdeeff', pierce: f[9] | 0 });
+  }
+}
+// Sieg über einen Gegner eines Mitspielers: ['k', Alter, id, Helfer, x, y, Art, XP, Merkmale, Begegnung]. Jeder Helfer bekommt seine eigene Beute.
+function netApplyKill(pe, f) {
+  const en = pe.enemies.get(f[2]);
+  if (en) { en.dead = true; pe.enemies.delete(f[2]); }
+  const type = NET_TYPES[f[6]] || 'qualle', def = BOSS_TYPES[type] || ENEMY_TYPES[type];
+  if (Math.abs(f[4] - camera.x) < W / 2 + 80 && Math.abs(f[5] - camera.y) < H / 2 + 80) spawnBurst(f[4], f[5], def.color, (f[8] & 4) ? 26 : 10);
+  const helpers = Array.isArray(f[3]) ? f[3] : [];
+  if (helpers.indexOf(Net.id) === -1 || !player || gameState === 'gameover') return;
+  const k = { x: f[4], y: f[5], type: type, xp: netClamp(f[7], NET_MAX_XP), elite: !!(f[8] & 1), champ: !!(f[8] & 2), isBoss: !!(f[8] & 4) && !!BOSS_TYPES[type], enc: Math.min(20, f[9] | 0 || 1) };
+  grantKill(k);
+  Sfx.death();
+  if (k.isBoss || k.champ) checkAchievements();
+}
+function netUpdateShots(dt) {
+  if (!Net.shots.length) return;
+  const list = remoteEnemyList.length ? enemies.concat(remoteEnemyList) : enemies;
+  for (let i = Net.shots.length - 1; i >= 0; i--) {
+    const s = Net.shots[i];
+    s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+    let gone = s.life <= 0;
+    if (!gone && !s.pierce) for (let j = 0; j < list.length; j++) { const en = list[j]; if (!en.dead && distXY(s.x, s.y, en.x, en.y) < s.r + en.r) { gone = true; break; } }
+    if (gone) Net.shots.splice(i, 1);
+  }
+}
+
+// ---------- senden ----------
+// Online jagt ein Gegner den nächsten Blobi: dich oder einen Mitspieler in Sync-Reichweite (der ihn dann sicher sieht)
+function netTargetOf(en) {
+  let best = player, bd = distXY(en.x, en.y, player.x, player.y);
+  Net.peers.forEach(function(pe){
+    if (!pe.active) return;
+    const d = distXY(en.x, en.y, pe.x, pe.y);
+    if (d < bd && d <= NET_NEAR) { bd = d; best = pe; }
+  });
+  return best;
+}
+function netNearbyPeers(x, y) {
+  const out = [];
+  Net.peers.forEach(function(pe){ if (pe.active && distXY(pe.x, pe.y, x, y) <= NET_NEAR) out.push(pe); });
+  return out;
+}
+// Champions: Level-Faktor aus dem Durchschnitts-Level der Spieler in der Nähe, +50 % HP pro weiterem Spieler
+function championScale() {
+  if (!Net.on) return levelFactor(runLevel);
+  const near = netNearbyPeers(player.x, player.y);
+  let lv = runLevel;
+  for (let i = 0; i < near.length; i++) lv += near[i].lv || 1;
+  return levelFactor(lv / (near.length + 1)) * (1 + CHAMPION_GROUP_HP * near.length);
+}
+function netAnnounce(kind, o) {
+  const now = performance.now();
+  if (kind === 's') Net.fxOut.push(['s', now, Math.round(o.x), Math.round(o.y), netR1(o.vx), netR1(o.vy), o.r, netR1(o.dmg), netR2(o.life), o.color, (o.heavy ? 1 : 0) | (o.isInk ? 2 : 0)]);
+  else if (kind === 'z') Net.fxOut.push(['z', now, Math.round(o.x), Math.round(o.y), o.r, netR2(o.warn), netR2(o.life), o.kind, netR1(o.dmg)]);
+  else if (kind === 'w') Net.fxOut.push(['w', now, Math.round(o.x), Math.round(o.y), Math.round(o.r), netR2(o.gaps[0]), netR2(o.gaps[1]), netR2(o.gaps[2]), netR1(o.dmg)]);
+}
+function netFx(kind, a, b, c, d) {
+  if (!Net.live) return;
+  if (kind === 'c') Net.fxOut.push(['c', performance.now(), Math.round(a), Math.round(b), Math.round(c)]);
+  else if (kind === 'b') Net.fxOut.push(['b', performance.now(), Math.round(a), Math.round(b), Math.round(c), Math.round(d)]);
+}
+function netShotFx(pr) {
+  if (!Net.live) return;
+  Net.fxOut.push(['p', performance.now(), Math.round(pr.x), Math.round(pr.y), Math.round(pr.vx), Math.round(pr.vy), pr.r, netR2(pr.life), pr.color, pr.pierce || 0]);
+}
+// Treffer an einem Gegner eines Mitspielers: wird gesammelt und mit der nächsten Nachricht an ihn geschickt
+function netQueueHit(en, dmg, flags) {
+  const key = en.owner + ':' + en.rid;
+  const h = Net.hitsOut.get(key);
+  if (h) { h[2] += dmg; h[3] |= flags; } else Net.hitsOut.set(key, [en.owner, en.rid, dmg, flags]);
+  Net.toOut.add(en.owner);
+}
+// dein Gegner ist besiegt: Helfer bekommen ihre Beute, alle in der Nähe sehen ihn verschwinden
+function netEnemyKilled(en, k) {
+  const helpers = en.helpers ? Array.from(en.helpers) : [];
+  if (!Net.live && !helpers.length) return;
+  Net.fxOut.push(['k', performance.now(), en.id, helpers, Math.round(k.x), Math.round(k.y), NET_TYPE_IDX[k.type], k.xp, (k.elite ? 1 : 0) | (k.champ ? 2 : 0) | (k.isBoss ? 4 : 0), k.enc]);
+  for (let i = 0; i < helpers.length; i++) Net.toOut.add(helpers[i]);
+}
+function netEnemyRecords() {
+  const near = [];
+  Net.peers.forEach(function(pe){ if (pe.seen && !pe.asleep && !(pe.fl & NF_DEAD)) near.push(pe); });
+  const out = [];
+  if (!near.length) return out;
+  for (let i = 0; i < enemies.length; i++) {
+    const en = enemies[i];
+    if (en.dead) continue;
+    let mask = 0;                              // welche Mitspieler diesen Gegner gerade bekommen (ein Bit pro Spieler)
+    for (let j = 0; j < near.length; j++) if (distXY(near[j].x, near[j].y, en.x, en.y) <= NET_NEAR) mask |= 1 << (near[j].id % 30);
+    if (!mask) { en.netMask = 0; continue; }
+    const fresh = (mask & ~(en.netMask || 0)) !== 0;   // jemand sieht ihn neu: er braucht alle Angaben
+    en.netMask = mask;
+    const fl = (en.elite ? 1 : 0) | (en.hitFlash > 0 ? 2 : 0) | (en.shell ? 4 : 0);
+    const mh = netR1(en.maxHp), rr = netR1(en.r), dm = netR1(en.dmg * (en.lead ? LEADER_DMG : 1)), sig = mh + '|' + rr + '|' + dm;
+    if (!fresh && !en.champ && !en.isBoss && !en.cst && !en.lead && en.netSig === sig && (Net.tick + en.id) % 10 !== 0) {
+      const sh = [en.id, Math.round(en.x), Math.round(en.y), en.maxHp > 0 ? Math.round(Math.max(0, en.hp) / en.maxHp * 100) : 0];   // kurz: nur Ort und HP in %
+      if (fl) sh.push(fl);
+      out.push(sh);
+      continue;
+    }
+    en.netSig = sig;
+    const r = [en.id, NET_TYPE_IDX[en.type], Math.round(en.x), Math.round(en.y), netR1(Math.max(0, en.hp)), mh, rr, dm, fl];
+    let ex = null;
+    if (en.champ) (ex = ex || {}).c = en.champ.map(function(t){ return CHAMPION_TRAIT_KEYS.indexOf(t); });
+    if (en.cst) { ex = ex || {}; ex.cs = NET_CST.indexOf(en.cst); ex.da = netR2(en.dAng || 0); }
+    if (en.lead && !en.lead.dead) (ex = ex || {}).ld = en.lead.id;
+    if (en.isBoss) {
+      ex = ex || {};
+      ex.s = Math.max(0, NET_STATES.indexOf(en.state)); ex.st = netR2(en.stT || 0); ex.ph = en.phase; ex.an = netR2(en.ang || 0); ex.gp = netR2(en.gap || 0);
+      ex.n = en.encounterNumber; ex.tg = (en.tg && en.tg !== player && en.tg.id) ? en.tg.id : 0;
+    }
+    if (ex) r.push(ex);
+    out.push(r);
+  }
+  return out;
+}
+function netSendTick(now) {
+  const ws = Net.ws;
+  if (!ws || ws.readyState !== 1 || !player) { Net.fxOut = []; Net.hitsOut.clear(); Net.toOut.clear(); return; }
+  const fl = (gameState === 'paused' || gameState === 'levelup') ? NF_PAUSED : (gameState === 'gameover' || gameState === 'menu' ? NF_DEAD : 0);
+  const p = player;
+  const m = { t: 's', ts: Math.round(now), x: Math.round(p.x), y: Math.round(p.y), a: netR2(p.angle || 0), hp: Math.ceil(Math.max(0, p.hp)), mh: Math.round(p.maxHp),
+    lv: runLevel, ch: selectedCharacterId, fl: fl };
+  if (Net.live && !(fl & NF_DEAD)) { Net.tick++; m.e = netEnemyRecords(); }
+  else for (let i = 0; i < enemies.length; i++) enemies[i].netMask = 0;     // niemand bekommt sie: später wieder mit allen Angaben
+  if (Net.fxOut.length) { m.fx = Net.fxOut; for (let i = 0; i < m.fx.length; i++) m.fx[i][1] = Math.max(0, Math.round(now - m.fx[i][1])); Net.fxOut = []; }
+  if (Net.hitsOut.size) { m.h = []; Net.hitsOut.forEach(function(h){ m.h.push([h[0], h[1], netR1(h[2]), h[3]]); }); Net.hitsOut.clear(); }
+  if (Net.toOut.size) { m.to = Array.from(Net.toOut); Net.toOut.clear(); }
+  try { ws.send(JSON.stringify(m)); } catch (e) { /* Verbindung bricht gerade ab */ }
+}
+function netFrame(dt) {
+  const now = performance.now();
+  netUpdatePeers(now, dt);
+  if (gameState === 'playing') { netProcessHits(now); netRemoteUpdate(dt); }
+  netProcessFx(now);
+  netUpdateShots(dt);
+  if (now - Net.lastSend >= (Net.live ? NET_TICK_NEAR : NET_TICK_FAR)) { Net.lastSend = now; netSendTick(now); }
+}
+
+// ---------- zeichnen: Mitspieler, ihre Schüsse, Pfeile ----------
+function netColorRgb(col) { const c = hexToRgb(NET_COLORS[col % NET_COLORS.length]); return c.r + ',' + c.g + ',' + c.b; }
+function drawNetRing(sx, sy, r, col) {
+  ctx.save();
+  ctx.strokeStyle = NET_COLORS[col % NET_COLORS.length]; ctx.globalAlpha *= 0.75; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(sx, sy + r * 0.95, r * 1.05, r * 0.42, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+function drawPeers() {
+  Net.peers.forEach(function(pe){
+    if (!pe.seen || (pe.fl & NF_DEAD)) return;
+    const sx = pe.x - camera.x + W / 2, sy = pe.y - camera.y + H / 2;
+    if (sx < -80 || sx > W + 80 || sy < -80 || sy > H + 80) return;
+    const sleepy = pe.asleep || (pe.fl & NF_PAUSED);
+    ctx.globalAlpha = sleepy ? 0.5 : 1;
+    drawNetRing(sx, sy, pe.r, pe.col);
+    const ch = CHARACTERS.filter(function(c){ return c.id === pe.ch; })[0] || CHARACTERS[0];
+    drawPlayerSprite(sx, sy, pe.r, { wobble: pe.bob, angle: pe.a, glow: 10, charId: ch.id, color: ch.color, dark: ch.dark });
+    // Namensschild mit Level und kleinem Lebensbalken
+    const label = pe.name + ' · Lv ' + (pe.lv || 1) + (pe.asleep ? ' 💤' : (pe.fl & NF_PAUSED ? ' ⏸' : ''));
+    ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const ty = sy - pe.r * 1.55 - 12;
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, sx, ty);
+    ctx.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; ctx.fillText(label, sx, ty);
+    const bw = 40, frac = Math.max(0, Math.min(1, pe.hp / Math.max(1, pe.mh)));
+    ctx.fillStyle = 'rgba(2,10,20,0.7)'; ctx.fillRect(sx - bw / 2 - 1, ty + 8, bw + 2, 5);
+    ctx.fillStyle = frac > 0.3 ? '#5ef2c0' : '#ff5c72'; ctx.fillRect(sx - bw / 2, ty + 9, bw * frac, 3);
+    ctx.globalAlpha = 1;
+  });
+}
+function drawNetShots() {
+  for (let i = 0; i < Net.shots.length; i++) {
+    const s = Net.shots[i], sx = s.x - camera.x + W / 2, sy = s.y - camera.y + H / 2;
+    if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) continue;
+    ctx.globalAlpha = 0.8; ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+// Pfeile zu den 5 nächsten Mitspielern ausserhalb des Bildes (mit Name und Entfernung), dazu ihre Bosse und Champions
+function drawPeerArrows() {
+  for (let i = 0; i < remoteEnemyList.length; i++) {
+    const en = remoteEnemyList[i];
+    if (en.isBoss) edgeArrow(en.x, en.y, '255,92,114', 0.8);
+    else if (en.champ) edgeArrow(en.x, en.y, CHAMPION_TRAITS[en.champ[0]].rgb, 0.6);
+  }
+  const list = [];
+  Net.peers.forEach(function(pe){ if (pe.seen && !(pe.fl & NF_DEAD)) list.push(pe); });
+  list.sort(function(a, b){ return distXY(a.x, a.y, player.x, player.y) - distXY(b.x, b.y, player.x, player.y); });
+  for (let i = 0; i < Math.min(5, list.length); i++) {
+    const pe = list[i], d = distXY(pe.x, pe.y, player.x, player.y);
+    edgeArrow(pe.x, pe.y, netColorRgb(pe.col), 0.85, pe.name + ' · ' + Math.round(d / 10) + ' m');
+  }
+}
+// Boss-Balken: dein Boss oder sonst der Boss eines Mitspielers in deiner Nähe
+function netHudBoss() {
+  let best = null, bd = 1500;
+  for (let i = 0; i < remoteEnemyList.length; i++) {
+    const en = remoteEnemyList[i];
+    if (!en.isBoss) continue;
+    const d = distXY(en.x, en.y, player.x, player.y);
+    if (d < bd) { bd = d; best = en; }
+  }
+  return best;
+}
+function netRoomLabel() { return '🌐 ' + Net.code + ' · ' + (Net.peers.size + 1) + '/' + Net.cap; }
 
 document.addEventListener('DOMContentLoaded', function(){
   initUI();

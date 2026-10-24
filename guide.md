@@ -1,6 +1,6 @@
 # Blobfisch Survivors — Complete Reference
 
-Every number below is pulled directly from the current game code, not from memory — and the weapon/passive tables below have also been checked against the running game level by level, so this reflects what's shipped right now (including area hazards, boss phases and recurring bosses, per-area pearl rates, the wearing Bubble Ring, the rebalanced Shop and claimable achievements). Percentages and damage values are shown *before* your character's damage multiplier, Shop bonuses and the Schlagkraft passive are applied, except where noted.
+Every number below is pulled directly from the current game code, not from memory — and the weapon/passive tables below have also been checked against the running game level by level, so this reflects what's shipped right now (including area hazards, boss phases and recurring bosses, per-area pearl rates, the wearing Bubble Ring, the rebalanced Shop, claimable achievements, champions and the online mode). Percentages and damage values are shown *before* your character's damage multiplier, Shop bonuses and the Schlagkraft passive are applied, except where noted.
 
 ---
 
@@ -13,7 +13,7 @@ Every number below is pulled directly from the current game code, not from memor
 | **Panzer-Blobi** | Available from the start | 145 | 122 | ×1.0 | ×1.05 (5% *slower*) | 0 | Side-view art — mirrors left/right, tilts up to 90° |
 | **Glücks-Blobi** | Reach level 25 in one run | 90 | 155 | ×1.0 | ×0.95 (5% *faster*) | +3 | Side-view art — mirrors left/right, tilts up to 90° |
 
-The character-select cards show the real, current numbers (including any Shop bonuses), and the stage cards show their difficulty multiplier and boss. These are *base* stats. Shop upgrades (Section 8) add flat/percentage bonuses on top of whichever character you pick, every run. Players who unlocked Glücks-Blobi under the earlier level-15 rule keep it.
+The character-select cards show the real, current numbers (including any Shop bonuses), and the stage cards show their difficulty multiplier and boss. These are *base* stats. Shop upgrades (Section 9) add flat/percentage bonuses on top of whichever character you pick, every run. Players who unlocked Glücks-Blobi under the earlier level-15 rule keep it.
 
 Turbo, Panzer, and Glücks are drawn from the side, so instead of spinning all the way around (which would flip them upside-down), they mirror horizontally once you're heading more than 90° away from their natural facing, and only tilt within that ±90° window. Standard is the only one drawn from directly above, so it turns freely in a full circle.
 
@@ -72,13 +72,13 @@ Base stats below; actual in-run stats scale with time elapsed and stage difficul
 
 **While a boss is alive** the arena is calmer so you can focus on the duel: each wave brings only half as many regular enemies (rounded up, at least 1), the gap between waves is 1.4× longer, no Elites are created and the Piranha-Ring waits until the boss is dead. (The boss's own helpers are separate, see Section 4.)
 
-**The 70-enemy cap:** at most 70 regular enemies are alive at once. At the cap, a new spawn never deletes anything you can see — it *replaces the farthest enemy that is outside the screen*, and if every enemy is on-screen the spawn is simply skipped. Bosses and elites are never replaced.
+**The 70-enemy cap:** at most 70 regular enemies are alive at once. At the cap, a new spawn never deletes anything you can see — it *replaces the farthest enemy that is outside the screen*, and if every enemy is on-screen the spawn is simply skipped. Bosses, elites and champions are never replaced, and a champion appears even when the cap is reached (Section 5).
 
 **Piranha schools and rings:** whenever the spawner picks a Piranha it spawns a whole school of `4 + min(5, ⌊seconds/90⌋)` packed together (4 at the start, 9 from 7:30 on). On stages that have Piranhas (Riff, Kelp, Vulkan), a **Piranha-Ring** hits at 2:00 and then every 100 s (postponed while a boss is alive): 12 Piranhas appear evenly spaced on a circle just outside the screen and close in all at once, announced by a banner.
 
 **Elites:** from 3:00 on, roughly every 55 s the next regular spawn (a Piranha school never counts) becomes an **Elite**: gold ring, ×3 HP, ×1.25 damage, ×1.3 size, ×4 XP, and +3 extra pearls when it dies (each worth the area's pearl value).
 
-**Pearl drops:** a regular enemy drops a pearl with the area's drop chance — Riff 11%, Kelp 22%, Graben 16.5%, Vulkan 22% — and each pearl is worth the area's pearl value: 1 in Riff and Kelp, 2 in Graben and Vulkan (Section 2). Bosses drop a treasure (Section 4). Luck adds +10% per point to every pearl you collect (Section 6).
+**Pearl drops:** a regular enemy drops a pearl with the area's drop chance — Riff 11%, Kelp 22%, Graben 16.5%, Vulkan 22% — and each pearl is worth the area's pearl value: 1 in Riff and Kelp, 2 in Graben and Vulkan (Section 2). Bosses drop a treasure (Section 4). Luck adds +10% per point to every pearl you collect (Section 7).
 
 **Piles of orbs:** XP orbs and pearls that lie far away from you are merged so that huge piles don't slow the game down, and **nothing is ever lost**. Orbs outside the screen simply combine invisibly into one bigger orb (bigger orbs are drawn slightly larger, up to radius 12). If more than 200 orbs are lying around, the ones that are on-screen but more than 60 units beyond your pickup radius no longer vanish: they slowly drift into the nearest orb of their patch and add up when they arrive. As soon as you swim within pickup range, a drifting orb becomes individually collectible again. Hearts never merge.
 
@@ -163,11 +163,59 @@ On top of that, each earlier appearance shortens the waits by another 8% (this e
 | 3rd | 5 each → 40–65 | 10 each → 80–130 |
 | 4th | 6 each → 48–78 | 12 each → 96–156 |
 
-Beating a boss for the first time also opens the next area (Section 2) and counts toward the boss achievements (Section 9).
+Beating a boss for the first time also opens the next area (Section 2) and counts toward the boss achievements (Section 10).
+
+**Champion bosses:** from the 3rd boss of a run on, the boss comes as an angry champion boss with a special trait, more HP and double treasure (Section 5).
 
 ---
 
-## 5. Waffen (Weapons)
+## 5. Champions
+
+A **champion** is a rare, much tougher version of a normal enemy with one special trait (two late in a run). It is worth hunting: it drops a treasure chest. Champions sit one clear step above the gold-ringed Elites, which stay as they are. The TurboWarp Lite version has the same champions with the same numbers.
+
+**When they come**
+- The first champion appears at **4:00**, then one every **120–150 s** (random).
+- Never during a boss fight (also not during the 3-second boss warning). After a boss dies, the next champion waits at least 20 s.
+- At most **1** at a time before 15:00, up to **2** from **15:00** on.
+- It is a random type from the area's current spawn rotation (Section 3), except **Piranha** (too small) and **Seeigel** (can't move). A champion appears even when the 70-enemy cap is full, and the cap never removes one.
+- A message announces it ("👑 Champion erschienen: Gepanzerter Riesenkrebs") with a fanfare, and while it is off-screen a small arrow in its trait colour points to it.
+
+**How strong**
+- HP: `normal HP at that moment × 8 × level factor`. The level factor is the bosses' one (Section 4): `(your level ÷ 21)^1.3`, limited to 0.7 – 6. Online, the level is the average of the players near the champion, and it gets **+50 % HP for every other player nearby** (Section 13).
+- Damage ×1.4, size ×1.5, XP ×10.
+- Examples (single-player): a Krebs champion at 4:00 in the Riff at level 15 has 285 HP (a normal Krebs: 51); a Muräne champion at 10:00 in the Kelpwald at level 30 has 701 HP; a Riesenkrebs champion at 15:00 in the Tiefsee-Graben at level 45 has about 11,000 HP and hits for 76.
+- One random trait before 15:00, two different ones from 15:00 on.
+
+**Traits**
+
+| Trait | Colour | What it does | How to beat it |
+|---|---|---|---|
+| **Flink** (fast) | cyan | 60 % faster. Every 4 s (the first after 2–4 s), when you're within 520 units, it **flashes for 0.6 s** — a cyan ring and a lane show where it will go; it keeps aiming at you until 0.2 s before — then **dashes** for 0.35 s at 480 units/s (about 170 units). | Sidestep when it flashes. |
+| **Gepanzert** (armoured) | grey | A **shell** of six plates blocks **60 %** of all damage until the champion has lost 30 % of its HP; then the shell cracks (with a sound and a puff) and it takes full damage. | Strong single hits: Korallenspeer, Harpune. |
+| **Vampir** | red | Heals **10 % of its max HP** every time its touch costs you HP (a blocked hit — Schutzschild — doesn't heal it). | Keep your distance. |
+| **Teilend** (splitting) | green | When it dies it **splits into 3 normal enemies** of its type with 1.5× the normal HP (they obey the enemy cap). | Be ready for the split. |
+| **Explosiv** | orange | When it dies, a **marked circle** (radius 110) appears where it died and **bursts after 1 s** for 2× its touch damage, once. | Swim out of the circle. |
+| **Anführer** (leader) | gold | While it lives, other enemies within 220 units are **25 % faster** and hit **20 % harder** (touch and shots); thin gold lines link them to it. Bosses aren't affected. | Kill it first. |
+
+**Look:** a soft aura in the trait colour, a small crown, and a name tag with its own HP bar, for example "Flinker Krebs", "Gepanzerte Qualle", "Anführer-Hai" or, with two traits, "Teilende, gepanzerte Qualle". The second trait shows as a dashed ring in its colour. In the Tiefsee-Graben champions glow, so they stay visible in the dark.
+
+**Reward:** its XP orb (×10 XP) and a **treasure chest** with **12 × the area's pearl value**: 12 pearls in the Riff and the Kelpwald, 24 in the Tiefsee-Graben and the Vulkanschlucht. Luck applies (+10 % per point). Chests are never merged with other pickups.
+
+**Champion bosses:** from the **3rd boss encounter** of a run on, the boss arrives as a **champion boss**:
+- one trait: Flink (the boss walks 35 % faster), Gepanzert, Vampir or Anführer;
+- **"wütend"**: it roars as soon as it arrives and fights in Phase 2 from the start (it can still reach Phase 3); the message reads "👑 Champion-Boss: … – wütend von Anfang an!", the HUD name gets a 👑, and a rotating dashed ring in its trait colour surrounds it;
+- HP ×1.3 on top of the normal boss scaling (Section 4);
+- reward: **double pearl treasure** (each of the 8–13 pearls is worth twice as much), the usual heart, and a chest with a **free upgrade card**: a normal level-up choice ("🎁 Schatztruhe!") that costs no XP. If a level-up and a free card are waiting at the same time, the level-up comes first.
+
+**Achievements:** Champion-Jäger (defeat 25 champions, +60 pearls) and Kronenbrecher (defeat a champion boss, +120), see Section 10.
+
+**How much they add (measured).** Bot runs of 20 minutes with and without champions, same seeds: in the Korallenriff the bot defeated about 5.4 champions and 0.8 champion bosses per run, which made up about 9–10 % of the run's pearls; in the Tiefsee-Graben about 2 champions, 7 %. No measurable extra levels (the differences stayed within the normal run-to-run spread). Human players who hunt champions get a bit more. The target was 10–15 % of the pearls and at most 1–2 extra levels by 20:00. If champions should feel more rewarding, raise `CHAMPION_CHEST` from 12 to 15.
+
+**Tuning knobs** (all at the top of the game script, next to `BOSS_TYPES`): `CHAMPION_START`, `CHAMPION_GAP_MIN` / `MAX`, `CHAMPION_LATE`, `CHAMPION_HP`, `CHAMPION_DMG`, `CHAMPION_SIZE`, `CHAMPION_XP`, `CHAMPION_CHEST`, `CHAMPION_EXCLUDE`, `CHAMPION_BOSS_FROM`, `CHAMPION_BOSS_HP`, `CHAMPION_BOSS_TRAITS`, the trait table `CHAMPION_TRAITS` and the per-trait numbers `FLINK_*`, `SHELL_*`, `VAMPIR_HEAL`, `SPLIT_*`, `BURST_*`, `LEADER_*`; online `CHAMPION_GROUP_HP`.
+
+---
+
+## 6. Waffen (Weapons)
 
 Every weapon can be leveled 1–5 by picking it (or picking it again) on level-up. Damage figures already include the "+level" scaling but **not** your character's damage multiplier, the Shop damage bonus or the Schlagkraft passive — multiply by all of them to get your real numbers. The level-up cards do that for you and show the final values.
 
@@ -263,7 +311,7 @@ The 2nd companion unlocks at level 3, orbiting on the opposite side from the fir
 
 ---
 
-## 6. Passive Verbesserungen (Passives)
+## 7. Passive Verbesserungen (Passives)
 
 | Passive | Effect per level | L1 | L2 | L3 | L4 | L5 |
 |---|---|---|---|---|---|---|
@@ -278,16 +326,16 @@ The 2nd companion unlocks at level 3, orbiting on the opposite side from the fir
 | **Schlagkraft** | +8% damage on every weapon except Tintenwolke (multiplies with character and Shop damage) | +8% | +16% | +24% | +32% | +40% |
 
 Notes:
-- **Lebenskraft is *not* a revive** (it used to be called Extra-Leben, which was misleading). It raises your max HP **for the current run only** — nothing carries over to the next run — and heals 20 HP each time you pick a level of it; it never brings you back from death. The only revive in the game is **Zweite Chance** in the Shop (Section 8).
+- **Lebenskraft is *not* a revive** (it used to be called Extra-Leben, which was misleading). It raises your max HP **for the current run only** — nothing carries over to the next run — and heals 20 HP each time you pick a level of it; it never brings you back from death. The only revive in the game is **Zweite Chance** in the Shop (Section 9).
 - **Schutzschild** grants an immediate free charge the moment you first pick it, then recharges on the timer above after each block.
 - **Luck** is a shared stat: it comes from your character (Glücks-Blobi starts at +3), the Shop's Glücksbringer (+1 per level), and this passive (+1 per level). Each point of Luck does two things: **+10% pearls from every pearl pickup** (tracked fractionally, so +10% really does mean one extra pearl per ten collected), and **+6% chance that a level-up offers a 4th upgrade card instead of 3** (capped at 60%). When the bonus card appears, the level-up screen says so.
 - **Healing:** there are no healing pickups lying around the map (a pickup like that existed briefly and was removed for being too strong). The HP you regain mid-run comes from Regeneration (continuous), the one-off +20 heal when you pick Lebenskraft, and the **heart every boss drops** (+40% of your max HP, Section 4); the Schutzschild blocks a hit but doesn't heal.
 
 ---
 
-## 7. Spezialmechaniken (How defense works, tied together)
+## 8. Spezialmechaniken (How defense works, tied together)
 
-1. **Ordinary enemy shots** (Anglerfisch, the Tintenfisch ink, and the boss's radial bursts, roar rings, Sog rings, fans, tooth shots and ink ring) — blockable by the Bubble Ring on contact. From ring level 4, every block wears the bubble that took it (Section 5).
+1. **Ordinary enemy shots** (Anglerfisch, the Tintenfisch ink, and the boss's radial bursts, roar rings, Sog rings, fans, tooth shots and ink ring) — blockable by the Bubble Ring on contact. From ring level 4, every block wears the bubble that took it (Section 6).
 2. **Heavy boss shots** (the big glowing red ones) — ignore the Ring entirely. Dodge them or have a charged Schutzschild.
 3. **Contact damage** from touching an enemy — reduced by Panzerung, avoidable with i-frames (0.5s after any hit) or a charged shield.
 4. **Hazards and boss moves** (lava zones, tentacle slams and the whip, the Magma-Schockwelle, the Hai-König's charge, the Sog pull) — not shots, so the Ring can't touch them. They are all telegraphed and avoided by moving; Panzerung reduces them, a charged Schutzschild absorbs one hit, and i-frames apply (which is why standing in lava hurts about every half second).
@@ -299,7 +347,7 @@ Notes:
 
 ---
 
-## 8. Shop (Permanent Upgrades, bought with banked Perlen)
+## 9. Shop (Permanent Upgrades, bought with banked Perlen)
 
 The price of buying level *N+1* is `base cost × multiplier^N`, rounded. The last column lists the price of each level in order.
 
@@ -320,7 +368,7 @@ These stack with your character's base stats and any in-run passives you pick �
 
 ---
 
-## 9. Erfolge (Achievements)
+## 10. Erfolge (Achievements)
 
 | Achievement | Condition | Reward |
 |---|---|---|
@@ -334,8 +382,10 @@ These stack with your character's base stats and any in-run passives you pick �
 | Perlensammler | Earn 1000 pearls in total (lifetime) — having 1000 banked at once also counts | 100 |
 | Voll entwickelt | Reach level 30 in a single run | 75 |
 | Ganze Blobi-Familie | Unlock all 4 characters | 50 |
+| Champion-Jäger | Defeat 25 champions (lifetime) | 60 |
+| Kronenbrecher | Defeat a champion boss | 120 |
 
-**Achievements are unlocked automatically, but you collect the reward yourself.** All ten together pay 810 pearls.
+**Achievements are unlocked automatically, but you collect the reward yourself.** All twelve together pay 990 pearls. Online, defeating an enemy together counts for every player who hit it (Section 13).
 - When a condition is met, the achievement is **unlocked** and a banner points you to the menu. Nothing is paid yet.
 - On the Achievements screen a waiting achievement shows a gold **NEU** tag, a 🎁 icon and a button **„Einlösen“ (+N 💧)**. Click it to collect the reward — the pearls count up into your balance. Two or more waiting? An **„Alle einlösen · +N 💧“** button at the top collects them all at once.
 - The main menu's Erfolge button carries a red **„N NEU“** badge as long as rewards are waiting.
@@ -345,17 +395,49 @@ These stack with your character's base stats and any in-run passives you pick �
 
 ---
 
-## 10. Fortschritt & Speichern (Saving)
+## 11. Fortschritt & Speichern (Saving)
 
 - **Between runs:** pearls, Shop levels, achievements (unlocked and claimed), unlocked stages, best stats, and character unlocks save automatically to the browser's local storage every time they change, and persist across sessions once this is live on your actual site. If the browser blocks local storage (private mode, some embeds), the main menu shows a warning, because progress then only lasts until the tab is closed.
-- **Mid-run:** the game also snapshots your *current* run — level, weapons, passives, bubble-ring wear, HP, elapsed time, pearls so far, position — whenever the tab is backgrounded, right before the page is hidden, and every ~8 seconds while playing. If the browser discards or reloads the tab (common on mobile after being away a while), the main menu offers a **"Weiterspielen"** button that restores your **progress** instead of losing it: level, XP, weapons, passives, HP, elapsed time, pearls and position all come back. If you were on the level-up screen, you come back to exactly that screen with the same cards and no upgrade is lost. What does *not* come back is the live scene — enemies, projectiles and pickups on screen are cleared, so you resume into open water with 1.5 seconds of invulnerability. If a boss was alive when you left, that same boss encounter restarts at full HP a few seconds after you resume (it does not skip ahead to the next, tougher one).
+- **Mid-run:** the game also snapshots your *current* run — level, weapons, passives, bubble-ring wear, HP, elapsed time, pearls so far, position — whenever the tab is backgrounded, right before the page is hidden, and every ~8 seconds while playing. If the browser discards or reloads the tab (common on mobile after being away a while), the main menu offers a **"Weiterspielen"** button that restores your **progress** instead of losing it: level, XP, weapons, passives, HP, elapsed time, pearls and position all come back. If you were on the level-up screen, you come back to exactly that screen with the same cards and no upgrade is lost. What does *not* come back is the live scene — enemies, projectiles and pickups on screen are cleared, so you resume into open water with 1.5 seconds of invulnerability. If a boss was alive when you left, that same boss encounter restarts at full HP a few seconds after you resume (it does not skip ahead to the next, tougher one). The champion timer and a waiting free upgrade card are saved too; champions alive at that moment are gone (the next one comes at least 20 s after you resume). **Online runs are not saved for resuming** (Section 13); their pearls are banked when the run ends or you leave the room.
 - **Nothing is thrown away:** quitting via the pause menu, using **Neustart** in the pause menu, and starting a new dive while an old snapshot is waiting all bank the pearls and stats of the run they replace — including the Glücks-Blobi level check — exactly as dying does.
 - **Tab switching:** the game pauses automatically when the tab or window loses focus, and it clears any held keys or touch so your fish doesn't keep drifting when you come back.
 
 ---
 
-## 11. Steuerung (Controls)
+## 12. Steuerung (Controls)
 
 - **Desktop:** WASD or arrow keys to move. ESC or the pause icon to pause (holding ESC no longer flickers the pause on and off).
 - **Mobile:** drag anywhere on the screen to move. The first finger down owns the stick; extra fingers or a resting palm are ignored, and lifting a different finger doesn't stop you.
 - Attacks on every weapon are fully automatic — the only inputs are movement and which upgrade to pick on level-up.
+- Typing in the name or code field of the "Online spielen" screen never moves the fish or pauses the game.
+
+---
+
+## 13. Online spielen (Beta)
+
+Play together with friends in a **private room**. Everyone plays their own run — own level, XP, weapons, HP and pearls — but you see each other, fight side by side and each of you gets loot. The game needs the small online server from the folder `blobfisch-online` (its README explains the free Cloudflare setup); until its address is entered in `index.html` (`ONLINE_SERVER`), the online screen says the server isn't set up yet. Single-player is completely unaffected.
+
+**Getting in**
+- Main menu → **🌐 Online spielen**. Type a name (3–12 characters: letters including umlauts, digits, space, `-` and `_`; 🎲 picks a random one like "Blubbi482") and pick your Blobi.
+- **Raum erstellen**: choose an area and click. Your run starts at once; the room's **code** (4 letters, never I, L or O) is shown in a message, in the small pill under the XP bar (`🌐 KRBX · 1/8`) and in the pause menu. Give it to your friends.
+- **Beitreten**: type the code (upper or lower case) and click. You play in the room's area, even if you haven't unlocked it yourself yet (beating a boss there still counts normally).
+- Up to **8 players** per room. The room stays open for 10 minutes after the last player has left, so you can rejoin with the same code.
+- Names are checked by the server; a name that isn't allowed is replaced by a random one and you're told so.
+
+**What is shared**
+- **Seeing each other:** every Blobi shows its name, level and a small HP bar, and has its own colour ring (you see your own ring too). Friends off-screen get a coloured arrow at the screen edge with their name and distance (in "m" = 10 world units); the 5 nearest are shown. Their bosses and champions nearby get arrows too. In the Tiefsee-Graben your friends stay visible in the dark.
+- **Enemies:** each player's enemies spawn around that player and scale with that player's run time and level, exactly as in single-player. Every enemy chases the **nearest Blobi** — yours or a friend's, but a friend's only while they are within **1,600 units** (about 1.5 screens), so they can always see what is chasing them.
+- **Fighting together:** your weapons hit your friends' enemies too; their HP bars drop about a tenth of a second later. Ink-cloud slowing and the Vampir heal work across as well.
+- **Loot is personal:** when an enemy dies, **everyone who hit it** gets their own full loot — the XP orb, the chance for a pearl, the Elite pearls, the boss treasure and heart, and a champion's chest (including a champion boss's free upgrade card). Each helper's kill counts for their achievements and statistics, and a boss kill opens the next area for every helper.
+- **Taking damage:** your own game decides when you are hit, checking your Blobi against everything you see: your enemies and your friends', their shots, slam and lava zones, explosion circles and magma waves. A friend's Meeresungeheuer pulls you with its Sog when you are within 900 units.
+- **Champions online:** their level factor uses the average level of the players nearby, and they get +50 % HP for every other player nearby (Section 5).
+
+**Pausing, level-ups, background tab:** these work as in single-player — your game stops. Your friends then see your Blobi faded with ⏸ (💤 when your tab is in the background), and **your enemies freeze and fade** on their screens: they can't be hit and do no damage until you're back, and they don't chase you meanwhile.
+
+**Game over:** your run ends as usual (pearls are banked) and your enemies vanish from your friends' screens. **"Nochmal spielen"** starts a new run in the same room, near the room's middle. **"Zum Menü"** (also in the pause menu) leaves the room. Online runs can't be resumed after closing the page.
+
+**Connection problems:** if the connection drops, the game keeps running alone and reconnects by itself (up to 4 tries); if that fails, you simply continue alone. Messages explain wrong codes ("gibt es nicht"), full rooms, an unreachable server (or the free daily limit being used up) and an outdated page ("Bitte lade die Seite neu").
+
+**Technical numbers** (for tuning): the game sends its state 10 times per second while a friend is within 2,400 units and twice per second otherwise; friends and their enemies are shown 130 ms in the past so they move smoothly. A friend who sends nothing for 2.5 s counts as asleep. Values from other players are capped (damage per hit 1,000, XP per kill 1,000). Measured with two players and about 70 enemies each: about 12 KB/s per player. Knobs: `ONLINE_SERVER`, `NET_NEAR`, `NET_LIVE`, `NET_TICK_NEAR` / `NET_TICK_FAR`, `NET_DELAY`, `NET_ASLEEP`, `CHAMPION_GROUP_HP` in `index.html`; `CAP_PRIVATE` and `ROOM_TTL_MS` in the server's `room-core.js`.
+
+**Not yet online (planned next steps):** being downed and revived by a friend, shared world bosses and room champions, extra HP for normal enemies when several players are near, a safe harbour in the room's middle, level-up cards that don't pause the game while friends are near, quick messages, public rooms ("Schnellspiel") with online counts, and a player list.
