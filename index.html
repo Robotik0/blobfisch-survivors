@@ -239,7 +239,60 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .online-row .btn { width: auto; flex-shrink: 0; }
 .online-status { min-height: 18px; margin: 8px 0 0; font-size: 12.5px; font-weight: 800; color: var(--bioluma); text-align: center; line-height: 1.4; }
 .online-status.bad { color: #ff8a9a; }
-.hud-room { margin-left: 6px; border-color: rgba(126,182,255,0.5); color: #cfe4ff; }
+.hud-room { margin-left: 6px; border-color: rgba(126,182,255,0.5); color: #cfe4ff; pointer-events: auto; cursor: pointer; }
+.hud-mini { pointer-events: auto; width: 32px; height: 32px; margin: 6px 0 0 6px; padding: 0; border-radius: 50%; border: 1px solid rgba(126,182,255,0.5); background: rgba(5,20,35,0.72); color: var(--foam); font-size: 15px; line-height: 30px; cursor: pointer; vertical-align: top; }
+.online-count { text-align: center; font-size: 13px; font-weight: 800; color: var(--bioluma); margin: -6px 0 4px; min-height: 18px; }
+.online-who { text-align: center; font-size: 13px; color: var(--foam-dim); font-weight: 700; margin: -6px 0 10px; }
+.online-who b { color: var(--foam); }
+.online-mode-list { display: flex; flex-direction: column; gap: 10px; }
+.online-mode { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border-radius: 16px; border: 2px solid rgba(126,224,255,0.2); background: rgba(126,224,255,0.07); color: var(--foam); cursor: pointer; text-align: left; font-family: 'Nunito', sans-serif; transition: all 0.15s ease; }
+.online-mode:hover { border-color: var(--bioluma); background: rgba(94,242,192,0.1); }
+.online-mode.primary { border-color: rgba(255,122,89,0.7); background: linear-gradient(135deg, rgba(255,122,89,0.24), rgba(224,96,63,0.1)); }
+.online-mode.resume { border-color: rgba(94,242,192,0.7); background: rgba(94,242,192,0.12); }
+.online-mode .om-icon { font-size: 26px; width: 36px; text-align: center; flex-shrink: 0; }
+.online-mode b { display: block; font-size: 15.5px; font-weight: 900; }
+.online-mode small { display: block; font-size: 12px; color: var(--foam-dim); font-weight: 700; margin-top: 2px; line-height: 1.35; }
+.online-mode:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.4); }
+#online-areas .cnt { margin-left: auto; padding-left: 4px; font-size: 11px; color: var(--bioluma); font-weight: 900; white-space: nowrap; }
+/* Level-Leiste (online, Freund in der Nähe): Karten unten, das Spiel läuft weiter */
+.lvlbar { position: absolute; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(760px, calc(100% - 20px)); z-index: 7; display: none;
+  background: linear-gradient(180deg, rgba(15,47,74,0.92), rgba(6,22,38,0.94)); border: 1px solid rgba(255,215,106,0.55); border-radius: 16px; padding: 8px 10px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.lvlbar.show { display: block; animation: lvlIn 0.25s ease-out; }
+@keyframes lvlIn { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.lvlbar-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px 'Baloo 2', 'Nunito', sans-serif; color: var(--pearl); margin: 0 2px 6px; }
+.lvlbar-time { font: 900 12px 'Nunito', sans-serif; color: var(--foam-dim); white-space: nowrap; }
+.lvlbar-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
+.lvlbar-card { display: flex; gap: 8px; align-items: center; text-align: left; padding: 7px 9px; border-radius: 12px; border: 2px solid rgba(126,224,255,0.22); background: rgba(126,224,255,0.08); color: var(--foam); cursor: pointer; font-family: 'Nunito', sans-serif; min-width: 0; }
+.lvlbar-card:hover { border-color: var(--bioluma); background: rgba(94,242,192,0.1); }
+.lvlbar-card .k { flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; background: rgba(255,215,106,0.2); color: var(--pearl); font: 900 12px/20px 'Nunito', sans-serif; text-align: center; }
+.lvlbar-card .ic { font-size: 20px; flex-shrink: 0; }
+.lvlbar-card .tx { min-width: 0; }
+.lvlbar-card .nm { display: block; font-weight: 800; font-size: 12.5px; line-height: 1.2; }
+.lvlbar-card .ds { font-size: 10.5px; color: var(--foam-dim); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+@media (hover: none) { .lvlbar-card .k { display: none; } }
+@media (max-width: 520px) { .lvlbar-cards { grid-template-columns: 1fr 1fr; } }
+/* Kurznachrichten-Rad (Q / 💬) und Spielerliste (Tab / Raum-Anzeige) */
+.qwheel { position: absolute; inset: 0; z-index: 8; display: none; align-items: center; justify-content: center; background: rgba(2,8,16,0.28); }
+.qwheel.show { display: flex; }
+.qwheel-ring { position: relative; width: min(320px, 92vw); height: min(320px, 92vw); }
+.qwheel-btn { position: absolute; transform: translate(-50%, -50%); padding: 8px 11px; border-radius: 999px; border: 2px solid rgba(126,224,255,0.45); background: rgba(5,20,35,0.94); color: var(--foam); font: 800 13px 'Nunito', sans-serif; cursor: pointer; white-space: nowrap; box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+.qwheel-btn:hover, .qwheel-btn:focus-visible { border-color: var(--bioluma); background: rgba(20,60,70,0.96); outline: none; }
+.qwheel-btn .k { font-size: 10px; color: var(--foam-dim); margin-right: 5px; }
+@media (hover: none) { .qwheel-btn .k { display: none; } }
+.qwheel-hint { position: absolute; left: 50%; top: calc(50% + min(160px, 46vw) + 14px); transform: translateX(-50%); font: 800 12px 'Nunito', sans-serif; color: var(--foam); text-shadow: 0 1px 3px rgba(0,0,0,0.8); text-align: center; pointer-events: none; white-space: nowrap; }
+.plist { position: absolute; top: calc(max(12px, env(safe-area-inset-top)) + 92px); right: 12px; z-index: 7; width: min(300px, calc(100% - 24px)); max-height: 60vh; overflow-y: auto; display: none;
+  background: rgba(5,20,35,0.92); border: 1px solid rgba(126,182,255,0.45); border-radius: 14px; padding: 8px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.plist.show { display: block; }
+.plist-head { display: flex; justify-content: space-between; align-items: center; font: 800 12.5px 'Nunito', sans-serif; color: #cfe4ff; margin-bottom: 4px; }
+.plist-close { background: none; border: none; color: var(--foam-dim); font-size: 16px; cursor: pointer; padding: 0 2px; }
+.plist-row { display: flex; align-items: center; gap: 7px; padding: 5px 2px; font-size: 12.5px; font-weight: 700; border-top: 1px solid rgba(126,224,255,0.1); }
+.plist-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.plist-row img { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+.plist-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plist-row.me .plist-name { color: var(--bioluma); }
+.plist-lv { color: var(--foam-dim); font-size: 11.5px; flex-shrink: 0; }
+.plist-st { min-width: 56px; text-align: right; flex-shrink: 0; font-size: 11px; color: var(--foam-dim); }
+@media (prefers-reduced-motion: reduce) { .lvlbar.show { animation: none; } }
 .pause-room { color: var(--foam-dim); font-size: 13px; font-weight: 700; margin: -6px 0 14px; line-height: 1.4; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.4); box-shadow: none; }
 @media (max-height: 760px) {
@@ -252,6 +305,13 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 #toast{position:absolute;top:86px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 #toast.low{top:122px}
+#toast.net{top:110px}
+#toast.netlow{top:148px}
+#screen-pause.live { background: linear-gradient(180deg, rgba(2,8,16,0) 35%, rgba(2,8,16,0.6)); align-items: flex-end; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+#screen-pause.live .panel { max-width: 420px; padding: 14px 18px; }
+#screen-pause.live h2 { font-size: 19px; margin-bottom: 6px; }
+#screen-pause.live .menu-buttons { flex-direction: row; flex-wrap: wrap; }
+#screen-pause.live .menu-buttons .btn { flex: 1 1 40%; padding: 10px 12px; font-size: 14px; }
 
 @media (max-width: 380px) {
   .panel { padding: 22px 16px; }
@@ -302,7 +362,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="hud-bar-wrap xp-wrap">
       <div class="hud-bar-fill xp-fill" id="hud-xp-fill"></div>
     </div>
-    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;"></div>
+    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;" role="button" aria-label="Spielerliste"></div><button class="hud-mini" id="btn-chat" style="display:none;" aria-label="Kurznachricht">💬</button>
     <div class="hud-boss-wrap" id="hud-boss">
       <span class="hud-boss-name" id="hud-boss-name"></span>
       <div class="hud-bar-wrap boss-wrap"><div class="hud-bar-fill boss-fill" id="hud-boss-fill"></div><i class="boss-notch" style="left:33%"></i><i class="boss-notch" style="left:66%"></i></div>
@@ -310,6 +370,16 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   </div>
 
   <div id="toast"></div>
+
+  <div class="lvlbar" id="lvlbar" aria-live="polite">
+    <div class="lvlbar-head"><span id="lvlbar-title">Level erreicht!</span><span class="lvlbar-time" id="lvlbar-time"></span></div>
+    <div class="lvlbar-cards" id="lvlbar-cards"></div>
+  </div>
+  <div class="qwheel" id="qwheel"><div class="qwheel-ring" id="qwheel-ring"></div><div class="qwheel-hint">Nachricht an alle im Raum · Q schliesst</div></div>
+  <div class="plist" id="plist">
+    <div class="plist-head"><span id="plist-title">Raum</span><button class="plist-close" id="plist-close" aria-label="Schliessen">✕</button></div>
+    <div id="plist-rows"></div>
+  </div>
 
   <div class="screen active" id="screen-menu">
     <div class="panel menu-panel">
@@ -321,6 +391,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       <p id="storage-warning" style="display:none;color:#ff8a9a;font-size:12px;font-weight:700;margin:-10px 0 12px;">⚠ Speichern nicht möglich – Fortschritt geht beim Schliessen verloren.</p>
       <div class="menu-buttons">
         <button class="btn btn-primary btn-large" id="btn-continue-run" style="display:none;">Weiterspielen</button>
+        <button class="btn btn-primary" id="btn-continue-online" style="display:none;">🌐 Online weiterspielen</button>
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
         <button class="btn btn-secondary" id="btn-goto-online">🌐 Online spielen <span class="beta-tag">Beta</span></button>
         <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
@@ -359,7 +430,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   <div class="screen" id="screen-online">
     <div class="panel online-panel">
       <h2>Online spielen <span class="beta-tag">Beta</span></h2>
-      <p class="online-note">Spiel mit Freunden in einem privaten Raum: Jeder hat seine eigenen Gegner, Level und Perlen – aber ihr seht euch, kämpft zusammen und bekommt beide Beute.</p>
+      <p class="online-count" id="online-count"></p>
+      <p class="online-note">Jeder spielt seinen eigenen Lauf mit eigenen Gegnern, Leveln und Perlen – aber ihr seht euch, kämpft zusammen und rettet euch gegenseitig.</p>
       <label class="online-label" for="online-name">Dein Name</label>
       <div class="online-row">
         <input id="online-name" class="online-input" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Dein Name">
@@ -367,21 +439,53 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       </div>
       <span class="online-label">Dein Blobi</span>
       <div class="online-chips" id="online-chars"></div>
-      <div class="online-box">
-        <span class="online-label">Neuer Raum im Gebiet</span>
-        <div class="online-chips" id="online-areas"></div>
-        <button class="btn btn-primary" id="btn-online-create">Raum erstellen</button>
-      </div>
-      <div class="online-box">
-        <label class="online-label" for="online-code">Code eines Freundes</label>
-        <div class="online-row">
-          <input id="online-code" class="online-input code" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false" aria-label="Raum-Code">
-          <button class="btn btn-secondary" id="btn-online-join">Beitreten</button>
-        </div>
-      </div>
       <p class="online-status" id="online-status"></p>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-online-back">Zurück</button>
+        <button class="btn btn-primary" id="btn-online-next">Weiter</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-online-mode">
+    <div class="panel online-panel">
+      <h2>Wie willst du spielen?</h2>
+      <p class="online-who" id="online-who"></p>
+      <div class="online-mode-list">
+        <button class="online-mode resume" id="btn-mode-resume" style="display:none;"><span class="om-icon">🔄</span><span><b>Weiterspielen</b><small id="mode-resume-sub"></small></span></button>
+        <button class="online-mode primary" id="btn-mode-quick"><span class="om-icon">⚡</span><span><b>Schnellspiel</b><small id="mode-quick-count">Spiel mit allen, die gerade online sind</small></span></button>
+        <button class="online-mode" id="btn-mode-create"><span class="om-icon">➕</span><span><b>Raum erstellen</b><small>Privater Raum für dich und deine Freunde (bis 8) – du bekommst einen Code</small></span></button>
+        <button class="online-mode" id="btn-mode-join"><span class="om-icon">🔑</span><span><b>Raum beitreten</b><small>Mit dem Code aus 4 Buchstaben, den dir ein Freund sagt</small></span></button>
+      </div>
+      <p class="online-status" id="online-status-mode"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-mode-back">Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-online-area">
+    <div class="panel online-panel">
+      <h2 id="online-area-title">⚡ Schnellspiel</h2>
+      <p class="online-note" id="online-area-note"></p>
+      <div class="online-chips" id="online-areas"></div>
+      <p class="online-status" id="online-status-area"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-area-back">Zurück</button>
+        <button class="btn btn-primary" id="btn-area-go">Los geht’s!</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-online-code">
+    <div class="panel online-panel">
+      <h2>🔑 Raum beitreten</h2>
+      <p class="online-note">Gib den Code ein, den dein Freund oben im Spiel sieht (4 Buchstaben, z. B. KRBX).</p>
+      <input id="online-code" class="online-input code" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false" aria-label="Raum-Code" style="width:100%;">
+      <p class="online-status" id="online-status-code"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-code-back">Zurück</button>
+        <button class="btn btn-primary" id="btn-online-join">Beitreten</button>
       </div>
     </div>
   </div>
@@ -425,7 +529,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <li><strong>Gebiete:</strong> Kelpwald: Tang bremst dich. Tiefsee-Graben: Dunkelheit – du siehst nur in deiner Nähe. Vulkanschlucht: Lavazonen – raus, sobald sie aufglühen! Das Korallenriff ist gefahrlos.</li>
         <li><strong>Boss-Tricks:</strong> Bei zwei Dritteln und einem Drittel Leben brüllt der Boss, ruft Verstärkung und kämpft härter (siehe Kerben im Lebensbalken). Hai-König: Sturmangriff, später doppelt und dreifach (danach erschöpft). Riesenkrake: Tentakelschläge auf markierte Kreise. Meeresungeheuer: Sog – schwimm weg! Lava-Titan: Magmawelle – such die Lücke. Ein roter Pfeil zeigt zum Boss.</li>
         <li><strong>Champions:</strong> Ab 4 Minuten erscheint ab und zu ein Champion – ein viel stärkerer Gegner mit Krone, Namensschild und einer besonderen Eigenschaft: Flink (leuchtet auf und sprintet auf dich zu – ausweichen!), Gepanzert (sein Panzer schluckt Schaden, bis er bricht), Vampir (heilt sich, wenn er dich trifft), Teilend (zerfällt in drei), Explosiv (hinterlässt einen Kreis, der nach 1 Sekunde platzt) oder Anführer (macht Gegner in seiner Nähe schneller und stärker). Besiegt lässt er eine Schatztruhe voller Perlen fallen. Ab der dritten Begegnung kommt der Boss als wütender Champion-Boss: doppelte Perlen, und seine Truhe enthält eine Gratis-Verbesserung.</li>
-        <li><strong>Online (Beta):</strong> Unter „Online spielen“ erstellst du einen privaten Raum und gibst deinen Freunden den Code aus 4 Buchstaben. Jeder spielt seinen eigenen Lauf mit eigenen Gegnern, Leveln und Perlen – aber ihr seht euch, eure Gegner jagen den nächsten Blobi, und wer bei einem Sieg mitgeholfen hat, bekommt seine eigene Beute (auch die Schatztruhe). Farbige Pfeile zeigen zu deinen Mitspielern. Pausierst du, warten deine Gegner, bis du zurück bist.</li>
+        <li><strong>Online (Beta):</strong> Unter „Online spielen“ wählst du Namen und Blobi, dann <strong>Schnellspiel</strong> (mit allen, die gerade online sind, bis 24 pro Raum), <strong>Raum erstellen</strong> (privat, bis 8, mit einem Code aus 4 Buchstaben für deine Freunde) oder <strong>Raum beitreten</strong>. Jeder spielt seinen eigenen Lauf mit eigenen Gegnern, Leveln und Perlen – aber ihr seht euch, eure Gegner jagen den nächsten Blobi, und wer bei einem Sieg mitgeholfen hat, bekommt seine eigene Beute (auch die Schatztruhe). Was ein Freund einsammelt, liegt für dich noch da.</li>
+        <li><strong>Zusammen spielen:</strong> Du startest im <strong>Hafen</strong> in der Raummitte: dort bist du sicher, aber deine Waffen ruhen. Sind Freunde in der Nähe, halten Pause und Level-Up das Spiel nicht an (die Karten erscheinen unten: Tasten 1–4 oder antippen), und neue Gegner haben pro Freund 50 % mehr Leben. Alle 5 Minuten erscheint bei einem zufälligen Spieler ein <strong>Weltboss</strong> (ein roter Pfeil zeigt allen den Weg), dazu ab und zu Raum-Champions. Bei 0 Leben bist du 20 Sekunden <strong>ohnmächtig</strong>: ein Freund rettet dich, wenn er 3 Sekunden neben dir bleibt. <strong>Q</strong> oder 💬 schickt eine Kurznachricht, <strong>Tab</strong> oder die Raum-Anzeige zeigt alle Spieler. Lädst du die Seite neu, geht dein Online-Lauf im selben Raum weiter.</li>
         <li><strong>Erfolge:</strong> Jeder Erfolg gibt einmalig Perlen. Neue Erfolge sind mit NEU markiert – hol dir die Belohnung im Menü unter Erfolge mit „Einlösen“ ab.</li>
         <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts.</li>
       </ul>
@@ -755,9 +860,17 @@ const keys = {};
 window.addEventListener('keydown', function(e){
   if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // Tippen im Namens- oder Code-Feld
   const k = e.key.toLowerCase();
+  const inRun = !!player && (gameState === 'playing' || gameState === 'paused' || gameState === 'levelup' || gameState === 'gameover');
+  if (k === 'tab') { if (Net.on && inRun) { e.preventDefault(); togglePlayerList(); } return; }          // online: Spielerliste
+  if (k === 'q' && !e.repeat && Net.on && (gameState === 'playing' || gameState === 'paused')) { toggleQuickWheel(); return; }   // Kurznachrichten
+  if (/^[1-8]$/.test(k) && !e.repeat) {
+    const n = +k;
+    if (quickWheelOpen()) { pickQuick(n - 1); return; }
+    if (currentLevelUp && (gameState === 'levelup' || currentLevelUp.bar) && n <= currentLevelUp.picks.length) { chooseUpgrade(currentLevelUp.picks[n - 1]); return; }
+  }
   keys[k] = true;
   if (['arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(k) !== -1) e.preventDefault();
-  if (k === 'escape' && !e.repeat) togglePause();
+  if (k === 'escape' && !e.repeat) { if (quickWheelOpen()) toggleQuickWheel(false); else togglePause(); }
 });
 window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
 
@@ -824,6 +937,7 @@ let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0, pearlFrac = 
 let pendingLevelUps = 0, pendingFreeCards = 0;
 let zones = [], shockwaves = [], hazardTimer = 7, ringTime = 120, eliteTime = 180, currentLevelUp = null, runNewAch = [], playerInKelp = false;
 let champTime = CHAMPION_START, enemySeq = 0;
+let playerDown = 0, reviveProg = 0, pauseOverlay = false, runSlot = 'solo';   // online: ohnmächtig (s bis zum Ende), Rettung (s), Pause ohne Anhalten, Speicherplatz des Laufs
 let lastTime = 0, rafId = null;
 
 function xpForLevel(level) { return Math.floor(6 + level * 4.6); }
@@ -860,7 +974,9 @@ function recomputeDerivedStats() {
 
 // ---------- Lauf-Snapshot (übersteht Tab-Wechsel, AFK, Browser-Neuladen) ----------
 function saveRunSnapshot() {
-  if (!player || Net.on || Net.wantOpen) return;       // Online-Läufe lassen sich nicht fortsetzen
+  if (!player) return;
+  const online = runSlot === 'online';
+  if (online && !Net.code) return;
   const snap = {
     v: 1,
     characterId: selectedCharacterId, stageId: selectedStageId,
@@ -879,6 +995,11 @@ function saveRunSnapshot() {
       x: player.x, y: player.y, angle: player.angle
     }
   };
+  if (online) {                    // Online-Lauf: geht nach dem Neuladen im selben Raum weiter (siehe Netz-Teil)
+    snap.room = Net.code; snap.kind = Net.kind; snap.title = Net.title; snap.savedAt = Date.now(); snap.down = playerDown > 0;
+    Storage.set(ONLINE_SNAP_KEY, snap);
+    return;
+  }
   Storage.set('blobfischSurvivorsRunSnapshot', snap);
 }
 
@@ -929,6 +1050,7 @@ function resumeRunSnapshot(snap) {
   pendingFreeCards = snap.pendingFreeCards || 0;
   champTime = (typeof snap.champTime === 'number') ? Math.max(snap.champTime, runTime + 20) : Math.max(runTime + 60, CHAMPION_START);
   currentLevelUp = null; levelUpProcessing = false;
+  playerDown = 0; reviveProg = 0; pauseOverlay = false; runSlot = 'solo'; hideLevelBar();
   setHudVisible(true);
   lastTime = 0;
   if (snap.levelUp && snap.levelUp.picks && (snap.levelUp.free ? pendingFreeCards > 0 : pendingLevelUps > 0)) {
@@ -975,6 +1097,10 @@ function startRun(charId, stageId) {
   reviveFlashTimer = 0;
   pearlFrac = 0;
   pendingLevelUps = 0; pendingFreeCards = 0;
+  currentLevelUp = null; levelUpProcessing = false;
+  playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
+  runSlot = Net.on ? 'online' : 'solo';
+  if (Net.on) { invulnTimer = HAFEN_PROTECT; Net.lastSend = 0; Net.myBubble = null; }   // online: Start im Hafen mit 5 s Schutz
 
   gameState = 'playing';
   showScreen(null);
@@ -996,10 +1122,13 @@ function spawnEnemy(typeKey, isBoss) {
   const stage = stageOf();
   if (isBoss) {
     const def = BOSS_TYPES[typeKey];
-    const champ = bossEncounterCount + 1 >= CHAMPION_BOSS_FROM;   // ab der 3. Begegnung kommt der Boss als Champion-Boss
+    const room = Net.on && Net.peers.size > 0;
+    // ab der 3. Begegnung kommt der Boss als Champion-Boss; online (Weltboss) jeder dritte
+    const champ = room ? (bossEncounterCount + 1) % CHAMPION_BOSS_FROM === 0 : bossEncounterCount + 1 >= CHAMPION_BOSS_FROM;
     const encounterMult = 1 + bossEncounterCount * 0.15;
-    const levelMult = levelFactor(runLevel);
-    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult * (champ ? CHAMPION_BOSS_HP : 1);
+    const levelMult = championScale();                                  // Level-Faktor (online: Durchschnitt der Spieler in der Nähe)
+    const groupMult = Net.on ? 1 + WORLD_BOSS_HP * netNearbyPeers(player.x, player.y).length : 1;   // Weltboss: +60 % pro weiterem Spieler
+    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult * groupMult * (champ ? CHAMPION_BOSS_HP : 1);
     const dmgMult = 1 + bossEncounterCount * 0.2;
     bossEntity = {
       id: ++enemySeq, isBoss: true, type: typeKey, name: def.name, encounterNumber: bossEncounterCount + 1,
@@ -1010,6 +1139,7 @@ function spawnEnemy(typeKey, isBoss) {
       phase: 1, tier: 1, waveLeft: 0, waveT: 0, waveIdx: 0, gap: 0, dashLeft: 0
     };
     if (champ) makeChampionBoss(bossEntity, CHAMPION_BOSS_TRAITS[Math.floor(Math.random() * CHAMPION_BOSS_TRAITS.length)]);
+    hafenKeepOut(bossEntity);
     bossEncounterCount++;
     enemies.push(bossEntity);
     Sfx.boss();
@@ -1026,6 +1156,11 @@ function spawnEnemy(typeKey, isBoss) {
     rangedTimer: 1 + Math.random(), inkTimer: 2 + Math.random() * 2,
     wobble: Math.random() * 10, jitter: Math.random() * Math.PI * 2
   };
+  if (Net.on) {                                   // online: +50 % HP pro weiterem Spieler in der Nähe (stärker statt mehr), nie im Hafen
+    const n = netNearbyPeers(player.x, player.y).length;
+    if (n) { e.hp *= 1 + NET_GROUP_HP * n; e.maxHp = e.hp; }
+    hafenKeepOut(e);
+  }
   enemies.push(e);
   return e;
 }
@@ -1038,12 +1173,14 @@ const SPAWN_TABLE_BY_STAGE = {
 };
 
 function updateSpawner(dt) {
+  if (Net.on && inHafen(player.x, player.y)) return;     // im Hafen kommen keine Gegner
   spawnTimer -= dt;
   const stage = stageOf();
+  const room = Net.on && Net.peers.size > 0;              // mit anderen im Raum kommen Boss und Champions nach dem Plan des Raums
   if (spawnTimer <= 0) {
     const table = SPAWN_TABLE_BY_STAGE[stage.id];
     const batch = 1 + Math.floor(runTime / 100);
-    const duel = !!bossEntity;   // im Boss-Kampf kommen weniger gewöhnliche Gegner und keine Elite
+    const duel = !!bossEntity || (Net.on && netBossNear());   // im Boss-Kampf kommen weniger gewöhnliche Gegner und keine Elite
     const n = duel ? Math.max(1, Math.ceil(Math.min(batch, 4) / 2)) : Math.min(batch, 4);
     for (let i = 0; i < n; i++) {
       const avail = Math.min(table.length, 1 + Math.floor(runTime / 25));
@@ -1074,12 +1211,12 @@ function updateSpawner(dt) {
     }
     showToast('\uD83D\uDC1F Piranha-Ring!');
   }
-  if (runTime >= champTime && !bossEntity && bossWarningTimer <= 0) {   // Champions: ab 4:00, nie w\u00E4hrend eines Boss-Kampfs
+  if (!room && runTime >= champTime && !bossEntity && bossWarningTimer <= 0) {   // Champions: ab 4:00, nie w\u00E4hrend eines Boss-Kampfs
     if (championCount() < (runTime >= CHAMPION_LATE ? 2 : 1) && spawnChampion()) {
       champTime = runTime + CHAMPION_GAP_MIN + Math.random() * (CHAMPION_GAP_MAX - CHAMPION_GAP_MIN);
     }
   }
-  if (!bossEntity && bossWarningTimer <= 0 && runTime >= nextBossTime) {
+  if (!room && !bossEntity && bossWarningTimer <= 0 && runTime >= nextBossTime) {
     bossWarningTimer = 3;
   }
 }
@@ -1270,10 +1407,11 @@ const WEAPON_COOLDOWNS = { blase:0.85, ring:99, tintenwolke:1.2, harpune:1.1, el
 
 function updateWeapons(dt) {
   const p = player;
+  const safe = Net.on && inHafen(p.x, p.y);              // im Hafen ruhen die Waffen
   for (const id in p.weapons) {
     const level = p.weapons[id];
     const type = WEAPON_DEFS[id].type;
-    if (type === 'orbit' || type === 'minion') continue;
+    if (type === 'orbit' || type === 'minion' || safe) continue;
     p.weaponTimers[id] = (p.weaponTimers[id]||0) - dt;
     if (p.weaponTimers[id] <= 0) {
       const n0 = projectiles.length;
@@ -1284,8 +1422,8 @@ function updateWeapons(dt) {
       p.weaponTimers[id] = WEAPON_COOLDOWNS[id] * mult;
     }
   }
-  updateOrbitWeapon(dt);
-  updateMinion(dt);
+  updateOrbitWeapon(dt, safe);
+  updateMinion(dt, safe);
 }
 
 function orbitBubbleRadius(level) { return 52 + level*7; }
@@ -1356,12 +1494,13 @@ function getOrbitBubbleWorldPositions() {
   return positions;
 }
 
-function updateOrbitWeapon(dt) {
+function updateOrbitWeapon(dt, safe) {
   const p = player;
   const level = p.weapons.ring;
   if (!level) return;
   orbitAngle += dt * 2.4;
   if (p.ringFlash) for (let i = 0; i < p.ringFlash.length; i++) if (p.ringFlash[i] > 0) p.ringFlash[i] -= dt;
+  if (safe) return;
   const dmg = (6 + level*3) * p.damage;
   const bubbles = getOrbitBubbleWorldPositions();
   const list = allEnemies();
@@ -1378,7 +1517,7 @@ function updateOrbitWeapon(dt) {
   }
 }
 
-function updateMinion(dt) {
+function updateMinion(dt, safe) {
   const p = player;
   const level = p.weapons.begleiter;
   if (!level) { minionEntities = []; return; }
@@ -1395,7 +1534,8 @@ function updateMinion(dt) {
 
   for (let m=0; m<minionEntities.length; m++) {
     const min = minionEntities[m];
-    if (!min.targetEnemy || min.targetEnemy.dead || distXY(min.targetEnemy.x, min.targetEnemy.y, p.x, p.y) > leash) {
+    if (safe) min.targetEnemy = null;
+    else if (!min.targetEnemy || min.targetEnemy.dead || distXY(min.targetEnemy.x, min.targetEnemy.y, p.x, p.y) > leash) {
       const taken = [];
       for (let o = 0; o < minionEntities.length; o++) if (o !== m && minionEntities[o].targetEnemy) taken.push(minionEntities[o].targetEnemy);
       min.targetEnemy = findNearestEnemy(p.x, p.y, leash, taken) || findNearestEnemy(p.x, p.y, leash);
@@ -1430,6 +1570,7 @@ function updateMinion(dt) {
     }
 
     min.timer -= dt;
+    if (min.timer <= 0 && safe) min.timer = fireInterval;
     if (min.timer <= 0) {
       const shootAt = (min.targetEnemy && !min.targetEnemy.dead) ? min.targetEnemy : findNearestEnemy(min.x, min.y, 340);
       if (shootAt) {
@@ -1528,6 +1669,12 @@ function updateEnemies(dt) {
     const buff = en.lead ? LEADER_SPEED : 1, hitMult = en.lead ? LEADER_DMG : 1;
 
     const tg = targetOf(en);
+    if (tg.hold) {                       // online: niemand zum Jagen (alle ohnmächtig oder weg): stehen bleiben
+      en.tg = null; en.wobble += dt * 8;
+      if (en.contactTimer > 0) en.contactTimer -= dt;
+      hafenKeepOut(en);
+      continue;
+    }
     en.tg = tg;
     const dx = tg.x - en.x, dy = tg.y - en.y;
     const d = Math.hypot(dx, dy) || 1;
@@ -1586,6 +1733,7 @@ function updateEnemies(dt) {
     if (en.cst) { const o = flinkStep(en, dt, tg, d); if (o) { moveX = o.mx; moveY = o.my; spd = o.spd; } }
     en.x += moveX * spd * dt;
     en.y += moveY * spd * dt;
+    if (Net.on) hafenKeepOut(en);
     en.wobble += dt * 8;
 
     if (en.contactTimer > 0) en.contactTimer -= dt;
@@ -1630,6 +1778,10 @@ function updateProjectiles(dt) {
     pr.x += pr.vx * dt; pr.y += pr.vy * dt;
     pr.life -= dt;
     let remove = pr.life <= 0;
+    if (!remove && Net.on) {
+      if (pr.x * pr.x + pr.y * pr.y < HAFEN_R * HAFEN_R) { remove = true; spawnBurst(pr.x, pr.y, '#9effe0', 3); }   // der Hafen schluckt Schüsse
+      else if (!pr.heavy && netRingBlocks(pr)) remove = true;
+    }
 
     if (!remove && !pr.heavy && player.weapons.ring) {
       if (ringBubbles === null) ringBubbles = getOrbitBubbleWorldPositions();
@@ -1658,6 +1810,7 @@ function shieldRechargeTime(level) { return Math.max(5, 16 - level*2.2); }
 // Gibt true zurück, wenn der Treffer Lebenspunkte gekostet hat (false: vom Schutzschild geblockt)
 function damagePlayer(amount) {
   const p = player;
+  if (playerDown > 0 || (Net.on && inHafen(p.x, p.y))) return false;   // online: ohnmächtig oder im Hafen nimmt man keinen Schaden
   if (p.shieldReady) {
     p.shieldReady = false;
     p.shieldTimer = shieldRechargeTime(p.passives.schild || 1);
@@ -1693,7 +1846,22 @@ function onPlayerDeath() {
     Sfx.revive();
     return;
   }
+  if (Net.on && netCanBeRevived()) { netGoDown(); return; }   // online: ohnmächtig, ein Freund kann dich retten
   endRun();
+}
+// ohnmächtig (online): nicht bewegen, nicht angreifen, kein Schaden. Steht ein Freund 3 s daneben, geht es mit 30 % Leben weiter.
+function updateDowned(dt) {
+  const p = player;
+  playerDown -= dt;
+  invulnTimer = Math.max(invulnTimer, 0.3);
+  if (p.hitFlash > 0) p.hitFlash -= dt;
+  p.bob += dt * 2;
+  camera.x += (p.x - camera.x) * Math.min(1, dt * 6);
+  camera.y += (p.y - camera.y) * Math.min(1, dt * 6);
+  const helper = netReviver();
+  if (helper) { reviveProg += dt; if (reviveProg >= REVIVE_TIME) { netRevived(helper); return; } }
+  else reviveProg = Math.max(0, reviveProg - dt * 2);
+  if (playerDown <= 0 || (Net.on && Net.peers.size === 0)) { playerDown = 0; reviveProg = 0; endRun(); }
 }
 
 function updatePickups(dt) {
@@ -1823,9 +1991,12 @@ function presentLevelUpChoices() {
     if (free) pendingFreeCards = Math.max(0, pendingFreeCards - 1); else pendingLevelUps = Math.max(0, pendingLevelUps - 1);
     levelUpProcessing = false;
     if (pendingLevelUps > 0 || pendingFreeCards > 0) { presentLevelUpChoices(); return; }
-    gameState = 'playing'; showScreen(null); return;
+    currentLevelUp = null; hideLevelBar();
+    if (gameState === 'levelup') { gameState = 'playing'; showScreen(null); }
+    return;
   }
-  gameState = 'levelup';
+  const bar = Net.on && gameState === 'playing' && netSomeoneNear();   // online mit Freund in der Nähe: Leiste unten, das Spiel läuft weiter
+  if (!bar) gameState = 'levelup';
   levelUpProcessing = false;
   const poolCopy = pool.slice();
   const bonusCard = Math.random() < luckCardChance();
@@ -1841,14 +2012,46 @@ function presentLevelUpChoices() {
     player.ringPin = false;
   }
   if (player.weapons.ring) player.ringLock = false;   // ab jetzt darf wieder eine Blase platzen
-  currentLevelUp = { picks: picks, bonus: bonusCard && count === 4, free: free };
+  currentLevelUp = { picks: picks, bonus: bonusCard && count === 4, free: free, bar: bar };
+  if (bar) { renderLevelBar(currentLevelUp); return; }
+  hideLevelBar();
   renderLevelUpScreen(picks, currentLevelUp.bonus, free);
 }
+// Level-Leiste: Karten unten am Rand, Tasten 1–4 oder antippen; nach 15 s wird die erste Karte genommen
+function renderLevelBar(cl) {
+  const bar = document.getElementById('lvlbar'), wrap = document.getElementById('lvlbar-cards');
+  cl.left = LVLBAR_TIME;
+  if (!bar || !wrap) return;
+  const t = document.getElementById('lvlbar-title');
+  if (t) t.textContent = cl.free ? '\uD83C\uDF81 Schatztruhe: eine Gratis-Verbesserung' : '\u2B50 Level ' + runLevel + '!' + (cl.bonus ? ' \uD83C\uDF40 Eine Karte mehr' : '');
+  wrap.innerHTML = '';
+  cl.picks.forEach(function(choice, i){
+    const def = choice.kind === 'weapon' ? WEAPON_DEFS[choice.id] : PASSIVE_DEFS[choice.id];
+    const b = document.createElement('button');
+    b.className = 'lvlbar-card';
+    b.innerHTML = '<span class="k">' + (i + 1) + '</span><span class="ic">' + (LEVELUP_ICONS[choice.id] || '\u2728') + '</span><span class="tx"><span class="nm">' +
+      (choice.refill ? def.name + ': Mehr Blasen' : def.name + (choice.level > 0 ? ' Stufe ' + choice.next : ' (Neu)')) + '</span><span class="ds">' + upgradeDetail(choice) + '</span></span>';
+    b.addEventListener('click', function(){ chooseUpgrade(choice); });
+    wrap.appendChild(b);
+  });
+  bar.classList.add('show');
+  updateLevelBar(0);
+}
+function updateLevelBar(dt) {
+  const cl = currentLevelUp;
+  if (!cl || !cl.bar) return;
+  cl.left -= dt;
+  const el = document.getElementById('lvlbar-time');
+  if (el) el.textContent = (cl.picks.length > 1 ? '1\u2013' + cl.picks.length + ' oder antippen \u00B7 ' : '') + Math.max(0, Math.ceil(cl.left)) + ' s';
+  if (cl.left <= 0) chooseUpgrade(cl.picks[0]);
+}
+function hideLevelBar() { const bar = document.getElementById('lvlbar'); if (bar) bar.classList.remove('show'); }
 
 function chooseUpgrade(choice) {
-  if (levelUpProcessing || gameState !== 'levelup') return;
+  if (levelUpProcessing || !currentLevelUp || (gameState !== 'levelup' && !currentLevelUp.bar)) return;
+  if (currentLevelUp.picks.indexOf(choice) === -1) return;            // ein Klick auf eine alte Karte (schnell doppelt getippt)
   levelUpProcessing = true;
-  const free = !!(currentLevelUp && currentLevelUp.free);
+  const free = !!currentLevelUp.free;
   currentLevelUp = null;
   const p = player;
   if (choice.kind === 'weapon') {
@@ -1867,7 +2070,7 @@ function chooseUpgrade(choice) {
   Sfx.levelup();
   if (free) pendingFreeCards = Math.max(0, pendingFreeCards - 1); else pendingLevelUps = Math.max(0, pendingLevelUps - 1);
   if (pendingLevelUps > 0 || pendingFreeCards > 0) presentLevelUpChoices();
-  else { levelUpProcessing = false; gameState = 'playing'; showScreen(null); }
+  else { levelUpProcessing = false; hideLevelBar(); if (gameState === 'levelup') { gameState = 'playing'; showScreen(null); } }
 }
 
 /* ============================================================
@@ -1880,21 +2083,24 @@ function update(dt) {
     bossWarningTimer -= dt;
     if (bossWarningTimer <= 0) {
       const stage = stageOf();
+      if (Net.wbEnc) { bossEncounterCount = Net.wbEnc - 1; Net.wbEnc = 0; }   // Weltboss: die Begegnungen zählt der Raum
       spawnEnemy(stage.boss, true);
     }
   }
-  updateSpawner(dt);
-  updatePlayer(dt);
-  updateWeapons(dt);
+  const down = playerDown > 0;                     // online ohnmächtig: kein Spawnen, Bewegen, Angreifen, Einsammeln
+  if (!down) updateSpawner(dt);
+  if (down) { updateDowned(dt); if (gameState !== 'playing') return; } else updatePlayer(dt);
+  if (!down) updateWeapons(dt);
   updateEnemies(dt);
   updateProjectiles(dt);
   updateHazards(dt);
   if (gameState !== 'playing') return;
-  updatePickups(dt);
+  if (!down) updatePickups(dt);
   mergeFarPickups(dt);
   updateParticles(dt);
 
-  if (pendingLevelUps > 0 || pendingFreeCards > 0) presentLevelUpChoices();
+  if (currentLevelUp && currentLevelUp.bar) updateLevelBar(dt);
+  else if (!down && (pendingLevelUps > 0 || pendingFreeCards > 0)) presentLevelUpChoices();
   if (runTime > save.stats.bestTime) save.stats.bestTime = runTime;
 }
 
@@ -1925,7 +2131,10 @@ function showToast(text) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = text; el.classList.add('show');
-  el.classList.toggle('low', !!bossEntity);          // nicht über dem Boss-Lebensbalken
+  const online = Net.on && !!player && gameState !== 'menu', boss = !!bossEntity || (online && !!netHudBoss());
+  el.classList.toggle('low', boss && !online);       // nicht über dem Boss-Lebensbalken
+  el.classList.toggle('net', online && !boss);       // online: nicht über der Raum-Anzeige
+  el.classList.toggle('netlow', online && boss);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
 }
@@ -2131,7 +2340,7 @@ function pushWave(sw) { shockwaves.push(sw); if (Net.live) netAnnounce('w', sw);
 const SOG_RANGE = 900;
 function sogPull(en, dt, dl) {
   const p = player;
-  if (Net.on && dl > SOG_RANGE) return;
+  if (Net.on && (dl > SOG_RANGE || playerDown > 0 || inHafen(p.x, p.y))) return;
   p.x += (en.x - p.x) / dl * 105 * dt; p.y += (en.y - p.y) / dl * 105 * dt;
 }
 
@@ -2147,7 +2356,9 @@ function updateHazards(dt) {
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, off = i === 0 ? 0 : 110 + Math.random() * 230;
         const lead = i === 0 ? p.speed * 0.7 : 0;
-        pushZone({ x: p.x + mv.x * lead + Math.cos(a) * off, y: p.y + mv.y * lead + Math.sin(a) * off, r: 78, t: 0, warn: 1.5, life: 3.5, kind: 'lava', dmg: dmg });
+        const zx = p.x + mv.x * lead + Math.cos(a) * off, zy = p.y + mv.y * lead + Math.sin(a) * off;
+        if (Net.on && Math.hypot(zx, zy) < HAFEN_R + 78) continue;    // nie im Hafen
+        pushZone({ x: zx, y: zy, r: 78, t: 0, warn: 1.5, life: 3.5, kind: 'lava', dmg: dmg });
       }
     }
   }
@@ -2529,11 +2740,14 @@ function bankRunProgress() {
   if (runLevel >= GLUECKS_LEVEL && save.unlockedCharacters.indexOf('gluecks') === -1) {
     save.unlockedCharacters.push('gluecks');
   }
-  clearRunSnapshot();
+  if (runSlot === 'online') Storage.set(ONLINE_SNAP_KEY, null); else clearRunSnapshot();
   persistSave();
 }
 
 function endRun() {
+  if (currentLevelUp && currentLevelUp.bar) { currentLevelUp = null; levelUpProcessing = false; }
+  playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
+  if (Net.on) { toggleQuickWheel(false); Net.lastSend = 0; }
   gameState = 'gameover';
   Sfx.gameover();
   bankRunProgress();
@@ -2601,14 +2815,29 @@ function claimAchievement(id) {
 
 function togglePause() {
   if (gameState === 'playing') {
-    gameState = 'paused'; clearInput(); showScreen('screen-pause');
-    const pr = document.getElementById('pause-room');
-    if (pr) { pr.style.display = Net.on ? '' : 'none'; if (Net.on) pr.textContent = '\uD83C\uDF10 Raum ' + Net.code + ' \u00B7 ' + (Net.peers.size + 1) + ' Spieler \u2013 deine Gegner warten, bis du weiterspielst.'; }
+    if (pauseOverlay) { pauseOverlay = false; showScreen(null); return; }
+    clearInput();
+    if (Net.on && netSomeoneNear()) { pauseOverlay = true; showScreen('screen-pause'); pauseRoomText(); return; }   // online: das Spiel läuft weiter
+    gameState = 'paused'; showScreen('screen-pause'); pauseRoomText();
   }
   else if (gameState === 'paused') { gameState = 'playing'; showScreen(null); }
 }
-window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); });
-document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); if (gameState === 'playing') togglePause(); saveRunSnapshotIfActive(); } });
+// richtige Pause (Tab im Hintergrund, oder niemand mehr in der Nähe)
+function hardPause() {
+  if (gameState !== 'playing') return;
+  pauseOverlay = false; gameState = 'paused'; clearInput(); showScreen('screen-pause'); pauseRoomText();
+}
+function pauseRoomText() {
+  const sp = document.getElementById('screen-pause');
+  if (sp) sp.classList.toggle('live', !!pauseOverlay);
+  const pr = document.getElementById('pause-room');
+  if (!pr) return;
+  pr.style.display = Net.on ? '' : 'none';
+  if (Net.on) pr.textContent = '\uD83C\uDF10 ' + netRoomName() + ' \u00B7 ' + (Net.peers.size + 1) + ' Spieler \u2013 ' +
+    (pauseOverlay ? 'ein Freund ist in der N\u00E4he: das Spiel l\u00E4uft weiter!' : 'deine Gegner warten, bis du weiterspielst.');
+}
+window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing' && !pauseOverlay) togglePause(); saveRunSnapshotIfActive(); });
+document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); hardPause(); saveRunSnapshotIfActive(); } });
 window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
 setInterval(function(){ saveRunSnapshotIfActive(); }, 8000);
 
@@ -3877,7 +4106,21 @@ function drawBossWarning() {
   ctx.fillStyle = '#ff5c72';
   ctx.font = '700 26px "Baloo 2", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('\u26A0 Ein Boss n\u00E4hert sich! \u26A0', W/2, 90);
+  ctx.fillText(Net.on && Net.peers.size > 0 ? '\u26A0 Ein Weltboss n\u00E4hert sich! \u26A0' : '\u26A0 Ein Boss n\u00E4hert sich! \u26A0', W/2, Net.on ? 140 : 90);
+  ctx.restore();
+}
+function drawDownBanner() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ff8a9a'; ctx.shadowColor = '#ff5c72'; ctx.shadowBlur = 14;
+  const t1 = '\uD83D\uDC94 Ohnm\u00E4chtig \u2013 noch ' + Math.max(0, Math.ceil(playerDown)) + ' s';
+  let size = 26;
+  ctx.font = '700 ' + size + 'px "Baloo 2", sans-serif';
+  const w = ctx.measureText(t1).width;
+  if (w > W - 32) { size = Math.max(12, Math.floor(size * (W - 32) / w)); ctx.font = '700 ' + size + 'px "Baloo 2", sans-serif'; }
+  ctx.fillText(t1, W / 2, 158);
+  ctx.shadowBlur = 0; ctx.fillStyle = '#ffd3dc'; ctx.font = '800 13px "Nunito", sans-serif';
+  ctx.fillText(reviveProg > 0 ? 'Rettung l\u00E4uft \u2026 bleib ruhig!' : 'Ein Freund muss 3 s neben dir bleiben, um dich zu retten.', W / 2, 182);
   ctx.restore();
 }
 function drawReviveBanner() {
@@ -3935,6 +4178,7 @@ function render() {
 
   const inRun = !!(player && (gameState==='playing'||gameState==='paused'||gameState==='levelup'||gameState==='gameover'));
   if (inRun) {
+    if (Net.on) drawHafen();
     drawHazards();
     const gm = 40;
     for (let i=0;i<pickups.length;i++){
@@ -3975,7 +4219,6 @@ function render() {
       const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2;
       if (sx < -100 || sx > W+100 || sy < -100 || sy > H+100) continue;
       const color = en.hitFlash > 0 ? '#ffffff' : (en.state === 'tired' ? '#e0d890' : en.color);
-      if (en.frozen) ctx.globalAlpha = 0.45;      // Gegner eines Mitspielers, der gerade pausiert
       if (en.isBoss) {
         if (en.state === 'windup' || en.state === 'sog' || en.state === 'roar') drawBossTelegraph(en, sx, sy);
         if (en.champ) drawChampionBossUnder(en, sx, sy);
@@ -3989,8 +4232,8 @@ function render() {
       }
       ctx.globalAlpha = 1;
     }
-    if (player.weapons.ring) drawRingBubbles();
-    if (player.weapons.begleiter) {
+    if (player.weapons.ring && playerDown <= 0) drawRingBubbles();
+    if (player.weapons.begleiter && playerDown <= 0) {
       for (let mi=0; mi<minionEntities.length; mi++) {
         const min = minionEntities[mi];
         const sx = min.x-camera.x+W/2, sy = min.y-camera.y+H/2;
@@ -4000,21 +4243,20 @@ function render() {
     if (Net.on) drawPeers();
     {
       const sx = player.x-camera.x+W/2, sy = player.y-camera.y+H/2;
-      if (Net.on) drawNetRing(sx, sy, player.r, Net.col);
-      if (player.shieldReady) {
-        const pulse = 0.75 + Math.sin(runTime*4) * 0.2;
-        ctx.save();
-        ctx.globalAlpha = pulse;
-        ctx.strokeStyle = '#5ef2c0';
-        ctx.shadowColor = '#5ef2c0'; ctx.shadowBlur = 12;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(sx, sy, player.r + 9, 0, Math.PI*2); ctx.stroke();
-        ctx.restore();
+      if (playerDown > 0) {                        // online ohnmächtig: blass, roter Ring, grüner Fortschritt beim Retten
+        drawDownRing(sx, sy, player.r, reviveProg / REVIVE_TIME);
+        ctx.globalAlpha = 0.55;
+        drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: 0, glow: 6 });
+        ctx.globalAlpha = 1;
+      } else {
+        if (Net.on) drawNetRing(sx, sy, player.r, Net.col);
+        if (player.shieldReady) drawShieldRing(sx, sy, player.r);
+        const alphaBlink = invulnTimer > 0 ? (Math.sin(runTime*30) > 0 ? 1 : 0.4) : 1;
+        ctx.globalAlpha = alphaBlink;
+        drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: player.angle, flashAmount: player.hitFlash, glow: 16 });
+        ctx.globalAlpha = 1;
       }
-      const alphaBlink = invulnTimer > 0 ? (Math.sin(runTime*30) > 0 ? 1 : 0.4) : 1;
-      ctx.globalAlpha = alphaBlink;
-      drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: player.angle, flashAmount: player.hitFlash, glow: 16 });
-      ctx.globalAlpha = 1;
+      if (Net.on && Net.myBubble) drawSpeech(sx, sy - player.r * 1.55 - 6, Net.myBubble);
     }
     for (let i=0;i<particles.length;i++){
       const pt = particles[i];
@@ -4063,6 +4305,8 @@ function render() {
     drawEdgeArrows();
     if (bossWarningTimer > 0) drawBossWarning();
     if (reviveFlashTimer > 0) drawReviveBanner();
+    if (playerDown > 0) drawDownBanner();
+    if (Net.on && gameState === 'playing') drawHafenHint();
     if (touchState.active && gameState === 'playing') drawTouchStick();
   }
 }
@@ -4076,7 +4320,7 @@ function cacheUI() {
    'hud-boss','hud-boss-fill','hud-boss-name','hud-ring',
    'character-grid','stage-grid','shop-list','shop-pearls-total','achievement-list',
    'levelup-choices','gameover-stats','gameover-achievements','gameover-title',
-   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room'
+   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room','btn-chat'
   ].forEach(function(id){ UI[id] = document.getElementById(id); });
 }
 
@@ -4085,6 +4329,7 @@ function setHudVisible(visible) {
 }
 
 function showScreen(id) {
+  if (id !== 'screen-pause') pauseOverlay = false;
   const screens = document.querySelectorAll('.screen');
   screens.forEach(function(s){ s.classList.remove('active'); });
   if (id) {
@@ -4126,8 +4371,8 @@ function updateHud() {
     hudSet('hud-boss-fill', 'w', Math.max(0, (B.hp / B.maxHp) * 100).toFixed(1) + '%');
     hudSet('hud-boss-name', 'text', (B.champ ? '\uD83D\uDC51 ' : '') + B.name + (B.encounterNumber > 1 ? ' \u00D7' + B.encounterNumber : '') + ' \u00B7 Phase ' + B.phase + (B.remote ? ' \u00B7 ' + B.peer.name : ''));
   } else if (hudCache.boss) { UI['hud-boss'].classList.remove('active'); hudCache.boss = 0; }
-  if (Net.on) { hudSet('hud-room', 'disp', 'inline-block'); hudSet('hud-room', 'text', netRoomLabel()); }
-  else hudSet('hud-room', 'disp', 'none');
+  if (Net.on) { hudSet('hud-room', 'disp', 'inline-block'); hudSet('hud-room', 'text', netRoomLabel()); hudSet('btn-chat', 'disp', 'inline-block'); }
+  else { hudSet('hud-room', 'disp', 'none'); hudSet('btn-chat', 'disp', 'none'); }
 }
 
 function updateMenuPearlsLabel() {
@@ -4146,6 +4391,9 @@ function updateContinueButton() {
   const contBtn = document.getElementById('btn-continue-run');
   const playBtn = document.getElementById('btn-goto-play');
   if (!contBtn || !playBtn) return;
+  bankStaleOnlineSnapshot();
+  const os = netConfigured() ? onlineSnapshot() : null, onBtn = document.getElementById('btn-continue-online');
+  if (onBtn) { onBtn.style.display = os ? '' : 'none'; if (os) onBtn.textContent = '\uD83C\uDF10 Online weiterspielen \u00B7 ' + onlineSnapLabel(os); }
   if (snap) {
     contBtn.style.display = '';
     playBtn.className = 'btn btn-secondary';
@@ -4333,6 +4581,8 @@ function renderGameOverScreen() {
   if (toastEl) toastEl.classList.remove('show');
   const newly = runNewAch.slice();
   UI['gameover-title'].textContent = 'Spiel vorbei';
+  const retry = document.getElementById('btn-retry');
+  if (retry) retry.textContent = Net.on ? 'Nochmal eintauchen' : 'Nochmal spielen';
   const stats = [
     { label:'\u00DCberlebt', value: Math.floor(runTime/60)+':'+String(Math.floor(runTime%60)).padStart(2,'0') },
     { label:'Level erreicht', value: runLevel },
@@ -4419,9 +4669,17 @@ function initUI() {
   updateMenuPearlsLabel();
 }
 
-// ---------- Bildschirm "Online spielen" ----------
-let onlineArea = null;
-function renderOnlineScreen() {
+// ---------- Bildschirme "Online spielen": erst das Profil (Name, Blobi), dann die Spielart, dann Gebiet oder Code ----------
+let onlineArea = null, onlinePurpose = 'quick', onlineAreaTouched = false, onlineStats = null, onlineStatsTimer = 0;
+const ONLINE_SCREENS = ['screen-online', 'screen-online-mode', 'screen-online-area', 'screen-online-code'];
+const ONLINE_STATUS_IDS = ['online-status', 'online-status-mode', 'online-status-area', 'online-status-code'];
+const ONLINE_ACTION_IDS = ['btn-online-next', 'btn-mode-resume', 'btn-mode-quick', 'btn-mode-create', 'btn-mode-join', 'btn-area-go', 'btn-online-join'];
+
+function onlineScreenOpen() {
+  return ONLINE_SCREENS.some(function(id){ const el = document.getElementById(id); return !!(el && el.classList && el.classList.contains('active')); });
+}
+function charName(id) { const ch = CHARACTERS.filter(function(c){ return c.id === id; })[0] || CHARACTERS[0]; return ch.name; }
+function renderOnlineProfile() {
   const nameEl = document.getElementById('online-name');
   if (nameEl && document.activeElement !== nameEl) nameEl.value = onlineName();
   const chars = document.getElementById('online-chars');
@@ -4432,34 +4690,94 @@ function renderOnlineScreen() {
       const b = document.createElement('button');
       b.className = 'online-chip' + (ch.id === selectedCharacterId ? ' selected' : '');
       b.disabled = !unlocked;
-      b.innerHTML = '<img src="' + (CHARACTER_SPRITES[ch.id] || '') + '" alt="">' + (unlocked ? '' : '\uD83D\uDD12 ') + ch.name.replace('-Blobi', '');
-      b.addEventListener('click', function(){ selectedCharacterId = ch.id; save.lastCharacter = ch.id; persistSave(); Sfx.click(); renderOnlineScreen(); });
+      b.innerHTML = '<img src="' + (CHARACTER_SPRITES[ch.id] || '') + '" alt="">' + (unlocked ? '' : '🔒 ') + ch.name.replace('-Blobi', '');
+      b.addEventListener('click', function(){ selectedCharacterId = ch.id; save.lastCharacter = ch.id; persistSave(); Sfx.click(); renderOnlineProfile(); });
       chars.appendChild(b);
     });
   }
-  if (!onlineArea || save.stagesUnlocked.indexOf(onlineArea) === -1) onlineArea = save.stagesUnlocked.indexOf(selectedStageId) !== -1 ? selectedStageId : 'riff';
-  const areas = document.getElementById('online-areas');
-  if (areas) {
-    areas.innerHTML = '';
-    STAGES.forEach(function(st){
-      const unlocked = save.stagesUnlocked.indexOf(st.id) !== -1;
-      const b = document.createElement('button');
-      b.className = 'online-chip' + (st.id === onlineArea ? ' selected' : '');
-      b.disabled = !unlocked;
-      b.innerHTML = '<span class="sw" style="background:linear-gradient(135deg,' + st.bgTop + ',' + st.bgBottom + ')"></span>' + (unlocked ? '' : '\uD83D\uDD12 ') + st.name;
-      b.addEventListener('click', function(){ onlineArea = st.id; Sfx.click(); renderOnlineScreen(); });
-      areas.appendChild(b);
-    });
+  const next = document.getElementById('btn-online-next');
+  if (next) next.disabled = !netConfigured();
+  renderOnlineCounts();
+  if (!netConfigured()) onlineStatus('Der Online-Server ist noch nicht eingerichtet (Anleitung: blobfisch-online/README.md).', true);
+}
+function renderOnlineMode() {
+  const who = document.getElementById('online-who');
+  if (who) who.innerHTML = 'Du spielst als <b>' + netEsc(onlineName()) + '</b> · ' + netEsc(charName(selectedCharacterId));
+  const snap = onlineSnapshot(), rb = document.getElementById('btn-mode-resume');
+  if (rb) {
+    rb.style.display = snap ? '' : 'none';
+    const sub = document.getElementById('mode-resume-sub');
+    if (snap && sub) sub.textContent = onlineSnapLabel(snap) + ' – dein Lauf wartet auf dich';
   }
-  const ok = netConfigured();
-  ['btn-online-create', 'btn-online-join'].forEach(function(id){ const b = document.getElementById(id); if (b) b.disabled = !ok || !!Net.ws; });
-  if (!ok) onlineStatus('Der Online-Server ist noch nicht eingerichtet (Anleitung: blobfisch-online/README.md).', true);
+  renderOnlineCounts();
+}
+function onlineSum(o) { let n = 0; if (o) for (const k in o) n += o[k] | 0; return n; }
+function renderOnlineCounts() {
+  const s = onlineStats && !onlineStats.error ? onlineStats : null;
+  const el = document.getElementById('online-count');
+  if (el) el.textContent = onlineStats && onlineStats.error === 'limit' ? '🔴 Der Online-Modus ist für heute voll' :
+    !s ? '' : s.total > 0 ? '🟢 ' + s.total + ' Spieler online' : '⚪ Gerade ist niemand online – vielleicht kommt jemand dazu!';
+  const q = document.getElementById('mode-quick-count');
+  if (q) {
+    const n = s ? onlineSum(s.open) : 0;
+    q.textContent = !s ? 'Spiel mit allen, die gerade online sind' : n > 0 ? n + ' gerade im Schnellspiel – spring dazu!' : 'Noch niemand da – fang an, andere kommen dazu';
+  }
+  renderOnlineAreas();
+}
+// Schnellspiel: das Gebiet, in dem gerade die meisten spielen (wenn freigeschaltet), sonst das zuletzt gewählte
+function onlineBestArea() {
+  const s = onlineStats && !onlineStats.error ? onlineStats : null;
+  let best = null, bn = 0;
+  if (s && s.open) STAGES.forEach(function(st){ const n = s.open[st.id] | 0; if (n > bn && save.stagesUnlocked.indexOf(st.id) !== -1) { bn = n; best = st.id; } });
+  return best || onlineLastArea();
+}
+function onlineLastArea() { return (save.lastStage && save.stagesUnlocked.indexOf(save.lastStage) !== -1) ? save.lastStage : 'riff'; }
+function renderOnlineAreas() {
+  const areas = document.getElementById('online-areas');
+  if (!areas) return;
+  const quick = onlinePurpose === 'quick';
+  if (quick && !onlineAreaTouched) onlineArea = onlineBestArea();
+  if (!onlineArea || save.stagesUnlocked.indexOf(onlineArea) === -1) onlineArea = onlineLastArea();
+  const t = document.getElementById('online-area-title');
+  if (t) t.textContent = quick ? '⚡ Schnellspiel' : '➕ Neuer Raum';
+  const n = document.getElementById('online-area-note');
+  if (n) n.textContent = quick ? 'Wähle ein Gebiet – du landest im Raum, in dem dort schon die meisten spielen (bis 24).' : 'Wähle das Gebiet für euren privaten Raum (bis 8 Spieler). Danach siehst du den Code für deine Freunde.';
+  const go = document.getElementById('btn-area-go');
+  if (go) go.textContent = quick ? 'Los geht’s!' : 'Raum erstellen';
+  const s = onlineStats && !onlineStats.error ? onlineStats : null;
+  areas.innerHTML = '';
+  STAGES.forEach(function(st){
+    const unlocked = save.stagesUnlocked.indexOf(st.id) !== -1;
+    const b = document.createElement('button');
+    b.className = 'online-chip' + (st.id === onlineArea ? ' selected' : '');
+    b.disabled = !unlocked;
+    const cnt = quick && s && s.open ? (s.open[st.id] | 0) : 0;
+    b.innerHTML = '<span class="sw" style="background:linear-gradient(135deg,' + st.bgTop + ',' + st.bgBottom + ')"></span>' + (unlocked ? '' : '🔒 ') + st.name +
+      (cnt ? '<span class="cnt">' + cnt + ' 🟢</span>' : '');
+    b.addEventListener('click', function(){ onlineArea = st.id; onlineAreaTouched = true; Sfx.click(); renderOnlineAreas(); });
+    areas.appendChild(b);
+  });
+}
+// Wie viele online sind: beim Öffnen und alle 10 s, solange ein Online-Bildschirm offen ist
+function onlineFetchStats() {
+  if (!netConfigured() || document.hidden) return;
+  fetch(netServerBase() + '/stats').then(function(r){ return r.json(); })
+    .then(function(d){ onlineStats = d && typeof d === 'object' ? d : null; renderOnlineCounts(); })
+    .catch(function(){ onlineStats = null; renderOnlineCounts(); });
+}
+function onlineStatsStart() {
+  onlineFetchStats();
+  if (onlineStatsTimer) return;
+  onlineStatsTimer = setInterval(function(){
+    if (!onlineScreenOpen()) { clearInterval(onlineStatsTimer); onlineStatsTimer = 0; return; }
+    onlineFetchStats();
+  }, 10000);
 }
 function onlineStatus(text, bad) {
-  const el = document.getElementById('online-status');
-  if (el) { el.textContent = text || ''; el.className = 'online-status' + (bad ? ' bad' : ''); }
-  if (bad) ['btn-online-create', 'btn-online-join'].forEach(function(id){ const b = document.getElementById(id); if (b) b.disabled = !netConfigured(); });
+  ONLINE_STATUS_IDS.forEach(function(id){ const el = document.getElementById(id); if (el) { el.textContent = text || ''; el.className = 'online-status' + (bad ? ' bad' : ''); } });
+  if (bad) onlineEnable(true);
 }
+function onlineEnable(on) { ONLINE_ACTION_IDS.forEach(function(id){ const b = document.getElementById(id); if (b) b.disabled = !on || !netConfigured(); }); }
 function onlineCheckName() {
   const el = document.getElementById('online-name');
   const v = el ? el.value.replace(/\s+/g, ' ').trim() : onlineName();
@@ -4467,74 +4785,110 @@ function onlineCheckName() {
   save.onlineName = v; persistSave();
   return true;
 }
+function onlineShow(id) { onlineStatus(''); onlineEnable(true); showScreen(id); onlineStatsStart(); }
 function initOnlineUI() {
   Net.onStatus = onlineStatus;
-  document.getElementById('btn-goto-online').addEventListener('click', function(){
-    Sfx.click(); ensureAudio(); onlineStatus(''); renderOnlineScreen(); showScreen('screen-online');
-  });
-  document.getElementById('btn-online-dice').addEventListener('click', function(){
+  const on = function(id, ev, fn){ const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  const back = function(){ if (!Net.on) netDisconnect(); };
+  on('btn-goto-online', 'click', function(){ Sfx.click(); ensureAudio(); bankStaleOnlineSnapshot(); onlineShow('screen-online'); renderOnlineProfile(); });
+  on('btn-online-dice', 'click', function(){
     Sfx.click(); const el = document.getElementById('online-name'); if (el) el.value = randomOnlineName(); onlineCheckName(); onlineStatus('');
   });
-  document.getElementById('online-name').addEventListener('change', function(){ if (onlineCheckName()) onlineStatus(''); });
-  document.getElementById('online-code').addEventListener('input', function(e){
+  on('online-name', 'change', function(){ if (onlineCheckName()) onlineStatus(''); });
+  on('online-name', 'keydown', function(e){ if (e.key === 'Enter') { const b = document.getElementById('btn-online-next'); if (b) b.click(); } });
+  on('btn-online-next', 'click', function(){ Sfx.click(); if (!netConfigured() || !onlineCheckName()) return; renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-online-back', 'click', function(){ Sfx.click(); back(); onlineStatus(''); updateMenuPearlsLabel(); showScreen('screen-menu'); });
+  on('btn-mode-resume', 'click', function(){ Sfx.click(); onlineResume(); });
+  on('btn-mode-quick', 'click', function(){ Sfx.click(); onlinePurpose = 'quick'; onlineAreaTouched = false; renderOnlineAreas(); onlineShow('screen-online-area'); });
+  on('btn-mode-create', 'click', function(){ Sfx.click(); onlinePurpose = 'create'; onlineArea = onlineLastArea(); renderOnlineAreas(); onlineShow('screen-online-area'); });
+  on('btn-mode-join', 'click', function(){
+    Sfx.click(); onlineShow('screen-online-code');
+    const c = document.getElementById('online-code'); if (c && c.focus) { try { c.focus(); } catch (e) {} }
+  });
+  on('btn-mode-back', 'click', function(){ Sfx.click(); back(); renderOnlineProfile(); onlineShow('screen-online'); });
+  on('btn-area-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-code-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-area-go', 'click', function(){
+    Sfx.click();
+    if (!netConfigured()) return;
+    onlineEnable(false);
+    if (onlinePurpose === 'quick') netQuick(onlineArea || 'riff'); else netCreateRoom(onlineArea || 'riff');
+  });
+  on('online-code', 'input', function(e){
     const el = e.target, v = el.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
     if (el.value !== v) el.value = v;
   });
-  document.getElementById('online-code').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('btn-online-join').click(); });
-  document.getElementById('btn-online-create').addEventListener('click', function(){
+  on('online-code', 'keydown', function(e){ if (e.key === 'Enter') { const b = document.getElementById('btn-online-join'); if (b) b.click(); } });
+  on('btn-online-join', 'click', function(){
     Sfx.click();
-    if (!onlineCheckName()) return;
-    this.disabled = true; document.getElementById('btn-online-join').disabled = true;
-    netCreateRoom(onlineArea || 'riff');
-  });
-  document.getElementById('btn-online-join').addEventListener('click', function(){
-    Sfx.click();
-    if (!onlineCheckName()) return;
-    const code = document.getElementById('online-code').value.toUpperCase();
+    const el = document.getElementById('online-code'), code = el ? el.value.toUpperCase() : '';
     if (!NET_CODE_RE.test(code)) { onlineStatus('Der Code hat 4 Buchstaben (ohne I, L und O).', true); return; }
-    this.disabled = true; document.getElementById('btn-online-create').disabled = true;
-    netJoin(code, false);
+    onlineEnable(false);
+    netJoin(code, false, false);
   });
-  document.getElementById('btn-online-back').addEventListener('click', function(){
-    Sfx.click(); if (!Net.on) netDisconnect(); onlineStatus(''); updateMenuPearlsLabel(); showScreen('screen-menu');
-  });
+  on('btn-continue-online', 'click', function(){ Sfx.click(); ensureAudio(); renderOnlineMode(); onlineShow('screen-online-mode'); onlineResume(); });
+  // im Lauf: Spielerliste (Tab oder Antippen der Raum-Anzeige) und Kurznachrichten (Q oder 💬)
+  on('hud-room', 'click', function(){ togglePlayerList(); });
+  on('btn-chat', 'click', function(){ toggleQuickWheel(); });
+  on('plist-close', 'click', function(){ togglePlayerList(false); });
+  on('qwheel', 'click', function(e){ if (e.target === e.currentTarget) toggleQuickWheel(false); });
+  buildQuickWheel();
+  ['keydown', 'mousedown', 'touchstart', 'pointerdown'].forEach(function(ev){ window.addEventListener(ev, function(){ Net.lastInput = performance.now(); }, { passive: true }); });
 }
 
 /* ============================================================
-   NETZ (Online-Modus): private Räume mit Code
+   NETZ (Online-Modus): Schnellspiel in öffentlichen Räumen (bis 24) und private Räume mit Code (bis 8)
    Jeder Browser spielt seinen eigenen Blobi und die Gegner um ihn herum ("Besitzer"). Der Server leitet nur weiter:
    Zustand + Gegner alle 0,1 s an Mitspieler in der Nähe, Treffer an den Besitzer des Gegners, Siege an alle Helfer.
+   Der "Anker" (wer am längsten im Raum ist) führt die Uhren für Weltbosse und Raum-Champions und ruft sie bei einem
+   zufälligen Spieler hervor; dessen Browser lässt sie erscheinen und spielt sie.
    Allein (Net.on = false) ist alles hier abgeschaltet: das Spiel läuft genau wie bisher.
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 1;             // muss zu PROTOCOL in room-core.js passen
+const NET_PROTOCOL = 2;             // muss zu PROTOCOL in room-core.js passen
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
-const NET_TICK_NEAR = 100, NET_TICK_FAR = 500;    // ms zwischen zwei Zustands-Nachrichten (mit / ohne Mitspieler in der Nähe)
-const NET_DELAY = 130;              // ms: Mitspieler und ihre Gegner werden so weit in der Vergangenheit gezeigt (dafür glatt)
-const NET_ASLEEP = 2500;            // ms ohne Nachricht: der Mitspieler "schläft" (Tab im Hintergrund)
-const NET_COLORS = ['#5ef2c0', '#ffd76a', '#ff7ab8', '#7eb6ff', '#ff9a3c', '#b98cff', '#c8ff6a', '#ffffff'];
+const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
+const NET_CROWD = [[12, 200], [6, 150]];   // viele Spieler in der Nähe (mehr als 12 / 6): seltener senden (Bandbreite und Tagesgrenze)
+const NET_DELAY = 130;              // ms: Mitspieler und ihre Gegner werden so weit in der Vergangenheit gezeigt (dafür glatt; mindestens)
+const NET_ASLEEP = 3500;            // ms ohne Nachricht: der Mitspieler "schläft" (Tab im Hintergrund) und verschwindet samt Gegnern
+const NET_COLORS = ['#5ef2c0', '#ffd76a', '#ff7ab8', '#7eb6ff', '#ff9a3c', '#b98cff', '#c8ff6a', '#ffffff', '#ff6b6b', '#6bffef', '#ffb3f0', '#a3a3ff'];
 const NET_STATES = ['walk', 'windup', 'dash', 'tired', 'roar', 'sog'];
 const NET_CST = ['walk', 'flash', 'dash'];
 const NET_TYPES = Object.keys(ENEMY_TYPES).concat(Object.keys(BOSS_TYPES));
 const NET_TYPE_IDX = {}; NET_TYPES.forEach(function(k, i){ NET_TYPE_IDX[k] = i; });
-const NF_PAUSED = 1, NF_DEAD = 2;
+const NF_PAUSED = 1, NF_DEAD = 2, NF_DOWN = 4, NF_SHIELD = 8, NF_HAFEN = 16;    // Merkmale eines Spielers in seinen Nachrichten
 const NET_NAME_RE = /^[A-Za-z0-9ÄÖÜäöüßÀÂÇÈÉÊËÎÏÔÙÛàâçèéêëîïôùû _-]{3,12}$/;
 const NET_CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/;
-const CHAMPION_GROUP_HP = 0.5;      // online: Champions +50 % HP pro weiterem Spieler in der Nähe
+const NET_GROUP_HP = 0.5;           // online: neue Gegner (auch Champions) +50 % HP pro weiterem Spieler in der Nähe
+const WORLD_BOSS_HP = 0.6;          // Weltboss: +60 % HP pro weiterem Spieler in der Nähe
+const WORLD_BOSS_GAP = 240;         // s: nach einem Weltboss kommt der nächste nach 4 Minuten (der erste nach 5, wie allein)
+const HAFEN_R = 250;                // Hafen: sichere Zone in der Raummitte (Radius)
+const HAFEN_PROTECT = 5;            // s Schutz am Anfang eines Online-Laufs
+const DOWN_TIME = 20, DOWN_NEAR = 2200;              // ohnmächtig: 20 s Zeit zum Retten; nur wenn ein Freund höchstens 2 Bildschirme weit weg ist
+const REVIVE_R = 60, REVIVE_TIME = 3, REVIVE_HP = 0.3;   // Retten: 3 s höchstens 60 Einheiten daneben, dann 30 % Leben
+const LVLBAR_TIME = 15;             // s bis zur automatischen Wahl in der Level-Leiste (Freund in der Nähe)
+const QUICK_MSGS = ['👋 Hallo', '🆘 Hilfe!', '📍 Hierher!', '🙏 Danke!', '⚠️ Boss!', '🎉 GG', '👑 Champion!', '👍 OK'];
+const QUICK_SHOW = 3, QUICK_GAP = 2;    // Sprechblase 3 s, höchstens eine Nachricht alle 2 s
 const NET_MAX_DMG = 1000, NET_MAX_HIT = 5000, NET_MAX_XP = 1000;   // Obergrenzen für Werte von Mitspielern (gegen manipulierte Spiele)
+const NET_HOLD = { hold: true, x: 0, y: 0 };                         // Ziel "niemand": Gegner bleiben stehen
+const ONLINE_SNAP_KEY = 'blobfischSurvivorsOnlineRun', ONLINE_SNAP_TTL = 30 * 60 * 1000;   // Online-Lauf nach dem Neuladen: 30 Minuten
+const NET_UNREACHABLE = 'Der Online-Server ist nicht erreichbar (oder für heute voll). Spiel solange allein!';
 function netClamp(v, hi) { v = +v; return isFinite(v) ? Math.max(0, Math.min(hi, v)) : 0; }
 
 const Net = {
-  on: false, live: false, ws: null, id: 0, code: '', area: '', name: '', col: 0, cap: 8, created: false,
-  peers: new Map(), lastSend: 0, tick: 0, fxOut: [], hitsOut: new Map(), toOut: new Set(), hitsIn: [], fxIn: [], shots: [],
-  wantOpen: false, retries: 0, startedRun: false, onStatus: null, pingTimer: 0, stamp: 0
+  on: false, live: false, ws: null, id: 0, code: '', kind: 'private', title: '', area: '', name: '', col: 0, cap: 8, created: false, quick: false,
+  peers: new Map(), lastSend: 0, tick: 0, fxOut: [], hitsOut: new Map(), toOut: new Set(), needTo: new Set(), hitsIn: [], fxIn: [], shots: [],
+  wantOpen: false, retries: 0, startedRun: false, onStatus: null, pingTimer: 0, stamp: 0, quickArea: 'riff', quickTries: 0, resume: null,
+  anchor: 0, rt: null, multi: false, wasAnchor: false, seq: 0, doneB: 0, doneC: 0, wbSeq: 0, wbEnc: 0, seenWorld: new Set(), urgent: false,
+  qOut: -1, qLast: -1e9, myBubble: null, lastInput: 0, afk: 300
 };
 let remoteEnemyList = [], remoteFrozen = [];
 function remoteDrawList() { return remoteFrozen.length ? remoteEnemyList.concat(remoteFrozen) : remoteEnemyList; }
 function netR1(v) { return Math.round(v * 10) / 10; }
 function netR2(v) { return Math.round(v * 100) / 100; }
+function netEsc(s) { return String(s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
 // ---------- Server-Adresse: ?server=http://localhost:8787 ist nur für lokale Tests erlaubt ----------
 function netServerBase() {
@@ -4547,33 +4901,60 @@ function netServerBase() {
 function netConfigured() { return netServerBase().indexOf('DEIN-KONTO') === -1; }
 function netWsBase() { return netServerBase().replace(/^http/, 'ws'); }
 
-function randomOnlineName() { return 'Blubbi' + (100 + Math.floor(Math.random() * 900)); }
+function randomOnlineName() { return 'Blobi' + (100 + Math.floor(Math.random() * 900)); }
 function onlineName() {
+  if (save.onlineName && /^Blubbi\d{3}$/.test(save.onlineName)) { save.onlineName = 'Blobi' + save.onlineName.slice(6); persistSave(); }   // alter Zufallsname
   if (!save.onlineName || !NET_NAME_RE.test(save.onlineName)) { save.onlineName = randomOnlineName(); persistSave(); }
   return save.onlineName;
 }
 function netStatus(text, bad) { if (Net.onStatus) Net.onStatus(text, !!bad); }
+function netRoomName() { return Net.kind === 'global' ? (Net.title || Net.code) : 'Raum ' + Net.code; }
+function netRoomLabel() { return '👥 ' + (Net.kind === 'global' ? (Net.title || Net.code) : Net.code) + ' · ' + (Net.peers.size + 1) + '/' + Net.cap; }
+// Die Gratis-Grenze von Cloudflare gilt pro Tag bis 00:00 UTC (in der Schweiz 1 oder 2 Uhr nachts)
+function netLimitText() {
+  let at = '2 Uhr nachts';
+  try { const d = new Date(), r = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1)); at = r.getHours() + ':00 Uhr'; } catch (e) {}
+  return 'Der Online-Modus ist für heute voll (Gratis-Grenze des Servers). Ab ' + at + ' geht es wieder – spiel solange allein!';
+}
+function netErrorText(err) {
+  if (err === 'limit') return netLimitText();
+  if (err === 'busy') return 'Der Server hat gerade zu tun – versuch es gleich nochmal.';
+  return 'Das hat nicht geklappt – versuch es gleich nochmal.';
+}
 
-// ---------- Verbinden, Raum erstellen / beitreten, verlassen ----------
+// ---------- Verbinden: Schnellspiel, Raum erstellen / beitreten, verlassen ----------
+function netQuick(area, skip, resume) {
+  netStatus('Suche einen Raum …');
+  Net.created = false; Net.quickArea = area;
+  if (!skip) Net.quickTries = 0;
+  fetch(netServerBase() + '/quick?area=' + encodeURIComponent(area) + (skip ? '&skip=' + encodeURIComponent(skip) : ''))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.room) netJoin(d.room, false, true, resume);
+      else netStatus(netErrorText(d && d.error), true);
+    })
+    .catch(function(){ netStatus(NET_UNREACHABLE, true); });
+}
 function netCreateRoom(area) {
   netStatus('Raum wird erstellt …');
   Net.created = true;
   fetch(netServerBase() + '/new?area=' + encodeURIComponent(area))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d && d.code) netJoin(d.code, true);
-      else netStatus(d && d.error === 'busy' ? 'Gerade ist kein Raum frei – versuch es gleich nochmal.' : 'Der Raum konnte nicht erstellt werden.', true);
+      if (d && d.code) netJoin(d.code, true, false);
+      else netStatus(netErrorText(d && d.error), true);
     })
-    .catch(function(){ netStatus('Der Online-Server ist nicht erreichbar (oder für heute voll). Spiel solange allein!', true); });
+    .catch(function(){ netStatus(NET_UNREACHABLE, true); });
 }
-function netJoin(code, created) {
+function netJoin(code, created, quick, resume) {
   netDisconnect();
-  Net.code = code; Net.created = !!created; Net.wantOpen = true; Net.retries = 0; Net.startedRun = false;
-  netStatus('Verbinde mit Raum ' + code + ' …');
+  Net.code = code; Net.created = !!created; Net.quick = !!quick; Net.resume = resume || null;
+  Net.wantOpen = true; Net.retries = 0; Net.startedRun = false;
+  netStatus(quick ? 'Verbinde …' : 'Verbinde mit Raum ' + code + ' …');
   netOpen();
 }
 function netOpen() {
-  const url = netWsBase() + '/join/' + Net.code + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId);
+  const url = netWsBase() + '/join/' + encodeURIComponent(Net.code) + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId);
   let ws;
   try { ws = new WebSocket(url); } catch (e) { netStatus('Der Online-Server ist nicht erreichbar.', true); return; }
   Net.ws = ws;
@@ -4581,44 +4962,61 @@ function netOpen() {
   ws.onclose = function(ev){ if (Net.ws === ws) netClosed(ev.code); };
   ws.onerror = function(){};
   clearInterval(Net.pingTimer);
-  Net.pingTimer = setInterval(function(){ if (Net.ws === ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 20000);   // hält die Verbindung im Hintergrund-Tab offen
+  Net.pingTimer = setInterval(function(){ if (Net.ws === ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 20000);   // hält die Verbindung offen (kostet nichts)
 }
 function netDisconnect() {
   Net.wantOpen = false;
   clearInterval(Net.pingTimer);
   if (Net.ws) { const ws = Net.ws; Net.ws = null; try { ws.close(1000, 'bye'); } catch (e) {} }
-  Net.on = false; Net.live = false;
+  netGoSolo();
+}
+// ab jetzt allein: die Uhren des Raums werden wieder die eigenen, alles von Mitspielern verschwindet
+function netGoSolo() {
+  if (Net.multi) netRoomSwitch(false, true);
+  Net.on = false; Net.live = false; Net.multi = false; Net.wasAnchor = false; Net.rt = null; Net.anchor = 0;
   netClearRemote();
+  toggleQuickWheel(false); togglePlayerList(false);
 }
 function netClearRemote() {
   Net.peers.clear(); remoteEnemyList = []; remoteFrozen = []; Net.shots = [];
-  Net.fxIn = []; Net.hitsIn = []; Net.fxOut = []; Net.hitsOut.clear(); Net.toOut.clear();
+  Net.fxIn = []; Net.hitsIn = []; Net.fxOut = []; Net.hitsOut.clear(); Net.toOut.clear(); Net.needTo.clear();
   for (let i = 0; i < enemies.length; i++) if (enemies[i].helpers) enemies[i].helpers = null;
 }
-// Raum verlassen (Menü): danach wieder ganz normales Einzelspiel
+// Raum verlassen (Menü, lange inaktiv): danach wieder ganz normales Einzelspiel
 function netLeave() {
   if (!Net.on && !Net.ws) return;
   netDisconnect();
-  if (save.stagesUnlocked.indexOf(selectedStageId) === -1) selectedStageId = (save.lastStage && save.stagesUnlocked.indexOf(save.lastStage) !== -1) ? save.lastStage : 'riff';
+  if (gameState !== 'playing' && gameState !== 'paused' && gameState !== 'levelup' &&
+      save.stagesUnlocked.indexOf(selectedStageId) === -1) selectedStageId = (save.lastStage && save.stagesUnlocked.indexOf(save.lastStage) !== -1) ? save.lastStage : 'riff';
   if (UI['hud-room']) UI['hud-room'].style.display = 'none';
+  const rb = document.getElementById('btn-retry'); if (rb) rb.textContent = 'Nochmal spielen';
 }
 function netClosed(code) {
   Net.ws = null;
   clearInterval(Net.pingTimer);
   if (!Net.wantOpen) return;
   const msg = code === 4004 ? 'Raum ' + Net.code + ' gibt es nicht (mehr). Prüf den Code.' :
-              code === 4001 ? 'Raum ' + Net.code + ' ist voll (' + Net.cap + ' Spieler).' :
+              code === 4001 ? (Net.kind === 'global' || Net.quick ? 'Der Raum ist gerade voll.' : 'Raum ' + Net.code + ' ist voll (' + Net.cap + ' Spieler).') :
               code === 4002 ? 'Bitte lade die Seite neu – das Spiel wurde aktualisiert.' :
+              code === 4029 ? netLimitText() :
               code === 4000 ? 'Der Raum hat die Verbindung abgelehnt.' : '';
-  if (!Net.startedRun) { Net.wantOpen = false; netStatus(msg || 'Der Online-Server ist nicht erreichbar (oder für heute voll). Spiel solange allein!', true); return; }
+  if (!Net.startedRun) {
+    // Schnellspiel: ein voller (oder gerade geschlossener) Raum -> einen anderen suchen
+    if ((code === 4001 || code === 4004) && Net.quick && Net.quickTries < 3) { Net.quickTries++; const skip = Net.code, res = Net.resume; Net.wantOpen = false; netQuick(Net.quickArea, skip, res); return; }
+    // Weiterspielen: den privaten Raum gibt es nicht mehr -> im Schnellspiel desselben Gebiets weiter
+    if (code === 4004 && Net.resume) { const res = Net.resume; Net.wantOpen = false; showToast('Raum ' + Net.code + ' ist zu – du spielst im Schnellspiel weiter.'); netQuick(res.stageId, null, res); return; }
+    Net.wantOpen = false; netStatus(msg || NET_UNREACHABLE, true); return;
+  }
   if (!msg && Net.retries < 4) {                     // während des Laufs: neu verbinden
     Net.retries++;
-    Net.on = false; netClearRemote();
+    const keep = Net.code;
+    netGoSolo(); Net.code = keep;
     showToast('📡 Verbindung unterbrochen – verbinde neu …');
     setTimeout(function(){ if (Net.wantOpen && !Net.ws) netOpen(); }, 1000 * Net.retries);
     return;
   }
-  Net.wantOpen = false; Net.on = false; netClearRemote();
+  Net.wantOpen = false; netGoSolo();
+  runSlot = 'solo'; Storage.set(ONLINE_SNAP_KEY, null);   // der Lauf geht allein weiter (und lässt sich wie einer allein fortsetzen)
   if (UI['hud-room']) UI['hud-room'].style.display = 'none';
   showToast(msg || '📡 Verbindung verloren – du spielst allein weiter.');
 }
@@ -4634,36 +5032,47 @@ function netReceive(data) {
   else if (m.t === 'welcome') netOnWelcome(m);
   else if (m.t === 'join') netAddPeer(m.p, true);
   else if (m.t === 'leave') netRemovePeer(m.id, true);
+  else if (m.t === 'anchor') Net.anchor = m.id | 0;
   else if (m.t === 'err') netOnError(m.m);
 }
-// Der Server lehnt ab (Code falsch, Raum voll, alte Version): gleich melden, nicht erst auf das Schliessen warten
+// Der Server lehnt ab (Code falsch, Raum voll, alte Version, Tagesgrenze): gleich melden, nicht erst auf das Schliessen warten
 function netOnError(why) {
   const ws = Net.ws;
-  netClosed(why === 'notfound' ? 4004 : why === 'full' ? 4001 : why === 'version' ? 4002 : 4000);
+  netClosed(why === 'notfound' ? 4004 : why === 'full' ? 4001 : why === 'version' ? 4002 : why === 'limit' ? 4029 : 4000);
   if (ws) { try { ws.close(); } catch (e) {} }
 }
 function netOnWelcome(m) {
   const first = !Net.startedRun;
-  Net.id = m.id; Net.code = m.code; Net.area = m.area; Net.name = m.name; Net.col = m.col || 0; Net.cap = m.cap || 8;
   netClearRemote();
+  Net.id = m.id; Net.code = m.code; Net.kind = m.kind === 'global' ? 'global' : 'private'; Net.title = m.title || m.code;
+  Net.area = m.area; Net.name = m.name; Net.col = m.col || 0; Net.cap = m.cap || 8; Net.anchor = m.anchor || m.id;
+  Net.rt = null; Net.multi = false; Net.wasAnchor = false; Net.doneB = 0; Net.doneC = 0;
   (m.players || []).forEach(function(p){ netAddPeer(p, false); });
-  Net.retries = 0; Net.lastSend = 0;
+  Net.retries = 0; Net.lastSend = 0; Net.lastInput = performance.now();
   if (m.renamed) { save.onlineName = m.name; persistSave(); }
   Net.on = true;
-  if (first) {
-    Net.startedRun = true;
-    netStatus('');
-    startRun(selectedCharacterId, m.area);
-    const others = (m.players || []).map(function(p){ return p.name; });
-    showToast(m.renamed ? 'Dein Name war nicht erlaubt – du heisst jetzt ' + m.name + '.' :
-      (Net.created ? '🌐 Raum ' + m.code + ' – gib deinen Freunden diesen Code!' :
-       '🌐 Raum ' + m.code + (others.length ? ' · mit ' + others.join(', ') : '')));
-  } else showToast('📡 Wieder verbunden!');
+  if (!first) { showToast('📡 Wieder verbunden!'); return; }
+  Net.startedRun = true;
+  netStatus('');
+  // nach dem Neuladen: der gespeicherte Lauf geht im selben Raum weiter (oder überall, wenn "Weiterspielen" gewählt wurde)
+  const snap = onlineSnapshot();
+  const resume = snap && (Net.resume || snap.room === m.code) && snap.stageId === m.area ? snap : null;
+  Net.resume = null;
+  if (resume) resumeOnlineRun(resume);
+  else { bankOnlineSnapshot(); startRun(selectedCharacterId, m.area); }     // ein anderer gespeicherter Online-Lauf ist damit vorbei
+  const others = (m.players || []).map(function(p){ return p.name; });
+  const withWho = others.length ? ' · mit ' + others.slice(0, 4).join(', ') + (others.length > 4 ? ' und ' + (others.length - 4) + ' weiteren' : '') : '';
+  showToast(m.renamed ? 'Dein Name war nicht erlaubt – du heisst jetzt ' + m.name + '.' :
+    resume ? '🔄 Dein Lauf geht weiter: Level ' + runLevel + ' · ' + netRoomName() + withWho :
+    Net.kind === 'global' ? '🌐 ' + Net.title + (withWho || ' – noch allein. Andere können jederzeit dazukommen!') :
+    Net.created ? '🌐 Raum ' + m.code + ' – gib deinen Freunden diesen Code!' : '🌐 Raum ' + m.code + withWho);
 }
 function netAddPeer(p, announce) {
   if (!p || p.id === Net.id) return;
   Net.peers.set(p.id, { id: p.id, name: String(p.name || '?'), ch: p.ch || 'standard', col: p.col || 0, x: 0, y: 0, r: 19, a: 0, hp: 1, mh: 1, lv: 1, fl: 0,
-    last: 0, seen: false, snaps: [], off: null, speed: 0, mv: { x: 0, y: 0, mag: 0 }, bob: 0, enemies: new Map(), active: false, asleep: false });
+    last: 0, seen: false, snaps: [], off: null, speed: 0, mv: { x: 0, y: 0, mag: 0 }, bob: 0, enemies: new Map(), active: false, asleep: false,
+    rg: null, rgT: 0, mn: null, mnD: null, wb: null, bubble: null, q0: -1e9, revT: 0, warnAt: -1e9, lastTs: 0, ivl: 0, delay: NET_DELAY });
+  Net.lastSend = 0;                                  // gleich melden: der Neue sieht mich sofort
   if (announce) { showToast('👋 ' + p.name + ' ist da!'); Sfx.ping(); }
 }
 function netRemovePeer(id, announce) {
@@ -4687,9 +5096,12 @@ function netOnFar(m) {
   if (!pe) return;
   const now = performance.now();
   pe.last = now; pe.seen = true;
-  pe.snaps = [{ t: now - NET_DELAY, x: m.x, y: m.y, a: pe.a, far: true }];
+  pe.snaps = [{ t: now - pe.delay, x: m.x, y: m.y, a: pe.a, far: true }];
+  pe.lastTs = 0;
   pe.x = m.x; pe.y = m.y; pe.lv = m.lv; pe.hp = m.hp; pe.mh = m.mh; pe.fl = m.fl | 0; if (m.ch) pe.ch = m.ch;
+  pe.rg = null; pe.mn = null; pe.mnD = null;
   netDropEnemies(pe, false);
+  netPeerExtras(pe, m, now);
 }
 function netOnTick(m) {
   const pe = Net.peers.get(m.f);
@@ -4698,16 +5110,29 @@ function netOnTick(m) {
   const sample = now - m.ts;                    // Uhr des Mitspielers + Laufzeit: die kleinste Differenz ist die beste Schätzung
   if (pe.off === null || sample < pe.off) pe.off = sample; else pe.off += (sample - pe.off) * 0.02;
   const t = m.ts + pe.off;
+  // Abstand seiner Nachrichten (in einer Menge sendet er seltener): so weit in der Vergangenheit zeigen, dass es glatt bleibt
+  const gap = pe.lastTs ? m.ts - pe.lastTs : 0;
+  pe.lastTs = m.ts;
+  if (gap > 0 && gap < 600) { pe.ivl = pe.ivl ? pe.ivl + (gap - pe.ivl) * 0.15 : gap; pe.delay = Math.min(300, Math.max(NET_DELAY, pe.ivl + 30)); }
   pe.last = now; pe.seen = true;
   pe.fl = m.fl | 0; pe.hp = m.hp; pe.mh = m.mh; pe.lv = m.lv; if (m.ch) pe.ch = m.ch;
   if (pe.snaps.length && (t <= pe.snaps[pe.snaps.length - 1].t || pe.snaps[pe.snaps.length - 1].far)) pe.snaps.length = 0;   // nach Fern-Meldungen: springen statt gleiten
   pe.snaps.push({ t: t, x: m.x, y: m.y, a: m.a || 0 });
   if (pe.snaps.length > 8) pe.snaps.shift();
+  pe.rg = Array.isArray(m.rg) && m.rg.length === 3 ? m.rg : null; pe.rgT = t;           // Blasenring: [Stufe, heile Blasen (Bits), Winkel]
+  pe.mn = Array.isArray(m.mn) && m.mn.length <= 4 ? m.mn : null; if (!pe.mn) pe.mnD = null;   // Schwarm-Freunde: Abstand zum Blobi
   if (pe.fl & NF_DEAD) netDropEnemies(pe, true);
   else if (m.e) netApplyEnemies(pe, m.e, t);
   else netDropEnemies(pe, false);
-  if (m.fx) for (let i = 0; i < m.fx.length; i++) { const f = m.fx[i]; if (Array.isArray(f)) Net.fxIn.push({ pe: pe, f: f, due: t - (f[1] || 0) + NET_DELAY }); }
+  if (m.fx) for (let i = 0; i < m.fx.length; i++) { const f = m.fx[i]; if (Array.isArray(f)) Net.fxIn.push({ pe: pe, f: f, due: t - (f[1] || 0) + pe.delay }); }
   if (m.h) for (let i = 0; i < m.h.length; i++) { const h = m.h[i]; if (Array.isArray(h) && h[0] === Net.id) Net.hitsIn.push({ src: m.f, id: h[1], dmg: netClamp(h[2], NET_MAX_HIT), fl: h[3] | 0, at: now }); }
+  netPeerExtras(pe, m, now);
+}
+// Angaben, die auch weit entfernte Spieler bekommen: Weltbosse und Champions, Uhren des Ankers, Kurznachrichten
+function netPeerExtras(pe, m, now) {
+  netSetWorld(pe, m.wb, now);
+  if (Array.isArray(m.an) && pe.id === Net.anchor && Net.anchor !== Net.id) netTakeTimers(m.an);
+  if (m.q != null) netOnQuick(pe, m.q | 0, now);
 }
 // Gegner-Liste eines Mitspielers: [id, Art, x, y, HP, max. HP, Radius, Schaden, Merkmale, Extras]
 function netApplyEnemies(pe, list, t) {
@@ -4783,9 +5208,10 @@ function netSample(snaps, tD, out) {
 }
 function netPeerActive(pe) { return pe.seen && !pe.asleep && !(pe.fl & (NF_PAUSED | NF_DEAD)); }
 function netUpdatePeers(now, dt) {
-  const tD = now - NET_DELAY;
+  const meOk = !!player && gameState === 'playing' && playerDown <= 0;
   let live = false;
   Net.peers.forEach(function(pe){
+    const tD = now - pe.delay;
     pe.asleep = pe.seen && now - pe.last > NET_ASLEEP;
     if (pe.snaps.length) {
       const ox = pe.x, oy = pe.y;
@@ -4805,17 +5231,29 @@ function netUpdatePeers(now, dt) {
       if (en.isBoss && en.stT > 0 && pe.active) en.stT = Math.max(0, en.stT - dt);
       if (pe.active) en.wobble += dt * 8;
     });
+    // Retten: ich stehe neben einem ohnmächtigen Freund (der Ring zeigt den Fortschritt; entscheiden tut sein Spiel)
+    if ((pe.fl & NF_DOWN) && meOk && !pe.asleep && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R) pe.revT = Math.min(REVIVE_TIME, pe.revT + dt); else pe.revT = 0;
+    if (pe.bubble) { pe.bubble.t -= dt; if (pe.bubble.t <= 0) pe.bubble = null; }
+    if (pe.mn) {                                 // Schwarm-Freunde des Mitspielers: weich hinter ihm her
+      const n = pe.mn.length >> 1;
+      if (!pe.mnD || pe.mnD.length !== n) { pe.mnD = []; for (let i = 0; i < n; i++) pe.mnD.push({ x: pe.x + pe.mn[i * 2], y: pe.y + pe.mn[i * 2 + 1] }); }
+      for (let i = 0; i < n; i++) { const d = pe.mnD[i]; d.x += (pe.x + pe.mn[i * 2] - d.x) * Math.min(1, dt * 8); d.y += (pe.y + pe.mn[i * 2 + 1] - d.y) * Math.min(1, dt * 8); }
+    }
   });
-  Net.live = live;
+  if (Net.myBubble) { Net.myBubble.t -= dt; if (Net.myBubble.t <= 0) Net.myBubble = null; }
+  Net.live = live || Net.needTo.size > 0;
   netRebuildLists();
 }
+// Gegner von Mitspielern: aktive kann man treffen; die eines pausierten Spielers stehen still (in normalen Farben) und lassen
+// sich trotzdem treffen; die eines schlafenden (Tab im Hintergrund) verschwinden mit ihm
 function netRebuildLists() {
-  const act = [], frz = [];
+  const act = [];
   Net.peers.forEach(function(pe){
-    const on = netPeerActive(pe);
-    pe.enemies.forEach(function(en){ if (en.dead) return; en.frozen = !on; (on ? act : frz).push(en); });
+    if (pe.asleep || !pe.seen) return;
+    const frozen = !netPeerActive(pe);
+    pe.enemies.forEach(function(en){ if (en.dead) return; en.frozen = frozen; act.push(en); });
   });
-  remoteEnemyList = act; remoteFrozen = frz;
+  remoteEnemyList = act; remoteFrozen = [];
 }
 // Gegner eines Mitspielers können dich berühren (dein Browser entscheidet über deinen Schaden), der Sog seines Bosses zieht dich
 function netRemoteUpdate(dt) {
@@ -4824,7 +5262,7 @@ function netRemoteUpdate(dt) {
     const en = remoteEnemyList[i];
     if (en.orbitHitTimer > 0) en.orbitHitTimer -= dt;
     if (en.contactTimer > 0) en.contactTimer -= dt;
-    if (en.dead || gameState !== 'playing') continue;
+    if (en.dead || en.frozen || gameState !== 'playing') continue;
     if (distXY(en.x, en.y, p.x, p.y) < en.r + p.r && en.contactTimer <= 0 && invulnTimer <= 0) {
       if (damagePlayer(en.dmg) && hasTrait(en, 'vampir')) vampirHeal(en);
       en.contactTimer = 0.55;
@@ -4832,7 +5270,7 @@ function netRemoteUpdate(dt) {
     if (en.isBoss && en.state === 'sog') sogPull(en, dt, distXY(en.x, en.y, p.x, p.y) || 1);
   }
 }
-// Treffer von Mitspielern an deinen Gegnern (nur während du spielst; alte verfallen)
+// Treffer von Mitspielern an deinen Gegnern (auch während deiner Pause: deine Gegner stehen dann still, lassen sich aber besiegen)
 function netProcessHits(now) {
   if (!Net.hitsIn.length) return;
   const list = Net.hitsIn; Net.hitsIn = [];
@@ -4856,6 +5294,7 @@ function netProcessFx(now) {
     if (ev.due > now) { keep.push(ev); continue; }
     const late = (now - ev.due) / 1000;
     if (ev.f[0] === 'k') { netApplyKill(ev.pe, ev.f); continue; }       // Siege nie verwerfen (Beute!)
+    if (ev.f[0] === 'r') { netApplyRevive(ev.pe, ev.f); continue; }
     if (!playing) { if (late < 1.5) keep.push(ev); continue; }
     if (late > 1.5) continue;
     netApplyFx(ev.pe, ev.f, late);
@@ -4888,11 +5327,25 @@ function netApplyKill(pe, f) {
   const type = NET_TYPES[f[6]] || 'qualle', def = BOSS_TYPES[type] || ENEMY_TYPES[type];
   if (Math.abs(f[4] - camera.x) < W / 2 + 80 && Math.abs(f[5] - camera.y) < H / 2 + 80) spawnBurst(f[4], f[5], def.color, (f[8] & 4) ? 26 : 10);
   const helpers = Array.isArray(f[3]) ? f[3] : [];
-  if (helpers.indexOf(Net.id) === -1 || !player || gameState === 'gameover') return;
+  if (helpers.indexOf(Net.id) === -1 || !player || gameState === 'gameover' || gameState === 'menu') return;
   const k = { x: f[4], y: f[5], type: type, xp: netClamp(f[7], NET_MAX_XP), elite: !!(f[8] & 1), champ: !!(f[8] & 2), isBoss: !!(f[8] & 4) && !!BOSS_TYPES[type], enc: Math.min(20, f[9] | 0 || 1) };
   grantKill(k);
   Sfx.death();
+  netLootHint();
   if (k.isBoss || k.champ) checkAchievements();
+}
+// Wiederbelebt: ['r', Alter, wer geholfen hat]
+function netApplyRevive(pe, f) {
+  if (!player || gameState === 'menu') return;
+  if (f[2] === Net.id) { showToast('💚 Du hast ' + pe.name + ' gerettet!'); Sfx.revive(); }
+  else { const h = Net.peers.get(f[2]); showToast('💚 ' + pe.name + ' wurde' + (h ? ' von ' + h.name : '') + ' gerettet!'); }
+  if (Math.abs(pe.x - camera.x) < W / 2 + 60 && Math.abs(pe.y - camera.y) < H / 2 + 60) spawnBurst(pe.x, pe.y, '#5ef2c0', 18);
+}
+// Einmal pro Spielstand: jeder hat seine eigene Beute (was ein Freund einsammelt, liegt bei dir noch da)
+function netLootHint() {
+  if (save.lootHint) return;
+  save.lootHint = 1; persistSave();
+  setTimeout(function(){ if (Net.on && gameState === 'playing') showToast('💡 Jeder hat seine eigene Beute: Was dein Freund einsammelt, liegt für dich noch da – schnapp es dir!'); }, 1500);
 }
 function netUpdateShots(dt) {
   if (!Net.shots.length) return;
@@ -4905,30 +5358,384 @@ function netUpdateShots(dt) {
     if (gone) Net.shots.splice(i, 1);
   }
 }
+// Blasenring eines Mitspielers: wehrt (auf deinem Bildschirm) die kleinen Schüsse ab, die ihn treffen würden – wie in seinem Spiel
+function netRingBlocks(pr) {
+  let hit = false;
+  const now = performance.now();
+  Net.peers.forEach(function(pe){
+    if (hit || !pe.rg || !pe.active || (pe.fl & NF_DOWN)) return;
+    const tD = now - pe.delay;
+    const lv = pe.rg[0] | 0, rad = orbitBubbleRadius(lv);
+    if (lv <= 0 || Math.abs(pr.x - pe.x) > rad + 20 || Math.abs(pr.y - pe.y) > rad + 20) return;
+    const n = lv * 2, ang = pe.rg[2] + 2.4 * (tD - pe.rgT) / 1000;
+    for (let i = 0; i < n && i < 30; i++) {
+      if (!(pe.rg[1] & (1 << i))) continue;
+      const a = ang + (i / n) * Math.PI * 2;
+      if (distXY(pr.x, pr.y, pe.x + Math.cos(a) * rad, pe.y + Math.sin(a) * rad) < 16) { hit = true; spawnBurst(pr.x, pr.y, '#bdeeff', 6); return; }
+    }
+  });
+  return hit;
+}
+
+// ---------- Hafen: sichere Zone in der Mitte jedes Raums (nur online) ----------
+function inHafen(x, y) { return Net.on && x * x + y * y < HAFEN_R * HAFEN_R; }
+function hafenKeepOut(en) {                     // Gegner kommen nicht in den Hafen
+  if (!Net.on) return;
+  const d = Math.hypot(en.x, en.y), m = HAFEN_R + en.r;
+  if (d >= m) return;
+  if (d < 0.01) { en.x = m; en.y = 0; return; }
+  en.x *= m / d; en.y *= m / d;
+}
+
+// ---------- Ohnmächtig und retten (nur online, wenn ein Freund in der Nähe ist) ----------
+function netCanBeRevived() {
+  if (!Net.on || !player) return false;
+  for (const pe of Net.peers.values()) if (netPeerActive(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= DOWN_NEAR) return true;
+  return false;
+}
+function netGoDown() {
+  playerDown = DOWN_TIME; reviveProg = 0; player.hp = 0; invulnTimer = 1;
+  clearInput();
+  spawnBurst(player.x, player.y, '#ff5c72', 18);
+  Sfx.gameover();
+  Net.urgent = true; Net.lastSend = 0;
+  saveRunSnapshot();
+}
+function netReviver() {
+  let helper = null;
+  Net.peers.forEach(function(pe){
+    if (!helper && netPeerActive(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R + 15) helper = pe;
+  });
+  return helper;
+}
+function netRevived(pe) {
+  playerDown = 0; reviveProg = 0;
+  player.hp = Math.ceil(player.maxHp * REVIVE_HP);
+  invulnTimer = 2;
+  spawnBurst(player.x, player.y, '#5ef2c0', 24);
+  for (let i = 0; i < enemies.length; i++) {               // wie bei der Zweiten Chance: Gegner weggestossen
+    const e = enemies[i], rx = e.x - player.x, ry = e.y - player.y, rd = Math.hypot(rx, ry) || 1;
+    if (rd < 320) { const push = e.isBoss ? 140 : 340 - rd; e.x += rx / rd * push; e.y += ry / rd * push; }
+  }
+  Sfx.revive();
+  showToast('💚 ' + pe.name + ' hat dich gerettet!');
+  Net.fxOut.push(['r', performance.now(), pe.id]); Net.urgent = true; Net.lastSend = 0;
+  saveRunSnapshot();                                        // gerettet: der gespeicherte Lauf ist wieder fortsetzbar
+}
+
+// ---------- Weltbosse und Raum-Champions ----------
+// Jeder meldet seine Bosse und Champions dem ganzen Raum (Pfeile, Meldungen): [Art 1 = Weltboss kommt, 2 = Boss, 3 = Champion, id, Typ, x, y, HP %, Eigenschaften]
+function netWorldList() {
+  if (!Net.peers.size || !player) return null;
+  const out = [];
+  if (bossWarningTimer > 0) out.push([1, Net.wbSeq || 0, NET_TYPE_IDX[stageOf().boss], Math.round(player.x), Math.round(player.y), 100, 0]);
+  for (let i = 0; i < enemies.length && out.length < 8; i++) {
+    const en = enemies[i];
+    if (en.dead || !(en.isBoss || en.champ)) continue;
+    out.push([en.isBoss ? 2 : 3, en.id, NET_TYPE_IDX[en.type], Math.round(en.x), Math.round(en.y), Math.round(Math.max(0, en.hp) / en.maxHp * 100),
+      en.champ ? en.champ.map(function(t){ return CHAMPION_TRAIT_KEYS.indexOf(t); }) : 0]);
+  }
+  return out.length ? out : null;
+}
+function netWorldName(w) {
+  const type = NET_TYPES[w[2]] || 'qualle', def = BOSS_TYPES[type] || ENEMY_TYPES[type];
+  const traits = Array.isArray(w[6]) ? w[6].map(function(k){ return CHAMPION_TRAIT_KEYS[k]; }).filter(Boolean) : [];
+  return traits.length ? championName(type, traits) : def.name;
+}
+function netSetWorld(pe, wb, now) {
+  pe.wb = Array.isArray(wb) && wb.length ? wb.filter(Array.isArray) : null;
+  if (!pe.wb || !player || gameState === 'menu') return;
+  for (let i = 0; i < pe.wb.length; i++) {
+    const w = pe.wb[i], key = pe.id + ':' + w[0] + ':' + w[1];
+    if (Net.seenWorld.has(key)) continue;
+    Net.seenWorld.add(key);
+    if (w[0] === 1) { pe.warnAt = now; showToast('⚠ Ein Weltboss erscheint bei ' + pe.name + '!'); Sfx.boss(); }
+    else if (w[0] === 2) { if (now - pe.warnAt > 8000) { showToast('⚠ Weltboss bei ' + pe.name + ': ' + netWorldName(w)); Sfx.boss(); } }
+    else if (w[0] === 3) { showToast('👑 Champion bei ' + pe.name + ': ' + netWorldName(w)); Sfx.champion(); }
+  }
+}
+function netWorldBossActive() {
+  if (bossEntity || bossWarningTimer > 0) return true;
+  for (const pe of Net.peers.values()) if (pe.wb) for (let i = 0; i < pe.wb.length; i++) if (pe.wb[i][0] === 1 || pe.wb[i][0] === 2) return true;
+  return false;
+}
+function netRoomChampions() {
+  let n = championCount();
+  Net.peers.forEach(function(pe){ if (pe.wb) for (let i = 0; i < pe.wb.length; i++) if (pe.wb[i][0] === 3) n++; });
+  return n;
+}
+// Ein Boss eines Mitspielers ist in deiner Nähe: weniger gewöhnliche Gegner (wie im eigenen Boss-Kampf)
+function netBossNear() {
+  for (let i = 0; i < remoteEnemyList.length; i++) { const en = remoteEnemyList[i]; if (en.isBoss && !en.dead && distXY(en.x, en.y, player.x, player.y) <= NET_NEAR) return true; }
+  return false;
+}
+function netRoomActive() {
+  if (player && gameState === 'playing' && playerDown <= 0) return true;
+  for (const pe of Net.peers.values()) if (netPeerActive(pe) && !(pe.fl & NF_DOWN)) return true;
+  return false;
+}
+// zufälliger Spieler, bei dem etwas erscheinen darf: spielt gerade, nicht ohnmächtig, nicht im Hafen
+function netPickHost() {
+  const c = [];
+  if (player && gameState === 'playing' && playerDown <= 0 && !inHafen(player.x, player.y)) c.push(Net.id);
+  Net.peers.forEach(function(pe){ if (netPeerActive(pe) && !(pe.fl & (NF_DOWN | NF_HAFEN))) c.push(pe.id); });
+  return c.length ? c[Math.floor(Math.random() * c.length)] : 0;
+}
+// allein <-> mit anderen, oder ich werde Anker: Uhren übergeben. Allein gelten die eigenen Uhren (wie im Einzelspiel).
+function netRoomSwitch(multi, anchor) {
+  if (!player) { if (!multi) Net.rt = null; return; }
+  if (multi && anchor) {
+    if (!Net.rt) Net.rt = { boss: (bossEntity || bossWarningTimer > 0) ? -1 : Math.max(20, nextBossTime - runTime), champ: Math.max(20, champTime - runTime),
+      count: bossEncounterCount, hb: 0, sb: 0, cb: 0, hc: 0, sc: 0 };
+    const rt = Net.rt;
+    rt.seen = rt.boss === -1 && !!bossEntity; rt.callAt = performance.now();
+    Net.seq = Math.max(Net.seq, rt.sb | 0, rt.sc | 0);
+  }
+  if (!multi && Net.rt) {
+    const rt = Net.rt;
+    if (!bossEntity && bossWarningTimer <= 0) nextBossTime = runTime + (rt.boss >= 0 ? Math.max(20, rt.boss) : WORLD_BOSS_GAP);
+    champTime = runTime + Math.max(20, rt.champ);
+    bossEncounterCount = Math.max(bossEncounterCount, rt.count | 0);
+    Net.rt = null;
+  }
+}
+function netTakeTimers(an) {
+  Net.rt = { boss: +an[0] || 0, champ: +an[1] || 0, count: an[2] | 0, hb: an[3] | 0, sb: an[4] | 0, cb: an[5] | 0, hc: an[6] | 0, sc: an[7] | 0 };
+}
+function netRoomUpdate(dt, now) {
+  const multi = Net.peers.size > 0, anchor = !multi || Net.anchor === Net.id;
+  if (multi !== Net.multi || (multi && anchor !== Net.wasAnchor)) netRoomSwitch(multi, anchor);
+  Net.multi = multi; Net.wasAnchor = anchor;
+  if (!multi || !player) return;
+  if (gameState === 'playing') { nextBossTime += dt; champTime += dt; }      // eigene Uhren ruhen, solange andere im Raum sind
+  if (anchor) netAnchorUpdate(dt, now);
+  else if (Net.rt && netRoomActive()) {      // die Kopie der Uhren läuft mit: fällt der Anker aus, geht es nahtlos weiter
+    if (Net.rt.boss > 0) Net.rt.boss = Math.max(0, Net.rt.boss - dt);
+    Net.rt.champ -= dt;
+  }
+  netHostCalls();
+}
+// Der Anker zählt die Uhren des Raums herunter (solange jemand spielt) und ruft Weltbosse und Champions bei einem zufälligen Spieler
+function netAnchorUpdate(dt, now) {
+  const rt = Net.rt;
+  if (!rt) return;
+  const active = netRoomActive(), boss = netWorldBossActive();
+  if (active) { if (rt.boss > 0) rt.boss = Math.max(0, rt.boss - dt); rt.champ -= dt; }
+  if (rt.boss === -1) {                                   // gerufen: warten, bis er erscheint und wieder weg ist
+    if (boss) rt.seen = true;
+    else if (rt.seen) { rt.boss = WORLD_BOSS_GAP; rt.seen = false; rt.champ = Math.max(rt.champ, 20); }   // nach dem Boss kurz durchatmen
+    else if (now - (rt.callAt || 0) > 10000) netCallBoss(rt, now, true);   // der Gerufene kann gerade nicht: jemand anderen
+  } else if (rt.boss <= 0 && !boss && active) netCallBoss(rt, now, false);
+  if (rt.champ <= 0 && rt.boss !== -1 && !boss && active) {
+    const cap = runTime >= CHAMPION_LATE ? 2 : 1, host = netRoomChampions() < cap ? netPickHost() : 0;
+    if (host) { rt.hc = host; rt.sc = ++Net.seq; Net.urgent = true; Net.lastSend = 0; }
+    rt.champ = host || netRoomChampions() >= cap ? CHAMPION_GAP_MIN + Math.random() * (CHAMPION_GAP_MAX - CHAMPION_GAP_MIN) : 5;
+  }
+}
+function netCallBoss(rt, now, again) {
+  const host = netPickHost();
+  rt.callAt = now;
+  if (!host) return;
+  if (!again) { rt.count = (rt.count | 0) + 1; rt.cb = rt.count; }
+  rt.hb = host; rt.sb = ++Net.seq; rt.boss = -1; rt.seen = false;
+  Net.urgent = true; Net.lastSend = 0;
+}
+// Ich bin gerufen: der Weltboss erscheint bei mir (nach 3 s Warnung) oder ein Champion
+function netHostCalls() {
+  const rt = Net.rt;
+  if (!rt || !player) return;
+  const ok = gameState === 'playing' && playerDown <= 0 && !inHafen(player.x, player.y);
+  if (rt.hb === Net.id && rt.sb > Net.doneB) {
+    Net.doneB = rt.sb;
+    if (ok && !bossEntity && bossWarningTimer <= 0) { Net.wbSeq = rt.sb; Net.wbEnc = rt.cb || 1; bossWarningTimer = 3; Net.urgent = true; Net.lastSend = 0; }
+  }
+  if (rt.hc === Net.id && rt.sc > Net.doneC) {
+    Net.doneC = rt.sc;
+    if (ok && !bossEntity && spawnChampion()) { Net.urgent = true; Net.lastSend = 0; }
+  }
+}
+
+// ---------- Kurznachrichten (Q oder 💬): Sprechblase über dem Blobi, weiter weg als Meldung ----------
+let qwheelOpen = false;
+function quickWheelOpen() { return qwheelOpen; }
+function buildQuickWheel() {
+  const ring = document.getElementById('qwheel-ring');
+  if (!ring) return;
+  ring.innerHTML = '';
+  QUICK_MSGS.forEach(function(text, i){
+    const a = -Math.PI / 2 + i / QUICK_MSGS.length * Math.PI * 2;
+    const b = document.createElement('button');
+    b.className = 'qwheel-btn';
+    b.style.left = (50 + Math.cos(a) * 38).toFixed(1) + '%'; b.style.top = (50 + Math.sin(a) * 38).toFixed(1) + '%';
+    b.innerHTML = '<span class="k">' + (i + 1) + '</span>' + text;
+    b.addEventListener('click', function(e){ e.stopPropagation(); pickQuick(i); });
+    ring.appendChild(b);
+  });
+}
+function toggleQuickWheel(open) {
+  if (open === undefined) open = !qwheelOpen;
+  if (open && (!Net.on || !player)) open = false;
+  qwheelOpen = !!open;
+  const el = document.getElementById('qwheel');
+  if (el) el.classList.toggle('show', qwheelOpen);
+  if (qwheelOpen) clearInput();
+}
+function pickQuick(i) {
+  toggleQuickWheel(false);
+  if (!netSendQuick(i)) showToast('⏳ Kurz warten …');
+}
+function netSendQuick(i) {
+  const now = performance.now();
+  if (!Net.on || !QUICK_MSGS[i] || now - Net.qLast < QUICK_GAP * 1000) return false;
+  Net.qLast = now; Net.qOut = i; Net.myBubble = { text: QUICK_MSGS[i], t: QUICK_SHOW };
+  Net.lastSend = 0;
+  return true;
+}
+function netOnQuick(pe, i, now) {
+  if (!QUICK_MSGS[i] || now - pe.q0 < 1500) return;
+  pe.q0 = now;
+  pe.bubble = { text: QUICK_MSGS[i], t: QUICK_SHOW };
+  if (!player || gameState === 'menu') return;
+  const onScreen = !pe.asleep && Math.abs(pe.x - camera.x) < W / 2 && Math.abs(pe.y - camera.y) < H / 2;
+  if (!onScreen) showToast('💬 ' + pe.name + ': ' + QUICK_MSGS[i]);
+  Sfx.ping();
+}
+
+// ---------- Spielerliste (Tab oder Antippen der Raum-Anzeige) ----------
+let plistOpen = false, plistAt = 0;
+function togglePlayerList(open) {
+  if (open === undefined) open = !plistOpen;
+  if (open && !Net.on) open = false;
+  plistOpen = !!open;
+  const el = document.getElementById('plist');
+  if (el) el.classList.toggle('show', plistOpen);
+  if (plistOpen) renderPlayerList();
+}
+function netPeerStatus(pe) {
+  if (pe.fl & NF_DEAD) return '☠ vorbei';
+  if (pe.asleep) return '💤 schläft';
+  if (pe.fl & NF_DOWN) return '💔 Hilfe!';
+  if (pe.fl & NF_PAUSED) return '⏸ Pause';
+  if (pe.fl & NF_HAFEN) return '⚓ Hafen';
+  return player ? Math.round(distXY(pe.x, pe.y, player.x, player.y) / 10) + ' m' : '';
+}
+function renderPlayerList() {
+  plistAt = performance.now();
+  const rows = document.getElementById('plist-rows'), head = document.getElementById('plist-title');
+  if (!rows) return;
+  if (head) head.textContent = netRoomName() + ' · ' + (Net.peers.size + 1) + '/' + Net.cap + ' Spieler';
+  const me = { me: true, name: Net.name || onlineName(), ch: selectedCharacterId, lv: runLevel, col: Net.col, d: -1,
+    st: playerDown > 0 ? '💔 Hilfe!' : gameState === 'gameover' ? '☠ vorbei' : gameState === 'paused' ? '⏸ Pause' : (player && inHafen(player.x, player.y)) ? '⚓ Hafen' : 'du' };
+  const list = [me];
+  Net.peers.forEach(function(pe){ list.push({ name: pe.name, ch: pe.ch, lv: pe.lv || 1, col: pe.col, st: netPeerStatus(pe), d: player && pe.seen ? distXY(pe.x, pe.y, player.x, player.y) : 1e9 }); });
+  list.sort(function(a, b){ return a.d - b.d; });
+  rows.innerHTML = list.map(function(r){
+    return '<div class="plist-row' + (r.me ? ' me' : '') + '"><span class="plist-dot" style="background:' + NET_COLORS[(r.col | 0) % NET_COLORS.length] + '"></span>' +
+      '<img src="' + (CHARACTER_SPRITES[r.ch] || '') + '" alt=""><span class="plist-name">' + netEsc(r.name) + '</span>' +
+      '<span class="plist-lv">Lv ' + (r.lv | 0) + '</span><span class="plist-st">' + r.st + '</span></div>';
+  }).join('');
+}
+
+// ---------- Online-Lauf speichern: nach dem Neuladen geht er im selben Raum weiter ----------
+function onlineSnapshot() {
+  const s = Storage.get(ONLINE_SNAP_KEY, null);
+  if (!s || !s.player || !s.room) return null;
+  if (s.down || !(Date.now() - (s.savedAt || 0) < ONLINE_SNAP_TTL)) return null;
+  if (!CHARACTERS.some(function(c){ return c.id === s.characterId; }) || !STAGES.some(function(st){ return st.id === s.stageId; })) return null;
+  return s;
+}
+function onlineSnapLabel(s) {
+  const t = s.runTime || 0;
+  return (s.kind === 'global' ? (s.title || s.room) : 'Raum ' + s.room) + ' · Lv ' + (s.runLevel || 1) + ' · ' + Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+}
+// ein alter Online-Lauf, der nicht mehr weitergeht: seine Perlen werden gutgeschrieben
+function bankOnlineSnapshot(s) {
+  s = s || Storage.get(ONLINE_SNAP_KEY, null);
+  Storage.set(ONLINE_SNAP_KEY, null);
+  if (!s || !s.player) return 0;
+  const pr = s.runPearls || 0;
+  save.totalPearls += pr; save.stats.totalPearlsEarned += pr;
+  if ((s.runLevel || 0) >= GLUECKS_LEVEL && save.unlockedCharacters.indexOf('gluecks') === -1) save.unlockedCharacters.push('gluecks');
+  persistSave();
+  return pr;
+}
+function bankStaleOnlineSnapshot() {
+  const s = Storage.get(ONLINE_SNAP_KEY, null);
+  if (s && s.player && !onlineSnapshot()) bankOnlineSnapshot(s);
+}
+// "Weiterspielen": zurück in denselben Raum (gibt es den privaten Raum nicht mehr, geht es im Schnellspiel weiter)
+function onlineResume() {
+  const s = onlineSnapshot();
+  if (!s || !netConfigured()) { renderOnlineMode(); return; }
+  selectedCharacterId = s.characterId;
+  onlineEnable(false);
+  if (s.kind === 'global') { Net.quickArea = s.stageId; Net.quickTries = 0; netJoin(s.room, false, true, s); }
+  else netJoin(s.room, false, false, s);
+}
+function resumeOnlineRun(snap) {
+  ensureAudio();
+  bankOldRun();
+  selectedCharacterId = snap.characterId; selectedStageId = snap.stageId;
+  save.lastCharacter = selectedCharacterId; persistSave();
+  const cs = computeCharacterStats(selectedCharacterId);
+  player = Object.assign({ r: 19, facing: 1, angle: 0, bob: 0, hitFlash: 0, slowTimer: 0, color: cs.color, dark: cs.dark }, snap.player);
+  const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 110;     // zurück im Hafen
+  player.x = Math.cos(a) * d; player.y = Math.sin(a) * d;
+  camera = { x: player.x, y: player.y };
+  enemies = []; projectiles = []; enemyProjectiles = []; pickups = []; particles = [];
+  orbitAngle = 0; minionEntities = [];
+  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; resetHudCache();
+  runTime = snap.runTime; runLevel = snap.runLevel; runXp = snap.runXp; runXpToNext = snap.runXpToNext;
+  runKills = snap.runKills; runPearls = snap.runPearls;
+  ringTime = runTime + 60; eliteTime = runTime + 30;
+  spawnTimer = snap.spawnTimer || 0; spawnInterval = snap.spawnInterval || 1.15;
+  nextBossTime = (typeof snap.nextBossTime === 'number') ? Math.max(snap.nextBossTime, runTime + 30) : runTime + 120;
+  bossEncounterCount = snap.bossEncounterCount || 0;
+  bossEntity = null; bossWarningTimer = 0;
+  reviveAvailable = !!snap.reviveAvailable;
+  invulnTimer = HAFEN_PROTECT; reviveFlashTimer = 0; pearlFrac = 0;
+  pendingLevelUps = snap.pendingLevelUps || 0; pendingFreeCards = snap.pendingFreeCards || 0;
+  champTime = (typeof snap.champTime === 'number') ? Math.max(snap.champTime, runTime + 20) : Math.max(runTime + 60, CHAMPION_START);
+  currentLevelUp = null; levelUpProcessing = false;
+  playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
+  runSlot = 'online';
+  Net.lastSend = 0; Net.myBubble = null;
+  gameState = 'playing';
+  showScreen(null);
+  setHudVisible(true);
+  lastTime = 0;
+}
 
 // ---------- senden ----------
-// Online jagt ein Gegner den nächsten Blobi: dich oder einen Mitspieler in Sync-Reichweite (der ihn dann sicher sieht)
+// Online jagt ein Gegner den nächsten Blobi: dich oder einen Mitspieler in Sync-Reichweite (der ihn dann sicher sieht).
+// Wer ohnmächtig ist, wird nicht gejagt; wer im Hafen ist, nur, wenn sonst niemand da ist. Niemand da: stehen bleiben.
 function netTargetOf(en) {
-  let best = player, bd = distXY(en.x, en.y, player.x, player.y);
+  let best = null, bd = Infinity, safe = null, sd = Infinity;
+  if (playerDown <= 0) {
+    const d = distXY(en.x, en.y, player.x, player.y);
+    if (inHafen(player.x, player.y)) { safe = player; sd = d; } else { best = player; bd = d; }
+  }
   Net.peers.forEach(function(pe){
-    if (!pe.active) return;
+    if (!pe.active || (pe.fl & NF_DOWN)) return;
     const d = distXY(en.x, en.y, pe.x, pe.y);
-    if (d < bd && d <= NET_NEAR) { bd = d; best = pe; }
+    if (d > NET_NEAR) return;
+    if (pe.fl & NF_HAFEN) { if (d < sd) { sd = d; safe = pe; } }
+    else if (d < bd) { bd = d; best = pe; }
   });
-  return best;
+  return best || safe || NET_HOLD;
 }
 function netNearbyPeers(x, y) {
   const out = [];
   Net.peers.forEach(function(pe){ if (pe.active && distXY(pe.x, pe.y, x, y) <= NET_NEAR) out.push(pe); });
   return out;
 }
-// Champions: Level-Faktor aus dem Durchschnitts-Level der Spieler in der Nähe, +50 % HP pro weiterem Spieler
+// Champions und Bosse: Level-Faktor aus dem Durchschnitts-Level der Spieler in der Nähe (die +50 % pro Spieler gibt spawnEnemy)
 function championScale() {
   if (!Net.on) return levelFactor(runLevel);
   const near = netNearbyPeers(player.x, player.y);
   let lv = runLevel;
   for (let i = 0; i < near.length; i++) lv += near[i].lv || 1;
-  return levelFactor(lv / (near.length + 1)) * (1 + CHAMPION_GROUP_HP * near.length);
+  return levelFactor(lv / (near.length + 1));
 }
 function netAnnounce(kind, o) {
   const now = performance.now();
@@ -4958,7 +5765,9 @@ function netEnemyKilled(en, k) {
   if (!Net.live && !helpers.length) return;
   Net.fxOut.push(['k', performance.now(), en.id, helpers, Math.round(k.x), Math.round(k.y), NET_TYPE_IDX[k.type], k.xp, (k.elite ? 1 : 0) | (k.champ ? 2 : 0) | (k.isBoss ? 4 : 0), k.enc]);
   for (let i = 0; i < helpers.length; i++) Net.toOut.add(helpers[i]);
+  if (helpers.length) netLootHint();
 }
+// Gegner-Angaben für alle, die sie sehen können (auch Mitspieler weit weg von mir, z. B. bei einem Weltboss): sie kommen in "to"
 function netEnemyRecords() {
   const near = [];
   Net.peers.forEach(function(pe){ if (pe.seen && !pe.asleep && !(pe.fl & NF_DEAD)) near.push(pe); });
@@ -4968,7 +5777,7 @@ function netEnemyRecords() {
     const en = enemies[i];
     if (en.dead) continue;
     let mask = 0;                              // welche Mitspieler diesen Gegner gerade bekommen (ein Bit pro Spieler)
-    for (let j = 0; j < near.length; j++) if (distXY(near[j].x, near[j].y, en.x, en.y) <= NET_NEAR) mask |= 1 << (near[j].id % 30);
+    for (let j = 0; j < near.length; j++) if (distXY(near[j].x, near[j].y, en.x, en.y) <= NET_NEAR) { mask |= 1 << (near[j].id % 30); Net.needTo.add(near[j].id); }
     if (!mask) { en.netMask = 0; continue; }
     const fresh = (mask & ~(en.netMask || 0)) !== 0;   // jemand sieht ihn neu: er braucht alle Angaben
     en.netMask = mask;
@@ -4996,30 +5805,79 @@ function netEnemyRecords() {
   }
   return out;
 }
+function netRingState() {
+  const p = player;
+  ringEnsure();
+  let mask = 0;
+  for (let i = 0; i < p.ringDead.length && i < 30; i++) if (!p.ringDead[i]) mask |= 1 << i;
+  const T = Math.PI * 2;
+  return [p.weapons.ring, mask, netR2(((orbitAngle % T) + T) % T)];
+}
 function netSendTick(now) {
   const ws = Net.ws;
   if (!ws || ws.readyState !== 1 || !player) { Net.fxOut = []; Net.hitsOut.clear(); Net.toOut.clear(); return; }
-  const fl = (gameState === 'paused' || gameState === 'levelup') ? NF_PAUSED : (gameState === 'gameover' || gameState === 'menu' ? NF_DEAD : 0);
-  const p = player;
+  const p = player, dead = gameState === 'gameover' || gameState === 'menu';
+  let fl = (gameState === 'paused' || gameState === 'levelup') ? NF_PAUSED : (dead ? NF_DEAD : 0);
+  if (!dead) {
+    if (playerDown > 0) fl |= NF_DOWN;
+    if (p.shieldReady) fl |= NF_SHIELD;
+    if (inHafen(p.x, p.y)) fl |= NF_HAFEN;
+  }
   const m = { t: 's', ts: Math.round(now), x: Math.round(p.x), y: Math.round(p.y), a: netR2(p.angle || 0), hp: Math.ceil(Math.max(0, p.hp)), mh: Math.round(p.maxHp),
     lv: runLevel, ch: selectedCharacterId, fl: fl };
-  if (Net.live && !(fl & NF_DEAD)) { Net.tick++; m.e = netEnemyRecords(); }
-  else for (let i = 0; i < enemies.length; i++) enemies[i].netMask = 0;     // niemand bekommt sie: später wieder mit allen Angaben
+  Net.needTo.clear();
+  if (!dead) {
+    Net.tick++;
+    m.e = netEnemyRecords();
+    if (p.weapons.ring && playerDown <= 0) m.rg = netRingState();
+    if (minionEntities.length && playerDown <= 0) { m.mn = []; for (let i = 0; i < minionEntities.length && i < 2; i++) m.mn.push(Math.round(minionEntities[i].x - p.x), Math.round(minionEntities[i].y - p.y)); }
+    const wb = netWorldList();
+    if (wb) m.wb = wb;
+  } else for (let i = 0; i < enemies.length; i++) enemies[i].netMask = 0;     // niemand bekommt sie: später wieder mit allen Angaben
+  if (Net.rt && Net.anchor === Net.id) { const rt = Net.rt; m.an = [netR1(rt.boss), netR1(rt.champ), rt.count | 0, rt.hb | 0, rt.sb | 0, rt.cb | 0, rt.hc | 0, rt.sc | 0]; }
+  if (Net.qOut >= 0) { m.q = Net.qOut; Net.qOut = -1; }
+  if (Net.urgent) { m.u = 1; Net.urgent = false; }
   if (Net.fxOut.length) { m.fx = Net.fxOut; for (let i = 0; i < m.fx.length; i++) m.fx[i][1] = Math.max(0, Math.round(now - m.fx[i][1])); Net.fxOut = []; }
   if (Net.hitsOut.size) { m.h = []; Net.hitsOut.forEach(function(h){ m.h.push([h[0], h[1], netR1(h[2]), h[3]]); }); Net.hitsOut.clear(); }
+  Net.needTo.forEach(function(id){ Net.toOut.add(id); });
   if (Net.toOut.size) { m.to = Array.from(Net.toOut); Net.toOut.clear(); }
   try { ws.send(JSON.stringify(m)); } catch (e) { /* Verbindung bricht gerade ab */ }
+}
+// in einer Menge (viele Spieler auf dem Bildschirm) seltener senden: jeder bekommt dann weniger, das Bild bleibt glatt
+function netNearTick() {
+  let n = 0;
+  Net.peers.forEach(function(pe){ if (pe.seen && !pe.asleep && !(pe.fl & NF_DEAD) && distXY(pe.x, pe.y, player.x, player.y) <= NET_LIVE) n++; });
+  for (let i = 0; i < NET_CROWD.length; i++) if (n > NET_CROWD[i][0]) return NET_CROWD[i][1];
+  return NET_TICK_NEAR;
+}
+// jemand Aktives ist nah genug, dass dein Spiel nicht anhalten darf (Pause und Level-Up laufen dann weiter)
+function netSomeoneNear() {
+  if (!Net.on || !player) return false;
+  for (const pe of Net.peers.values()) if (netPeerActive(pe) && distXY(pe.x, pe.y, player.x, player.y) <= NET_LIVE) return true;
+  return false;
 }
 function netFrame(dt) {
   const now = performance.now();
   netUpdatePeers(now, dt);
-  if (gameState === 'playing') { netProcessHits(now); netRemoteUpdate(dt); }
+  netRoomUpdate(dt, now);
+  if (gameState !== 'gameover' && gameState !== 'menu') netProcessHits(now);
+  if (gameState === 'playing') netRemoteUpdate(dt);
   netProcessFx(now);
   netUpdateShots(dt);
-  if (now - Net.lastSend >= (Net.live ? NET_TICK_NEAR : NET_TICK_FAR)) { Net.lastSend = now; netSendTick(now); }
+  if (pauseOverlay && gameState === 'playing' && !netSomeoneNear()) hardPause();     // niemand mehr in der Nähe: richtige Pause
+  // allein im Raum: gar nichts senden (der Raum schläft und kostet nichts); Pause und Menü: selten; sonst je nach Nähe
+  const iv = !Net.peers.size ? Infinity :
+    (gameState === 'gameover' || gameState === 'menu' || gameState === 'paused' || gameState === 'levelup') ? (Net.live ? NET_TICK_FAR : NET_TICK_IDLE) :
+    Net.live ? netNearTick() : NET_TICK_FAR;
+  if (now - Net.lastSend >= iv - 2) { Net.lastSend = now; netSendTick(now); }     // -2 ms: Bildtakt-Rundung
+  if (Net.startedRun && Net.lastInput && now - Net.lastInput > Net.afk * 1000) {    // 5 Minuten nichts gedrückt: Platz im Raum freigeben
+    netLeave();
+    showToast('💤 Du warst 5 Minuten inaktiv und hast den Raum verlassen – du spielst allein weiter.');
+  }
+  if (plistOpen && now - plistAt > 500) renderPlayerList();
 }
 
-// ---------- zeichnen: Mitspieler, ihre Schüsse, Pfeile ----------
+// ---------- zeichnen: Hafen, Mitspieler, ihre Schüsse, Pfeile ----------
 function netColorRgb(col) { const c = hexToRgb(NET_COLORS[col % NET_COLORS.length]); return c.r + ',' + c.g + ',' + c.b; }
 function drawNetRing(sx, sy, r, col) {
   ctx.save();
@@ -5027,26 +5885,118 @@ function drawNetRing(sx, sy, r, col) {
   ctx.beginPath(); ctx.ellipse(sx, sy + r * 0.95, r * 1.05, r * 0.42, 0, 0, Math.PI * 2); ctx.stroke();
   ctx.restore();
 }
+function drawShieldRing(sx, sy, r) {
+  ctx.save();
+  ctx.globalAlpha *= 0.75 + Math.sin(runTime * 4) * 0.2;
+  ctx.strokeStyle = '#5ef2c0'; ctx.shadowColor = '#5ef2c0'; ctx.shadowBlur = 12; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(sx, sy, r + 9, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+// ohnmächtig: roter pulsierender Ring, grüner Fortschritt beim Retten, gestrichelt der Bereich, in dem man retten kann
+function drawDownRing(sx, sy, r, prog) {
+  ctx.save();
+  ctx.setLineDash([5, 7]); ctx.strokeStyle = 'rgba(94,242,192,0.45)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(sx, sy, REVIVE_R, 0, Math.PI * 2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(255,92,114,' + (0.55 + Math.sin(runTime * 6) * 0.3) + ')'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(sx, sy, r + 12, 0, Math.PI * 2); ctx.stroke();
+  if (prog > 0) {
+    ctx.strokeStyle = '#5ef2c0'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(sx, sy, r + 12, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, prog)); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawSpeech(sx, sy, b) {
+  ctx.save();
+  ctx.globalAlpha *= Math.min(1, b.t / 0.4);
+  ctx.font = '800 13px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(b.text).width + 18, h = 24;
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  roundRectPath(sx - w / 2, sy - h, w, h, 10); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(sx - 6, sy - 1); ctx.lineTo(sx + 6, sy - 1); ctx.lineTo(sx, sy + 6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#0b2a40'; ctx.fillText(b.text, sx, sy - h / 2 + 1);
+  ctx.restore();
+}
+function drawPeerRing(pe, sx, sy) {
+  const lv = pe.rg[0] | 0, mask = pe.rg[1] | 0;
+  if (lv <= 0) return;
+  const n = lv * 2, rad = orbitBubbleRadius(lv), ang = pe.rg[2] + 2.4 * (performance.now() - pe.delay - pe.rgT) / 1000;
+  ctx.save();
+  ctx.shadowColor = '#bdeeff'; ctx.shadowBlur = 8;
+  for (let i = 0; i < n && i < 30; i++) {
+    if (!(mask & (1 << i))) continue;
+    const a = ang + (i / n) * Math.PI * 2, bx = sx + Math.cos(a) * rad, by = sy + Math.sin(a) * rad;
+    ctx.globalAlpha = 0.88; ctx.fillStyle = '#bdeeff';
+    ctx.beginPath(); ctx.arc(bx, by, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(120,200,255,0.9)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(bx, by, 10, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawHafen() {
+  const sx = -camera.x + W / 2, sy = -camera.y + H / 2, R = HAFEN_R;
+  if (sx < -R - 80 || sx > W + R + 80 || sy < -R - 80 || sy > H + R + 80) return;
+  ctx.save();
+  const g = ctx.createRadialGradient(sx, sy, R * 0.15, sx, sy, R);
+  g.addColorStop(0, 'rgba(94,242,192,0.11)'); g.addColorStop(1, 'rgba(94,242,192,0.035)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI * 2); ctx.fill();
+  ctx.setLineDash([14, 10]); ctx.lineDashOffset = -runTime * 12;
+  ctx.strokeStyle = 'rgba(94,242,192,0.5)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI * 2); ctx.stroke();
+  ctx.setLineDash([]);
+  const label = '⚓ Hafen – sicher, keine Waffen';
+  ctx.font = '800 15px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(2,10,20,0.8)'; ctx.fillStyle = 'rgba(158,255,224,0.95)';
+  const ly = sy - R - 16 > 150 ? sy - R - 16 : (sy + R + 18 < H - 70 ? sy + R + 18 : null);   // nicht unter der Anzeige oben
+  if (ly !== null) { ctx.strokeText(label, sx, ly); ctx.fillText(label, sx, ly); }
+  ctx.restore();
+}
+// im Hafen: ein Hinweis unten in der Mitte (solange keine Level-Leiste dort ist)
+function drawHafenHint() {
+  if (!player || !inHafen(player.x, player.y) || playerDown > 0 || (currentLevelUp && currentLevelUp.bar)) return;
+  ctx.save();
+  const t = '⚓ Im Hafen bist du sicher – deine Waffen ruhen. Schwimm hinaus zum Kämpfen!';
+  ctx.font = '800 13px "Nunito", sans-serif';
+  if (ctx.measureText(t).width > W - 52) ctx.font = '800 11px "Nunito", sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = Math.min(W - 24, ctx.measureText(t).width + 28), y = H - 34;
+  ctx.fillStyle = 'rgba(5,20,35,0.78)'; roundRectPath(W / 2 - w / 2, y - 15, w, 30, 15); ctx.fill();
+  ctx.strokeStyle = 'rgba(94,242,192,0.45)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = '#bff8e6'; ctx.fillText(t, W / 2, y + 1, W - 40);
+  ctx.restore();
+}
 function drawPeers() {
   Net.peers.forEach(function(pe){
-    if (!pe.seen || (pe.fl & NF_DEAD)) return;
+    if (!pe.seen || pe.asleep || (pe.fl & NF_DEAD)) return;      // schläft (Tab im Hintergrund): unsichtbar
     const sx = pe.x - camera.x + W / 2, sy = pe.y - camera.y + H / 2;
-    if (sx < -80 || sx > W + 80 || sy < -80 || sy > H + 80) return;
-    const sleepy = pe.asleep || (pe.fl & NF_PAUSED);
-    ctx.globalAlpha = sleepy ? 0.5 : 1;
-    drawNetRing(sx, sy, pe.r, pe.col);
+    if (sx < -120 || sx > W + 120 || sy < -120 || sy > H + 120) return;
+    const down = !!(pe.fl & NF_DOWN), paused = !!(pe.fl & NF_PAUSED);
+    if (!down) {
+      if (pe.rg) drawPeerRing(pe, sx, sy);
+      if (pe.mnD) for (let i = 0; i < pe.mnD.length; i++) drawBlob(pe.mnD[i].x - camera.x + W / 2, pe.mnD[i].y - camera.y + H / 2, 11, '#9effc9', null, { wobble: runTime * 6 + i * 3, accessory: 'fin', glow: 6 });
+    }
+    if (down) drawDownRing(sx, sy, pe.r, pe.revT / REVIVE_TIME);
+    ctx.globalAlpha = paused ? 0.6 : (down ? 0.55 : 1);
+    if (!down) drawNetRing(sx, sy, pe.r, pe.col);
+    if ((pe.fl & NF_SHIELD) && !down) drawShieldRing(sx, sy, pe.r);
     const ch = CHARACTERS.filter(function(c){ return c.id === pe.ch; })[0] || CHARACTERS[0];
-    drawPlayerSprite(sx, sy, pe.r, { wobble: pe.bob, angle: pe.a, glow: 10, charId: ch.id, color: ch.color, dark: ch.dark });
+    drawPlayerSprite(sx, sy, pe.r, { wobble: pe.bob, angle: down ? 0 : pe.a, glow: 10, charId: ch.id, color: ch.color, dark: ch.dark });
     // Namensschild mit Level und kleinem Lebensbalken
-    const label = pe.name + ' · Lv ' + (pe.lv || 1) + (pe.asleep ? ' 💤' : (pe.fl & NF_PAUSED ? ' ⏸' : ''));
+    const label = pe.name + ' · Lv ' + (pe.lv || 1) + (down ? ' 💔' : (paused ? ' ⏸' : ''));
     ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const ty = sy - pe.r * 1.55 - 12;
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, sx, ty);
-    ctx.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; ctx.fillText(label, sx, ty);
+    ctx.fillStyle = down ? '#ff8a9a' : NET_COLORS[pe.col % NET_COLORS.length]; ctx.fillText(label, sx, ty);
     const bw = 40, frac = Math.max(0, Math.min(1, pe.hp / Math.max(1, pe.mh)));
     ctx.fillStyle = 'rgba(2,10,20,0.7)'; ctx.fillRect(sx - bw / 2 - 1, ty + 8, bw + 2, 5);
     ctx.fillStyle = frac > 0.3 ? '#5ef2c0' : '#ff5c72'; ctx.fillRect(sx - bw / 2, ty + 9, bw * frac, 3);
+    if (down) {
+      ctx.font = '900 11px "Nunito", sans-serif'; ctx.lineWidth = 3;
+      const hint = pe.revT > 0 ? 'Rettung … ' + Math.ceil(REVIVE_TIME - pe.revT) : 'Schwimm zu mir!';
+      ctx.strokeText(hint, sx, sy + pe.r + 24); ctx.fillStyle = '#ffd3dc'; ctx.fillText(hint, sx, sy + pe.r + 24);
+    }
     ctx.globalAlpha = 1;
+    if (pe.bubble) drawSpeech(sx, ty - 10, pe.bubble);
   });
 }
 function drawNetShots() {
@@ -5057,7 +6007,8 @@ function drawNetShots() {
   }
   ctx.globalAlpha = 1;
 }
-// Pfeile zu den 5 nächsten Mitspielern ausserhalb des Bildes (mit Name und Entfernung), dazu ihre Bosse und Champions
+// Pfeile: Bosse und Champions (auch weit weg, gemeldet an den ganzen Raum), ohnmächtige Mitspieler (rot, pulsierend)
+// und die 5 nächsten Mitspieler ausserhalb des Bildes, mit Name und Entfernung
 function drawPeerArrows() {
   for (let i = 0; i < remoteEnemyList.length; i++) {
     const en = remoteEnemyList[i];
@@ -5065,7 +6016,22 @@ function drawPeerArrows() {
     else if (en.champ) edgeArrow(en.x, en.y, CHAMPION_TRAITS[en.champ[0]].rgb, 0.6);
   }
   const list = [];
-  Net.peers.forEach(function(pe){ if (pe.seen && !(pe.fl & NF_DEAD)) list.push(pe); });
+  Net.peers.forEach(function(pe){
+    if (!pe.seen || pe.asleep || (pe.fl & NF_DEAD)) return;
+    if (pe.wb) for (let i = 0; i < pe.wb.length; i++) {
+      const w = pe.wb[i];
+      if (w[0] === 1) continue;
+      const en = pe.enemies.get(w[1]);
+      if (en && !en.dead) continue;                    // schon als Gegner sichtbar: der Pfeil kommt von oben
+      const tr = Array.isArray(w[6]) ? CHAMPION_TRAIT_KEYS[w[6][0]] : null;
+      edgeArrow(w[3], w[4], w[0] === 2 ? '255,92,114' : (tr && CHAMPION_TRAITS[tr] ? CHAMPION_TRAITS[tr].rgb : '255,215,106'), w[0] === 2 ? 0.9 : 0.62);
+    }
+    if (pe.fl & NF_DOWN) {
+      edgeArrow(pe.x, pe.y, '255,92,114', 0.95 + Math.sin(runTime * 8) * 0.18, '💔 ' + pe.name + ' · ' + Math.round(distXY(pe.x, pe.y, player.x, player.y) / 10) + ' m');
+      return;
+    }
+    list.push(pe);
+  });
   list.sort(function(a, b){ return distXY(a.x, a.y, player.x, player.y) - distXY(b.x, b.y, player.x, player.y); });
   for (let i = 0; i < Math.min(5, list.length); i++) {
     const pe = list[i], d = distXY(pe.x, pe.y, player.x, player.y);
@@ -5083,7 +6049,6 @@ function netHudBoss() {
   }
   return best;
 }
-function netRoomLabel() { return '🌐 ' + Net.code + ' · ' + (Net.peers.size + 1) + '/' + Net.cap; }
 
 document.addEventListener('DOMContentLoaded', function(){
   initUI();
