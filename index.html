@@ -262,6 +262,13 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .online-status { min-height: 18px; margin: 8px 0 0; font-size: 12.5px; font-weight: 800; color: var(--bioluma); text-align: center; line-height: 1.4; }
 .online-status.bad { color: #ff8a9a; }
 .hud-room { margin-left: 6px; border-color: rgba(126,182,255,0.5); color: #cfe4ff; pointer-events: auto; cursor: pointer; }
+.hud-mini.hud-call { width: auto; min-width: 32px; padding: 0 9px; border-radius: 999px; border-color: rgba(255,215,106,0.8); color: var(--pearl); font: 900 13px/30px 'Nunito', sans-serif; box-shadow: 0 0 14px rgba(255,215,106,0.35); }
+.hud-mini.hud-call.cool { border-color: rgba(255,215,106,0.3); color: var(--foam-dim); box-shadow: none; }
+.hud-sg { margin-left: 6px; border-color: rgba(94,242,192,0.75); color: #bff8e6; }
+.hud-sg.far { opacity: 0.5; }
+.hud-lf { margin-top: 5px; font: 800 11.5px 'Nunito', sans-serif; color: var(--foam); text-shadow: 0 1px 3px rgba(0,0,0,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: min(560px, 80vw); }
+.hud-lf b { color: var(--pearl); font-weight: 900; }
+.hud-lf .tb { color: #8cc4ff; } .hud-lf .tr { color: #ff9aa6; }
 .hud-mini { pointer-events: auto; width: 32px; height: 32px; margin: 6px 0 0 6px; padding: 0; border-radius: 50%; border: 1px solid rgba(126,182,255,0.5); background: rgba(5,20,35,0.72); color: var(--foam); font-size: 15px; line-height: 30px; cursor: pointer; vertical-align: top; }
 .online-count { text-align: center; font-size: 13px; font-weight: 800; color: var(--bioluma); margin: -6px 0 4px; min-height: 18px; }
 .online-who { text-align: center; font-size: 13px; color: var(--foam-dim); font-weight: 700; margin: -6px 0 10px; }
@@ -292,6 +299,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .lvlbar-time { font: 900 12px 'Nunito', sans-serif; color: var(--foam-dim); white-space: nowrap; }
 .lvlbar-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
 .lvlbar-card, .qwheel-btn, .hud-mini, .hud-room, .chancebar .btn { touch-action: manipulation; }
+/* Leisten unten (Level, Zweite Chance, Schwarmruf): nur die Knöpfe nehmen Berührungen an – ein Daumen, der dort aufsetzt, steuert */
+.lvlbar, .chancebar, .callbar { pointer-events: none; }
+.lvlbar .lvlbar-card, .chancebar .btn, .callbar .btn { pointer-events: auto; }
 .lvlbar-card { display: flex; gap: 8px; align-items: center; text-align: left; padding: 7px 9px; border-radius: 12px; border: 2px solid rgba(126,224,255,0.22); background: rgba(126,224,255,0.08); color: var(--foam); cursor: pointer; font-family: 'Nunito', sans-serif; min-width: 0; }
 .lvlbar-card:hover { border-color: var(--bioluma); background: rgba(94,242,192,0.1); }
 .lvlbar-card .k { flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; background: rgba(255,215,106,0.2); color: var(--pearl); font: 900 12px/20px 'Nunito', sans-serif; text-align: center; }
@@ -314,6 +324,22 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .chance-btns .btn-ghost { flex: 1; }
 .chance-hint { margin: 7px 0 0; font-size: 11px; color: var(--foam-dim); font-weight: 700; }
 @media (hover: none) { .chance-hint { display: none; } }
+/* Schwarmruf: der Leitfisch ruft – 10 s zum Folgen */
+.callbar { position: absolute; left: 50%; bottom: max(16%, calc(env(safe-area-inset-bottom) + 70px)); transform: translateX(-50%); width: min(440px, calc(100% - 24px)); z-index: 9; display: none;
+  background: linear-gradient(180deg, rgba(42,32,8,0.95), rgba(12,14,22,0.96)); border: 1px solid rgba(255,215,106,0.7); border-radius: 18px; padding: 10px 14px 9px; box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 30px rgba(255,215,106,0.18); text-align: center; }
+.callbar.show { display: block; animation: lvlIn 0.25s ease-out; }
+.callbar .chance-head { color: #ffe7a6; }
+.callbar .call-fill { background: linear-gradient(90deg, #ffd76a, #fff1b8); }
+.callbar .chance-btns .btn-primary { background: linear-gradient(135deg, #ffd76a, #e8a92c); color: #2a1a00; box-shadow: 0 6px 18px rgba(255,215,106,0.35); }
+.callbar .chance-btns .btn-primary:disabled { filter: grayscale(0.7); opacity: 0.55; }
+.callbar .btn { touch-action: manipulation; }
+.plist-team-head { display: flex; justify-content: space-between; padding: 7px 2px 2px; font: 900 12px 'Nunito', sans-serif; border-top: 1px solid rgba(126,224,255,0.18); }
+.plist-team-head.t0 { color: #8cc4ff; } .plist-team-head.t1 { color: #ff9aa6; }
+.plist-pts { min-width: 42px; text-align: right; flex-shrink: 0; font-size: 11.5px; color: var(--pearl); font-variant-numeric: tabular-nums; }
+.plist-switch { display: none; margin: 8px 0 2px; width: 100%; padding: 7px 10px; border-radius: 10px; border: 1px solid rgba(126,182,255,0.5); background: rgba(126,182,255,0.12); color: #cfe4ff; font: 800 12.5px 'Nunito', sans-serif; cursor: pointer; touch-action: manipulation; }
+.plist-switch:disabled { opacity: 0.5; cursor: not-allowed; }
+.plist-note { font-size: 11px; color: var(--foam-dim); font-weight: 700; margin: 4px 2px 0; }
+.plist-note:empty { display: none; }
 /* Kurznachrichten-Rad (Q / 💬) und Spielerliste (Tab / Raum-Anzeige) */
 .qwheel { position: absolute; inset: 0; z-index: 8; display: none; align-items: center; justify-content: center; background: rgba(2,8,16,0.28); }
 .qwheel.show { display: flex; }
@@ -349,8 +375,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 #toast{position:absolute;top:86px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 #toast.low{top:122px}
-#toast.net{top:110px}
-#toast.netlow{top:148px}
+#toast.net{top:134px}
+#toast.netlow{top:172px}
 #screen-pause.live { background: linear-gradient(180deg, rgba(2,8,16,0) 35%, rgba(2,8,16,0.6)); align-items: flex-end; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 #screen-pause.live .panel { max-width: 420px; padding: 14px 18px; }
 #screen-pause.live h2 { font-size: 19px; margin-bottom: 6px; }
@@ -406,7 +432,8 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="hud-bar-wrap xp-wrap">
       <div class="hud-bar-fill xp-fill" id="hud-xp-fill"></div>
     </div>
-    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;" role="button" aria-label="Spielerliste"></div><button class="hud-mini" id="btn-chat" style="display:none;" aria-label="Kurznachricht">💬</button>
+    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;" role="button" aria-label="Spielerliste"></div><button class="hud-mini" id="btn-chat" style="display:none;" aria-label="Kurznachricht">💬</button><button class="hud-mini hud-call" id="btn-call" style="display:none;" aria-label="Schwarmruf">📯</button><div class="hud-pill hud-ring hud-sg" id="hud-sg" style="display:none;"></div>
+    <div class="hud-lf" id="hud-lf" style="display:none;"></div>
     <div class="hud-boss-wrap" id="hud-boss">
       <span class="hud-boss-name" id="hud-boss-name"></span>
       <div class="hud-bar-wrap boss-wrap"><div class="hud-bar-fill boss-fill" id="hud-boss-fill"></div><i class="boss-notch" style="left:33%"></i><i class="boss-notch" style="left:66%"></i></div>
@@ -428,10 +455,21 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     </div>
     <p class="chance-hint">Leertaste oder Enter = Zweite Chance</p>
   </div>
+  <div class="callbar" id="callbar" role="dialog" aria-live="assertive">
+    <div class="chance-head"><span id="call-title">📯 Der Leitfisch ruft!</span><span class="chance-time" id="call-time">10 s</span></div>
+    <div class="chance-track"><div class="chance-fill call-fill" id="call-fill"></div></div>
+    <div class="chance-btns">
+      <button class="btn btn-primary" id="btn-call-follow">🐟 Folgen <span class="btn-sub" id="call-sub">Strömungsritt zum Leitfisch</span></button>
+      <button class="btn btn-ghost" id="btn-call-no">Nein</button>
+    </div>
+    <p class="chance-hint">F = Folgen · N = Nein</p>
+  </div>
   <div class="qwheel" id="qwheel"><div class="qwheel-ring" id="qwheel-ring"></div><div class="qwheel-hint">Nachricht an alle im Raum · Q schliesst</div></div>
   <div class="plist" id="plist">
     <div class="plist-head"><span id="plist-title">Raum</span><button class="plist-close" id="plist-close" aria-label="Schliessen">✕</button></div>
     <div id="plist-rows"></div>
+    <button class="plist-switch" id="plist-switch">⇄ Team wechseln</button>
+    <p class="plist-note" id="plist-note"></p>
   </div>
 
   <div class="screen active" id="screen-menu">
@@ -743,8 +781,10 @@ const BOSS_TYPES = {
 const CHAMPION_START = 240;                               // der erste Champion kommt bei 4:00
 const CHAMPION_GAP_MIN = 120, CHAMPION_GAP_MAX = 150;     // danach alle 120–150 s (zufällig), nie während eines Boss-Kampfs
 const CHAMPION_LATE = 900;                                // ab 15:00: bis zu 2 gleichzeitig, jeder mit 2 Eigenschaften
-const CHAMPION_HP = 8, CHAMPION_DMG = 1.4, CHAMPION_SIZE = 1.5, CHAMPION_XP = 10;   // HP zusätzlich × Level-Faktor (wie bei Bossen)
-const CHAMPION_CHEST = 12;                                // Schatztruhe: 12 × Perlenwert des Gebiets
+const CHAMPION_HP = 12, CHAMPION_DMG = 1.7, CHAMPION_SIZE = 1.5, CHAMPION_XP = 10;  // HP zusätzlich × Level-Faktor (wie bei Bossen); seit 6.0 härter (war 8 / 1,4)
+const CHAMPION_SPEED = 1.1;                               // Champions sind 10 % schneller
+const CHAMP_SHOT_EVERY = 3.5, CHAMP_SHOT_N = 3, CHAMP_SHOT_SPREAD = 0.26, CHAMP_SHOT_SPEED = 175, CHAMP_SHOT_DMG = 0.55;   // und schiessen alle 3,5 s einen Fächer aus 3 Schüssen
+const CHAMPION_CHEST = 15;                                // Schatztruhe: 15 × Perlenwert des Gebiets (seit 6.0, weil Champions härter sind; war 12)
 const CHAMPION_EXCLUDE = ['piranha', 'seeigel'];          // zu klein / kann sich nicht bewegen
 const CHAMPION_BOSS_FROM = 3;                             // ab der 3. Boss-Begegnung eines Laufs kommt der Boss als Champion-Boss
 const CHAMPION_BOSS_HP = 1.3;                             // Champion-Boss: HP × 1,3 zusätzlich, startet wütend in Phase 2
@@ -955,26 +995,105 @@ function playTone(freq, dur, type, vol) {
     osc.stop(now + dur);
   } catch (e) { /* Audio ist nicht kritisch */ }
 }
+// Klänge (seit 6.0): kleine Synthesizer-Stimmen statt einfacher Pieptöne – Blasen, Platscher, Glöckchen, ein Horn. Alles läuft über
+// einen Kompressor (laute Momente übersteuern nicht), jede Stimme hat eine Hüllkurve, viele haben eine Tonhöhen-Kurve und etwas
+// Zufall (gleiche Klänge klingen nicht maschinell gleich). Häufige Klänge sind gedrosselt, höchstens 28 Stimmen gleichzeitig.
+let sfxBus = null, sfxNoise = null, sfxVoices = 0;
+const sfxLast = {};
+function sfxReady(key, gap) {
+  if (save.muted || !audioCtx || audioCtx.state !== 'running') return false;
+  const t = performance.now();
+  if (gap && sfxLast[key] && t - sfxLast[key] < gap) return false;
+  sfxLast[key] = t;
+  if (!sfxBus) {
+    try {
+      const comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 5; comp.attack.value = 0.004; comp.release.value = 0.18;
+      const g = audioCtx.createGain(); g.gain.value = 0.85;
+      g.connect(comp); comp.connect(audioCtx.destination); sfxBus = g;
+      const n = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate), d = n.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      sfxNoise = n;
+    } catch (e) { return false; }
+  }
+  return sfxVoices < 28;
+}
+function rnd(a) { return 1 + (Math.random() * 2 - 1) * a; }
+// eine Stimme: o = { w: Wellenform, f, f2 (Ziel-Tonhöhe), d (Dauer), v (Lautstärke), a (Anschlag), t (Verzögerung), lp / hp / bp (Filter), q }
+function sv(o) {
+  try {
+    const t0 = audioCtx.currentTime + (o.t || 0), d = o.d || 0.1, a = Math.min(o.a || 0.004, d * 0.5);
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = o.w || 'sine';
+    osc.frequency.setValueAtTime(o.f, t0);
+    if (o.f2) osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.f2), t0 + d * (o.glide || 1));
+    if (o.vib) { const l = audioCtx.createOscillator(), lg = audioCtx.createGain(); l.frequency.value = o.vib; lg.gain.value = o.f * 0.012; l.connect(lg); lg.connect(osc.frequency); l.start(t0); l.stop(t0 + d + 0.05); }
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(o.v || 0.05, t0 + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+    let node = osc;
+    if (o.lp || o.hp || o.bp) { const fl = audioCtx.createBiquadFilter(); fl.type = o.lp ? 'lowpass' : o.hp ? 'highpass' : 'bandpass'; fl.frequency.value = o.lp || o.hp || o.bp; fl.Q.value = o.q || 0.8; node.connect(fl); node = fl; }
+    node.connect(g); g.connect(sfxBus);
+    osc.start(t0); osc.stop(t0 + d + 0.02);
+    sfxVoices++; osc.onended = function(){ sfxVoices--; };
+  } catch (e) { /* Audio ist nicht kritisch */ }
+}
+// Rauschen (Platscher, Rauschen, Funkeln): o = { d, v, a, t, lp / hp / bp (Filter, mit f2 als Ziel), q }
+function sn(o) {
+  try {
+    const t0 = audioCtx.currentTime + (o.t || 0), d = o.d || 0.1, a = Math.min(o.a || 0.003, d * 0.5);
+    const src = audioCtx.createBufferSource(), g = audioCtx.createGain(), fl = audioCtx.createBiquadFilter();
+    src.buffer = sfxNoise; src.playbackRate.value = o.rate || 1;
+    fl.type = o.lp ? 'lowpass' : o.hp ? 'highpass' : 'bandpass';
+    const f = o.lp || o.hp || o.bp || 1000;
+    fl.frequency.setValueAtTime(f, t0);
+    if (o.f2) fl.frequency.exponentialRampToValueAtTime(o.f2, t0 + d);
+    fl.Q.value = o.q || 0.9;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(o.v || 0.04, t0 + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+    src.connect(fl); fl.connect(g); g.connect(sfxBus);
+    src.start(t0, Math.random() * 0.5); src.stop(t0 + d + 0.02);
+    sfxVoices++; src.onended = function(){ sfxVoices--; };
+  } catch (e) { /* Audio ist nicht kritisch */ }
+}
 const Sfx = {
-  shoot: function(){ playTone(520, 0.06, 'triangle', 0.05); },
-  hit: function(){ playTone(180, 0.08, 'square', 0.06); },
-  death: function(){ playTone(300, 0.12, 'sawtooth', 0.07); },
-  pickup: function(){ playTone(760, 0.07, 'sine', 0.06); },
-  levelup: function(){ playTone(500,0.09,'sine',0.09); setTimeout(function(){playTone(760,0.14,'sine',0.09);}, 90); },
-  hurt: function(){ playTone(120, 0.15, 'sawtooth', 0.09); },
-  boss: function(){ playTone(90, 0.5, 'sawtooth', 0.11); },
-  click: function(){ playTone(440, 0.04, 'triangle', 0.05); },
-  gameover: function(){ playTone(200,0.2,'sawtooth',0.09); setTimeout(function(){playTone(140,0.3,'sawtooth',0.09);}, 150); },
-  deflect: function(){ playTone(950, 0.05, 'sine', 0.06); },
-  shieldBlock: function(){ playTone(650,0.08,'sine',0.1); setTimeout(function(){playTone(950,0.12,'sine',0.08);}, 60); },
-  heal: function(){ playTone(700,0.07,'sine',0.07); setTimeout(function(){playTone(900,0.1,'sine',0.07);}, 70); },
-  claim: function(){ playTone(660,0.08,'sine',0.09); setTimeout(function(){playTone(880,0.09,'sine',0.09);}, 80); setTimeout(function(){playTone(1180,0.16,'sine',0.1);}, 170); },
-  pop: function(){ playTone(1300,0.05,'sine',0.08); setTimeout(function(){playTone(820,0.07,'triangle',0.06);}, 35); },
-  revive: function(){ playTone(300,0.1,'sine',0.08); setTimeout(function(){playTone(500,0.12,'sine',0.09);}, 100); setTimeout(function(){playTone(760,0.2,'sine',0.1);}, 220); },
-  champion: function(){ playTone(392,0.12,'triangle',0.09); setTimeout(function(){playTone(523,0.12,'triangle',0.09);}, 110); setTimeout(function(){playTone(784,0.22,'triangle',0.1);}, 220); },
-  chest: function(){ playTone(880,0.08,'sine',0.09); setTimeout(function(){playTone(1175,0.1,'sine',0.09);}, 70); setTimeout(function(){playTone(1568,0.18,'sine',0.1);}, 150); },
-  crack: function(){ playTone(260,0.09,'square',0.07); setTimeout(function(){playTone(170,0.12,'sawtooth',0.06);}, 50); },
-  ping: function(){ playTone(1046,0.07,'sine',0.07); setTimeout(function(){playTone(1318,0.1,'sine',0.07);}, 80); }
+  // eigener Schuss: ein kleines "Blubb" (Blase, die nach oben springt)
+  shoot: function(){ if (!sfxReady('shoot', 55)) return; const r = rnd(0.08); sv({ f: 340 * r, f2: 760 * r, d: 0.075, v: 0.045, a: 0.003 }); sn({ hp: 3200, d: 0.03, v: 0.01 }); },
+  hit: function(){ if (!sfxReady('hit', 40)) return; sv({ w: 'triangle', f: 220, f2: 120, d: 0.07, v: 0.04 }); },
+  // Gegner besiegt: "Plopp" mit kleinem Spritzer
+  death: function(){ if (!sfxReady('death', 38)) return; const r = rnd(0.12); sv({ f: 820 * r, f2: 210 * r, d: 0.1, v: 0.06 }); sn({ bp: 1300 * r, f2: 500, d: 0.08, v: 0.035, q: 1.4 }); },
+  // Kugel / Perle eingesammelt: helles Glöckchen
+  pickup: function(){ if (!sfxReady('pickup', 45)) return; const r = rnd(0.05); sv({ w: 'triangle', f: 1180 * r, f2: 1420 * r, d: 0.07, v: 0.03 }); sv({ f: 1770 * r, d: 0.09, v: 0.016, t: 0.025 }); },
+  levelup: function(){ if (!sfxReady('levelup', 200)) return; [523, 659, 784, 1047].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.22, v: 0.055, t: i * 0.07, a: 0.01 }); }); sn({ hp: 5000, d: 0.45, v: 0.018, t: 0.12, a: 0.08 }); },
+  // getroffen: dumpfer Schlag
+  hurt: function(){ if (!sfxReady('hurt', 110)) return; sv({ f: 170, f2: 55, d: 0.2, v: 0.13 }); sn({ lp: 1000, f2: 200, d: 0.13, v: 0.07 }); sv({ w: 'square', f: 105, d: 0.06, v: 0.025, lp: 900 }); },
+  // Boss: tiefes Grollen aus der Tiefe
+  boss: function(){ if (!sfxReady('boss', 300)) return; sv({ w: 'sawtooth', f: 74, f2: 52, d: 0.95, v: 0.075, lp: 420, a: 0.06 }); sv({ f: 46, d: 1.0, v: 0.12, a: 0.08 }); sn({ lp: 320, f2: 120, d: 0.75, v: 0.06, a: 0.05 }); },
+  click: function(){ if (!sfxReady('click', 30)) return; sv({ w: 'triangle', f: 680, f2: 520, d: 0.04, v: 0.035 }); },
+  gameover: function(){ if (!sfxReady('gameover', 400)) return; [392, 330, 262].forEach(function(f, i){ sv({ w: 'triangle', f: f, f2: f * 0.97, d: 0.32, v: 0.07, t: i * 0.17, a: 0.01 }); }); sv({ f: 98, d: 0.9, v: 0.09, t: 0.3, a: 0.05 }); },
+  // Blasenring wehrt ab: gläsernes Klingen
+  deflect: function(){ if (!sfxReady('deflect', 60)) return; const r = rnd(0.06); sv({ f: 1400 * r, f2: 1950 * r, d: 0.06, v: 0.035 }); sv({ f: 2900 * r, d: 0.05, v: 0.012 }); },
+  shieldBlock: function(){ if (!sfxReady('shield', 120)) return; [520, 781, 1172].forEach(function(f){ sv({ w: 'triangle', f: f * rnd(0.01), d: 0.28, v: 0.04 }); }); sn({ bp: 2600, d: 0.12, v: 0.03, q: 2 }); },
+  heal: function(){ if (!sfxReady('heal', 120)) return; sv({ f: 600, f2: 900, d: 0.14, v: 0.05, a: 0.01 }); sv({ f: 900, f2: 1350, d: 0.16, v: 0.045, t: 0.07, a: 0.01 }); sn({ hp: 4500, d: 0.2, v: 0.012, t: 0.05 }); },
+  claim: function(){ if (!sfxReady('claim', 150)) return; [660, 880, 1180, 1760].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.2, v: 0.055, t: i * 0.075, a: 0.006 }); }); },
+  // Ringblase platzt
+  pop: function(){ if (!sfxReady('pop', 60)) return; sv({ f: 1300, f2: 380, d: 0.08, v: 0.06 }); sn({ bp: 2200, f2: 800, d: 0.06, v: 0.04, q: 1.5 }); },
+  revive: function(){ if (!sfxReady('revive', 200)) return; [392, 523, 659, 784].forEach(function(f, i){ sv({ f: f, d: 0.35, v: 0.06, t: i * 0.09, a: 0.03 }); }); sn({ hp: 4000, d: 0.5, v: 0.015, t: 0.15, a: 0.1 }); },
+  // Champion erscheint: Fanfare mit Pauke
+  champion: function(){ if (!sfxReady('champion', 250)) return; [392, 523, 784].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: i === 2 ? 0.45 : 0.16, v: 0.065, t: i * 0.11, a: 0.008, vib: i === 2 ? 6 : 0 }); }); sv({ f: 110, f2: 70, d: 0.25, v: 0.09 }); sn({ lp: 500, d: 0.2, v: 0.05 }); },
+  // Truhe: Perlen klimpern heraus
+  chest: function(){ if (!sfxReady('chest', 200)) return; [880, 1175, 1568, 2093, 1760].forEach(function(f, i){ sv({ w: 'triangle', f: f * rnd(0.02), d: 0.14, v: 0.045, t: i * 0.055 }); }); sn({ hp: 4200, d: 0.4, v: 0.02, t: 0.05, a: 0.05 }); },
+  crack: function(){ if (!sfxReady('crack', 80)) return; sn({ bp: 1900, f2: 700, d: 0.12, v: 0.07, q: 1.2 }); sv({ w: 'square', f: 230, f2: 110, d: 0.09, v: 0.035, lp: 1400 }); },
+  ping: function(){ if (!sfxReady('ping', 120)) return; sv({ f: 1046, d: 0.1, v: 0.045 }); sv({ f: 1318, d: 0.14, v: 0.045, t: 0.08 }); },
+  // Schwarmruf: ein Muschelhorn (der Filter öffnet sich langsam)
+  horn: function(){ if (!sfxReady('horn', 500)) return; sv({ w: 'sawtooth', f: 147, f2: 165, d: 1.1, v: 0.07, a: 0.12, lp: 900, glide: 0.4, vib: 5 }); sv({ w: 'sawtooth', f: 220, f2: 247, d: 1.0, v: 0.035, a: 0.15, lp: 1100, glide: 0.4, t: 0.05 }); sv({ f: 73, d: 1.1, v: 0.06, a: 0.1 }); },
+  // Anlauf: Wasser wirbelt
+  whoosh: function(){ if (!sfxReady('whoosh', 200)) return; sn({ bp: 380, f2: 2400, d: 0.55, v: 0.07, a: 0.2, q: 1.1 }); },
+  // Strömungsritt: Rauschen der Strömung mit aufsteigendem Ton
+  ride: function(){ if (!sfxReady('ride', 300)) return; sn({ lp: 420, f2: 2200, d: 1.4, v: 0.07, a: 0.15 }); sv({ f: 300, f2: 620, d: 1.0, v: 0.03, a: 0.2 }); },
+  // Ankunft: Platsch und Glöckchen
+  arrive: function(){ if (!sfxReady('arrive', 300)) return; sv({ f: 130, f2: 48, d: 0.3, v: 0.12 }); sn({ bp: 1000, f2: 260, d: 0.35, v: 0.07 }); sv({ w: 'triangle', f: 1046, d: 0.25, v: 0.035, t: 0.08 }); }
 };
 
 const keys = {};
@@ -985,6 +1104,11 @@ window.addEventListener('keydown', function(e){
   const inRun = runVisible();
   if (k === 'tab') { if (Net.on && inRun) { e.preventDefault(); togglePlayerList(); } return; }          // online: Spielerliste
   if (k === 'q' && !e.repeat && Net.on && (gameState === 'playing' || gameState === 'paused')) { toggleQuickWheel(); return; }   // Kurznachrichten
+  if (Net.on && gameState === 'playing' && !e.repeat && !quickWheelOpen()) {                         // Schwarmruf: R rufen, F folgen, N nein
+    if (k === 'r' && netAmLeader()) { netRequestCall(); return; }
+    if (k === 'f' && (Net.call || netWindup())) { netFollow(); return; }
+    if (k === 'n' && (Net.call || netWindup())) { netDeclineCall(); return; }
+  }
   if (/^[1-8]$/.test(k) && !e.repeat) {
     const n = +k;
     if (quickWheelOpen()) { pickQuick(n - 1); return; }
@@ -1011,7 +1135,12 @@ canvas.addEventListener('touchmove', function(e){
   e.preventDefault();
 }, { passive: false });
 function touchEnded(e){
-  for (let i = 0; i < e.changedTouches.length; i++) if (e.changedTouches[i].identifier === touchState.id) pointerUp();
+  let ended = false;
+  for (let i = 0; i < e.changedTouches.length; i++) if (e.changedTouches[i].identifier === touchState.id) { pointerUp(); ended = true; }
+  if (ended && gameState === 'playing') for (let i = 0; i < e.touches.length; i++) {        // ein anderer Finger liegt noch auf: er steuert weiter
+    const t = e.touches[i];
+    if (t.target === canvas) { pointerDown(t.clientX, t.clientY, t.identifier); break; }
+  }
   e.preventDefault();
 }
 canvas.addEventListener('touchend', touchEnded, { passive: false });
@@ -1140,7 +1269,7 @@ function saveRunSnapshot() {
       weapons: player.weapons, weaponTimers: player.weaponTimers, passives: player.passives,
       shieldReady: player.shieldReady, shieldTimer: player.shieldTimer,
       ringHits: player.ringHits, ringDead: player.ringDead, ringLock: player.ringLock, ringPin: player.ringPin, ringNext: player.ringNext,
-      x: player.x, y: player.y, angle: player.angle
+      x: netRiding() ? Net.ride.sx : player.x, y: netRiding() ? Net.ride.sy : player.y, angle: player.angle
     }
   };
   if (online) {                    // Online-Lauf: geht nach dem Neuladen im selben Raum weiter (siehe Netz-Teil)
@@ -1274,6 +1403,7 @@ function startRun(charId, stageId) {
   playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
   lateWarned = false; chanceLeft = 0; chanceDown = false; resumeCount = 0; takenEach.clear(); pendingEach.clear(); hideChance(); bossCorpses = [];
   runSlot = Net.on ? 'online' : 'solo';
+  Net.ride = null; Net.call = null; Net.sgUntil = 0; Net.sgMult = 1; Net.landAt = 0; netCallBarHide();
   if (Net.on) { invulnTimer = HAFEN_PROTECT; Net.lastSend = 0; Net.myBubble = null; netFreshLoot(); }   // online: Start im Hafen mit 5 s Schutz
 
   gameState = 'playing';
@@ -1332,6 +1462,7 @@ function spawnEnemy(typeKey, isBoss) {
     wobble: Math.random() * 10, jitter: Math.random() * Math.PI * 2, grp: 1, face: Math.random() < 0.5 ? -1 : 1
   };
   if (Net.on) {                                   // online: +50 % HP pro weiterem Spieler in der Nähe (stärker statt mehr), nie im Hafen
+    if (Net.mode === 'pvp') e.xp *= PVP_ENEMY_XP;  // PvP: wenige Gegner, dafür mehr XP
     const n = netNearbyPeers(player.x, player.y).length;
     if (n) { e.grp = 1 + NET_GROUP_HP * n; e.hp *= e.grp; e.maxHp = e.hp; }   // ... und genauso mehr Beute (XP, Perlen-Chance)
     hafenKeepOut(e);
@@ -1358,7 +1489,9 @@ function updateSpawner(dt) {
     const batch = 1 + Math.floor(runTime / 100);
     const cap = 4 + (runTime > LATE_START ? Math.floor((runTime - LATE_START) / LATE_BATCH_EVERY) : 0);   // ab 15:00 alle 2 Minuten einer mehr pro Welle
     const duel = !!bossEntity || (Net.on && netBossNear());   // im Boss-Kampf kommen weniger gewöhnliche Gegner und keine Elite
-    const n = duel ? Math.max(1, Math.ceil(Math.min(batch, cap) / 2)) : Math.min(batch, cap);
+    const pvp = Net.on && Net.mode === 'pvp';                  // PvP: es geht um die anderen Spieler – viel weniger Gegner
+    let n = duel ? Math.max(1, Math.ceil(Math.min(batch, cap) / 2)) : Math.min(batch, cap);
+    if (pvp) n = Math.max(1, Math.round(n * PVP_BATCH));
     for (let i = 0; i < n; i++) {
       const avail = Math.min(table.length, 1 + Math.floor(runTime / 25));
       const key = table[Math.floor(Math.random() * avail)];
@@ -1376,9 +1509,9 @@ function updateSpawner(dt) {
       }
     }
     spawnInterval = Math.max(0.45, 1.2 - (runTime / 60) * 0.055 * stage.difficulty);
-    spawnTimer = spawnInterval * (duel ? 1.4 : 1);
+    spawnTimer = spawnInterval * (duel ? 1.4 : 1) * (pvp ? PVP_GAP : 1);
   }
-  if (runTime >= ringTime && !bossEntity && SPAWN_TABLE_BY_STAGE[stage.id].indexOf('piranha') !== -1) {
+  if (runTime >= ringTime && !bossEntity && SPAWN_TABLE_BY_STAGE[stage.id].indexOf('piranha') !== -1 && !(Net.on && Net.mode === 'pvp')) {
     ringTime = runTime + 100;
     const rd = Math.hypot(W, H) / 2 + 80;
     for (let k = 0; k < 12; k++) {
@@ -1433,6 +1566,7 @@ const NET_HIT_SLOW = 2, NET_HIT_VAMPIR = 4;
 // src: 'lava' = Umgebung (zählt für niemanden als Treffer; allein bekommst du trotzdem die Beute)
 function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.dead || en.predDead) return;
+  if (!src && Net.sgMult !== 1) dmg *= Net.sgMult;                               // Schwarmgeist: +15 % auf deine eigenen Treffer
   if (en.isPlayer) { netQueuePvp(en, dmg, flags || 0); en.hitFlash = 0.12; return; }   // PvP: ein Mitspieler (sein Spiel zieht die HP ab)
   if (en.remote) {                                                                // Gegner eines Mitspielers: sein Spiel zieht die HP ab …
     netQueueHit(en, dmg, flags || 0); en.hitFlash = 0.12;
@@ -1483,6 +1617,7 @@ function killInfo(en) {
 // Statistik eines Siegs (für jeden Helfer in seinem eigenen Spiel)
 function creditKill(k) {
   runKills++;
+  if (Net.on) netAddPoints(k.isBoss ? LF_POINTS.boss + (k.champ ? LF_POINTS.champ : 0) : k.champ ? LF_POINTS.champ : k.elite ? LF_POINTS.elite : LF_POINTS.enemy);
   save.stats.totalKills++;
   if (k.champ) {
     save.stats.championsDefeated = (save.stats.championsDefeated || 0) + 1;
@@ -1953,6 +2088,7 @@ function updateEnemies(dt) {
     if (en.hitFlash > 0) en.hitFlash -= dt;
     if (en.orbitHitTimer > 0) en.orbitHitTimer -= dt;
     if (en.slowTimer > 0) en.slowTimer -= dt;
+    if (en.stun > 0) { en.stun -= dt; en.wobble += dt * 3; if (en.contactTimer > 0) en.contactTimer -= dt; continue; }   // betäubt (Ankunftswelle)
     const speedMult = en.slowTimer > 0 ? 0.65 : 1;
     en.lead = (leaders && !en.isBoss) ? leaderOf(en, leaders) : null;
     const buff = en.lead ? LEADER_SPEED : 1, hitMult = en.lead ? LEADER_DMG : 1;
@@ -2018,6 +2154,18 @@ function updateEnemies(dt) {
       }
     }
 
+    if (en.champ && !en.isBoss && en.cShot != null) {        // Champion: alle 3,5 s ein Fächer aus 3 Schüssen auf sein Ziel
+      en.cShot -= dt;
+      if (en.cShot <= 0 && d < 620 && en.cst !== 'dash') {
+        en.cShot = CHAMP_SHOT_EVERY;
+        const base = Math.atan2(dy, dx), col = CHAMPION_TRAITS[en.champ[0]] ? CHAMPION_TRAITS[en.champ[0]].color : '#ffd76a';
+        for (let k = 0; k < CHAMP_SHOT_N; k++) {
+          const a = base + (k - (CHAMP_SHOT_N - 1) / 2) * CHAMP_SHOT_SPREAD;
+          pushEnemyShot({ x: en.x, y: en.y, vx: Math.cos(a) * CHAMP_SHOT_SPEED, vy: Math.sin(a) * CHAMP_SHOT_SPEED, r: 7, dmg: en.dmg * CHAMP_SHOT_DMG * hitMult, life: 3.2, color: col });
+        }
+        spawnBurst(en.x, en.y, col, 6);
+      }
+    }
     let spd = (en.isBoss && en.spd != null ? en.spd : en.speed) * speedMult * buff;
     if (en.cst) { const o = flinkStep(en, dt, tg, d); if (o) { moveX = o.mx; moveY = o.my; spd = o.spd; } }
     en.x += moveX * spd * dt;
@@ -2106,7 +2254,7 @@ function shieldRechargeTime(level) { return Math.max(5, 16 - level*2.2); }
 // Gibt true zurück, wenn der Treffer Lebenspunkte gekostet hat (false: vom Schutzschild geblockt)
 function damagePlayer(amount) {
   const p = player;
-  if (playerDown > 0 || (Net.on && inHafen(p.x, p.y))) return false;   // online: ohnmächtig oder im Hafen nimmt man keinen Schaden
+  if (playerDown > 0 || (Net.on && inHafen(p.x, p.y)) || netRiding()) return false;   // online: ohnmächtig, im Hafen oder beim Strömungsritt nimmt man keinen Schaden
   if (p.shieldReady) {
     p.shieldReady = false;
     p.shieldTimer = shieldRechargeTime(p.passives.schild || 1);
@@ -2398,12 +2546,17 @@ function presentLevelUpChoices() {
 // Knöpfe im laufenden Spiel (Level-Leiste, Kurznachrichten, Zweite Chance): reagieren schon beim Berühren, auch mit einem
 // zweiten Finger, während der erste den Blobi steuert (sonst schluckt das Handy den Klick). Danach kurz keine Klicks (kein Doppelt).
 let tapGuard = 0;
+// Manche Handys schicken für einen zweiten Finger kein pointerdown (nur touchstart): beide werden gehört, aber nur einmal ausgelöst.
 function tapButton(el, fn) {
+  let last = 0;
+  const fire = function(e){ const t = performance.now(); if (t - last < 350) return; last = t; tapGuard = t; fn(e); };
+  el.addEventListener('touchstart', function(e){ if (el.disabled) return; e.preventDefault(); fire(e); }, { passive: false });
   el.addEventListener('pointerdown', function(e){
     if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
-    e.preventDefault(); tapGuard = performance.now(); fn(e);
+    if (el.disabled) return;
+    e.preventDefault(); fire(e);
   });
-  el.addEventListener('click', function(e){ if (performance.now() - tapGuard < 700) return; fn(e); });
+  el.addEventListener('click', function(e){ if (performance.now() - tapGuard < 700) return; fire(e); });
 }
 // Level-Leiste: Karten unten am Rand, Tasten 1–4 oder antippen; nach 15 s wird die erste Karte genommen
 function renderLevelBar(cl) {
@@ -2476,14 +2629,17 @@ function update(dt) {
     }
   }
   const down = playerDown > 0;                     // online ohnmächtig: kein Spawnen, Bewegen, Angreifen, Einsammeln
-  if (!down) updateSpawner(dt);
-  if (down) { updateDowned(dt); if (gameState !== 'playing') return; } else updatePlayer(dt);
-  if (!down) updateWeapons(dt);
+  if (down && Net.ride && Net.ride.phase === 'windup') Net.ride = null;
+  const ride = !down && !!Net.ride;               // Schwarmruf: Anlauf oder Strömungsritt (kein Spawnen, keine Waffen, nichts einsammeln)
+  if (!down && !ride) updateSpawner(dt);
+  if (down) { updateDowned(dt); if (gameState !== 'playing') return; } else if (!(ride && netRideUpdate(dt))) updatePlayer(dt);
+  const riding = netRiding();
+  if (!down && !riding) updateWeapons(dt);
   updateEnemies(dt);
   updateProjectiles(dt);
   updateHazards(dt);
   if (gameState !== 'playing') return;
-  if (!down) updatePickups(dt);
+  if (!down && !riding) updatePickups(dt);
   mergeFarPickups(dt);
   updateParticles(dt);
 
@@ -2931,7 +3087,7 @@ function edgeArrow(wx, wy, rgb, scale, label) {    // Bildschirm-Pixel (screenSp
   const sp = worldToScreen(wx, wy), sx = sp.x, sy = sp.y;
   if (sx > 0 && sx < SW && sy > 0 && sy < SH) return false;
   const a = Math.atan2(sy - SH / 2, sx - SW / 2);
-  const ax = Math.max(30, Math.min(SW - 30, sx)), ay = Math.max(120, Math.min(SH - 30, sy));
+  const ax = Math.max(30, Math.min(SW - 30, sx)), ay = Math.max(Net.on ? 168 : 120, Math.min(SH - 30, sy));   // online: unter der Raum-Zeile
   ctx.save(); ctx.translate(ax, ay);
   ctx.save(); ctx.rotate(a); ctx.scale(scale, scale);
   ctx.fillStyle = 'rgba(' + rgb + ',' + (0.75 + Math.sin(runTime * 8) * 0.2) + ')';
@@ -3204,7 +3360,7 @@ function championName(type, traits) {
 function makeChampion(e, traits) {
   e.champ = traits.slice();
   e.hp *= CHAMPION_HP * championScale(); e.maxHp = e.hp;          // passt sich dem Level an (wie ein Boss), online auch der Spielerzahl
-  e.dmg *= CHAMPION_DMG; e.r *= CHAMPION_SIZE; e.xp *= CHAMPION_XP;
+  e.dmg *= CHAMPION_DMG; e.r *= CHAMPION_SIZE; e.xp *= CHAMPION_XP; e.speed *= CHAMPION_SPEED; e.cShot = CHAMP_SHOT_EVERY * (0.5 + Math.random() * 0.5);
   if (hasTrait(e, 'flink')) { e.speed *= FLINK_SPEED; e.cst = 'walk'; e.cT = FLINK_EVERY * (0.5 + Math.random() * 0.5); e.dAng = 0; }
   if (hasTrait(e, 'gepanzert')) e.shell = true;
   e.name = championName(e.type, e.champ);
@@ -3287,7 +3443,7 @@ function endRun() {
   if (currentLevelUp && currentLevelUp.bar) { currentLevelUp = null; levelUpProcessing = false; }
   chanceLeft = 0; chanceDown = false; hideChance();
   playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
-  if (Net.on) { toggleQuickWheel(false); Net.lastSend = 0; }
+  if (Net.on) { toggleQuickWheel(false); Net.lastSend = 0; Net.urgent = true; }   // alle erfahren es sofort (auch weit weg)
   gameState = 'gameover';
   Sfx.gameover();
   bankRunProgress();
@@ -3361,7 +3517,22 @@ function claimAchievement(id) {
 }
 
 // Sicherheitsabfrage für Knöpfe, die den Lauf beenden (erst ab einer Minute Laufzeit)
-const CONFIRM_AFTER = 60;
+const CONFIRM_AFTER = 3;          // Neustart fragt immer nach (ausser in den ersten 3 Sekunden); Zum Menü speichert und fragt nie
+// Zum Menü: der Lauf wird gespeichert (online im Online-Platz, mit dem Raum) und geht im Menü mit "Weiterspielen" weiter.
+// Online verlässt du dabei den Raum: deine Bosse und Champions übernimmt ein Freund in der Nähe.
+function quitToMenu() {
+  if (runActive()) {
+    if (Net.ride) { if (netRiding()) { player.x = Net.ride.sx; player.y = Net.ride.sy; } Net.ride = null; }
+    if (playerDown > 0 || chanceOpen()) { netLeave(); bankRunProgress(); }                 // besiegt: der Lauf ist vorbei (wie bisher)
+    else {
+      if (Net.on) netLeave();                                    // erst übergeben (Bosse), dann speichern: nichts kommt doppelt zurück
+      saveRunSnapshot();
+      if (runSlot === 'online') showToast('💾 Dein Online-Lauf ist gespeichert – „Online weiterspielen“ bringt dich zurück in den Raum (30 Minuten lang).');
+    }
+  } else netLeave();
+  checkAchievements();
+  gameState = 'menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu');
+}
 function confirmThen(btn, fn) {
   if (runTime < CONFIRM_AFTER || btn.dataset.armed === '1') { resetConfirms(); fn(); return; }
   resetConfirms();
@@ -3414,7 +3585,8 @@ function perfTick(dt) {
   perfAcc += dt; perfN++;
   if (perfAcc < 1) return;
   const fps = perfN / perfAcc; perfAcc = 0; perfN = 0;
-  if (fps < 45) { perfSlow++; perfFast = 0; } else if (fps > 57) { perfFast++; perfSlow = 0; } else { perfSlow = 0; perfFast = 0; }
+  const tgt = paceTarget();                         // 60 Hz: unter 45 langsam, über 57 flüssig (halber Takt auf 90 Hz: 45 Bilder sind das Ziel)
+  if (fps < tgt * 0.75) { perfSlow++; perfFast = 0; } else if (fps > tgt * 0.95) { perfFast++; perfSlow = 0; } else { perfSlow = 0; perfFast = 0; }
   const base = Math.min(window.devicePixelRatio || 1, 2);
   if (perfSlow >= 2 && resIdx < RES_STEPS.length - 1 && base * RES_STEPS[resIdx + 1] >= RES_MIN_DPR) { resIdx++; perfSlow = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
   else if (perfFast >= 12 && resIdx > 0) { resIdx--; perfFast = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
@@ -3427,9 +3599,34 @@ function stepGame(dt) {
   else if (gameState === 'resume') { resumeCount -= dt; if (resumeCount <= 0) { resumeCount = 0; gameState = 'playing'; } }
   if (chanceLeft > 0) updateChance(dt);
 }
+// Bildtakt: schnelle Bildschirme (90 / 120 Hz, z. B. Realme 6) zeigen ein Bild alle 11 / 8 ms. Schafft das Gerät das nicht,
+// fallen unregelmässig Bilder aus – das ruckelt mehr als ein gleichmässig halber Takt. Dann wird nur jedes zweite Bild gezeichnet
+// (45 / 60 Bilder pro Sekunde, gleichmässig). Läuft es lange ruhig, wird es wieder versucht (mit wachsender Wartezeit).
+const PACE = { vs: 16.7, winMin: 99, winT: 0, frames: 0, misses: 0, slow: 0, calm: 0, half: false, flip: false, prev: 0, backoff: 15 };
+function paceFrame(timestamp) {
+  const P = PACE, d = P.prev ? timestamp - P.prev : 0;
+  P.prev = timestamp;
+  if (d > 3 && d < 60) P.winMin = Math.min(P.winMin, d);
+  if (!P.winT) P.winT = timestamp;
+  if (P.half) { P.flip = !P.flip; if (P.flip) return false; }
+  if (d > 0 && d < 250) { P.frames++; if (d > P.vs * (P.half ? 2.6 : 1.6)) P.misses++; }
+  if (timestamp - P.winT >= 1000) {
+    if (P.winMin < 99) P.vs = P.vs * 0.5 + P.winMin * 0.5;
+    const miss = P.frames ? P.misses / P.frames : 0, fast = P.vs < 13;
+    if (gameState === 'playing' && !document.hidden) {
+      if (!P.half && fast && miss > 0.15) { if (++P.slow >= 2) { P.half = true; P.slow = 0; P.calm = 0; } } else P.slow = 0;
+      if (P.half && miss < 0.03) { if (++P.calm >= P.backoff) { P.half = false; P.calm = 0; P.backoff = Math.min(120, P.backoff * 2); } } else if (P.half) P.calm = 0;
+      if (P.half && !fast) P.half = false;
+    }
+    P.winT = timestamp; P.winMin = 99; P.frames = 0; P.misses = 0;
+  }
+  return true;
+}
+function paceTarget() { return Math.min(60, 1000 / PACE.vs / (PACE.half ? 2 : 1)); }    // Bilder pro Sekunde, die man erwarten darf
 function gameLoop(timestamp) {
   rafId = requestAnimationFrame(gameLoop);   // zuerst neu einplanen: ein Fehler in einem Frame darf das Spiel nie anhalten
   try {
+    if (!paceFrame(timestamp)) return;      // halber Takt: dieses Bild auslassen
     if (!lastTime) lastTime = timestamp;
     let dt = (timestamp - lastTime) / 1000;
     const rawDt = Math.min(dt, 0.5);
@@ -5876,14 +6073,16 @@ function render() {
         drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: 0, glow: 6 });
         ctx.globalAlpha = 1;
       } else {
-        if (Net.on) drawNetRing(sx, sy, player.r, Net.col);
+        if (Net.ride && Net.ride.trail) drawRideTrail(Net.ride.trail, '190,250,255');
+        if (Net.on) drawNetRing(sx, sy, player.r, netMyColor());
         if (player.shieldReady) drawShieldRing(sx, sy, player.r);
         const alphaBlink = invulnTimer > 0 ? (Math.sin(runTime*30) > 0 ? 1 : 0.4) : 1;
         ctx.globalAlpha = alphaBlink;
         drawPlayerSprite(sx, sy, player.r, { wobble: player.bob, angle: player.angle, flashAmount: player.hitFlash, glow: 16 });
         ctx.globalAlpha = 1;
       }
-      if (Net.on && Net.myBubble) drawSpeech(sx, sy - player.r * 1.55 - 6, Net.myBubble);
+      if (Net.on && netAmLeader() && playerDown <= 0) drawCrown(sx, sy - player.r * 1.55 - 6 * txtScale());
+      if (Net.on && Net.myBubble) drawSpeech(sx, sy - player.r * 1.55 - (netAmLeader() ? 26 : 6) * txtScale(), Net.myBubble);
     }
     for (let i=0;i<particles.length;i++){
       const pt = particles[i];
@@ -5928,6 +6127,12 @@ function render() {
         ctx.globalAlpha = 1;
         continue;
       }
+      if (pt.isStreak) {                             // Schliere beim Strömungsritt
+        ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife) * 0.55; ctx.strokeStyle = pt.color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + pt.sx * pt.len, sy + pt.sy * pt.len); ctx.stroke();
+        ctx.globalAlpha = 1;
+        continue;
+      }
       if (pt.isPearl) {                              // Perle aus der Fontäne
         const sz = pt.r * 3.2;
         ctx.globalAlpha = Math.max(0, Math.min(1, pt.life / 0.3));
@@ -5965,7 +6170,7 @@ function cacheUI() {
    'hud-boss','hud-boss-fill','hud-boss-name','hud-ring',
    'character-grid','stage-grid','shop-list','shop-pearls-total','achievement-list',
    'levelup-choices','gameover-stats','gameover-achievements','gameover-title',
-   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room','btn-chat'
+   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room','btn-chat','btn-call','hud-sg','hud-lf'
   ].forEach(function(id){ UI[id] = document.getElementById(id); });
 }
 
@@ -5992,7 +6197,8 @@ function hudSet(id, prop, val) {
   const k = id + prop;
   if (hudCache[k] === val) return;
   hudCache[k] = val;
-  if (prop === 'text') UI[id].textContent = val; else if (prop === 'disp') UI[id].style.display = val; else if (prop === 'cls') UI[id].className = val; else UI[id].style.width = val;
+  if (!UI[id]) return;
+  if (prop === 'text') UI[id].textContent = val; else if (prop === 'html') UI[id].innerHTML = val; else if (prop === 'disp') UI[id].style.display = val; else if (prop === 'cls') UI[id].className = val; else UI[id].style.width = val;
 }
 function updateHud() {
   const p = player;
@@ -6014,10 +6220,11 @@ function updateHud() {
   if (B) {
     if (!hudCache.boss) { UI['hud-boss'].classList.add('active'); hudCache.boss = 1; }
     hudSet('hud-boss-fill', 'w', Math.max(0, (B.hp / B.maxHp) * 100).toFixed(1) + '%');
-    hudSet('hud-boss-name', 'text', (B.champ ? '\uD83D\uDC51 ' : '') + B.name + (B.encounterNumber > 1 ? ' \u00D7' + B.encounterNumber : '') + ' \u00B7 Phase ' + B.phase + (B.remote ? ' \u00B7 ' + B.peer.name : ''));
+    hudSet('hud-boss-name', 'text', (B.champ ? '\uD83D\uDC51 ' : '') + B.name + (B.encounterNumber > 1 ? ' \u00D7' + B.encounterNumber : '') + ' \u00B7 Phase ' + B.phase);
   } else if (hudCache.boss) { UI['hud-boss'].classList.remove('active'); hudCache.boss = 0; }
   if (Net.on) { hudSet('hud-room', 'disp', 'inline-block'); hudSet('hud-room', 'text', netRoomLabel()); hudSet('btn-chat', 'disp', 'inline-block'); }
   else { hudSet('hud-room', 'disp', 'none'); hudSet('btn-chat', 'disp', 'none'); }
+  netHudLeitfisch();
 }
 
 function updateMenuPearlsLabel() {
@@ -6333,18 +6540,13 @@ function initUI() {
   document.getElementById('btn-achievements-back').addEventListener('click', function(){ Sfx.click(); updateMenuPearlsLabel(); showScreen('screen-menu'); });
   document.getElementById('btn-instructions-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
 
-  document.getElementById('btn-pause').addEventListener('click', function(){ Sfx.click(); togglePause(); });
-  document.getElementById('btn-resume').addEventListener('click', function(){ Sfx.click(); resetConfirms(); togglePause(); });
+  tapButton(document.getElementById('btn-pause'), function(){ Sfx.click(); togglePause(); });        // auch mit einem zweiten Finger
+  tapButton(document.getElementById('btn-resume'), function(){ Sfx.click(); resetConfirms(); togglePause(); });
   // Neustart und Zum Menü beenden den Lauf: ab der ersten Minute erst nach einem zweiten Klick ("Wirklich?")
   document.getElementById('btn-restart-pause').addEventListener('click', function(){ Sfx.click(); confirmThen(this, function(){ startRun(selectedCharacterId, selectedStageId); }); });
   document.getElementById('btn-quit-pause').addEventListener('click', function(){
-    Sfx.click();
-    confirmThen(this, function(){
-      netLeave();
-      bankRunProgress();
-      checkAchievements();
-      gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu');
-    });
+    Sfx.click(); resetConfirms();
+    quitToMenu();
   });
   tapButton(document.getElementById('btn-chance-use'), function(){ useChance(); });
   tapButton(document.getElementById('btn-chance-giveup'), function(){ Sfx.click(); declineChance(false); });
@@ -6535,6 +6737,9 @@ function initOnlineUI() {
   // im Lauf: Spielerliste (Tab oder Antippen der Raum-Anzeige) und Kurznachrichten (Q oder 💬)
   ['hud-room', 'btn-chat'].forEach(function(id){ const el = document.getElementById(id); if (el) tapButton(el, function(){ if (id === 'hud-room') togglePlayerList(); else toggleQuickWheel(); }); });
   on('plist-close', 'click', function(){ togglePlayerList(false); });
+  // Schwarmruf (nur der Leitfisch), Folgen / Nein, Team wechseln
+  [['btn-call', function(){ netRequestCall(); }], ['btn-call-follow', function(){ netFollow(); }], ['btn-call-no', function(){ netDeclineCall(); }],
+   ['plist-switch', function(){ netSwitchTeam(); }]].forEach(function(b){ const el = document.getElementById(b[0]); if (el) tapButton(el, b[1]); });
   on('qwheel', 'click', function(e){ if (e.target === e.currentTarget) toggleQuickWheel(false); });
   buildQuickWheel();
   // Aktivität: Tasten, Klicks, Berühren – und auch ein Finger, der den Steuerknüppel hält und bewegt (touchmove / pointermove).
@@ -6552,7 +6757,7 @@ function initOnlineUI() {
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 3;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3)
+const NET_PROTOCOL = 4;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams)
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
@@ -6565,6 +6770,7 @@ const NET_CST = ['walk', 'flash', 'dash'];
 const NET_TYPES = Object.keys(ENEMY_TYPES).concat(Object.keys(BOSS_TYPES));
 const NET_TYPE_IDX = {}; NET_TYPES.forEach(function(k, i){ NET_TYPE_IDX[k] = i; });
 const NF_PAUSED = 1, NF_DEAD = 2, NF_DOWN = 4, NF_SHIELD = 8, NF_HAFEN = 16;    // Merkmale eines Spielers in seinen Nachrichten
+const NF_RIDE = 32, NF_IDLE = 64;   // reitet gerade (Strömungsritt); seit einer Minute nichts gedrückt (zählt nicht als aktiv für die Krone)
 const NET_NAME_RE = /^[A-Za-z0-9ÄÖÜäöüßÀÂÇÈÉÊËÎÏÔÙÛàâçèéêëîïôùû _-]{3,13}$/;
 const NET_CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/;
 const NET_GROUP_HP = 0.5;           // online: neue Gegner (auch Champions) +50 % HP pro weiterem Spieler in der Nähe
@@ -6584,6 +6790,23 @@ const NET_MAX_DMG = 1000, NET_MAX_HIT = 5000, NET_MAX_XP = 1000;   // Obergrenze
 const NET_HIT_FRAC = 0.6, NET_ZONE_WARN = 0.6, NET_ZONE_SEEN = 0.35, NET_WAVE_R0 = 100;
 // PvP: Waffen treffen auch die anderen Spieler, mit 30 % des Schadens, höchstens 25 % deiner max. HP auf einmal
 const PVP_DMG = 0.3, PVP_HIT_FRAC = 0.25, PVP_KO_WINDOW = 4000;
+// PvP-Räume: viel weniger Gegner (es geht darum, das andere Team zu besiegen) – halb so viele pro Welle, Wellen 2,2-mal seltener,
+// keine Piranha-Ringe. Dafür geben Gegner 2,5-mal so viel XP, und wer einen Spieler besiegt, bekommt 6 XP pro Level des Besiegten.
+const PVP_BATCH = 0.5, PVP_GAP = 2.2, PVP_ENEMY_XP = 2.5, PVP_KO_XP = 6;
+// Teams (PvP ab Version 4): Blau gegen Rot. Der Server teilt Neue ins kleinere Team ein; Waffen treffen nur das andere Team.
+const TEAM_NAMES = ['Blau', 'Rot'], TEAM_ICONS = ['🔵', '🔴'], TEAM_COLORS = ['#5aaeff', '#ff5c6c'], TEAM_RGB = ['90,174,255', '255,92,108'];
+// Leitfisch & Schwarmruf (ab Version 4): der beste aktive Spieler eines Raums (PvP: eines Teams) trägt die Krone und kann alle
+// 3 Minuten seinen Schwarm rufen. Bestenliste, Krone und Ruf-Uhr führt der Server (room-core.js, LF); hier Punkte, Ritt, Anzeige.
+const LF_POINTS = { enemy: 1, elite: 3, champ: 20, boss: 50, revive: 15, ko: 30, koLeader: 60 };   // Schwarmpunkte (Champion-Boss: 50 + 20)
+const LF_WINDOW = 10, LF_WINDUP = 0.6;                 // s zum Antworten; Anlauf nach "Folgen" (Nein bricht ihn ab)
+const LF_RIDE_SPEED = 3000, LF_RIDE_MIN = 1.2, LF_RIDE_MAX = 3;   // Strömungsritt: Entfernung ÷ 3.000 pro s, zwischen 1,2 und 3 s
+const LF_SKIP = 1200;                                  // schon so nah am Leitfisch: kein Ritt nötig, der Bonus kommt trotzdem
+const LF_RING = 160;                                   // Landeplätze: ein Ring um den Leitfisch
+const LF_WAVE_R = 220, LF_STUN = 1, LF_PROTECT = 1.5;  // Ankunftswelle (stösst weg, betäubt 1 s, macht keinen Schaden); Schutz danach
+const LF_FAR = 2400;                                   // eigene Gegner, die weiter zurückbleiben, kommen auf den Spawn-Ring um dich
+const LF_BONUS = 0.15, LF_BONUS_TIME = 30, LF_BONUS_R = 900;   // Schwarmgeist: +15 % Schaden für 30 s, in der Nähe des Leitfischs
+const LF_RIDE_FLAG_MAX = 4000;                         // ms: das Ritt-Merkmal eines Mitspielers zählt höchstens 4 s, nur nach einem echten Ruf
+const LF_IDLE = 60;                                    // s ohne Taste oder Berührung: für die Krone nicht mehr "aktiv"
 // Beute für alle: Kugeln, Perlen, Herzen und Truhen gehören dem Spiel, dessen Gegner sie fallen liess; wer sie berührt,
 // beansprucht sie, der Besitzer entscheidet (wer zuerst kommt). Unbestätigte Ansprüche verfallen nach 2,5 s.
 const PK_TYPES = ['xp', 'pearl', 'heal', 'chest'], PK_CLAIM_TTL = 2500, PK_ADOPT_ASLEEP = 15000;
@@ -6599,7 +6822,11 @@ const Net = {
   wantOpen: false, retries: 0, startedRun: false, onStatus: null, pingTimer: 0, stamp: 0, quickArea: 'riff', quickTries: 0, resume: null,
   anchor: 0, rt: null, multi: false, wasAnchor: false, seq: 0, doneB: 0, doneC: 0, wbSeq: 0, wbEnc: 0, seenWorld: new Set(), urgent: false,
   qOut: -1, qLast: -1e9, myBubble: null, lastInput: 0, afk: 300,
-  mode: 'coop', dropOut: [], goneOut: [], updOut: [], claimsOut: [], claimsIn: [], pvpOut: new Map(), pvpIn: [], lastPvpBy: 0, lastPvpAt: 0
+  mode: 'coop', dropOut: [], goneOut: [], updOut: [], claimsOut: [], claimsIn: [], pvpOut: new Map(), pvpIn: [], lastPvpBy: 0, lastPvpAt: 0,
+  refuseOut: [],
+  // Leitfisch & Teams (ab Version 4)
+  v4: false, team: -1, pts: 0, ptsRoom: '', lb: null, calls: new Map(), call: null, ride: null, callReq: false, foOut: 0, swOut: false,
+  sgUntil: 0, sgLeader: 0, sgMult: 1, sgNear: false, landAt: 0, idle: LF_IDLE, crownHint: false, growAt: 0
 };
 let pvpTargets = [];   // PvP: Mitspieler als Ziele für deine Waffen (sonst leer)
 let remoteEnemyList = [], remoteFrozen = [];
@@ -6628,7 +6855,7 @@ function onlineName() {
 function netStatus(text, bad) { if (Net.onStatus) Net.onStatus(text, !!bad); }
 function netRoomName() { return Net.kind === 'global' ? (Net.title || Net.code) : 'Raum ' + Net.code + (Net.mode === 'pvp' ? ' (PvP)' : ''); }
 function netModeIcon() { return Net.mode === 'pvp' ? '⚔️' : '🤝'; }
-function netRoomLabel() { return netModeIcon() + ' ' + (Net.kind === 'global' ? (Net.title || Net.code) : Net.code) + ' · ' + (Net.peers.size + 1) + '/' + Net.cap; }
+function netRoomLabel() { return netModeIcon() + ' ' + (Net.kind === 'global' ? (Net.title || Net.code) : Net.code) + ' · ' + (Net.peers.size + 1) + '/' + Net.cap + (netTeams() ? ' · ' + TEAM_ICONS[Net.team] + ' ' + TEAM_NAMES[Net.team] : ''); }
 // COOP oder PvP (Auswahl im Online-Menü, gespeichert)
 function onlineMode() { return save.onlineMode === 'pvp' ? 'pvp' : 'coop'; }
 // Die Gratis-Grenze von Cloudflare gilt pro Tag bis 00:00 UTC (in der Schweiz 1 oder 2 Uhr nachts)
@@ -6675,8 +6902,19 @@ function netJoin(code, created, quick, resume) {
   netStatus(quick ? 'Verbinde …' : 'Verbinde mit Raum ' + code + ' …');
   netOpen();
 }
+// privater Schlüssel dieses Browsers (nicht der Name): der Server erkennt dich nach dem Neuladen wieder (Schwarmpunkte, Team)
+function netKey() {
+  if (!save.netKey || !/^[A-Za-z0-9]{16,40}$/.test(save.netKey)) {
+    const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let k = '';
+    try { const a = new Uint32Array(20); crypto.getRandomValues(a); for (let i = 0; i < 20; i++) k += abc[a[i] % abc.length]; }
+    catch (e) { k = ''; for (let i = 0; i < 20; i++) k += abc[Math.floor(Math.random() * abc.length)]; }
+    save.netKey = k; persistSave();
+  }
+  return save.netKey;
+}
 function netOpen() {
-  const url = netWsBase() + '/join/' + encodeURIComponent(Net.code) + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId);
+  const url = netWsBase() + '/join/' + encodeURIComponent(Net.code) + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId) + '&k=' + netKey();
   let ws;
   try { ws = new WebSocket(url); } catch (e) { netStatus('Der Online-Server ist nicht erreichbar.', true); return; }
   Net.ws = ws;
@@ -6696,6 +6934,8 @@ function netDisconnect() {
 function netGoSolo() {
   if (Net.multi) netRoomSwitch(false, true);
   Net.on = false; Net.live = false; Net.multi = false; Net.wasAnchor = false; Net.rt = null; Net.anchor = 0;
+  Net.lb = null; Net.call = null; Net.calls.clear(); Net.callReq = false; Net.foOut = 0; Net.swOut = false; Net.sgUntil = 0; Net.sgMult = 1; Net.sgNear = false;
+  netCallBarHide();
   netClearRemote();
   toggleQuickWheel(false); togglePlayerList(false);
 }
@@ -6722,6 +6962,7 @@ function netClosed(code) {
               code === 4001 ? (Net.kind === 'global' || Net.quick ? 'Der Raum ist gerade voll.' : 'Raum ' + Net.code + ' ist voll (' + Net.cap + ' Spieler).') :
               code === 4002 ? (Net.verInfo && Net.verInfo.room && Net.verInfo.room < NET_PROTOCOL ? 'In diesem Raum spielen noch Freunde mit einer älteren Version – sie müssen die Seite neu laden.' : 'Bitte lade die Seite neu – das Spiel wurde aktualisiert.') :
               code === 4029 ? netLimitText() :
+              code === 4009 ? 'Du spielst in einem anderen Fenster in diesem Raum weiter.' :
               code === 4000 ? 'Der Raum hat die Verbindung abgelehnt.' : '';
   if (!Net.startedRun) {
     // Schnellspiel: ein voller (oder gerade geschlossener) Raum -> einen anderen suchen
@@ -6756,12 +6997,15 @@ function netReceive(data) {
   else if (m.t === 'join') netAddPeer(m.p, true);
   else if (m.t === 'leave') netRemovePeer(m.id, true);
   else if (m.t === 'anchor') Net.anchor = m.id | 0;
+  else if (m.t === 'lb') netOnBoard(m);
+  else if (m.t === 'call') netOnCall(m);
+  else if (m.t === 'team') netOnTeam(m);
   else if (m.t === 'err') { if (m.m === 'version') Net.verInfo = { room: m.room | 0, you: m.you | 0 }; netOnError(m.m); }
 }
 // Der Server lehnt ab (Code falsch, Raum voll, alte Version, Tagesgrenze): gleich melden, nicht erst auf das Schliessen warten
 function netOnError(why) {
   const ws = Net.ws;
-  netClosed(why === 'notfound' ? 4004 : why === 'full' ? 4001 : why === 'version' ? 4002 : why === 'limit' ? 4029 : 4000);
+  netClosed(why === 'notfound' ? 4004 : why === 'full' ? 4001 : why === 'version' ? 4002 : why === 'limit' ? 4029 : why === 'replaced' ? 4009 : 4000);
   if (ws) { try { ws.close(); } catch (e) {} }
 }
 function netOnWelcome(m) {
@@ -6771,6 +7015,9 @@ function netOnWelcome(m) {
   Net.area = m.area; Net.name = m.name; Net.col = m.col || 0; Net.cap = m.cap || 8; Net.anchor = m.anchor || m.id;
   Net.mode = m.mode === 'pvp' ? 'pvp' : 'coop';
   Net.rt = null; Net.multi = false; Net.wasAnchor = false; Net.doneB = 0; Net.doneC = 0;
+  Net.v4 = (m.v | 0) >= 4; Net.team = Net.v4 && Net.mode === 'pvp' && (m.tm === 0 || m.tm === 1) ? m.tm : -1; Net.lb = null;
+  // Schwarmpunkte zählen pro Raum; nach dem Neuladen (oder Wiederkommen) bringt der Server deine bisherigen mit
+  if (Net.ptsRoom !== m.code) { Net.pts = Math.max(0, +m.pts || 0); Net.ptsRoom = m.code; } else Net.pts = Math.max(Net.pts, +m.pts || 0);
   (m.players || []).forEach(function(p){ netAddPeer(p, false); });
   Net.retries = 0; Net.lastSend = 0; Net.lastInput = performance.now();
   if (m.renamed) { save.onlineName = m.name; persistSave(); }
@@ -6786,6 +7033,7 @@ function netOnWelcome(m) {
   else { bankOnlineSnapshot(); startRun(selectedCharacterId, m.area); }     // ein anderer gespeicherter Online-Lauf ist damit vorbei
   const others = (m.players || []).map(function(p){ return p.name; });
   const withWho = others.length ? ' · mit ' + others.slice(0, 4).join(', ') + (others.length > 4 ? ' und ' + (others.length - 4) + ' weiteren' : '') : '';
+  if (Net.team >= 0) setTimeout(function(){ if (Net.on && netTeams()) showToast(TEAM_ICONS[Net.team] + ' Du spielst im Team ' + TEAM_NAMES[Net.team] + ' – deine Waffen treffen nur das andere Team.'); }, 3400);
   showToast(m.renamed ? 'Dein Name war nicht erlaubt – du heisst jetzt ' + m.name + '.' :
     resume ? '🔄 Dein Lauf geht weiter: Level ' + runLevel + ' · ' + netRoomName() + withWho :
     Net.kind === 'global' ? netModeIcon() + ' ' + Net.title + (withWho || ' – noch allein. Andere können jederzeit dazukommen!') :
@@ -6796,7 +7044,8 @@ function netAddPeer(p, announce) {
   Net.peers.set(p.id, { id: p.id, name: String(p.name || '?'), ch: p.ch || 'standard', col: p.col || 0, x: 0, y: 0, r: 19, a: 0, hp: 1, mh: 1, lv: 1, fl: 0,
     last: 0, seen: false, snaps: [], off: null, speed: 0, mv: { x: 0, y: 0, mag: 0 }, bob: 0, enemies: new Map(), active: false, asleep: false,
     rg: null, rgT: 0, mn: null, mnD: null, wb: null, bubble: null, q0: -1e9, revT: 0, warnAt: -1e9, lastTs: 0, ivl: 0, delay: NET_DELAY,
-    pickups: new Map(), pkKnown: false, goneIds: null, tgt: null, deadSeen: false });
+    pickups: new Map(), pkKnown: false, goneIds: null, tgt: null, deadSeen: false,
+    tm: p.tm === 0 || p.tm === 1 ? p.tm : -1, rideAt: 0, landAt: 0, usedCall: 0, trail: null });
   Net.lastSend = 0;                                  // gleich melden: der Neue sieht mich sofort
   if (announce) { showToast('👋 ' + p.name + ' ist da!'); Sfx.ping(); }
 }
@@ -6824,7 +7073,7 @@ function netOnFar(m) {
   pe.last = now; pe.seen = true;
   pe.snaps = [{ t: now - pe.delay, x: m.x, y: m.y, a: pe.a, far: true }];
   pe.lastTs = 0;
-  pe.x = m.x; pe.y = m.y; pe.lv = m.lv; pe.hp = m.hp; pe.mh = m.mh; pe.fl = m.fl | 0; if (m.ch) pe.ch = m.ch;
+  pe.x = m.x; pe.y = m.y; pe.lv = m.lv; pe.hp = m.hp; pe.mh = m.mh; netPeerFlags(pe, m.fl | 0, now); if (m.ch) pe.ch = m.ch;
   pe.rg = null; pe.mn = null; pe.mnD = null;
   netDropEnemies(pe, false);
   netPeerExtras(pe, m, now);
@@ -6841,7 +7090,7 @@ function netOnTick(m) {
   pe.lastTs = m.ts;
   if (gap > 0 && gap < 600) { pe.ivl = pe.ivl ? pe.ivl + (gap - pe.ivl) * 0.15 : gap; pe.delay = Math.min(300, Math.max(NET_DELAY, pe.ivl + 30)); }
   pe.last = now; pe.seen = true;
-  pe.fl = m.fl | 0; pe.hp = m.hp; pe.mh = m.mh; pe.lv = m.lv; if (m.ch) pe.ch = m.ch;
+  netPeerFlags(pe, m.fl | 0, now); pe.hp = m.hp; pe.mh = m.mh; pe.lv = m.lv; if (m.ch) pe.ch = m.ch;
   if (pe.snaps.length && (t <= pe.snaps[pe.snaps.length - 1].t || pe.snaps[pe.snaps.length - 1].far)) pe.snaps.length = 0;   // nach Fern-Meldungen: springen statt gleiten
   pe.snaps.push({ t: t, x: m.x, y: m.y, a: m.a || 0 });
   if (pe.snaps.length > 8) pe.snaps.shift();
@@ -6857,6 +7106,7 @@ function netOnTick(m) {
     else if (f[0] === 'u') netOnPileUpdate(pe, f[2]);
     else if (f[0] === 'ho') { if (f[2] === Net.id) netAdoptEnemies(pe, f[3]); }
     else if (f[0] === 'x') netOnKnockout(pe, f);
+    else if (f[0] === 'no') { if (f[2] === Net.id) netClaimRefused(pe, f[3]); }
     else Net.fxIn.push({ pe: pe, f: f, due: t - (f[1] || 0) + pe.delay });
   }
   if (m.h) for (let i = 0; i < m.h.length; i++) { const h = m.h[i]; if (Array.isArray(h) && h[0] === Net.id) Net.hitsIn.push({ src: m.f, id: h[1], dmg: netClamp(h[2], NET_MAX_HIT), fl: h[3] | 0, at: now }); }
@@ -6977,7 +7227,9 @@ function netUpdatePeers(now, dt) {
       if (pe.active) en.wobble += dt * 8;
     });
     // Retten: ich stehe neben einem ohnmächtigen Freund (der Ring zeigt den Fortschritt; entscheiden tut sein Spiel)
-    if ((pe.fl & NF_DOWN) && meOk && !pe.asleep && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R) pe.revT = Math.min(REVIVE_TIME, pe.revT + dt); else pe.revT = 0;
+    if ((pe.fl & NF_DOWN) && meOk && netMate(pe) && !pe.asleep && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R) pe.revT = Math.min(REVIVE_TIME, pe.revT + dt); else pe.revT = 0;
+    if (pe.fl & NF_RIDE) { if (!pe.trail) pe.trail = []; pe.trail.push({ x: pe.x, y: pe.y }); if (pe.trail.length > 18) pe.trail.shift(); }
+    else if (pe.trail) { pe.trail.shift(); if (!pe.trail.length) pe.trail = null; }
     if (pe.bubble) { pe.bubble.t -= dt; if (pe.bubble.t <= 0) pe.bubble = null; }
     if (pe.mn) {                                 // Schwarm-Freunde des Mitspielers: weich hinter ihm her
       const n = pe.mn.length >> 1;
@@ -7016,7 +7268,7 @@ function netRemoteUpdate(dt) {
       if (damagePlayer(netCapHit(en.dmg)) && hasTrait(en, 'vampir')) vampirHeal(en);
       en.contactTimer = 0.55;
     }
-    if (en.isBoss && en.state === 'sog') sogPull(en, dt, distXY(en.x, en.y, p.x, p.y) || 1);
+    if (en.isBoss && en.state === 'sog' && !netRiding()) sogPull(en, dt, distXY(en.x, en.y, p.x, p.y) || 1);
   }
 }
 // Treffer von Mitspielern an deinen Gegnern (auch während deiner Pause: deine Gegner stehen dann still, lassen sich aber besiegen)
@@ -7067,6 +7319,8 @@ function netApplyFx(pe, f, late) {
     particles.push(makeInkCloudParticle(f[2], f[3], f[4]));
   } else if (k === 'b') {     // Elektroschlag eines Mitspielers (nur Effekt)
     particles.push({ x: f[2], y: f[3], tx: f[4], ty: f[5], isBolt: true, life: 0.15, maxLife: 0.15, color: '#5ef2c0' });
+  } else if (k === 'lw') {    // Ankunftswelle eines Mitspielers (Schwarmruf): stösst auch deine Gegner dort weg
+    arrivalWave(+f[2] || 0, +f[3] || 0);
   } else if (k === 'p') {     // Schuss eines Mitspielers (nur Effekt; seine Treffer meldet er selbst)
     if (f[7] - late > 0) Net.shots.push({ x: f[2] + f[4] * late, y: f[3] + f[5] * late, vx: f[4], vy: f[5], r: f[6], life: f[7] - late, color: f[8] || '#bdeeff', pierce: f[9] | 0 });
   }
@@ -7087,7 +7341,7 @@ function netApplyKill(pe, f) {
 // Wiederbelebt: ['r', Alter, wer geholfen hat]
 function netApplyRevive(pe, f) {
   if (!player || gameState === 'menu') return;
-  if (f[2] === Net.id) { showToast('💚 Du hast ' + pe.name + ' gerettet!'); Sfx.revive(); }
+  if (f[2] === Net.id) { showToast('💚 Du hast ' + pe.name + ' gerettet!' + (Net.v4 ? ' +' + LF_POINTS.revive + ' Schwarmpunkte' : '')); Sfx.revive(); netAddPoints(LF_POINTS.revive); }
   else { const h = Net.peers.get(f[2]); showToast('💚 ' + pe.name + ' wurde' + (h ? ' von ' + h.name : '') + ' gerettet!'); }
   if (Math.abs(pe.x - camera.x) < W / 2 + 60 && Math.abs(pe.y - camera.y) < H / 2 + 60) spawnBurst(pe.x, pe.y, '#5ef2c0', 18);
 }
@@ -7122,7 +7376,6 @@ function netClaimPickup(pk) {
   if (pk.each) pendingEach.add(eachKey(pk));
   Net.claimsOut.push([pk.owner, pk.rid]);
   Net.toOut.add(pk.owner);
-  Sfx.pickup();
 }
 const eachTakers = new Map();      // Besitzer: wer hat von welcher Boss-/Champion-Beute schon sein Herz / seine Truhe
 // Besitzer: Ansprüche der Mitspieler in der Reihenfolge, in der sie ankommen (der Erste bekommt sie)
@@ -7133,12 +7386,12 @@ function netProcessClaims() {
     const c = list[k];
     let idx = -1;
     for (let i = 0; i < pickups.length; i++) if (pickups[i].id === c.id && !pickups[i].remote) { idx = i; break; }
-    if (idx < 0) continue;
+    if (idx < 0) { Net.refuseOut.push([c.from, c.id]); continue; }       // schon weg: sofort Bescheid geben
     const pk = pickups[idx];
-    if (pk.gone || pk.solo) continue;
+    if (pk.gone || pk.solo) { Net.refuseOut.push([c.from, c.id]); continue; }
     if (pk.each) {
       const key = pk.src + ':' + pk.type, set = eachTakers.get(key) || new Set();
-      if (set.has(c.from)) continue;
+      if (set.has(c.from)) { Net.refuseOut.push([c.from, c.id]); continue; }
       set.add(c.from); eachTakers.set(key, set);
     }
     pk.gone = true; pickups.splice(idx, 1);
@@ -7195,7 +7448,7 @@ function netOnGone(pe, list) {
     if (pk) netRemoveRemotePickup(pe, g[0]);
     if (g[1] === Net.id && player && g[1]) {
       const type = PK_TYPES[g[2]] || (pk && pk.type), fl = g[4] | 0;
-      if (type && runActive() && playerDown <= 0) {
+      if (type && runActive() && (playerDown <= 0 || type !== 'heal')) {
         collectPickup(type, netClamp(g[3], type === 'heal' ? 1 : 50000), !!(fl & 2), !!(fl & 4));
         if (fl & 1) takenEach.add(pe.id + ':' + (g[5] | 0) + ':' + type);
       }
@@ -7218,6 +7471,12 @@ function netAdoptPickups(pe) {
   pe.pickups.forEach(function(pk){
     const i = netFindPickupIdx(pk);
     if (i < 0) return;
+    if (pk.claimed && player && runActive()) {                      // beansprucht, aber der Besitzer ist weg: sie gehört dir
+      pickups.splice(i, 1); pk.gone = true;
+      if (pk.each) pendingEach.delete(eachKey(pk));
+      collectPickup(pk.type, pk.amount, pk.card, pk.boss);
+      return;
+    }
     if (pk.claimed || !player || distXY(pk.x, pk.y, player.x, player.y) > NET_LIVE) { pickups.splice(i, 1); pk.gone = true; return; }
     pk.remote = false; pk.solo = true; pk.id = ++pickSeq; pk.owner = 0;
     if (pk.each) pk.src = 'a' + pe.id + ':' + pk.src;                // eigene Schlüssel für "jeder nur eins"
@@ -7230,10 +7489,8 @@ function netClaimTimeouts(now) {
   for (let i = pickups.length - 1; i >= 0; i--) {
     const pk = pickups[i];
     if (!pk.remote || !pk.claimed || now - pk.claimed < PK_CLAIM_TTL) continue;
-    if (pk.each) { pendingEach.delete(eachKey(pk)); pk.claimed = 0; pk.refused = now; continue; }
-    pickups.splice(i, 1); pk.gone = true;
-    const pe = Net.peers.get(pk.owner);
-    if (pe) pe.pickups.delete(pk.rid);
+    if (pk.each) pendingEach.delete(eachKey(pk));
+    pk.claimed = 0; pk.refused = now;                              // keine Antwort: sie bleibt liegen (nichts verschwindet einfach)
   }
 }
 
@@ -7248,18 +7505,26 @@ function netPredictHit(en, dmg) {
 }
 
 // ---------- Übergabe: endet mein Lauf oder gehe ich, übernimmt der nächste Freund meine Bosse und Champions ----------
+// Wer erbt: der nächste Mitspieler, der noch spielt – lieber einer, der gerade aktiv ist, sonst auch einer im Pausenmenü
+// (früher nur aktive: war der Freund in der Pause, verschwand der Boss mit allen Gegnern). Gewöhnliche Gegner in seiner Nähe
+// (bis 40) kommen mit, damit die Welt nicht plötzlich leer ist.
 function netHandover() {
   if (!Net.on || !Net.peers.size || !player) return;
-  const list = enemies.filter(function(e){ return !e.dead && (e.isBoss || e.champ); });
-  if (!list.length) return;
-  let heir = null, hd = Infinity;
+  const big = enemies.filter(function(e){ return !e.dead && (e.isBoss || e.champ); });
+  let heir = null, hd = Infinity, hAct = false;
   Net.peers.forEach(function(pe){
-    if (!netPeerActive(pe) || (pe.fl & NF_DOWN)) return;
-    let d = Infinity;
-    for (let i = 0; i < list.length; i++) d = Math.min(d, distXY(pe.x, pe.y, list[i].x, list[i].y));
-    if (d < hd && d <= NET_LIVE * 1.5) { hd = d; heir = pe; }
+    if (!pe.seen || pe.asleep || (pe.fl & (NF_DEAD | NF_DOWN))) return;
+    const act = netPeerActive(pe);
+    let d = distXY(pe.x, pe.y, player.x, player.y);
+    for (let i = 0; i < big.length; i++) d = Math.min(d, distXY(pe.x, pe.y, big[i].x, big[i].y));
+    if (d > NET_LIVE * 1.5) return;
+    if ((act && !hAct) || (act === hAct && d < hd)) { hd = d; heir = pe; hAct = act; }
   });
   if (!heir) return;
+  const small = enemies.filter(function(e){ return !e.dead && !e.isBoss && !e.champ && distXY(e.x, e.y, heir.x, heir.y) <= NET_NEAR; })
+    .sort(function(a, b){ return distXY(a.x, a.y, heir.x, heir.y) - distXY(b.x, b.y, heir.x, heir.y); }).slice(0, 40);
+  const list = big.concat(small);
+  if (!list.length) return;
   Net.fxOut.push(['ho', performance.now(), heir.id, list.map(function(e){ return plainCopy(e, SNAP_SKIP_EN); })]);
   Net.toOut.add(heir.id); Net.urgent = true;
   list.forEach(function(e){ e.dead = true; if (e === bossEntity) bossEntity = null; });
@@ -7269,7 +7534,7 @@ function netHandover() {
 function netAdoptEnemies(pe, list) {
   if (!Array.isArray(list) || !player || !runActive() || playerDown > 0) return;
   const names = [];
-  for (let i = 0; i < list.length && i < 12; i++) {
+  for (let i = 0; i < list.length && i < 60; i++) {
     const r = list[i];
     if (!r || typeof r !== 'object' || !(ENEMY_TYPES[r.type] || BOSS_TYPES[r.type])) continue;
     const en = Object.assign({}, r, { id: ++enemySeq, hitByMe: false, helpers: null, dead: false, hitFlash: 0, orbitHitTimer: 0, contactTimer: 0, adopted: true, tg: null, lead: null });
@@ -7278,8 +7543,9 @@ function netAdoptEnemies(pe, list) {
     if (en.hp <= 0) continue;
     if (Array.isArray(r.champ)) { en.champ = r.champ.filter(function(t){ return !!CHAMPION_TRAITS[t]; }); if (!en.champ.length) en.champ = null; }
     if (en.isBoss && !bossEntity) bossEntity = en;
+    if (en.stun) en.stun = 0;
     enemies.push(en);
-    names.push(en.name || (BOSS_TYPES[en.type] || ENEMY_TYPES[en.type]).name);
+    if (en.isBoss || en.champ) names.push(en.name || (BOSS_TYPES[en.type] || ENEMY_TYPES[en.type]).name);
   }
   if (names.length) { showToast('👑 Du übernimmst von ' + pe.name + ': ' + names.slice(0, 3).join(', ')); Sfx.champion(); }
 }
@@ -7288,12 +7554,12 @@ function netAdoptEnemies(pe, list) {
 // Die Mitspieler werden als Ziele (pvpTargets) in die Gegner-Liste deiner Waffen gemischt; ein Treffer wird gesammelt und an den
 // Getroffenen geschickt (pv), dessen Spiel ihn mit PVP_DMG abzieht. Nie im Hafen, nie an Ohnmächtigen.
 function netBuildPvpTargets(dt) {
-  if (Net.mode !== 'pvp' || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y)) { pvpTargets = []; return; }
+  if (Net.mode !== 'pvp' || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y) || netRiding() || netJustLanded()) { pvpTargets = []; return; }
   const out = [];
   Net.peers.forEach(function(pe){
     const t = pe.tgt;
     if (t) { if (t.hitFlash > 0) t.hitFlash -= dt; if (t.orbitHitTimer > 0) t.orbitHitTimer -= dt; }
-    if (!pe.active || (pe.fl & (NF_DOWN | NF_HAFEN)) || distXY(pe.x, pe.y, player.x, player.y) > NET_LIVE) return;
+    if (!pe.active || (pe.fl & (NF_DOWN | NF_HAFEN)) || !netFoe(pe) || netPeerShielded(pe) || distXY(pe.x, pe.y, player.x, player.y) > NET_LIVE) return;
     const tg = pe.tgt || (pe.tgt = { isPlayer: true, remote: true, peer: pe, owner: pe.id, type: 'player', name: pe.name, r: 19, hitFlash: 0, orbitHitTimer: 0, slowTimer: 0, contactTimer: 0, dead: false });
     tg.x = pe.x; tg.y = pe.y; tg.hp = Math.max(1, pe.hp); tg.maxHp = Math.max(1, pe.mh); tg.dead = false;
     out.push(tg);
@@ -7312,7 +7578,9 @@ function netProcessPvp(now) {
   if (Net.mode !== 'pvp' || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y)) return;
   for (let i = 0; i < list.length; i++) {
     const h = list[i];
-    if (invulnTimer > 0 || now - h.at > 2000) continue;
+    if (invulnTimer > 0 || now - h.at > 2000 || netRiding()) continue;
+    const from = Net.peers.get(h.from);
+    if (from && !netFoe(from)) continue;                          // das eigene Team trifft nie
     Net.lastPvpBy = h.from; Net.lastPvpAt = now;
     damagePlayer(Math.min(h.dmg * PVP_DMG, player.maxHp * PVP_HIT_FRAC));
     if (gameState !== 'playing' || playerDown > 0) break;
@@ -7330,11 +7598,356 @@ function netOnKnockout(pe, f) {
   if (!player) return;
   if (f[2] === Net.id) {
     save.stats.pvpKnockouts = (save.stats.pvpKnockouts || 0) + 1; persistSave();
-    showToast('⚔️ Du hast ' + pe.name + ' besiegt!'); Sfx.champion();
+    const lead = netIsLeader(pe.id), pts = lead ? LF_POINTS.koLeader : LF_POINTS.ko;
+    netAddPoints(pts);
+    if (runActive() && playerDown <= 0) gainXp((pe.lv || 1) * PVP_KO_XP);           // ein besiegter Spieler gibt XP
+    showToast('⚔️ Du hast ' + pe.name + ' besiegt!' + (lead ? ' 👑 Leitfisch-Kopfgeld' : '') + (Net.v4 ? ' +' + pts + ' Schwarmpunkte' : '')); Sfx.champion();
   } else {
     const a = Net.peers.get(f[2]);
     if (a) showToast('⚔️ ' + a.name + ' hat ' + pe.name + ' besiegt');
   }
+}
+
+// ---------- Teams (PvP ab Version 4: Blau gegen Rot) ----------
+function netTeams() { return Net.v4 && Net.mode === 'pvp' && Net.team >= 0; }
+// Gegner im PvP: das andere Team (ohne Teams, Version 3: alle). COOP: niemand.
+function netFoe(pe) { return Net.mode === 'pvp' && (!netTeams() || pe.tm !== Net.team); }
+function netMate(pe) { return !netFoe(pe); }                      // retten kann man nur Freunde (PvP: das eigene Team)
+function netPeerColor(pe) { return netTeams() && (pe.tm === 0 || pe.tm === 1) ? TEAM_COLORS[pe.tm] : NET_COLORS[pe.col % NET_COLORS.length]; }
+function netPeerRgb(pe) { return netTeams() && (pe.tm === 0 || pe.tm === 1) ? TEAM_RGB[pe.tm] : netColorRgb(pe.col); }
+function netMyColor() { return netTeams() ? TEAM_COLORS[Net.team] : NET_COLORS[Net.col % NET_COLORS.length]; }
+function netOnTeam(m) {
+  const tm = m.tm === 1 ? 1 : 0;
+  if ((m.id | 0) === Net.id) { Net.team = tm; showToast(TEAM_ICONS[tm] + ' Du bist jetzt im Team ' + TEAM_NAMES[tm] + '.'); Sfx.ping(); }
+  else { const pe = Net.peers.get(m.id | 0); if (pe) { pe.tm = tm; showToast(TEAM_ICONS[tm] + ' ' + pe.name + ' spielt jetzt im Team ' + TEAM_NAMES[tm] + '.'); } }
+  if (plistOpen) renderPlayerList();
+}
+// Team wechseln: nur in privaten PvP-Räumen und nur im Hafen (der Server prüft es auch)
+function netSwitchTeam() {
+  if (!netTeams() || Net.kind !== 'private' || !player) return false;
+  if (!inHafen(player.x, player.y)) { showToast('⚓ Team wechseln geht nur im Hafen.'); return false; }
+  Net.swOut = true; Net.urgent = true; Net.lastSend = 0;
+  return true;
+}
+
+// ---------- Leitfisch: Schwarmpunkte und Bestenliste (der Server führt sie, siehe room-core.js) ----------
+function netAddPoints(n) { if (Net.on && Net.v4 && n > 0) Net.pts += n; }
+function netGroup() { return netTeams() ? Net.team : 0; }
+function netLeaderOf(g) { return Net.lb && Net.lb.l ? (Net.lb.l[g] | 0) : 0; }
+function netMyLeader() { return netLeaderOf(netGroup()); }
+function netIsLeader(id) { return !!id && !!Net.lb && Net.lb.l.indexOf(id) !== -1; }
+function netAmLeader() { return Net.v4 && Net.id > 0 && netMyLeader() === Net.id; }
+function netPointsOf(id) { const v = Net.lb ? (Net.lb.pts.get(id) || 0) : 0; return id === Net.id ? Math.max(v, Math.floor(Net.pts)) : v; }
+// Zeit bis zum nächsten Schwarmruf meiner Gruppe (ms; Infinity: noch keine Krone)
+function netCallLeft() {
+  if (!Net.lb) return Infinity;
+  const cd = Net.lb.cd[netGroup()];
+  if (cd == null || cd < 0) return Infinity;
+  return Math.max(0, cd - (performance.now() - Net.lb.at));
+}
+function fmtPts(n) { return String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function fmtClock(ms) { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function netOnBoard(m) {
+  if (!Array.isArray(m.b)) return;
+  const old = Net.lb, pts = new Map(), order = [];
+  for (let i = 0; i < m.b.length && i < 64; i++) {
+    const r = m.b[i];
+    if (!Array.isArray(r)) continue;
+    const id = r[0] | 0;
+    pts.set(id, Math.max(0, +r[1] || 0)); order.push(id);
+    if (r.length > 2 && (r[2] === 0 || r[2] === 1)) { if (id === Net.id) Net.team = r[2]; else { const pe = Net.peers.get(id); if (pe) pe.tm = r[2]; } }
+  }
+  Net.lb = { pts: pts, order: order, l: Array.isArray(m.l) ? m.l.map(function(x){ return x | 0; }) : [0], cd: Array.isArray(m.cd) ? m.cd.map(function(x){ return +x; }) : [-1],
+    at: performance.now(), ts: Array.isArray(m.ts) ? m.ts.map(function(x){ return +x || 0; }) : null };
+  const g = netGroup(), was = old ? (old.l[g] | 0) : 0, now = Net.lb.l[g] | 0;
+  if (now !== was && player && gameState !== 'menu') netCrownNews(was, now);
+}
+function netCrownNews(was, now) {
+  if (now === Net.id) {
+    showToast(Net.crownHint ? '👑 Du bist wieder der Leitfisch!' : '👑 Du bist der Leitfisch! Mit 📯 (Taste R) rufst du deinen Schwarm zu dir.');
+    Net.crownHint = true; Sfx.champion();
+  } else if (was === Net.id) {
+    const pe = Net.peers.get(now);
+    showToast(pe ? '👑 ' + pe.name + ' hat dir die Krone abgenommen.' : '👑 Du bist nicht mehr der Leitfisch.');
+  } else if (now) {
+    const pe = Net.peers.get(now);
+    if (pe) showToast('👑 ' + pe.name + ' ist jetzt der Leitfisch' + (netTeams() ? ' von Team ' + TEAM_NAMES[Net.team] : '') + '.');
+  }
+}
+
+// ---------- Schwarmruf: der Leitfisch ruft, wer folgt, reitet auf einer Strömung zu ihm ----------
+function netRequestCall() {
+  if (!netAmLeader()) return false;
+  const left = netCallLeft();
+  if (left > 0) { showToast('📯 Der Schwarmruf ist in ' + fmtClock(left) + ' wieder bereit.'); return false; }
+  if (gameState !== 'playing' || playerDown > 0 || chanceOpen() || Net.ride) { showToast('📯 Jetzt geht das nicht.'); return false; }
+  Net.callReq = true; Net.urgent = true; Net.lastSend = 0;
+  return true;
+}
+function netOnCall(m) {
+  if (!Net.v4) return;
+  const now = performance.now(), tm = m.tm === 0 || m.tm === 1 ? m.tm : -1;
+  Net.calls.set(m.n | 0, { n: m.n | 0, at: now, tm: tm, id: m.id | 0 });
+  Net.calls.forEach(function(c, n){ if (n < (m.n | 0) - 8) Net.calls.delete(n); });
+  if (!player || gameState === 'menu') return;
+  Sfx.horn();
+  if ((m.id | 0) === Net.id) {
+    netSchwarmgeist(Net.id);
+    showToast('📯 Du rufst deinen Schwarm! Wer folgt, ist in wenigen Sekunden bei dir.');
+    return;
+  }
+  const pe = Net.peers.get(m.id | 0), name = pe ? pe.name : 'Der Leitfisch';
+  if (netTeams() && tm >= 0 && tm !== Net.team) { showToast('📯 ' + name + ' (Team ' + TEAM_NAMES[tm] + ') ruft sein Team – gleich kommen sie angeschwommen!'); return; }
+  if (gameState === 'gameover') return;
+  const lx = pe && pe.seen ? pe.x : +m.x || 0, ly = pe && pe.seen ? pe.y : +m.y || 0;
+  const d = distXY(player.x, player.y, lx, ly);
+  if (d <= LF_SKIP && playerDown <= 0) {                     // schon da: kein Ritt, der Bonus trotzdem
+    netSchwarmgeist(m.id | 0);
+    showToast('📯 ' + name + ' ruft – du bist schon da: Schwarmgeist! +15 % Schaden (30 s)');
+    return;
+  }
+  Net.call = { n: m.n | 0, id: m.id | 0, name: name, until: now + (+m.w || LF_WINDOW * 1000), x: lx, y: ly };
+  showToast('📯 Der Leitfisch ruft! ' + name + ' · ' + Math.round(d / 10) + ' m');
+}
+// Grund, warum du gerade nicht folgen kannst ('' = du kannst)
+function netCanFollow() {
+  if (!Net.call || !player) return 'none';
+  if (gameState === 'gameover' || gameState === 'menu') return 'over';
+  if (chanceOpen()) return 'chance';
+  if (playerDown > 0) return 'down';
+  if ((bossEntity && !bossEntity.dead) || bossWarningTimer > 0) return 'boss';
+  return '';
+}
+function netRiding() { return !!Net.ride && Net.ride.phase === 'ride'; }
+function netWindup() { return !!Net.ride && Net.ride.phase === 'windup'; }
+function netJustLanded() { return !!Net.landAt && performance.now() - Net.landAt < LF_PROTECT * 1000; }
+function netLeaderPos(r) {                                    // wo der Leitfisch gerade ist (ist er weg: wo er zuletzt war)
+  const pe = Net.peers.get(r.leader);
+  if (pe && pe.seen && !pe.asleep && !(pe.fl & NF_DEAD)) { r.lx = pe.x; r.ly = pe.y; }
+  return { x: r.lx, y: r.ly };
+}
+// eigene Gegner wegstossen (Anlauf, Ankunft): gewöhnliche fliegen weg (und sind betäubt), Bosse und Champions zucken nur
+function pushOwnEnemies(x, y, r, push, stun) {
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    if (e.dead) continue;
+    const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
+    if (d > r + e.r) continue;
+    if (e.isBoss || e.champ) { e.hitFlash = Math.max(e.hitFlash || 0, 0.25); continue; }
+    const k = Math.max(0, push + r - d) ; e.x += dx / d * k; e.y += dy / d * k;
+    if (stun) e.stun = Math.max(e.stun || 0, stun);
+    if (Net.on) hafenKeepOut(e);
+  }
+}
+function netFollow() {
+  if (Net.ride || netCanFollow()) return false;
+  const c = Net.call;
+  Net.ride = { phase: 'windup', t: LF_WINDUP, n: c.n, leader: c.id, lx: c.x, ly: c.y, name: c.name, out: !inHafen(c.x, c.y), trail: [] };
+  netLeaderPos(Net.ride);
+  Net.ride.out = !inHafen(Net.ride.lx, Net.ride.ly);
+  pushOwnEnemies(player.x, player.y, 200, 40, 0);
+  clearInput();
+  Sfx.whoosh();
+  return true;
+}
+function netDeclineCall() {
+  if (netWindup()) Net.ride = null;
+  Net.call = null;
+  netCallBarHide();
+}
+// jedes Bild (im Lauf): Anlauf, dann der Ritt. true: die Bewegung des Blobis ist damit erledigt
+function netRideUpdate(dt) {
+  const r = Net.ride, p = player;
+  if (!r || !p) return false;
+  if (r.phase === 'windup') {
+    r.t -= dt;
+    for (let k = 0; k < 2; k++) {                              // Blasen wirbeln um den Blobi
+      const a = Math.random() * Math.PI * 2, d = 26 + Math.random() * 40;
+      particles.push({ x: p.x + Math.cos(a) * d, y: p.y + Math.sin(a) * d, vx: -Math.sin(a) * 170 - Math.cos(a) * 50, vy: Math.cos(a) * 170 - Math.sin(a) * 50, life: 0.35, maxLife: 0.35, color: '#bdeeff', r: 2.5 });
+    }
+    if (invulnTimer > 0) invulnTimer -= dt;
+    camera.x += (p.x - camera.x) * Math.min(1, dt * 6); camera.y += (p.y - camera.y) * Math.min(1, dt * 6);
+    if (r.t <= 0) netStartRide(r);
+    return true;
+  }
+  r.t += dt;
+  const L = netLeaderPos(r);
+  let tx = L.x + Math.cos(r.ang) * LF_RING, ty = L.y + Math.sin(r.ang) * LF_RING;
+  if (r.out && inHafen(tx, ty)) { const d = Math.hypot(tx, ty) || 1, R = HAFEN_R + 40; tx = tx / d * R; ty = ty / d * R; }   // er ist in den Hafen geschwommen: Landung am Rand
+  const k = Math.min(1, r.t / r.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  const ox = p.x, oy = p.y;
+  p.x = r.sx + (tx - r.sx) * e; p.y = r.sy + (ty - r.sy) * e;
+  const mx = p.x - ox, my = p.y - oy, sp = Math.hypot(mx, my);
+  if (sp > 0.5) p.angle = Math.atan2(my, mx);
+  p.bob += dt * 12;
+  camera.x = p.x; camera.y = p.y;
+  invulnTimer = Math.max(invulnTimer, 0.25);
+  r.trail.push({ x: p.x, y: p.y }); if (r.trail.length > 22) r.trail.shift();
+  if (sp > 2 && dt > 0) for (let i = 0; i < 3; i++) {          // Schlieren: die Welt rauscht vorbei
+    const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * Math.max(W, H) * 0.5;
+    particles.push({ x: p.x + Math.cos(a) * d, y: p.y + Math.sin(a) * d, sx: -mx / sp, sy: -my / sp, isStreak: true, len: 40 + Math.random() * 70, life: 0.22, maxLife: 0.22, color: '#bdeeff' });
+  }
+  if (k >= 1) netArrive(r);
+  return true;
+}
+function netStartRide(r) {
+  const p = player, L = netLeaderPos(r);
+  r.phase = 'ride'; r.t = 0; r.sx = p.x; r.sy = p.y;
+  r.ang = Math.atan2(p.y - L.y, p.x - L.x) + (((Net.id * 0.618) % 1) - 0.5) * 1.4;   // auf der Seite, von der du kommst, verteilt
+  const d = distXY(L.x + Math.cos(r.ang) * LF_RING, L.y + Math.sin(r.ang) * LF_RING, p.x, p.y);
+  r.dur = Math.max(LF_RIDE_MIN, Math.min(LF_RIDE_MAX, d / LF_RIDE_SPEED));
+  Net.foOut = r.n; Net.urgent = true; Net.lastSend = 0;
+  Net.call = null; netCallBarHide();
+  Sfx.ride();
+}
+function netArrive(r) {
+  const p = player;
+  Net.ride = null; Net.landAt = performance.now();
+  invulnTimer = Math.max(invulnTimer, LF_PROTECT);
+  arrivalWave(p.x, p.y);
+  if (Net.on) { Net.fxOut.push(['lw', performance.now(), Math.round(p.x), Math.round(p.y)]); Net.urgent = true; Net.lastSend = 0; }
+  const ring = Math.max(W, H) * 0.62 + 60;                     // zurückgebliebene eigene Gegner kommen auf den Spawn-Ring (kein Entkommen)
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    if (e.dead || distXY(e.x, e.y, p.x, p.y) <= LF_FAR) continue;
+    const a = Math.random() * Math.PI * 2;
+    e.x = p.x + Math.cos(a) * ring; e.y = p.y + Math.sin(a) * ring;
+    if (Net.on) hafenKeepOut(e);
+  }
+  minionsHome(120, true);
+  netSchwarmgeist(r.leader);
+  Sfx.arrive();
+  showToast('🐟 Angekommen! Schwarmgeist: +15 % Schaden in der Nähe von ' + r.name + ' (30 s)');
+}
+// Ankunftswelle (Radius 220): stösst gewöhnliche Gegner weg und betäubt sie 1 s, macht keinen Schaden (auch bei Mitspielern: 'lw')
+function arrivalWave(x, y) {
+  pushOwnEnemies(x, y, LF_WAVE_R, 60, LF_STUN);
+  particles.push({ x: x, y: y, isRing: true, life: 0.6, maxLife: 0.6, r: 20, grow: LF_WAVE_R, color: '158,255,224' });
+  spawnBurst(x, y, '#bdeeff', 18);
+}
+// Schwarmgeist: +15 % Schaden für 30 s, solange du in der Nähe des Leitfischs bist (er selbst immer). Zählt nicht doppelt.
+function netSchwarmgeist(leader) { Net.sgUntil = performance.now() + LF_BONUS_TIME * 1000; Net.sgLeader = leader; }
+function netSgUpdate(now) {
+  Net.sgMult = 1; Net.sgNear = false;
+  if (!(Net.sgUntil > now) || !player || playerDown > 0) return;
+  let near = Net.sgLeader === Net.id;
+  if (!near) { const pe = Net.peers.get(Net.sgLeader); near = !!pe && pe.seen && !pe.asleep && distXY(pe.x, pe.y, player.x, player.y) <= LF_BONUS_R; }
+  Net.sgNear = near;
+  if (near) Net.sgMult = 1 + LF_BONUS;
+}
+// das Ritt-Merkmal eines Mitspielers zählt nur kurz nach einem echten Ruf seiner Gruppe (höchstens 4 s, einmal pro Ruf)
+function netPeerFlags(pe, fl, now) {
+  const was = !!(pe.fl & NF_RIDE), riding = !!(fl & NF_RIDE);
+  if (riding && !was) pe.rideAt = now;
+  pe.fl = fl;
+  if (!riding && was) {
+    if (netRideValid(pe, now)) pe.landAt = now;
+    const c = netTeamCall(pe.tm); if (c) pe.usedCall = c.n;
+    pe.rideAt = 0;
+  }
+}
+function netTeamCall(tm) {
+  let best = null;
+  Net.calls.forEach(function(c){ if ((!netTeams() || c.tm < 0 || c.tm === tm) && (!best || c.n > best.n)) best = c; });
+  return best;
+}
+function netRideValid(pe, now) {
+  const c = netTeamCall(pe.tm);
+  return !!c && now - c.at <= (LF_WINDOW + LF_WINDUP + LF_RIDE_MAX + 2) * 1000 && (!pe.rideAt || now - pe.rideAt <= LF_RIDE_FLAG_MAX) && pe.usedCall !== c.n;
+}
+function netPeerRiding(pe) { return !!(pe.fl & NF_RIDE) && netRideValid(pe, performance.now()); }
+function netPeerShielded(pe) { return netPeerRiding(pe) || (!!pe.landAt && performance.now() - pe.landAt < LF_PROTECT * 1000); }
+
+// ---------- Leiste "Der Leitfisch ruft!" (10 s): Folgen (F oder antippen) oder Nein (N) ----------
+let callbarKey = '';
+function netCallBarHide() { const el = document.getElementById('callbar'); if (el) el.classList.remove('show'); callbarKey = ''; }
+function netCallBarUpdate(now) {
+  const el = document.getElementById('callbar');
+  if (!el) return;
+  const c = Net.call, wind = netWindup();
+  if (c && now > c.until && !wind) Net.call = null;
+  if (!Net.call && !wind) { if (callbarKey) netCallBarHide(); return; }
+  const why = wind ? 'wind' : netCanFollow();
+  if (why === 'chance' || why === 'over' || why === 'none') { if (callbarKey) netCallBarHide(); return; }
+  const name = wind ? Net.ride.name : Net.call.name;
+  let dist = '';
+  if (!wind && player) { const pe = Net.peers.get(Net.call.id); const x = pe && pe.seen ? pe.x : Net.call.x, y = pe && pe.seen ? pe.y : Net.call.y; dist = ' · ' + Math.round(distXY(x, y, player.x, player.y) / 10) + ' m'; }
+  const secs = wind ? 0 : Math.max(0, Math.ceil((Net.call.until - now) / 1000));
+  const key = why + '|' + name + dist + '|' + secs;
+  if (key !== callbarKey) {
+    callbarKey = key;
+    const set = function(id, t){ const e = document.getElementById(id); if (e) e.textContent = t; };
+    set('call-title', '📯 ' + name + ' ruft!' + dist);
+    set('call-time', wind ? '' : secs + ' s');
+    set('call-sub', why === 'down' ? 'Erst wenn du gerettet bist' : why === 'boss' ? 'Besiege zuerst deinen Boss' : why === 'wind' ? 'Gleich geht’s los …' : 'Strömungsritt zum Leitfisch');
+    const fb = document.getElementById('btn-call-follow'); if (fb) fb.disabled = !!why;
+    set('btn-call-no', wind ? 'Abbrechen' : 'Nein');
+    el.classList.add('show');
+  }
+  const fill = document.getElementById('call-fill');
+  if (fill) fill.style.width = (wind ? 100 : Math.max(0, (Net.call.until - now) / (LF_WINDOW * 1000) * 100)).toFixed(1) + '%';
+  const lv = document.getElementById('lvlbar');                     // über der Level-Leiste, wenn die gerade offen ist
+  const bottom = lv && lv.classList.contains('show') && lv.offsetHeight ? (lv.offsetHeight + 22) + 'px' : '';
+  if (el.style.bottom !== bottom) el.style.bottom = bottom;
+}
+
+// ---------- Anzeige: Zeile unter der Raum-Anzeige, Ruf-Knopf, Schwarmgeist ----------
+// die Zeile unter der Raum-Anzeige: PvP die Teamsummen, dann der Leitfisch mit Punkten und dein Platz
+function netLfLine() {
+  const me = Net.id, lid = netMyLeader(), myPts = netPointsOf(me);
+  let rank = 1;
+  Net.lb.order.forEach(function(id){ if (id !== me && (Net.lb.pts.get(id) || 0) > myPts) rank++; });
+  let html = '';
+  if (netTeams() && Net.lb.ts) html += '<span class="tb">🔵 ' + fmtPts(Net.lb.ts[0]) + '</span> : <span class="tr">' + fmtPts(Net.lb.ts[1]) + ' 🔴</span> · ';
+  if (lid === me) html += '👑 <b>Du bist der Leitfisch</b> · ' + fmtPts(myPts);
+  else {
+    const pe = Net.peers.get(lid);
+    if (lid && pe) html += '👑 ' + netEsc(pe.name) + ' <b>' + fmtPts(Net.lb.pts.get(lid) || 0) + '</b> · ';
+    html += 'Du: Platz ' + rank + ' · <b>' + fmtPts(myPts) + '</b>' + (!lid ? ' · 👑 ab 100' : '');
+  }
+  return html;
+}
+function netHudLeitfisch() {
+  if (!Net.on || !Net.v4 || !Net.lb) { hudSet('hud-lf', 'disp', 'none'); hudSet('btn-call', 'disp', 'none'); hudSet('hud-sg', 'disp', 'none'); return; }
+  const me = Net.id, lid = netMyLeader();
+  hudSet('hud-lf', 'disp', 'block'); hudSet('hud-lf', 'html', netLfLine());
+  if (lid === me) {
+    const left = netCallLeft();
+    hudSet('btn-call', 'disp', 'inline-block');
+    hudSet('btn-call', 'text', left > 0 && left < Infinity ? '📯 ' + fmtClock(left) : '📯');
+    hudSet('btn-call', 'cls', 'hud-mini hud-call' + (left > 0 ? ' cool' : ''));
+  } else hudSet('btn-call', 'disp', 'none');
+  const now = performance.now();
+  if (Net.sgUntil > now) {
+    hudSet('hud-sg', 'disp', 'inline-block');
+    hudSet('hud-sg', 'text', '🐟 +15 % · ' + Math.ceil((Net.sgUntil - now) / 1000) + ' s');
+    hudSet('hud-sg', 'cls', 'hud-pill hud-ring hud-sg' + (Net.sgNear ? '' : ' far'));
+  } else hudSet('hud-sg', 'disp', 'none');
+}
+
+// ---------- Leitfisch-Plan Schritt 1: Bosse und Champions wachsen mit der Gruppe ----------
+// Kommt ein weiterer Spieler in die Nähe (1.600), bekommt ein Boss 60 % seiner Start-HP dazu (Champions 50 %), sein HP-Anteil
+// bleibt gleich, und er schrumpft nie wieder. So ist ein Boss, zu dem fünf Spieler schwimmen, auch für fünf gemacht.
+function netGrowBosses() {
+  for (let i = 0; i < enemies.length; i++) {
+    const en = enemies[i];
+    if (en.dead || !(en.isBoss || en.champ)) continue;
+    const n = netNearbyPeers(en.x, en.y).length;
+    const was = en.isBoss ? (en.nearN || 0) : Math.round(((en.grp || 1) - 1) / NET_GROUP_HP);
+    if (n <= was) continue;
+    const rate = en.isBoss ? WORLD_BOSS_HP : NET_GROUP_HP, f0 = 1 + rate * was, f1 = 1 + rate * n;
+    const frac = en.maxHp > 0 ? Math.max(0, en.hp) / en.maxHp : 1;
+    en.maxHp = en.maxHp / f0 * f1; en.hp = frac * en.maxHp;
+    if (en.isBoss) en.nearN = n; else en.grp = f1;
+  }
+}
+// Beute: der Besitzer lehnt einen Anspruch ab (schon weg oder schon eins genommen) – du bekommst Bescheid, statt still zu warten
+function netClaimRefused(pe, rid) {
+  const pk = pe.pickups.get(rid);
+  if (!pk || !pk.claimed) return;
+  if (pk.each) pendingEach.delete(eachKey(pk));
+  pk.claimed = 0; pk.refused = performance.now();
+  if (pk.type === 'chest' || pk.type === 'heal') showToast(pk.type === 'chest' ? '🎁 Zu spät – jemand anderes hatte die Truhe schon.' : '💗 Zu spät – das Herz war schon weg.');
 }
 // Schaden von Mitspieler-Gegnern begrenzen (siehe NET_HIT_FRAC)
 // wo die Mitspieler gerade sind (für "nichts zusammenfassen, was jemand sieht")
@@ -7385,7 +7998,7 @@ function hafenKeepOut(en) {                     // Gegner kommen nicht in den Ha
 // ---------- Ohnmächtig und retten (nur online, wenn ein Freund in der Nähe ist) ----------
 function netCanBeRevived() {
   if (!Net.on || !player) return false;
-  for (const pe of Net.peers.values()) if (netPeerActive(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= DOWN_NEAR) return true;
+  for (const pe of Net.peers.values()) if (netPeerActive(pe) && netMate(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= DOWN_NEAR) return true;
   return false;
 }
 function netGoDown(t) {
@@ -7399,7 +8012,7 @@ function netGoDown(t) {
 function netReviver() {
   let helper = null;
   Net.peers.forEach(function(pe){
-    if (!helper && netPeerActive(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R + 15) helper = pe;
+    if (!helper && netPeerActive(pe) && netMate(pe) && !(pe.fl & NF_DOWN) && distXY(pe.x, pe.y, player.x, player.y) <= REVIVE_R + 15) helper = pe;
   });
   return helper;
 }
@@ -7497,7 +8110,7 @@ function netRoomSwitch(multi, anchor) {
   }
 }
 function netTakeTimers(an) {
-  Net.rt = { boss: +an[0] || 0, champ: +an[1] || 0, count: an[2] | 0, hb: an[3] | 0, sb: an[4] | 0, cb: an[5] | 0, hc: an[6] | 0, sc: an[7] | 0 };
+  Net.rt = { boss: +an[0] || 0, champ: +an[1] || 0, count: an[2] | 0, hb: an[3] | 0, sb: an[4] | 0, cb: an[5] | 0, hc: an[6] | 0, sc: an[7] | 0, fresh: an[8] | 0 };
 }
 function netRoomUpdate(dt, now) {
   const multi = Net.peers.size > 0, anchor = !multi || Net.anchor === Net.id;
@@ -7513,9 +8126,18 @@ function netRoomUpdate(dt, now) {
   netHostCalls();
 }
 // Der Anker zählt die Uhren des Raums herunter (solange jemand spielt) und ruft Weltbosse und Champions bei einem zufälligen Spieler
+// niemand im Raum spielt mehr (alle besiegt oder im Menü): beim nächsten Lauf fangen die Uhren des Raums von vorn an
+// (Weltboss nach 5 Minuten als ×1). Vorher zählte der Raum weiter – nach zwei Toden kam der nächste Boss als ×4.
+function netNobodyPlays() {
+  if (runActive() && gameState !== 'gameover') return false;
+  for (const pe of Net.peers.values()) if (pe.seen && !(pe.fl & NF_DEAD)) return false;
+  return true;
+}
 function netAnchorUpdate(dt, now) {
   const rt = Net.rt;
   if (!rt) return;
+  if (netNobodyPlays()) { rt.fresh = 1; return; }
+  if (rt.fresh) { rt.fresh = 0; rt.boss = 300; rt.champ = CHAMPION_START; rt.count = 0; rt.cb = 0; rt.hb = 0; rt.hc = 0; rt.seen = false; }
   const active = netRoomActive(), boss = netWorldBossActive();
   if (active) { if (rt.boss > 0) rt.boss = Math.max(0, rt.boss - dt); rt.champ -= dt; }
   if (rt.boss === -1) {                                   // gerufen: warten, bis er erscheint und wieder weg ist
@@ -7621,16 +8243,33 @@ function renderPlayerList() {
   const rows = document.getElementById('plist-rows'), head = document.getElementById('plist-title');
   if (!rows) return;
   if (head) head.textContent = netRoomName() + ' · ' + (Net.peers.size + 1) + '/' + Net.cap + ' Spieler';
-  const me = { me: true, name: Net.name || onlineName(), ch: selectedCharacterId, lv: runLevel, col: Net.col, d: -1,
+  const lf = Net.v4 && !!Net.lb, teams = netTeams();
+  const me = { me: true, id: Net.id, tm: Net.team, name: Net.name || onlineName(), ch: selectedCharacterId, lv: runLevel, col: Net.col, d: -1, pts: netPointsOf(Net.id),
     st: playerDown > 0 ? '💔 Hilfe!' : gameState === 'gameover' ? '☠ vorbei' : gameState === 'paused' ? '⏸ Pause' : (player && inHafen(player.x, player.y)) ? '⚓ Hafen' : 'du' };
   const list = [me];
-  Net.peers.forEach(function(pe){ list.push({ name: pe.name, ch: pe.ch, lv: pe.lv || 1, col: pe.col, st: netPeerStatus(pe), d: player && pe.seen ? distXY(pe.x, pe.y, player.x, player.y) : 1e9 }); });
-  list.sort(function(a, b){ return a.d - b.d; });
-  rows.innerHTML = list.map(function(r){
-    return '<div class="plist-row' + (r.me ? ' me' : '') + '"><span class="plist-dot" style="background:' + NET_COLORS[(r.col | 0) % NET_COLORS.length] + '"></span>' +
-      '<img src="' + (CHARACTER_SPRITES[r.ch] || '') + '" alt=""><span class="plist-name">' + netEsc(r.name) + '</span>' +
-      '<span class="plist-lv">Lv ' + (r.lv | 0) + '</span><span class="plist-st">' + r.st + '</span></div>';
-  }).join('');
+  Net.peers.forEach(function(pe){ list.push({ id: pe.id, tm: pe.tm, name: pe.name, ch: pe.ch, lv: pe.lv || 1, col: pe.col, st: netPeerStatus(pe), pts: netPointsOf(pe.id),
+    d: player && pe.seen ? distXY(pe.x, pe.y, player.x, player.y) : 1e9 }); });
+  list.sort(lf ? function(a, b){ return b.pts - a.pts || a.d - b.d; } : function(a, b){ return a.d - b.d; });
+  const row = function(r){
+    const col = teams && (r.tm === 0 || r.tm === 1) ? TEAM_COLORS[r.tm] : NET_COLORS[(r.col | 0) % NET_COLORS.length];
+    return '<div class="plist-row' + (r.me ? ' me' : '') + '"><span class="plist-dot" style="background:' + col + '"></span>' +
+      '<img src="' + (CHARACTER_SPRITES[r.ch] || '') + '" alt=""><span class="plist-name">' + (netIsLeader(r.id) ? '👑 ' : '') + netEsc(r.name) + '</span>' +
+      '<span class="plist-lv">Lv ' + (r.lv | 0) + '</span>' + (lf ? '<span class="plist-pts">' + fmtPts(r.pts) + '</span>' : '') + '<span class="plist-st">' + r.st + '</span></div>';
+  };
+  if (teams) {
+    rows.innerHTML = [0, 1].map(function(t){
+      const mine = list.filter(function(r){ return r.tm === t; });
+      const sum = Net.lb && Net.lb.ts ? Net.lb.ts[t] : mine.reduce(function(a, r){ return a + r.pts; }, 0);
+      return '<div class="plist-team-head t' + t + '"><span>' + TEAM_ICONS[t] + ' Team ' + TEAM_NAMES[t] + (t === Net.team ? ' (du)' : '') + '</span><span>' + fmtPts(sum) + ' Punkte</span></div>' + mine.map(row).join('');
+    }).join('');
+  } else rows.innerHTML = list.map(row).join('');
+  const sw = document.getElementById('plist-switch'), note = document.getElementById('plist-note');
+  if (sw) {
+    const can = teams && Net.kind === 'private';
+    sw.style.display = can ? 'block' : 'none';
+    if (can) { const inH = !!player && inHafen(player.x, player.y); sw.disabled = !inH; sw.textContent = '⇄ Ins Team ' + TEAM_NAMES[1 - Net.team] + ' wechseln' + (inH ? '' : ' (nur im Hafen)'); }
+  }
+  if (note) note.textContent = lf ? 'Schwarmpunkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Retten 15' + (Net.mode === 'pvp' ? ' · Spieler 30 (Leitfisch 60)' : '') + '. Der Beste ist der Leitfisch 👑.' : '';
 }
 
 // ---------- Online-Lauf speichern: nach dem Neuladen geht er im selben Raum weiter ----------
@@ -7704,6 +8343,7 @@ function resumeOnlineRun(snap) {
   playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
   lateWarned = runTime >= LATE_START; chanceLeft = 0; chanceDown = false; hideChance(); takenEach.clear();
   runSlot = 'online';
+  Net.ride = null; Net.call = null; Net.sgUntil = 0; Net.sgMult = 1; Net.landAt = 0; netCallBarHide();
   Net.lastSend = 0; Net.myBubble = null; netFreshLoot();
   gameState = 'playing';
   showScreen(null);
@@ -7716,7 +8356,7 @@ function resumeOnlineRun(snap) {
 // Wer ohnmächtig ist, wird nicht gejagt; wer im Hafen ist, nur, wenn sonst niemand da ist. Niemand da: stehen bleiben.
 function netTargetOf(en) {
   let best = null, bd = Infinity, safe = null, sd = Infinity;
-  if (playerDown <= 0) {
+  if (playerDown <= 0 && !netRiding()) {                       // wer reitet, wird nicht gejagt
     const d = distXY(en.x, en.y, player.x, player.y);
     if (inHafen(player.x, player.y)) { safe = player; sd = d; } else { best = player; bd = d; }
   }
@@ -7855,7 +8495,9 @@ function netSendTick(now) {
     if (playerDown > 0) fl |= NF_DOWN;
     if (p.shieldReady) fl |= NF_SHIELD;
     if (inHafen(p.x, p.y)) fl |= NF_HAFEN;
+    if (netRiding() && gameState === 'playing') fl |= NF_RIDE;
   }
+  if (Net.lastInput && now - Net.lastInput > Net.idle * 1000) fl |= NF_IDLE;
   const m = { t: 's', ts: Math.round(now), x: Math.round(p.x), y: Math.round(p.y), a: netR2(p.angle || 0), hp: Math.ceil(Math.max(0, p.hp)), mh: Math.round(p.maxHp),
     lv: runLevel, ch: selectedCharacterId, fl: fl };
   Net.needTo.clear();
@@ -7867,13 +8509,20 @@ function netSendTick(now) {
     const wb = netWorldList();
     if (wb) m.wb = wb;
   } else for (let i = 0; i < enemies.length; i++) enemies[i].netMask = 0;     // niemand bekommt sie: später wieder mit allen Angaben
-  if (Net.rt && Net.anchor === Net.id) { const rt = Net.rt; m.an = [netR1(rt.boss), netR1(rt.champ), rt.count | 0, rt.hb | 0, rt.sb | 0, rt.cb | 0, rt.hc | 0, rt.sc | 0]; }
+  if (Net.rt && Net.anchor === Net.id) { const rt = Net.rt; m.an = [netR1(rt.boss), netR1(rt.champ), rt.count | 0, rt.hb | 0, rt.sb | 0, rt.cb | 0, rt.hc | 0, rt.sc | 0, rt.fresh ? 1 : 0]; }
   if (Net.qOut >= 0) { m.q = Net.qOut; Net.qOut = -1; }
+  if (Net.v4) {                                                  // Leitfisch: Punkte (Summe), Ruf, Folgen, Team wechseln
+    m.k = Math.floor(Net.pts);
+    if (Net.callReq) { m.cl = 1; Net.callReq = false; }
+    if (Net.foOut) { m.fo = Net.foOut; Net.foOut = 0; }
+    if (Net.swOut) { m.sw = 1; Net.swOut = false; }
+  }
   if (Net.urgent) { m.u = 1; Net.urgent = false; }
   netLootOut(now, dead);
   if (Net.fxOut.length) { m.fx = Net.fxOut; for (let i = 0; i < m.fx.length; i++) m.fx[i][1] = Math.max(0, Math.round(now - m.fx[i][1])); Net.fxOut = []; }
   if (Net.hitsOut.size) { m.h = []; Net.hitsOut.forEach(function(h){ m.h.push([h[0], h[1], netR1(h[2]), h[3]]); }); Net.hitsOut.clear(); }
   if (Net.claimsOut.length) { m.c = Net.claimsOut.slice(0, 64); Net.claimsOut = []; }
+  if (Net.refuseOut.length) { for (let i = 0; i < Net.refuseOut.length && i < 32; i++) { const r = Net.refuseOut[i]; Net.fxOut.push(['no', now, r[0], r[1]]); Net.toOut.add(r[0]); } Net.refuseOut = []; }
   if (Net.pvpOut.size) { m.pv = []; Net.pvpOut.forEach(function(d, id){ m.pv.push([id, netR1(d)]); }); Net.pvpOut.clear(); }
   Net.needTo.forEach(function(id){ Net.toOut.add(id); });
   if (Net.toOut.size) { m.to = Array.from(Net.toOut); Net.toOut.clear(); }
@@ -7901,6 +8550,9 @@ function netFrame(dt) {
   netClaimTimeouts(now);
   netBuildPvpTargets(dt);
   netProcessPvp(now);
+  if (Net.peers.size && now - Net.growAt > 500) { Net.growAt = now; netGrowBosses(); }
+  netSgUpdate(now);
+  netCallBarUpdate(now);
   Net.peers.forEach(function(pe){                      // lange im Hintergrund: seine Beute bei dir gehört dir
     if (pe.asleep && pe.pickups.size && now - pe.last > PK_ADOPT_ASLEEP) netAdoptPickups(pe);
   });
@@ -7922,9 +8574,9 @@ function netFrame(dt) {
 
 // ---------- zeichnen: Hafen, Mitspieler, ihre Schüsse, Pfeile ----------
 function netColorRgb(col) { const c = hexToRgb(NET_COLORS[col % NET_COLORS.length]); return c.r + ',' + c.g + ',' + c.b; }
-function drawNetRing(sx, sy, r, col) {
+function drawNetRing(sx, sy, r, color) {      // color: Farbe des Spielers (PvP mit Teams: Blau oder Rot)
   ctx.save();
-  ctx.strokeStyle = NET_COLORS[col % NET_COLORS.length]; ctx.globalAlpha *= 0.75; ctx.lineWidth = 3;
+  ctx.strokeStyle = color; ctx.globalAlpha *= 0.75; ctx.lineWidth = netTeams() ? 4 : 3;
   ctx.beginPath(); ctx.ellipse(sx, sy + r * 0.95, r * 1.05, r * 0.42, 0, 0, Math.PI * 2); ctx.stroke();
   ctx.restore();
 }
@@ -7948,6 +8600,30 @@ function drawDownRing(sx, sy, r, prog) {
     ctx.strokeStyle = '#5ef2c0'; ctx.lineWidth = 5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.arc(sx, sy, r + 12, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, prog)); ctx.stroke();
   }
+  ctx.restore();
+}
+// Strömungsritt: eine leuchtende Strömung hinter dem Reiter (dein Ritt und der von Mitspielern)
+function drawRideTrail(trail, rgb) {
+  if (!trail || trail.length < 2) return;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (let i = 1; i < trail.length; i++) {
+    const k = i / trail.length, a = trail[i - 1], b = trail[i];
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + (0.12 + k * 0.5).toFixed(3) + ')'; ctx.lineWidth = 6 + k * 22;
+    ctx.beginPath(); ctx.moveTo(a.x - camera.x + W / 2, a.y - camera.y + H / 2); ctx.lineTo(b.x - camera.x + W / 2, b.y - camera.y + H / 2); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let i = Math.max(0, trail.length - 8); i < trail.length; i++) { const t = trail[i], x = t.x - camera.x + W / 2, y = t.y - camera.y + H / 2; if (i === Math.max(0, trail.length - 8)) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+  ctx.stroke();
+  ctx.restore();
+}
+function drawCrown(sx, sy) {                    // Krone des Leitfischs über dem eigenen Blobi (gezeichnet, leuchtet golden)
+  ctx.save();
+  const ts = txtScale(); ctx.translate(sx, sy + Math.sin(runTime * 3) * 2); ctx.scale(ts, ts);
+  drawHalo(0, 0, 22, '#ffd76a', 0.55);
+  ctx.beginPath(); ctx.moveTo(-11, 6); ctx.lineTo(-12, -5); ctx.lineTo(-5, 0); ctx.lineTo(0, -9); ctx.lineTo(5, 0); ctx.lineTo(12, -5); ctx.lineTo(11, 6); ctx.closePath();
+  ctx.fillStyle = '#ffd76a'; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = '#8a5a00'; ctx.stroke();
+  ctx.fillStyle = '#ff5c8a'; ctx.beginPath(); ctx.arc(0, 1.5, 2.2, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 function drawSpeech(sx, sy, b) {
@@ -8017,28 +8693,29 @@ function drawPeers() {
     const sx = pe.x - camera.x + W / 2, sy = pe.y - camera.y + H / 2;
     if (sx < -120 || sx > W + 120 || sy < -120 || sy > H + 120) return;
     const down = !!(pe.fl & NF_DOWN), paused = !!(pe.fl & NF_PAUSED);
+    if (pe.trail) drawRideTrail(pe.trail, '190,250,255');
     if (!down) {
       if (pe.rg) drawPeerRing(pe, sx, sy);
       if (pe.mnD) for (let i = 0; i < pe.mnD.length; i++) { const mx = pe.mnD[i].x - camera.x + W / 2, my = pe.mnD[i].y - camera.y + H / 2; drawHalo(mx, my, 22, '#9effc9', 0.55); drawEnemySprite(mx, my, 11, '#9effc9', 'fin', runTime * 6 + i * 3); }
     }
-    if (down) drawDownRing(sx, sy, pe.r, pe.revT / REVIVE_TIME);
+    if (down && netMate(pe)) drawDownRing(sx, sy, pe.r, pe.revT / REVIVE_TIME);   // retten kann nur das eigene Team
     ctx.globalAlpha = paused ? 0.6 : (down ? 0.55 : 1);
-    if (!down) drawNetRing(sx, sy, pe.r, pe.col);
+    if (!down) drawNetRing(sx, sy, pe.r, netPeerColor(pe));
     if ((pe.fl & NF_SHIELD) && !down) drawShieldRing(sx, sy, pe.r);
     const ch = CHARACTERS.filter(function(c){ return c.id === pe.ch; })[0] || CHARACTERS[0];
     drawPlayerSprite(sx, sy, pe.r, { wobble: pe.bob, angle: down ? 0 : pe.a, glow: 10, charId: ch.id, color: ch.color, dark: ch.dark, flashAmount: pe.tgt && pe.tgt.hitFlash > 0 ? pe.tgt.hitFlash * 2 : 0 });
     // Namensschild mit Level und kleinem Lebensbalken
-    const label = pe.name + ' · Lv ' + (pe.lv || 1) + (down ? ' 💔' : (paused ? ' ⏸' : ''));
+    const label = (netIsLeader(pe.id) ? '👑 ' : '') + pe.name + ' · Lv ' + (pe.lv || 1) + (down ? ' 💔' : (paused ? ' ⏸' : ''));
     const ts = txtScale(), ty = sy - pe.r * 1.55 - 12 * ts;
     ctx.save(); ctx.translate(sx, ty); ctx.scale(ts, ts);       // Namensschild: auf kleinen Bildschirmen gleich gross lesbar
     ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, 0, 0);
-    ctx.fillStyle = down ? '#ff8a9a' : NET_COLORS[pe.col % NET_COLORS.length]; ctx.fillText(label, 0, 0);
+    ctx.fillStyle = down ? '#ff8a9a' : netPeerColor(pe); ctx.fillText(label, 0, 0);
     const bw = 40, frac = Math.max(0, Math.min(1, pe.hp / Math.max(1, pe.mh)));
     ctx.fillStyle = 'rgba(2,10,20,0.7)'; ctx.fillRect(-bw / 2 - 1, 8, bw + 2, 5);
     ctx.fillStyle = frac > 0.3 ? '#5ef2c0' : '#ff5c72'; ctx.fillRect(-bw / 2, 9, bw * frac, 3);
     ctx.restore();
-    if (down) {
+    if (down && netMate(pe)) {
       ctx.save(); ctx.translate(sx, sy + pe.r + 24 * ts); ctx.scale(ts, ts);
       ctx.font = '900 11px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)';
       const hint = pe.revT > 0 ? 'Rettung … ' + Math.ceil(REVIVE_TIME - pe.revT) : 'Schwimm zu mir!';
@@ -8064,7 +8741,11 @@ function drawPeerArrows() {
     if (en.isBoss) edgeArrow(en.x, en.y, '255,92,114', 0.8);
     else if (en.champ) edgeArrow(en.x, en.y, CHAMPION_TRAITS[en.champ[0]].rgb, 0.6);
   }
-  const list = [];
+  // der Hafen (Raummitte): wohin es zurückgeht, wie die Pfeile zu Mitspielern
+  if (player && !inHafen(player.x, player.y)) edgeArrow(0, 0, '158,255,224', 0.72, '⚓ Hafen · ' + Math.round(Math.max(0, Math.hypot(player.x, player.y) - HAFEN_R) / 10) + ' m');
+  const list = [], now = performance.now();
+  let callee = null;
+  if (Net.call && now < Net.call.until) callee = Net.call.id;
   Net.peers.forEach(function(pe){
     if (!pe.seen || pe.asleep || (pe.fl & NF_DEAD)) return;
     if (pe.wb) for (let i = 0; i < pe.wb.length; i++) {
@@ -8075,16 +8756,19 @@ function drawPeerArrows() {
       const tr = Array.isArray(w[6]) ? CHAMPION_TRAIT_KEYS[w[6][0]] : null;
       edgeArrow(w[3], w[4], w[0] === 2 ? '255,92,114' : (tr && CHAMPION_TRAITS[tr] ? CHAMPION_TRAITS[tr].rgb : '255,215,106'), w[0] === 2 ? 0.9 : 0.62);
     }
-    if (pe.fl & NF_DOWN) {
-      edgeArrow(pe.x, pe.y, '255,92,114', 0.95 + Math.sin(runTime * 8) * 0.18, '💔 ' + pe.name + ' · ' + Math.round(distXY(pe.x, pe.y, player.x, player.y) / 10) + ' m');
+    const d = Math.round(distXY(pe.x, pe.y, player.x, player.y) / 10) + ' m';
+    if (pe.id === callee) { edgeArrow(pe.x, pe.y, '255,215,106', 1 + Math.sin(runTime * 9) * 0.15, '📯 ' + pe.name + ' · ' + d); return; }
+    if ((pe.fl & NF_DOWN) && netMate(pe)) {
+      edgeArrow(pe.x, pe.y, '255,92,114', 0.95 + Math.sin(runTime * 8) * 0.18, '💔 ' + pe.name + ' · ' + d);
       return;
     }
+    if (netIsLeader(pe.id)) { edgeArrow(pe.x, pe.y, netPeerRgb(pe), 0.9, '👑 ' + pe.name + ' · ' + d); return; }   // der Leitfisch: immer
     list.push(pe);
   });
   list.sort(function(a, b){ return distXY(a.x, a.y, player.x, player.y) - distXY(b.x, b.y, player.x, player.y); });
   for (let i = 0; i < Math.min(5, list.length); i++) {
     const pe = list[i], d = distXY(pe.x, pe.y, player.x, player.y);
-    edgeArrow(pe.x, pe.y, netColorRgb(pe.col), 0.85, pe.name + ' · ' + Math.round(d / 10) + ' m');
+    edgeArrow(pe.x, pe.y, netPeerRgb(pe), 0.85, pe.name + ' · ' + Math.round(d / 10) + ' m');
   }
 }
 // Boss-Balken: dein Boss oder sonst der Boss eines Mitspielers in deiner Nähe
