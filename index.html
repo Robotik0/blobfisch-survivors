@@ -176,6 +176,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   font-weight: 800; border: none; border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
 }
 .shop-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+.shop-buy-btn .shop-miss { display: block; font-size: 10px; font-weight: 800; opacity: 0.9; }
 .shop-note { font-size: 12px; color: var(--foam-dim); font-weight: 700; margin: -4px 0 6px; }
 .shop-tiers { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
 .tier-chip { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.2); color: var(--foam-dim); }
@@ -191,7 +192,17 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .pick-buy.confirm { background: linear-gradient(135deg, #5ef2c0, #38c99a); color: #04241a; }
 .pick-card.buyable { opacity: 1; border-style: dashed; border-color: rgba(255,215,106,0.6); }
 .pick-card .new-tag { margin-left: 4px; }
-.achievement-item.locked { opacity: 0.5; }
+.achievement-item.locked { opacity: 0.78; }
+.achievement-item.locked .achievement-icon { opacity: 0.6; }
+.ach-prog { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.ach-bar { flex: 1; height: 6px; border-radius: 99px; background: rgba(126,224,255,0.14); overflow: hidden; }
+.ach-bar i { display: block; height: 100%; min-width: 3px; border-radius: 99px; background: linear-gradient(90deg, var(--bioluma), #7eb6ff); }
+.ach-prog-n { font-size: 11px; font-weight: 800; color: var(--foam); white-space: nowrap; }
+.ach-summary { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 800; color: var(--foam); margin: -4px 0 10px; }
+.ach-summary .ach-bar { height: 8px; }
+.go-next { margin: 10px 0 0; padding: 8px 10px; border-radius: 12px; background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.16); font-size: 12px; font-weight: 700; color: var(--foam); text-align: left; }
+.go-next b { color: var(--pearl); }
+.go-next .ach-prog { margin-top: 4px; }
 .achievement-item.unlocked { border-color: rgba(94,242,192,0.4); }
 .achievement-icon { font-size: 22px; flex-shrink: 0; }
 .achievement-item { position: relative; }
@@ -278,9 +289,19 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .hud-mini.hud-call.cool { border-color: rgba(255,215,106,0.3); color: var(--foam-dim); box-shadow: none; }
 .hud-sg { margin-left: 6px; border-color: rgba(94,242,192,0.75); color: #bff8e6; }
 .hud-sg.far { opacity: 0.5; }
-.hud-lf { margin-top: 5px; font: 800 11.5px 'Nunito', sans-serif; color: var(--foam); text-shadow: 0 1px 3px rgba(0,0,0,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: min(560px, 80vw); }
+.hud-lf { margin-top: 6px; display: inline-block; min-width: 190px; max-width: min(300px, 78vw); padding: 6px 10px 7px; border-radius: 12px; background: rgba(4,18,32,0.72); border: 1px solid rgba(126,182,255,0.28);
+  font: 700 12px/1.35 'Nunito', sans-serif; color: var(--foam); pointer-events: auto; cursor: pointer; }
 .hud-lf b { color: var(--pearl); font-weight: 900; }
+#hud.plist-open .hud-lf { display: none !important; }
+.hud-lf .sc-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-lf .sc-sub { font-size: 11px; color: var(--foam-dim); margin-bottom: 3px; }
+.hud-lf .sc-crown { color: #ffe6a6; }
+.hud-lf .sc-me { font-weight: 900; color: var(--pearl); }
+.hud-lf .sc-teams { display: flex; align-items: center; gap: 7px; font-weight: 900; font-size: 13px; }
 .hud-lf .tb { color: #8cc4ff; } .hud-lf .tr { color: #ff9aa6; }
+.hud-lf .mine { text-decoration: underline; text-underline-offset: 3px; }
+.hud-lf .sc-tug { flex: 1; min-width: 50px; height: 7px; border-radius: 99px; background: #ff5c6c; overflow: hidden; }
+.hud-lf .sc-tug i { display: block; height: 100%; background: #5aaeff; transition: width .4s; }
 .hud-mini { pointer-events: auto; width: 32px; height: 32px; margin: 6px 0 0 6px; padding: 0; border-radius: 50%; border: 1px solid rgba(126,182,255,0.5); background: rgba(5,20,35,0.72); color: var(--foam); font-size: 15px; line-height: 30px; cursor: pointer; vertical-align: top; }
 .online-count { text-align: center; font-size: 13px; font-weight: 800; color: var(--bioluma); margin: -6px 0 4px; min-height: 18px; }
 .online-who { text-align: center; font-size: 13px; color: var(--foam-dim); font-weight: 700; margin: -6px 0 10px; }
@@ -292,7 +313,22 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .mode-opt small { font-size: 10.5px; color: var(--foam-dim); font-weight: 700; line-height: 1.25; }
 .mode-opt .mo-icon { font-size: 20px; }
 .mode-opt.selected { border-color: var(--bioluma); background: rgba(94,242,192,0.12); box-shadow: 0 0 0 3px rgba(94,242,192,0.15); }
-#btn-kind-pvp.selected { border-color: #ff7a59; background: rgba(255,122,89,0.14); box-shadow: 0 0 0 3px rgba(255,122,89,0.18); }
+.online-mode { position: relative; }
+.online-mode .om-tag { position: absolute; top: -9px; right: 12px; display: none; padding: 1px 8px; border-radius: 999px; font: 900 10px/16px 'Nunito', sans-serif; letter-spacing: 0.4px; text-transform: uppercase; background: var(--bioluma); color: #04241a; }
+.online-mode.last { border-color: var(--bioluma); box-shadow: 0 0 0 3px rgba(94,242,192,0.15); }
+.online-mode.last .om-tag, .online-mode .om-tag.rec { display: block; }
+.online-mode .om-tag.rec { background: linear-gradient(135deg, #ffb070, #ff7a59); color: #2a0d00; }
+.online-link { display: block; width: 100%; margin: 12px 0 0; padding: 8px; border: 0; background: none; color: var(--foam-dim); font: 700 13px 'Nunito', sans-serif; cursor: pointer; text-align: center; }
+.online-link u { color: var(--bioluma); text-underline-offset: 3px; }
+.online-link:hover u { color: #fff; }
+.osteps { display: flex; align-items: center; justify-content: center; gap: 6px; margin: -4px 0 10px; font: 800 11px 'Nunito', sans-serif; color: var(--foam-dim); letter-spacing: 0.3px; }
+.osteps i { width: 22px; height: 6px; border-radius: 99px; background: rgba(126,224,255,0.18); }
+.osteps i.done { background: var(--bioluma); }
+.osteps i.cur { background: linear-gradient(90deg, var(--bioluma), #7eb6ff); width: 32px; }
+.osteps span { margin-left: 6px; }
+.area-chips .online-chip { flex: 1 1 45%; padding: 10px 10px; font-size: 13px; }
+.area-chips .online-chip .sw { width: 22px; height: 22px; }
+.online-chip .cnt { margin-left: auto; font-size: 11px; color: var(--bioluma); }
 .online-mode { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border-radius: 16px; border: 2px solid rgba(126,224,255,0.2); background: rgba(126,224,255,0.07); color: var(--foam); cursor: pointer; text-align: left; font-family: 'Nunito', sans-serif; transition: all 0.15s ease; }
 .online-mode:hover { border-color: var(--bioluma); background: rgba(94,242,192,0.1); }
 .online-mode.primary { border-color: rgba(255,122,89,0.7); background: linear-gradient(135deg, rgba(255,122,89,0.24), rgba(224,96,63,0.1)); }
@@ -349,6 +385,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .chance-btns .btn-primary .btn-sub { white-space: normal; margin-left: 0; line-height: 1.2; }
 .chance-btns .btn-ghost { flex: 1 1 0; min-width: 0; }
 .chance-time { white-space: nowrap; }
+.chance-stake { margin: 6px 0 0; font: 800 12px 'Nunito', sans-serif; color: #ffc2cc; text-align: center; }
 .plist-team-head { display: flex; justify-content: space-between; padding: 7px 2px 2px; font: 900 12px 'Nunito', sans-serif; border-top: 1px solid rgba(126,224,255,0.18); }
 .plist-team-head.t0 { color: #8cc4ff; } .plist-team-head.t1 { color: #ff9aa6; }
 .plist-pts { min-width: 42px; text-align: right; flex-shrink: 0; font-size: 11.5px; color: var(--pearl); font-variant-numeric: tabular-nums; }
@@ -466,9 +503,10 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   <div class="chancebar" id="chancebar" role="dialog" aria-live="assertive">
     <div class="chance-head"><span>💔 Besiegt! Zweite Chance nutzen?</span><span class="chance-time" id="chance-time">10 s</span></div>
     <div class="chance-track"><div class="chance-fill" id="chance-fill"></div></div>
+    <p class="chance-stake" id="chance-stake"></p>
     <div class="chance-btns">
       <button class="btn btn-primary" id="btn-chance-use">💚 Zweite Chance <span class="btn-sub">weiter mit halbem Leben</span></button>
-      <button class="btn btn-ghost" id="btn-chance-giveup">Aufgeben</button>
+      <button class="btn btn-ghost" id="btn-chance-giveup">Lauf beenden</button>
     </div>
     <p class="chance-hint">Leertaste oder Enter = Zweite Chance</p>
   </div>
@@ -538,9 +576,10 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div class="screen" id="screen-online">
     <div class="panel online-panel">
+      <div class="osteps"></div>
       <h2>Online spielen <span class="beta-tag">Beta</span></h2>
       <p class="online-count" id="online-count"></p>
-      <p class="online-note">Jeder spielt seinen eigenen Lauf mit eigenem Level – aber ihr kämpft gegen dieselben Gegner, die Beute liegt für alle da (wer zuerst kommt …) und ihr rettet euch gegenseitig.</p>
+      <p class="online-note">Jeder spielt seinen eigenen Lauf – aber ihr teilt dieselbe Welt mit denselben Gegnern.</p>
       <label class="online-label" for="online-name">Dein Name</label>
       <div class="online-row">
         <input id="online-name" class="online-input" maxlength="13" autocomplete="off" spellcheck="false" aria-label="Dein Name">
@@ -558,18 +597,15 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div class="screen" id="screen-online-mode">
     <div class="panel online-panel">
+      <div class="osteps"></div>
       <h2>Wie willst du spielen?</h2>
       <p class="online-who" id="online-who"></p>
-      <div class="mode-toggle" role="radiogroup" aria-label="Spielart">
-        <button class="mode-opt" id="btn-kind-coop" role="radio"><span class="mo-icon">🤝</span><b>COOP</b><small>Zusammen gegen die Gegner</small></button>
-        <button class="mode-opt" id="btn-kind-pvp" role="radio"><span class="mo-icon">⚔️</span><b>PvP</b><small>Team Blau gegen Team Rot – eure Waffen treffen das andere Team</small></button>
-      </div>
       <div class="online-mode-list">
         <button class="online-mode resume" id="btn-mode-resume" style="display:none;"><span class="om-icon">🔄</span><span><b>Weiterspielen</b><small id="mode-resume-sub"></small></span></button>
-        <button class="online-mode primary" id="btn-mode-quick"><span class="om-icon">⚡</span><span><b>Schnellspiel</b><small id="mode-quick-count">Spiel mit allen, die gerade online sind</small></span></button>
-        <button class="online-mode" id="btn-mode-create"><span class="om-icon">➕</span><span><b>Raum erstellen</b><small>Privater Raum für dich und deine Freunde (bis 8) – du bekommst einen Code</small></span></button>
-        <button class="online-mode" id="btn-mode-join"><span class="om-icon">🔑</span><span><b>Raum beitreten</b><small>Mit dem Code aus 4 Buchstaben, den dir ein Freund sagt</small></span></button>
+        <button class="online-mode" id="btn-kind-coop"><span class="om-icon">🤝</span><span><b>Zusammen (COOP)</b><small>Ihr kämpft gemeinsam gegen die Gegner und rettet euch gegenseitig.</small></span><span class="om-tag">Zuletzt</span></button>
+        <button class="online-mode" id="btn-kind-pvp"><span class="om-icon">⚔️</span><span><b>Gegeneinander (PvP)</b><small>Eure Waffen treffen auch andere Spieler. Wenige Gegner, viel Action.</small></span><span class="om-tag">Zuletzt</span></button>
       </div>
+      <button class="online-link" id="btn-mode-join">🔑 Du hast einen Code von einem Freund? <u>Hier beitreten</u></button>
       <p class="online-status" id="online-status-mode"></p>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-mode-back">Zurück</button>
@@ -577,11 +613,45 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     </div>
   </div>
 
+  <div class="screen" id="screen-online-pvp">
+    <div class="panel online-panel">
+      <div class="osteps"></div>
+      <h2>⚔️ Welches PvP?</h2>
+      <p class="online-who" id="online-who-pvp"></p>
+      <div class="online-mode-list">
+        <button class="online-mode" id="btn-kind-team"><span class="om-icon">🆚</span><span><b>Team gegen Team</b><small>Team Blau gegen Team Rot. Du kommst ins kleinere Team, Teamkameraden kannst du retten.</small></span><span class="om-tag">Zuletzt</span></button>
+        <button class="online-mode" id="btn-kind-ffa"><span class="om-icon">🗡️</span><span><b>Jeder gegen jeden</b><small>Keine Teams, keine Rettung: alle sind deine Gegner. Der Beste trägt die Krone.</small></span><span class="om-tag">Zuletzt</span></button>
+      </div>
+      <p class="online-status" id="online-status-pvp"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-pvp-back">Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-online-with">
+    <div class="panel online-panel">
+      <div class="osteps"></div>
+      <h2>Mit wem?</h2>
+      <p class="online-who" id="online-who-with"></p>
+      <div class="online-mode-list">
+        <button class="online-mode primary" id="btn-mode-quick"><span class="om-icon">⚡</span><span><b>Schnellspiel</b><small id="mode-quick-count">Spiel mit allen, die gerade online sind</small></span><span class="om-tag rec">Empfohlen</span></button>
+        <button class="online-mode" id="btn-mode-create"><span class="om-icon">👥</span><span><b>Mit Freunden</b><small>Privater Raum für bis zu 8. Du bekommst einen Code, den du deinen Freunden sagst.</small></span></button>
+      </div>
+      <p class="online-status" id="online-status-with"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-with-back">Zurück</button>
+      </div>
+    </div>
+  </div>
+
   <div class="screen" id="screen-online-area">
     <div class="panel online-panel">
-      <h2 id="online-area-title">⚡ Schnellspiel</h2>
+      <div class="osteps"></div>
+      <h2 id="online-area-title">Wo willst du spielen?</h2>
+      <p class="online-who" id="online-who-area"></p>
       <p class="online-note" id="online-area-note"></p>
-      <div class="online-chips" id="online-areas"></div>
+      <div class="online-chips area-chips" id="online-areas"></div>
       <p class="online-status" id="online-status-area"></p>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-area-back">Zurück</button>
@@ -592,8 +662,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div class="screen" id="screen-online-code">
     <div class="panel online-panel">
+      <div class="osteps"></div>
       <h2>🔑 Raum beitreten</h2>
-      <p class="online-note">Gib den Code ein, den dein Freund oben im Spiel sieht (4 Buchstaben, z. B. KRBX).</p>
+      <p class="online-note">Gib den Code ein, den dein Freund oben im Spiel sieht (4 Buchstaben, z. B. KRBX). Ob ihr COOP oder PvP spielt, bestimmt sein Raum.</p>
       <input id="online-code" class="online-input code" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false" aria-label="Raum-Code" style="width:100%;">
       <p class="online-status" id="online-status-code"></p>
       <div class="panel-actions">
@@ -620,6 +691,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="panel">
       <h2>Erfolge</h2>
       <p class="pearls-total">💧 <span id="ach-pearls-total">0</span> Perlen</p>
+      <div class="ach-summary" id="ach-summary"></div>
       <button class="btn btn-primary" id="btn-ach-claim-all" style="display:none;margin-bottom:10px;">Alle einlösen</button>
       <div class="achievement-list" id="achievement-list"></div>
       <div class="panel-actions">
@@ -667,6 +739,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       <div class="menu-buttons">
         <button class="btn btn-primary" id="btn-retry">Nochmal spielen</button>
         <button class="btn btn-secondary" id="btn-gameover-achievements" style="display:none;">🏆 Erfolge einlösen</button>
+        <button class="btn btn-secondary" id="btn-gameover-shop" style="display:none;">💧 Verbesserungen kaufen</button>
         <button class="btn btn-ghost" id="btn-gameover-menu">Zum Menü</button>
       </div>
     </div>
@@ -1386,7 +1459,68 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["⚔️ Du hast {} besiegt! 👑 Leitfisch-Kopfgeld +{} Schwarmpunkte","⚔️ You defeated {}! 👑 Lead Fish bounty +{} swarm points","⚔️ Ти переміг гравця {}! 👑 Нагорода за вожака +{} очок зграї"],
 ["⚔️ Du hast {} besiegt! 👑 Leitfisch-Kopfgeld","⚔️ You defeated {}! 👑 Lead Fish bounty","⚔️ Ти переміг гравця {}! 👑 Нагорода за вожака"],
 ["⚔️ {} hat {} besiegt","⚔️ {} defeated {}","⚔️ {} переміг гравця {}"],
-["💤 Du warst 5 Minuten inaktiv und hast den Raum verlassen – du spielst allein weiter.","💤 You were inactive for 5 minutes and left the room – you play on alone.","💤 Ти був неактивний 5 хвилин і вийшов із кімнати – граєш далі сам."]];
+["💤 Du warst 5 Minuten inaktiv und hast den Raum verlassen – du spielst allein weiter.","💤 You were inactive for 5 minutes and left the room – you play on alone.","💤 Ти був неактивний 5 хвилин і вийшов із кімнати – граєш далі сам."],
+["Jeder spielt seinen eigenen Lauf – aber ihr teilt dieselbe Welt mit denselben Gegnern.", "Everyone plays their own run – but you share one world with the same enemies.", "Кожен грає свій забіг – але ви ділите один світ і тих самих ворогів."],
+["Zusammen (COOP)", "Together (CO-OP)", "Разом (КООП)"],
+["Ihr kämpft gemeinsam gegen die Gegner und rettet euch gegenseitig.", "You fight the enemies together and rescue each other.", "Ви разом б'єтеся з ворогами й рятуєте одне одного."],
+["Zuletzt", "Last time", "Минулого разу"],
+["Für den Anfang", "Best to start", "Для початку"],
+["Empfohlen", "Recommended", "Рекомендовано"],
+["Gegeneinander (PvP)", "Against each other (PvP)", "Один проти одного (PvP)"],
+["Eure Waffen treffen auch andere Spieler. Wenige Gegner, viel Action.", "Your weapons also hit other players. Few enemies, lots of action.", "Ваша зброя влучає й в інших гравців. Мало ворогів, багато екшену."],
+["🔑 Du hast einen Code von einem Freund?", "🔑 Got a code from a friend?", "🔑 Маєш код від друга?"],
+["Hier beitreten", "Join here", "Увійти тут"],
+["⚔️ Welches PvP?", "⚔️ Which PvP?", "⚔️ Яке PvP?"],
+["Team gegen Team", "Team vs team", "Команда на команду"],
+["Team Blau gegen Team Rot. Du kommst ins kleinere Team, Teamkameraden kannst du retten.", "Team Blue against team Red. You join the smaller team and can rescue your teammates.", "Сині проти червоних. Ти потрапляєш у меншу команду й можеш рятувати товаришів."],
+["Jeder gegen jeden", "Free-for-all", "Кожен сам за себе"],
+["Keine Teams, keine Rettung: alle sind deine Gegner. Der Beste trägt die Krone.", "No teams, no rescues: everyone is your enemy. The best player wears the crown.", "Без команд і без порятунку: усі – твої вороги. Найкращий носить корону."],
+["Mit wem?", "With whom?", "З ким?"],
+["Mit Freunden", "With friends", "З друзями"],
+["Privater Raum für bis zu 8. Du bekommst einen Code, den du deinen Freunden sagst.", "Private room for up to 8. You get a code to tell your friends.", "Приватна кімната до 8 гравців. Отримаєш код, який скажеш друзям."],
+["Wo willst du spielen?", "Where do you want to play?", "Де хочеш грати?"],
+["Gib den Code ein, den dein Freund oben im Spiel sieht (4 Buchstaben, z. B. KRBX). Ob ihr COOP oder PvP spielt, bestimmt sein Raum.", "Enter the code your friend sees at the top of the game (4 letters, e.g. KRBX). Their room decides whether you play CO-OP or PvP.", "Введи код, який твій друг бачить угорі гри (4 літери, напр. KRBX). Чи гратимете КООП або PvP, визначає його кімната."],
+["Lauf beenden", "End run", "Завершити забіг"],
+["💧 Verbesserungen kaufen", "💧 Buy upgrades", "💧 Купити покращення"],
+["Schritt {} von {}", "Step {} of {}", "Крок {} з {}"],
+["Team-PvP", "Team PvP", "Командне PvP"],
+["🟢 {} spielen gerade – spring dazu!", "🟢 {} playing right now – jump in!", "🟢 {} грають зараз – приєднуйся!"],
+["{} – wartet noch {} Min. auf dich, dann ist er weg", "{} – waits {} more min. for you, then it's gone", "{} – чекає на тебе ще {} хв, потім зникне"],
+["Du landest im Raum, in dem dort schon die meisten spielen (bis 24).", "You land in the room where most people already play there (up to 24).", "Потрапиш у кімнату, де там уже грає найбільше гравців (до 24)."],
+["Euer privater Raum für bis zu 8. Danach siehst du den Code für deine Freunde.", "Your private room for up to 8. Then you see the code for your friends.", "Ваша приватна кімната до 8 гравців. Потім побачиш код для друзів."],
+["Los geht’s! · {} warten", "Let’s go! · {} waiting", "Поїхали! · {} чекають"],
+["Du bist in Team {}", "You are in team {}", "Ти в команді {}"],
+["Gleichstand", "Tied", "Нічия"],
+["ihr führt", "you're ahead", "ви попереду"],
+["ihr liegt hinten", "you're behind", "ви позаду"],
+["Im Team: Platz {} von {}", "In your team: place {} of {}", "У команді: місце {} з {}"],
+["Platz {} von {}", "Place {} of {}", "Місце {} з {}"],
+["👑 Du hast die Krone! Alle jagen dich.", "👑 You have the crown! Everyone is hunting you.", "👑 Корона в тебе! Усі на тебе полюють."],
+["👑 Du hast die Krone!", "👑 You have the crown!", "👑 Корона в тебе!"],
+["Krone: {}", "Crown: {}", "Корона: {}"],
+["Krone ab 2 Spielern im Team", "Crown from 2 players in the team", "Корона від 2 гравців у команді"],
+["Krone ab 2 Spielern", "Crown from 2 players", "Корона від 2 гравців"],
+["Krone ab 100 Punkten", "Crown from 100 points", "Корона від 100 очок"],
+["👑 Du hast die Krone! Wer dich besiegt, bekommt 60 Punkte – pass auf dich auf.", "👑 You have the crown! Whoever defeats you gets 60 points – watch out.", "👑 Корона в тебе! Хто тебе переможе, отримає 60 очок – бережися."],
+["Raum {} (Team-PvP)", "Room {} (team PvP)", "Кімната {} (командне PvP)"],
+["Raum {} (Jeder gegen jeden)", "Room {} (free-for-all)", "Кімната {} (кожен сам за себе)"],
+["{} Raum {} (Team-PvP) – gib deinen Freunden diesen Code!", "{} Room {} (team PvP) – give your friends this code!", "{} Кімната {} (командне PvP) – дай друзям цей код!"],
+["{} Raum {} (Jeder gegen jeden) – gib deinen Freunden diesen Code!", "{} Room {} (free-for-all) – give your friends this code!", "{} Кімната {} (кожен сам за себе) – дай друзям цей код!"],
+["{} Raum {} (Team-PvP) · mit {}", "{} Room {} (team PvP) · with {}", "{} Кімната {} (командне PvP) · разом із {}"],
+["{} Raum {} (Jeder gegen jeden) · mit {}", "{} Room {} (free-for-all) · with {}", "{} Кімната {} (кожен сам за себе) · разом із {}"],
+["{} FFA #{}", "{} FFA #{}", "{} FFA #{}"],
+["Punkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Spieler besiegen 30 (mit Krone 60). Wer die meisten hat, trägt die Krone 👑.", "Points: enemy 1 · elite 3 · champion 20 · boss 50 · defeating a player 30 (with crown 60). Whoever has the most wears the crown 👑.", "Очки: ворог 1 · еліта 3 · чемпіон 20 · бос 50 · перемога над гравцем 30 (з короною 60). У кого найбільше – той носить корону 👑."],
+["Punkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Retten 15. Der Beste ist der Leitfisch 👑 und kann mit 📯 alle zu sich rufen.", "Points: enemy 1 · elite 3 · champion 20 · boss 50 · rescue 15. The best player is the Lead Fish 👑 and can call everyone with 📯.", "Очки: ворог 1 · еліта 3 · чемпіон 20 · бос 50 · порятунок 15. Найкращий – вожак 👑, він може покликати всіх до себе 📯."],
+["Punkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Retten 15 · Spieler besiegen 30 (Leitfisch 60). Der Beste jedes Teams ist der Leitfisch 👑 und kann mit 📯 alle zu sich rufen.", "Points: enemy 1 · elite 3 · champion 20 · boss 50 · rescue 15 · defeating a player 30 (Lead Fish 60). The best player of each team is the Lead Fish 👑 and can call the team with 📯.", "Очки: ворог 1 · еліта 3 · чемпіон 20 · бос 50 · порятунок 15 · перемога над гравцем 30 (вожак 60). Найкращий у кожній команді – вожак 👑, він може покликати команду 📯."],
+["Sonst ist dein Lauf vorbei: Level {} · {} · {} Gegner", "Otherwise your run is over: level {} · {} · {} enemies", "Інакше твій забіг закінчиться: рівень {} · {} · {} ворогів"],
+["🏆 {} von {} Erfolgen", "🏆 {} of {} achievements", "🏆 {} з {} досягнень"],
+["Nächstes Ziel:", "Next goal:", "Наступна ціль:"],
+["Du hast jetzt", "You now have", "Тепер у тебе"],
+["genug für", "enough for", "вистачить на"],
+["{} Perlen", "{} pearls", "{} перлин"],
+["noch {}", "{} more", "ще {}"],
+["🔇 Ton: aus", "🔇 Sound: off", "🔇 Звук: вимк."],
+["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."]];
 
 // Anleitung in drei Sprachen (Bildschirm "Anleitung"); renderInstructions() setzt die gewählte ein
 const INSTRUCTIONS = {
@@ -1406,9 +1540,9 @@ de: `<li><strong>Bewegen:</strong> WASD oder Pfeiltasten – auf Mobilgeräten e
 <li><strong>Gebiete:</strong> Kelpwald: Tang bremst dich. Tiefsee-Graben: Dunkelheit – du siehst nur in deiner Nähe. Vulkanschlucht: Lavapfützen – raus, sobald sie aufglühen! Sie verbrennen auch Gegner (Bosse kaum, den Lava-Titan gar nicht). Das Korallenriff ist gefahrlos.</li>
 <li><strong>Champions:</strong> Ab 4 Minuten erscheint ab und zu ein Champion – ein viel stärkerer, schnellerer Gegner mit Krone, Namensschild und einer besonderen Eigenschaft. Alle 3,5 Sekunden schiesst er einen Fächer aus drei Schüssen auf dich. Flink (leuchtet auf und sprintet auf dich zu – ausweichen!), Gepanzert (sein Panzer schluckt Schaden, bis er bricht), Vampir (heilt sich, wenn er dich trifft), Teilend (zerfällt in drei), Explosiv (hinterlässt einen Kreis, der nach 1 Sekunde platzt) oder Anführer (macht Gegner in seiner Nähe schneller und stärker). Besiegt lässt er eine grosse Schatztruhe fallen. Ab der dritten Begegnung kommt der Boss als wütender Champion-Boss: doppelter Schatz, dazu eine Gratis-Verbesserung.</li>
 <li><strong>Weiterspielen:</strong> „Zum Menü“ speichert deinen Lauf – mit „Weiterspielen“ (online: „Online weiterspielen“, 30 Minuten lang) geht es genau dort weiter. Das gilt auch, wenn du das Spiel einfach schliesst: Gegner, Beute und Leben sind wie vorher, und nach einem Countdown von 3 Sekunden geht es weiter.</li>
-<li><strong>Online (Beta):</strong> Unter „Online spielen“ wählst du Namen, Blobi und Modus: <strong>COOP</strong> (zusammen gegen die Gegner) oder <strong>PvP</strong> (Team <strong>Blau</strong> gegen Team <strong>Rot</strong>: eure Waffen treffen das andere Team – mit 30 % des Schadens und höchstens einem Viertel der Lebenspunkte pro Treffer. Es gibt viel weniger Gegner, dafür mehr XP, und wer einen Spieler besiegt, bekommt XP). Dann <strong>Schnellspiel</strong> (mit allen, die gerade online sind, bis 24 pro Raum), <strong>Raum erstellen</strong> (privat, bis 8, mit einem Code aus 4 Buchstaben für deine Freunde) oder <strong>Raum beitreten</strong>. Gegner und Beute gehören allen: Wer eine Kugel, Perle oder Truhe zuerst berührt, bekommt sie. Boss-Herz und Boss-Schatz gibt es für jeden in der Nähe einmal, und ein Sieg zählt für jeden, der mitgeholfen hat.</li>
+<li><strong>Online (Beta):</strong> Unter „Online spielen“ gehst du Schritt für Schritt: Name und Blobi, dann <strong>Zusammen (COOP)</strong> oder <strong>Gegeneinander (PvP)</strong>. Beim PvP wählst du <strong>Team gegen Team</strong> (Blau gegen Rot) oder <strong>Jeder gegen jeden</strong> (keine Teams, keine Rettung). Im PvP treffen eure Waffen andere Spieler – mit 30 % des Schadens und höchstens einem Viertel der Lebenspunkte pro Treffer; es gibt viel weniger Gegner, dafür mehr XP, und wer einen Spieler besiegt, bekommt XP. Dann <strong>Schnellspiel</strong> (mit allen, die gerade online sind, bis 24 pro Raum) oder <strong>Mit Freunden</strong> (privater Raum bis 8, mit einem Code aus 4 Buchstaben). Hast du einen Code, tippst du gleich im zweiten Schritt auf „Hier beitreten“. Gegner und Beute gehören allen: Wer eine Kugel, Perle oder Truhe zuerst berührt, bekommt sie. Boss-Herz und Boss-Schatz gibt es für jeden in der Nähe einmal, und ein Sieg zählt für jeden, der mitgeholfen hat.</li>
 <li><strong>Zusammen spielen:</strong> Du startest im <strong>Hafen</strong> in der Raummitte (ein Pfeil zeigt immer dorthin): dort bist du sicher, aber deine Waffen ruhen. Sind Freunde in der Nähe, halten Pause und Level-Up das Spiel nicht an (die Karten erscheinen unten: Tasten 1–4 oder antippen – auch während du steuerst), und Gegner haben pro Freund mehr Leben und lassen mehr fallen. Nach 5 Minuten und dann alle 4 Minuten erscheint bei einem zufälligen Spieler ein <strong>Weltboss</strong> (ein roter Pfeil zeigt allen den Weg), dazu ab und zu Raum-Champions. Bei 0 Leben bist du 20 Sekunden <strong>ohnmächtig</strong>: ein Freund (im PvP nur aus deinem Team) rettet dich, wenn er 3 Sekunden neben dir bleibt. <strong>Q</strong> oder 💬 schickt eine Kurznachricht, <strong>Tab</strong> oder die Raum-Anzeige zeigt alle Spieler. Lädst du die Seite neu, geht dein Online-Lauf im selben Raum weiter.</li>
-<li><strong>Leitfisch & Schwarmruf:</strong> Online sammelst du <strong>Schwarmpunkte</strong> (Gegner 1, Elite 3, Champion 20, Boss 50, einen Freund retten 15, im PvP einen Spieler besiegen 30). Der beste aktive Spieler des Raums (im PvP: jedes Teams) trägt die Krone 👑 und ist der <strong>Leitfisch</strong>. Er kann alle 3 Minuten mit 📯 (Taste R) seinen Schwarm rufen: Wer „Folgen“ antippt (oder F drückt), reitet in höchstens 3 Sekunden auf einer Strömung zu ihm, landet mit einer Welle, die Gegner wegstösst, und bekommt 30 Sekunden lang den <strong>Schwarmgeist</strong>: +15 % Schaden in seiner Nähe. Wer schon nah ist, bekommt den Bonus gleich. Im PvP ist ein besiegter Leitfisch 60 Punkte wert.</li>
+<li><strong>Leitfisch & Schwarmruf:</strong> Online sammelst du <strong>Schwarmpunkte</strong> (Gegner 1, Elite 3, Champion 20, Boss 50, einen Freund retten 15, im PvP einen Spieler besiegen 30). Der beste aktive Spieler des Raums (im PvP: jedes Teams) trägt die Krone 👑 und ist der <strong>Leitfisch</strong>. Er kann alle 3 Minuten mit 📯 (Taste R) seinen Schwarm rufen: Wer „Folgen“ antippt (oder F drückt), reitet in höchstens 3 Sekunden auf einer Strömung zu ihm, landet mit einer Welle, die Gegner wegstösst, und bekommt 30 Sekunden lang den <strong>Schwarmgeist</strong>: +15 % Schaden in seiner Nähe. Wer schon nah ist, bekommt den Bonus gleich. Im PvP ist ein besiegter Leitfisch 60 Punkte wert. Bei „Jeder gegen jeden“ gibt es keinen Schwarmruf: Der Beste trägt nur die Krone – und alle jagen ihn.</li>
 <li><strong>Erfolge:</strong> Jeder Erfolg gibt einmalig Perlen. Neue Erfolge sind mit NEU markiert – hol dir die Belohnung im Menü unter Erfolge mit „Einlösen“ ab.</li>
 <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts. „Neustart“ fragt zur Sicherheit nach; „Zum Menü“ speichert deinen Lauf.</li>
 <li><strong>Sprache:</strong> Oben im Hauptmenü wählst du Deutsch, Englisch oder Ukrainisch (DE · EN · UA).</li>`,
@@ -1428,9 +1562,9 @@ en: `<li><strong>Move:</strong> WASD or arrow keys – on phones and tablets jus
 <li><strong>Areas:</strong> Kelp Forest: kelp slows you down. Deep-Sea Trench: darkness – you only see what is close to you. Volcano Gorge: lava pools – get out as soon as they light up! They burn enemies too (bosses barely, the Lava Titan not at all). The Coral Reef is safe.</li>
 <li><strong>Champions:</strong> From minute 4 a champion appears now and then – a much stronger, faster enemy with a crown, a name tag and a special trait. Every 3.5 seconds it shoots a fan of three shots at you. Swift (lights up and dashes at you – dodge!), Armored (its shell swallows damage until it breaks), Vampire (heals when it hits you), Splitting (splits into three), Explosive (leaves a circle that bursts after 1 second) or Leader (makes enemies near it faster and stronger). When defeated it drops a big treasure chest. From the third encounter the boss comes as an angry champion boss: double treasure plus a free upgrade.</li>
 <li><strong>Continue:</strong> “Menu” saves your run – “Continue” (online: “Continue online”, for 30 minutes) takes you back exactly there. The same happens if you simply close the game: enemies, loot and health are as before, and after a 3-second countdown it goes on.</li>
-<li><strong>Online (beta):</strong> Under “Play online” you choose a name, a Blobi and a mode: <strong>CO-OP</strong> (together against the enemies) or <strong>PvP</strong> (team <strong>Blue</strong> against team <strong>Red</strong>: your weapons hit the other team – with 30 % of the damage and at most a quarter of their health per hit. There are far fewer enemies but more XP, and defeating a player gives XP). Then <strong>Quick play</strong> (with everyone online right now, up to 24 per room), <strong>Create room</strong> (private, up to 8, with a 4-letter code for your friends) or <strong>Join room</strong>. Enemies and loot belong to everyone: whoever touches an orb, pearl or chest first gets it. The boss heart and Boss Treasure are there once for everyone nearby, and a victory counts for everyone who helped.</li>
+<li><strong>Online (beta):</strong> “Play online” takes you step by step: name and Blobi, then <strong>Together (CO-OP)</strong> or <strong>Against each other (PvP)</strong>. For PvP you pick <strong>Team vs team</strong> (Blue against Red) or <strong>Free-for-all</strong> (no teams, no rescues). In PvP your weapons hit other players – with 30 % of the damage and at most a quarter of their health per hit; there are far fewer enemies but more XP, and defeating a player gives XP. Then <strong>Quick play</strong> (with everyone online right now, up to 24 per room) or <strong>With friends</strong> (private room for up to 8, with a 4-letter code). If you have a code, tap “Join here” in the second step. Enemies and loot belong to everyone: whoever touches an orb, pearl or chest first gets it. The boss heart and Boss Treasure are there once for everyone nearby, and a victory counts for everyone who helped.</li>
 <li><strong>Playing together:</strong> You start in the <strong>Harbor</strong> in the middle of the room (an arrow always points there): you are safe there, but your weapons rest. With friends nearby, pause and level-ups don’t stop the game (the cards appear at the bottom: keys 1–4 or tap – even while you steer), and enemies have more health per friend and drop more. After 5 minutes and then every 4 minutes a <strong>world boss</strong> appears near a random player (a red arrow shows everyone the way), plus room champions now and then. At 0 health you are <strong>knocked out</strong> for 20 seconds: a friend (in PvP only from your team) rescues you by staying next to you for 3 seconds. <strong>Q</strong> or 💬 sends a quick message, <strong>Tab</strong> or the room label shows all players. If you reload the page, your online run continues in the same room.</li>
-<li><strong>Lead Fish & Swarm Call:</strong> Online you collect <strong>swarm points</strong> (enemy 1, elite 3, champion 20, boss 50, rescuing a friend 15, in PvP defeating a player 30). The best active player in the room (in PvP: in each team) wears the crown 👑 and is the <strong>Lead Fish</strong>. Every 3 minutes they can call their swarm with 📯 (key R): whoever taps “Follow” (or presses F) rides a current to them in at most 3 seconds, lands with a wave that pushes enemies away and gets the <strong>Swarm Spirit</strong> for 30 seconds: +15 % damage near the Lead Fish. Anyone who is already close gets the bonus right away. In PvP a defeated Lead Fish is worth 60 points.</li>
+<li><strong>Lead Fish & Swarm Call:</strong> Online you collect <strong>swarm points</strong> (enemy 1, elite 3, champion 20, boss 50, rescuing a friend 15, in PvP defeating a player 30). The best active player in the room (in PvP: in each team) wears the crown 👑 and is the <strong>Lead Fish</strong>. Every 3 minutes they can call their swarm with 📯 (key R): whoever taps “Follow” (or presses F) rides a current to them in at most 3 seconds, lands with a wave that pushes enemies away and gets the <strong>Swarm Spirit</strong> for 30 seconds: +15 % damage near the Lead Fish. Anyone who is already close gets the bonus right away. In PvP a defeated Lead Fish is worth 60 points. In “Free-for-all” there is no Swarm Call: the best player only wears the crown – and everyone hunts him.</li>
 <li><strong>Achievements:</strong> Every achievement gives pearls once. New achievements are marked NEW – collect the reward in the menu under Achievements with “Claim”.</li>
 <li><strong>Pause:</strong> The ESC key or the pause button at the top right. “Restart” asks to be sure; “Menu” saves your run.</li>
 <li><strong>Language:</strong> At the top of the main menu you choose German, English or Ukrainian (DE · EN · UA).</li>`,
@@ -1450,9 +1584,9 @@ uk: `<li><strong>Рух:</strong> WASD або стрілки – на телеф
 <li><strong>Локації:</strong> Ліс водоростей: водорості гальмують. Глибоководна западина: темрява – бачиш лише поруч. Вулканічна ущелина: лавові калюжі – тікай, щойно вони засвітяться! Вони обпікають і ворогів (босів ледь-ледь, Лавового титана – ніяк). Кораловий риф безпечний.</li>
 <li><strong>Чемпіони:</strong> Після 4 хвилин час від часу з'являється чемпіон – набагато сильніший і швидший ворог із короною, табличкою з ім'ям та особливою рисою. Кожні 3,5 секунди він стріляє в тебе віялом із трьох пострілів. Швидкий (спалахує й кидається на тебе – ухиляйся!), Броньований (панцир поглинає шкоду, доки не трісне), Вампір (лікується, коли влучає в тебе), Подільний (розпадається на трьох), Вибуховий (залишає коло, яке вибухає через 1 секунду) або Ватажок (робить ворогів поруч швидшими й сильнішими). Переможений, він залишає велику скриню. З третьої зустрічі бос приходить як лютий бос-чемпіон: подвійний скарб і безкоштовне покращення.</li>
 <li><strong>Продовжити:</strong> «До меню» зберігає забіг – «Продовжити» (онлайн: «Продовжити онлайн», протягом 30 хвилин) поверне тебе саме туди. Так само, якщо ти просто закриєш гру: вороги, здобич і здоров'я будуть як були, а після відліку 3 секунд гра продовжиться.</li>
-<li><strong>Онлайн (бета):</strong> У розділі «Грати онлайн» обираєш ім'я, Блобі та режим: <strong>КООП</strong> (разом проти ворогів) або <strong>PvP</strong> (команда <strong>синіх</strong> проти команди <strong>червоних</strong>: ваша зброя влучає в іншу команду – 30 % шкоди і не більше чверті здоров'я за удар. Ворогів набагато менше, зате більше досвіду, а за перемогу над гравцем теж дають досвід). Потім <strong>Швидка гра</strong> (з усіма, хто зараз онлайн, до 24 у кімнаті), <strong>Створити кімнату</strong> (приватна, до 8, з кодом із 4 літер для друзів) або <strong>Увійти в кімнату</strong>. Вороги й здобич спільні: хто перший торкнеться кулі, перлини чи скрині, той її й отримає. Серце й скарб боса є для кожного поруч по одному, а перемога зараховується всім, хто допомагав.</li>
+<li><strong>Онлайн (бета):</strong> «Грати онлайн» веде крок за кроком: ім'я та Блобі, потім <strong>Разом (КООП)</strong> або <strong>Один проти одного (PvP)</strong>. Для PvP обираєш <strong>Команда на команду</strong> (сині проти червоних) або <strong>Кожен сам за себе</strong> (без команд і без порятунку). У PvP ваша зброя влучає в інших гравців – 30 % шкоди і не більше чверті здоров'я за удар; ворогів набагато менше, зате більше досвіду, а за перемогу над гравцем теж дають досвід. Потім <strong>Швидка гра</strong> (з усіма, хто зараз онлайн, до 24 у кімнаті) або <strong>З друзями</strong> (приватна кімната до 8, з кодом із 4 літер). Якщо маєш код, натисни «Увійти тут» уже на другому кроці. Вороги й здобич спільні: хто перший торкнеться кулі, перлини чи скрині, той її й отримає. Серце й скарб боса є для кожного поруч по одному, а перемога зараховується всім, хто допомагав.</li>
 <li><strong>Гра разом:</strong> Ти починаєш у <strong>гавані</strong> посередині кімнати (стрілка завжди показує туди): там безпечно, але зброя відпочиває. Коли поруч друзі, пауза й нові рівні не зупиняють гру (картки з'являються внизу: клавіші 1–4 або торкнись – навіть коли керуєш), а вороги мають більше здоров'я за кожного друга й залишають більше здобичі. Через 5 хвилин, а потім кожні 4 хвилини біля випадкового гравця з'являється <strong>світовий бос</strong> (червона стрілка показує всім дорогу), а часом і чемпіони кімнати. Коли здоров'я падає до 0, ти <strong>непритомний</strong> 20 секунд: друг (у PvP – лише з твоєї команди) рятує тебе, якщо 3 секунди пробуде поруч. <strong>Q</strong> або 💬 надсилає коротке повідомлення, <strong>Tab</strong> або напис кімнати показує всіх гравців. Якщо перезавантажиш сторінку, онлайн-забіг продовжиться в тій самій кімнаті.</li>
-<li><strong>Вожак і поклик зграї:</strong> Онлайн ти збираєш <strong>очки зграї</strong> (ворог 1, еліта 3, чемпіон 20, бос 50, порятунок друга 15, у PvP перемога над гравцем 30). Найкращий активний гравець кімнати (у PvP – кожної команди) носить корону 👑 і є <strong>вожаком</strong>. Кожні 3 хвилини він може покликати зграю кнопкою 📯 (клавіша R): хто торкнеться «За ним» (або натисне F), за 3 секунди максимум допливає до нього на течії, приземляється з хвилею, що відштовхує ворогів, і на 30 секунд отримує <strong>дух зграї</strong>: +15 % шкоди поруч із вожаком. Хто вже поруч, отримує бонус одразу. У PvP переможений вожак коштує 60 очок.</li>
+<li><strong>Вожак і поклик зграї:</strong> Онлайн ти збираєш <strong>очки зграї</strong> (ворог 1, еліта 3, чемпіон 20, бос 50, порятунок друга 15, у PvP перемога над гравцем 30). Найкращий активний гравець кімнати (у PvP – кожної команди) носить корону 👑 і є <strong>вожаком</strong>. Кожні 3 хвилини він може покликати зграю кнопкою 📯 (клавіша R): хто торкнеться «За ним» (або натисне F), за 3 секунди максимум допливає до нього на течії, приземляється з хвилею, що відштовхує ворогів, і на 30 секунд отримує <strong>дух зграї</strong>: +15 % шкоди поруч із вожаком. Хто вже поруч, отримує бонус одразу. У PvP переможений вожак коштує 60 очок. У режимі «Кожен сам за себе» поклику зграї немає: найкращий лише носить корону – і всі на нього полюють.</li>
 <li><strong>Досягнення:</strong> Кожне досягнення один раз дає перлини. Нові позначені як НОВЕ – забери нагороду в меню в розділі «Досягнення» кнопкою «Забрати».</li>
 <li><strong>Пауза:</strong> Клавіша ESC або кнопка паузи вгорі праворуч. «Почати знову» перепитує для певності; «До меню» зберігає забіг.</li>
 <li><strong>Мова:</strong> Угорі головного меню обираєш німецьку, англійську або українську (DE · EN · UA).</li>`
@@ -1679,10 +1813,12 @@ function playTone(freq, dur, type, vol) {
     osc.stop(now + dur);
   } catch (e) { /* Audio ist nicht kritisch */ }
 }
-// Klänge (seit 6.0): kleine Synthesizer-Stimmen statt einfacher Pieptöne – Blasen, Platscher, Glöckchen, ein Horn. Alles läuft über
-// einen Kompressor (laute Momente übersteuern nicht), jede Stimme hat eine Hüllkurve, viele haben eine Tonhöhen-Kurve und etwas
-// Zufall (gleiche Klänge klingen nicht maschinell gleich). Häufige Klänge sind gedrosselt, höchstens 28 Stimmen gleichzeitig.
-let sfxBus = null, sfxNoise = null, sfxVoices = 0;
+// Klänge (seit 6.0, überarbeitet in 7.0): kleine Synthesizer-Stimmen statt Samples – Blasen, Platscher, Glöckchen, ein Horn.
+// Seit 7.0: ein kurzer Unterwasser-Hall (Faltungshall aus gefiltertem Rauschen) gibt den Klängen Raum; Treffer klicken leise;
+// Kugeln und Perlen steigen in einer Tonleiter, wenn du viele schnell hintereinander einsammelst (Sammel-Kette); schnelle Siege
+// hintereinander klingen immer heller (Serie); Bosse und Champions haben einen eigenen grossen Sieg-Klang; Kaufen klimpert.
+// Alles läuft über einen Kompressor (laute Momente übersteuern nicht), höchstens 28 Stimmen gleichzeitig, häufige Klänge gedrosselt.
+let sfxBus = null, sfxVerb = null, sfxNoise = null, sfxVoices = 0;
 const sfxLast = {};
 function sfxReady(key, gap) {
   if (save.muted || !audioCtx || audioCtx.state !== 'running') return false;
@@ -1692,18 +1828,34 @@ function sfxReady(key, gap) {
   if (!sfxBus) {
     try {
       const comp = audioCtx.createDynamicsCompressor();
-      comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 5; comp.attack.value = 0.004; comp.release.value = 0.18;
-      const g = audioCtx.createGain(); g.gain.value = 0.85;
+      comp.threshold.value = -18; comp.knee.value = 14; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.2;
+      const g = audioCtx.createGain(); g.gain.value = 0.9;
       g.connect(comp); comp.connect(audioCtx.destination); sfxBus = g;
       const n = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate), d = n.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       sfxNoise = n;
+      // Hall: 1,1 s abklingendes, dumpfes Rauschen (klingt nach Wasser), als eigener Weg zum Kompressor
+      try {
+        const sr = audioCtx.sampleRate, len = Math.floor(sr * 1.1), ir = audioCtx.createBuffer(2, len, sr);
+        for (let ch = 0; ch < 2; ch++) {
+          const o = ir.getChannelData(ch); let lp = 0;
+          for (let i = 0; i < len; i++) { lp = lp * 0.82 + (Math.random() * 2 - 1) * 0.18; o[i] = lp * Math.pow(1 - i / len, 2.6) * 2.2; }
+        }
+        const cv = audioCtx.createConvolver(); cv.buffer = ir;
+        const vg = audioCtx.createGain(); vg.gain.value = 0.55;
+        cv.connect(vg); vg.connect(comp); sfxVerb = cv;
+      } catch (e) { sfxVerb = null; }
     } catch (e) { return false; }
   }
   return sfxVoices < 28;
 }
 function rnd(a) { return 1 + (Math.random() * 2 - 1) * a; }
-// eine Stimme: o = { w: Wellenform, f, f2 (Ziel-Tonhöhe), d (Dauer), v (Lautstärke), a (Anschlag), t (Verzögerung), lp / hp / bp (Filter), q }
+// Hall-Anteil einer Stimme (o.rv, 0 … 1; Standard 0,18)
+function sfxSend(g, rv) {
+  if (!sfxVerb || rv === 0) return;
+  try { const s = audioCtx.createGain(); s.gain.value = rv == null ? 0.18 : rv; g.connect(s); s.connect(sfxVerb); } catch (e) {}
+}
+// eine Stimme: o = { w: Wellenform, f, f2 (Ziel-Tonhöhe), d (Dauer), v (Lautstärke), a (Anschlag), t (Verzögerung), lp / hp / bp (Filter), q, rv (Hall) }
 function sv(o) {
   try {
     const t0 = audioCtx.currentTime + (o.t || 0), d = o.d || 0.1, a = Math.min(o.a || 0.004, d * 0.5);
@@ -1717,12 +1869,12 @@ function sv(o) {
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
     let node = osc;
     if (o.lp || o.hp || o.bp) { const fl = audioCtx.createBiquadFilter(); fl.type = o.lp ? 'lowpass' : o.hp ? 'highpass' : 'bandpass'; fl.frequency.value = o.lp || o.hp || o.bp; fl.Q.value = o.q || 0.8; node.connect(fl); node = fl; }
-    node.connect(g); g.connect(sfxBus);
+    node.connect(g); g.connect(sfxBus); sfxSend(g, o.rv);
     osc.start(t0); osc.stop(t0 + d + 0.02);
     sfxVoices++; osc.onended = function(){ sfxVoices--; };
   } catch (e) { /* Audio ist nicht kritisch */ }
 }
-// Rauschen (Platscher, Rauschen, Funkeln): o = { d, v, a, t, lp / hp / bp (Filter, mit f2 als Ziel), q }
+// Rauschen (Platscher, Rauschen, Funkeln): o = { d, v, a, t, lp / hp / bp (Filter, mit f2 als Ziel), q, rv }
 function sn(o) {
   try {
     const t0 = audioCtx.currentTime + (o.t || 0), d = o.d || 0.1, a = Math.min(o.a || 0.003, d * 0.5);
@@ -1736,48 +1888,88 @@ function sn(o) {
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(o.v || 0.04, t0 + a);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
-    src.connect(fl); fl.connect(g); g.connect(sfxBus);
+    src.connect(fl); fl.connect(g); g.connect(sfxBus); sfxSend(g, o.rv);
     src.start(t0, Math.random() * 0.5); src.stop(t0 + d + 0.02);
     sfxVoices++; src.onended = function(){ sfxVoices--; };
   } catch (e) { /* Audio ist nicht kritisch */ }
 }
+// Ketten: Sammeln steigt eine Pentatonik hinauf (bis 2 Oktaven), Siege werden in einer Serie heller (bis +7 Halbtöne)
+const SFX_PENTA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+const sfxChain = { pick: 0, pickAt: 0, kill: 0, killAt: 0 };
+function sfxSemi(n) { return Math.pow(2, n / 12); }
 const Sfx = {
   // eigener Schuss: ein kleines "Blubb" (Blase, die nach oben springt)
-  shoot: function(){ if (!sfxReady('shoot', 55)) return; const r = rnd(0.08); sv({ f: 340 * r, f2: 760 * r, d: 0.075, v: 0.045, a: 0.003 }); sn({ hp: 3200, d: 0.03, v: 0.01 }); },
-  hit: function(){ if (!sfxReady('hit', 40)) return; sv({ w: 'triangle', f: 220, f2: 120, d: 0.07, v: 0.04 }); },
-  // Gegner besiegt: "Plopp" mit kleinem Spritzer
-  death: function(){ if (!sfxReady('death', 38)) return; const r = rnd(0.12); sv({ f: 820 * r, f2: 210 * r, d: 0.1, v: 0.06 }); sn({ bp: 1300 * r, f2: 500, d: 0.08, v: 0.035, q: 1.4 }); },
-  // Kugel / Perle eingesammelt: helles Glöckchen
-  pickup: function(){ if (!sfxReady('pickup', 45)) return; const r = rnd(0.05); sv({ w: 'triangle', f: 1180 * r, f2: 1420 * r, d: 0.07, v: 0.03 }); sv({ f: 1770 * r, d: 0.09, v: 0.016, t: 0.025 }); },
-  levelup: function(){ if (!sfxReady('levelup', 200)) return; [523, 659, 784, 1047].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.22, v: 0.055, t: i * 0.07, a: 0.01 }); }); sn({ hp: 5000, d: 0.45, v: 0.018, t: 0.12, a: 0.08 }); },
+  shoot: function(){ if (!sfxReady('shoot', 55)) return; const r = rnd(0.08); sv({ f: 340 * r, f2: 760 * r, d: 0.075, v: 0.04, a: 0.003, rv: 0.08 }); sn({ hp: 3200, d: 0.03, v: 0.009, rv: 0 }); },
+  // eigener Treffer: ein leises, trockenes "Tick" (zeigt, dass es sitzt, ohne zu nerven)
+  hit: function(){ if (!sfxReady('hit', 45)) return; const r = rnd(0.1); sv({ w: 'triangle', f: 520 * r, f2: 260 * r, d: 0.045, v: 0.022, rv: 0 }); sn({ bp: 3400 * r, d: 0.025, v: 0.014, q: 2, rv: 0 }); },
+  // Gegner besiegt: "Plopp" mit Spritzer und kleinem Bass – in einer schnellen Serie jedes Mal etwas heller
+  death: function(big){
+    if (!sfxReady('death', 34)) return;
+    const t = performance.now();
+    sfxChain.kill = t - sfxChain.killAt < 650 ? Math.min(sfxChain.kill + 1, 7) : 0; sfxChain.killAt = t;
+    const r = rnd(0.07) * sfxSemi(sfxChain.kill);
+    sv({ f: 760 * r, f2: 200 * r, d: 0.11, v: 0.06, rv: 0.12 });
+    sv({ f: 150, f2: 70, d: 0.09, v: big ? 0.09 : 0.045, rv: 0 });
+    sn({ bp: 1400 * r, f2: 520, d: 0.09, v: 0.035, q: 1.4, rv: 0.2 });
+    if (sfxChain.kill >= 4) sv({ w: 'triangle', f: 1568 * r, d: 0.08, v: 0.018, t: 0.03 });
+  },
+  // Boss oder Champion besiegt: Schlag, aufsteigender Akkord, Funkeln
+  bigKill: function(){
+    if (!sfxReady('bigkill', 400)) return;
+    sv({ f: 120, f2: 38, d: 0.55, v: 0.16, rv: 0.4 }); sn({ lp: 900, f2: 120, d: 0.5, v: 0.08, rv: 0.5 });
+    [523, 659, 784, 1047, 1319].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.5 - i * 0.04, v: 0.05, t: 0.12 + i * 0.065, a: 0.008, rv: 0.45 }); });
+    sn({ hp: 6000, d: 0.7, v: 0.02, t: 0.3, a: 0.12, rv: 0.6 });
+  },
+  // Kugel / Perle eingesammelt: Glöckchen, das in einer Sammel-Kette die Tonleiter hinaufsteigt
+  pickup: function(){
+    if (!sfxReady('pickup', 38)) return;
+    const t = performance.now();
+    sfxChain.pick = t - sfxChain.pickAt < 380 ? Math.min(sfxChain.pick + 1, SFX_PENTA.length - 1) : 0; sfxChain.pickAt = t;
+    const f = 880 * sfxSemi(SFX_PENTA[sfxChain.pick]) * rnd(0.01);
+    sv({ w: 'triangle', f: f, d: 0.08, v: 0.03, rv: 0.15 }); sv({ f: f * 2, d: 0.07, v: 0.011, t: 0.012, rv: 0.2 });
+  },
+  levelup: function(){
+    if (!sfxReady('levelup', 200)) return;
+    sv({ f: 131, d: 0.6, v: 0.08, a: 0.02, rv: 0.3 });
+    [523, 659, 784, 1047, 1319, 1568].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.3, v: 0.05, t: i * 0.055, a: 0.006, rv: 0.35 }); });
+    [1047, 1319, 1568].forEach(function(f){ sv({ f: f, d: 0.7, v: 0.022, t: 0.33, a: 0.04, vib: 5, rv: 0.5 }); });
+    sn({ hp: 5000, d: 0.55, v: 0.018, t: 0.1, a: 0.1, rv: 0.5 });
+  },
   // getroffen: dumpfer Schlag
-  hurt: function(){ if (!sfxReady('hurt', 110)) return; sv({ f: 170, f2: 55, d: 0.2, v: 0.13 }); sn({ lp: 1000, f2: 200, d: 0.13, v: 0.07 }); sv({ w: 'square', f: 105, d: 0.06, v: 0.025, lp: 900 }); },
+  hurt: function(){ if (!sfxReady('hurt', 110)) return; sv({ f: 170, f2: 55, d: 0.2, v: 0.13, rv: 0.1 }); sn({ lp: 1000, f2: 200, d: 0.13, v: 0.07 }); sv({ w: 'square', f: 105, d: 0.06, v: 0.025, lp: 900, rv: 0 }); },
   // Boss: tiefes Grollen aus der Tiefe
-  boss: function(){ if (!sfxReady('boss', 300)) return; sv({ w: 'sawtooth', f: 74, f2: 52, d: 0.95, v: 0.075, lp: 420, a: 0.06 }); sv({ f: 46, d: 1.0, v: 0.12, a: 0.08 }); sn({ lp: 320, f2: 120, d: 0.75, v: 0.06, a: 0.05 }); },
-  click: function(){ if (!sfxReady('click', 30)) return; sv({ w: 'triangle', f: 680, f2: 520, d: 0.04, v: 0.035 }); },
-  gameover: function(){ if (!sfxReady('gameover', 400)) return; [392, 330, 262].forEach(function(f, i){ sv({ w: 'triangle', f: f, f2: f * 0.97, d: 0.32, v: 0.07, t: i * 0.17, a: 0.01 }); }); sv({ f: 98, d: 0.9, v: 0.09, t: 0.3, a: 0.05 }); },
+  boss: function(){ if (!sfxReady('boss', 300)) return; sv({ w: 'sawtooth', f: 74, f2: 52, d: 0.95, v: 0.075, lp: 420, a: 0.06, rv: 0.35 }); sv({ f: 46, d: 1.0, v: 0.12, a: 0.08 }); sn({ lp: 320, f2: 120, d: 0.75, v: 0.06, a: 0.05, rv: 0.4 }); },
+  // Menü: eine weiche Blase (früher ein harter Klick)
+  click: function(){ if (!sfxReady('click', 30)) return; const r = rnd(0.03); sv({ f: 520 * r, f2: 880 * r, d: 0.06, v: 0.04, a: 0.003, rv: 0.12 }); },
+  // ein Schritt weiter im Menü: zwei Töne nach oben
+  step: function(){ if (!sfxReady('step', 60)) return; sv({ w: 'triangle', f: 660, d: 0.08, v: 0.035, rv: 0.2 }); sv({ w: 'triangle', f: 990, d: 0.12, v: 0.035, t: 0.06, rv: 0.25 }); },
+  // Kaufen: Perlen klimpern in die Kasse
+  buy: function(){ if (!sfxReady('buy', 150)) return; [1319, 1568, 2093].forEach(function(f, i){ sv({ w: 'triangle', f: f * rnd(0.01), d: 0.16, v: 0.04, t: i * 0.05, rv: 0.3 }); }); sv({ f: 196, f2: 140, d: 0.12, v: 0.05 }); sn({ hp: 5000, d: 0.25, v: 0.015, t: 0.04, rv: 0.4 }); },
+  gameover: function(){ if (!sfxReady('gameover', 400)) return; [392, 330, 262].forEach(function(f, i){ sv({ w: 'triangle', f: f, f2: f * 0.97, d: 0.32, v: 0.07, t: i * 0.17, a: 0.01, rv: 0.5 }); }); sv({ f: 98, d: 0.9, v: 0.09, t: 0.3, a: 0.05, rv: 0.4 }); },
   // Blasenring wehrt ab: gläsernes Klingen
-  deflect: function(){ if (!sfxReady('deflect', 60)) return; const r = rnd(0.06); sv({ f: 1400 * r, f2: 1950 * r, d: 0.06, v: 0.035 }); sv({ f: 2900 * r, d: 0.05, v: 0.012 }); },
-  shieldBlock: function(){ if (!sfxReady('shield', 120)) return; [520, 781, 1172].forEach(function(f){ sv({ w: 'triangle', f: f * rnd(0.01), d: 0.28, v: 0.04 }); }); sn({ bp: 2600, d: 0.12, v: 0.03, q: 2 }); },
-  heal: function(){ if (!sfxReady('heal', 120)) return; sv({ f: 600, f2: 900, d: 0.14, v: 0.05, a: 0.01 }); sv({ f: 900, f2: 1350, d: 0.16, v: 0.045, t: 0.07, a: 0.01 }); sn({ hp: 4500, d: 0.2, v: 0.012, t: 0.05 }); },
-  claim: function(){ if (!sfxReady('claim', 150)) return; [660, 880, 1180, 1760].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.2, v: 0.055, t: i * 0.075, a: 0.006 }); }); },
+  deflect: function(){ if (!sfxReady('deflect', 60)) return; const r = rnd(0.06); sv({ f: 1400 * r, f2: 1950 * r, d: 0.06, v: 0.035, rv: 0.2 }); sv({ f: 2900 * r, d: 0.05, v: 0.012 }); },
+  shieldBlock: function(){ if (!sfxReady('shield', 120)) return; [520, 781, 1172].forEach(function(f){ sv({ w: 'triangle', f: f * rnd(0.01), d: 0.28, v: 0.04, rv: 0.3 }); }); sn({ bp: 2600, d: 0.12, v: 0.03, q: 2 }); },
+  heal: function(){ if (!sfxReady('heal', 120)) return; sv({ f: 600, f2: 900, d: 0.14, v: 0.05, a: 0.01, rv: 0.3 }); sv({ f: 900, f2: 1350, d: 0.16, v: 0.045, t: 0.07, a: 0.01, rv: 0.3 }); sn({ hp: 4500, d: 0.2, v: 0.012, t: 0.05 }); },
+  claim: function(){ if (!sfxReady('claim', 150)) return; [660, 880, 1180, 1760].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: 0.22, v: 0.055, t: i * 0.075, a: 0.006, rv: 0.35 }); }); sn({ hp: 5000, d: 0.35, v: 0.014, t: 0.2, a: 0.06, rv: 0.4 }); },
   // Ringblase platzt
-  pop: function(){ if (!sfxReady('pop', 60)) return; sv({ f: 1300, f2: 380, d: 0.08, v: 0.06 }); sn({ bp: 2200, f2: 800, d: 0.06, v: 0.04, q: 1.5 }); },
-  revive: function(){ if (!sfxReady('revive', 200)) return; [392, 523, 659, 784].forEach(function(f, i){ sv({ f: f, d: 0.35, v: 0.06, t: i * 0.09, a: 0.03 }); }); sn({ hp: 4000, d: 0.5, v: 0.015, t: 0.15, a: 0.1 }); },
+  pop: function(){ if (!sfxReady('pop', 60)) return; sv({ f: 1300, f2: 380, d: 0.08, v: 0.06, rv: 0.2 }); sn({ bp: 2200, f2: 800, d: 0.06, v: 0.04, q: 1.5 }); },
+  revive: function(){ if (!sfxReady('revive', 200)) return; [392, 523, 659, 784].forEach(function(f, i){ sv({ f: f, d: 0.35, v: 0.06, t: i * 0.09, a: 0.03, rv: 0.4 }); }); sn({ hp: 4000, d: 0.5, v: 0.015, t: 0.15, a: 0.1, rv: 0.4 }); },
   // Champion erscheint: Fanfare mit Pauke
-  champion: function(){ if (!sfxReady('champion', 250)) return; [392, 523, 784].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: i === 2 ? 0.45 : 0.16, v: 0.065, t: i * 0.11, a: 0.008, vib: i === 2 ? 6 : 0 }); }); sv({ f: 110, f2: 70, d: 0.25, v: 0.09 }); sn({ lp: 500, d: 0.2, v: 0.05 }); },
+  champion: function(){ if (!sfxReady('champion', 250)) return; [392, 523, 784].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: i === 2 ? 0.45 : 0.16, v: 0.065, t: i * 0.11, a: 0.008, vib: i === 2 ? 6 : 0, rv: 0.35 }); }); sv({ f: 110, f2: 70, d: 0.25, v: 0.09 }); sn({ lp: 500, d: 0.2, v: 0.05, rv: 0.3 }); },
+  // PvP: einen Spieler besiegt – harter Schlag und zwei Töne nach oben
+  ko: function(){ if (!sfxReady('ko', 250)) return; sv({ f: 160, f2: 45, d: 0.3, v: 0.15, rv: 0.25 }); sn({ bp: 900, f2: 200, d: 0.2, v: 0.08 }); sv({ w: 'square', f: 523, d: 0.1, v: 0.03, t: 0.08, lp: 2200, rv: 0.3 }); sv({ w: 'square', f: 784, d: 0.22, v: 0.03, t: 0.17, lp: 2200, rv: 0.4 }); },
   // Truhe: Perlen klimpern heraus
-  chest: function(){ if (!sfxReady('chest', 200)) return; [880, 1175, 1568, 2093, 1760].forEach(function(f, i){ sv({ w: 'triangle', f: f * rnd(0.02), d: 0.14, v: 0.045, t: i * 0.055 }); }); sn({ hp: 4200, d: 0.4, v: 0.02, t: 0.05, a: 0.05 }); },
-  crack: function(){ if (!sfxReady('crack', 80)) return; sn({ bp: 1900, f2: 700, d: 0.12, v: 0.07, q: 1.2 }); sv({ w: 'square', f: 230, f2: 110, d: 0.09, v: 0.035, lp: 1400 }); },
-  ping: function(){ if (!sfxReady('ping', 120)) return; sv({ f: 1046, d: 0.1, v: 0.045 }); sv({ f: 1318, d: 0.14, v: 0.045, t: 0.08 }); },
+  chest: function(){ if (!sfxReady('chest', 200)) return; sv({ f: 140, f2: 90, d: 0.15, v: 0.08 }); [880, 1175, 1568, 2093, 1760, 2349].forEach(function(f, i){ sv({ w: 'triangle', f: f * rnd(0.02), d: 0.16, v: 0.045, t: 0.04 + i * 0.05, rv: 0.35 }); }); sn({ hp: 4200, d: 0.5, v: 0.022, t: 0.05, a: 0.05, rv: 0.5 }); },
+  crack: function(){ if (!sfxReady('crack', 80)) return; sn({ bp: 1900, f2: 700, d: 0.12, v: 0.07, q: 1.2, rv: 0.15 }); sv({ w: 'square', f: 230, f2: 110, d: 0.09, v: 0.035, lp: 1400 }); },
+  ping: function(){ if (!sfxReady('ping', 120)) return; sv({ f: 1046, d: 0.1, v: 0.045, rv: 0.3 }); sv({ f: 1318, d: 0.14, v: 0.045, t: 0.08, rv: 0.3 }); },
   // Schwarmruf: ein Muschelhorn (der Filter öffnet sich langsam)
-  horn: function(){ if (!sfxReady('horn', 500)) return; sv({ w: 'sawtooth', f: 147, f2: 165, d: 1.1, v: 0.07, a: 0.12, lp: 900, glide: 0.4, vib: 5 }); sv({ w: 'sawtooth', f: 220, f2: 247, d: 1.0, v: 0.035, a: 0.15, lp: 1100, glide: 0.4, t: 0.05 }); sv({ f: 73, d: 1.1, v: 0.06, a: 0.1 }); },
+  horn: function(){ if (!sfxReady('horn', 500)) return; sv({ w: 'sawtooth', f: 147, f2: 165, d: 1.1, v: 0.07, a: 0.12, lp: 900, glide: 0.4, vib: 5, rv: 0.5 }); sv({ w: 'sawtooth', f: 220, f2: 247, d: 1.0, v: 0.035, a: 0.15, lp: 1100, glide: 0.4, t: 0.05, rv: 0.5 }); sv({ f: 73, d: 1.1, v: 0.06, a: 0.1 }); },
   // Anlauf: Wasser wirbelt
-  whoosh: function(){ if (!sfxReady('whoosh', 200)) return; sn({ bp: 380, f2: 2400, d: 0.55, v: 0.07, a: 0.2, q: 1.1 }); },
+  whoosh: function(){ if (!sfxReady('whoosh', 200)) return; sn({ bp: 380, f2: 2400, d: 0.55, v: 0.07, a: 0.2, q: 1.1, rv: 0.3 }); },
   // Strömungsritt: Rauschen der Strömung mit aufsteigendem Ton
-  ride: function(){ if (!sfxReady('ride', 300)) return; sn({ lp: 420, f2: 2200, d: 1.4, v: 0.07, a: 0.15 }); sv({ f: 300, f2: 620, d: 1.0, v: 0.03, a: 0.2 }); },
+  ride: function(){ if (!sfxReady('ride', 300)) return; sn({ lp: 420, f2: 2200, d: 1.4, v: 0.07, a: 0.15, rv: 0.3 }); sv({ f: 300, f2: 620, d: 1.0, v: 0.03, a: 0.2, rv: 0.4 }); },
   // Ankunft: Platsch und Glöckchen
-  arrive: function(){ if (!sfxReady('arrive', 300)) return; sv({ f: 130, f2: 48, d: 0.3, v: 0.12 }); sn({ bp: 1000, f2: 260, d: 0.35, v: 0.07 }); sv({ w: 'triangle', f: 1046, d: 0.25, v: 0.035, t: 0.08 }); }
+  arrive: function(){ if (!sfxReady('arrive', 300)) return; sv({ f: 130, f2: 48, d: 0.3, v: 0.12 }); sn({ bp: 1000, f2: 260, d: 0.35, v: 0.07, rv: 0.3 }); sv({ w: 'triangle', f: 1046, d: 0.25, v: 0.035, t: 0.08, rv: 0.4 }); }
 };
 
 const keys = {};
@@ -2146,7 +2338,7 @@ function spawnEnemy(typeKey, isBoss) {
     wobble: Math.random() * 10, jitter: Math.random() * Math.PI * 2, grp: 1, face: Math.random() < 0.5 ? -1 : 1
   };
   if (Net.on) {                                   // online: +50 % HP pro weiterem Spieler in der Nähe (stärker statt mehr), nie im Hafen
-    if (Net.mode === 'pvp') e.xp *= PVP_ENEMY_XP;  // PvP: wenige Gegner, dafür mehr XP
+    if (netPvp()) e.xp *= PVP_ENEMY_XP;  // PvP: wenige Gegner, dafür mehr XP
     const n = netNearbyPeers(player.x, player.y).length;
     if (n) { e.grp = 1 + NET_GROUP_HP * n; e.hp *= e.grp; e.maxHp = e.hp; }   // ... und genauso mehr Beute (XP, Perlen-Chance)
     hafenKeepOut(e);
@@ -2173,7 +2365,7 @@ function updateSpawner(dt) {
     const batch = 1 + Math.floor(runTime / 100);
     const cap = 4 + (runTime > LATE_START ? Math.floor((runTime - LATE_START) / LATE_BATCH_EVERY) : 0);   // ab 15:00 alle 2 Minuten einer mehr pro Welle
     const duel = !!bossEntity || (Net.on && netBossNear());   // im Boss-Kampf kommen weniger gewöhnliche Gegner und keine Elite
-    const pvp = Net.on && Net.mode === 'pvp';                  // PvP: es geht um die anderen Spieler – viel weniger Gegner
+    const pvp = Net.on && netPvp();                  // PvP: es geht um die anderen Spieler – viel weniger Gegner
     let n = duel ? Math.max(1, Math.ceil(Math.min(batch, cap) / 2)) : Math.min(batch, cap);
     if (pvp) n = Math.max(1, Math.round(n * PVP_BATCH));
     for (let i = 0; i < n; i++) {
@@ -2195,7 +2387,7 @@ function updateSpawner(dt) {
     spawnInterval = Math.max(0.45, 1.2 - (runTime / 60) * 0.055 * stage.difficulty);
     spawnTimer = spawnInterval * (duel ? 1.4 : 1) * (pvp ? PVP_GAP : 1);
   }
-  if (runTime >= ringTime && !bossEntity && SPAWN_TABLE_BY_STAGE[stage.id].indexOf('piranha') !== -1 && !(Net.on && Net.mode === 'pvp')) {
+  if (runTime >= ringTime && !bossEntity && SPAWN_TABLE_BY_STAGE[stage.id].indexOf('piranha') !== -1 && !(Net.on && netPvp())) {
     ringTime = runTime + 100;
     const rd = Math.hypot(W, H) / 2 + 80;
     for (let k = 0; k < 12; k++) {
@@ -2251,9 +2443,9 @@ const NET_HIT_SLOW = 2, NET_HIT_VAMPIR = 4;
 function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.dead || en.predDead) return;
   if (!src && Net.sgMult !== 1) dmg *= Net.sgMult;                               // Schwarmgeist: +15 % auf deine eigenen Treffer
-  if (en.isPlayer) { netQueuePvp(en, dmg, flags || 0); en.hitFlash = 0.12; return; }   // PvP: ein Mitspieler (sein Spiel zieht die HP ab)
+  if (en.isPlayer) { netQueuePvp(en, dmg, flags || 0); en.hitFlash = 0.12; Sfx.hit(); return; }   // PvP: ein Mitspieler (sein Spiel zieht die HP ab)
   if (en.remote) {                                                                // Gegner eines Mitspielers: sein Spiel zieht die HP ab …
-    netQueueHit(en, dmg, flags || 0); en.hitFlash = 0.12;
+    netQueueHit(en, dmg, flags || 0); en.hitFlash = 0.12; if (!src) Sfx.hit();
     netPredictHit(en, dmg);                                                       // … hier sieht man es aber gleich (Vorhersage)
     return;
   }
@@ -2261,6 +2453,7 @@ function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.shell) dmg *= (1 - SHELL_BLOCK);                                          // Gepanzert: der Panzer schluckt 60 %
   en.hp -= dmg;
   if (src !== 'lava') {
+    if (!src && en.hp > 0) Sfx.hit();
     en.hitFlash = 0.12;
     if (src) (en.helpers || (en.helpers = new Set())).add(src); else en.hitByMe = true;
   }
@@ -2285,7 +2478,7 @@ function killEnemy(en) {
   if (mine) creditKill(k);
   dropLoot(k);
   spawnBurst(en.x, en.y, en.color, en.isBoss ? 26 : 10);
-  Sfx.death();
+  if (en.isBoss || en.champ) Sfx.bigKill(); else Sfx.death(!!en.elite);
   if (en.champ) championDeath(en);
   if (Net.on) netEnemyKilled(en, k);
   if (en.isBoss) {
@@ -3028,6 +3221,9 @@ function updateChance(dt) {
   if (chanceLeft <= 0) declineChance(true);
 }
 function showChance() {
+  // was auf dem Spiel steht: ohne Zweite Chance ist dieser Lauf vorbei
+  const st = document.getElementById('chance-stake');
+  if (st) st.textContent = 'Sonst ist dein Lauf vorbei: Level ' + runLevel + ' · ' + Math.floor(runTime / 60) + ':' + String(Math.floor(runTime % 60)).padStart(2, '0') + ' · ' + runKills + ' Gegner';
   const el = document.getElementById('chancebar');
   if (el) el.classList.add('show');
   updateChance(0);
@@ -3359,11 +3555,10 @@ function showToast(text) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = text; el.classList.add('show');
-  const online = Net.on && !!player && gameState !== 'menu', boss = !!bossEntity || (online && !!netHudBoss());
-  el.classList.toggle('low', boss && !online);       // nicht über dem Boss-Lebensbalken
-  el.classList.toggle('net', online && !boss);       // online: nicht über der Raum-Anzeige
-  el.classList.toggle('netlow', online && boss);
-  el.classList.toggle('menu', !!UI['hud'] && UI['hud'].style.display !== 'block');   // in den Menüs unten: nicht über Sprachwahl und Titel
+  const inMenu = !!UI['hud'] && UI['hud'].style.display !== 'block';
+  el.classList.toggle('menu', inMenu);               // in den Menüs unten: nicht über Sprachwahl und Titel
+  // im Lauf: gleich unter allem, was oben angezeigt wird (Leisten, Raum-Zeile, Punkte-Karte, Boss-Balken) – nie darüber
+  if (!inMenu) { hudBottomAt = 0; el.style.top = Math.round(hudBottom() - 6) + 'px'; } else el.style.top = '';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
 }
@@ -3768,11 +3963,38 @@ function drawDarkness() {
 }
 
 // Pfeile am Bildschirmrand: zum Boss (rot), zu Champions (klein, in der Farbe ihrer Eigenschaft) und online zu Mitspielern
+// Unterkante der Anzeige oben (Leisten, Raum-Zeile, Punkte-Karte, Boss-Balken): Pfeile und Schriften bleiben darunter.
+// Wird höchstens alle 0,4 s neu gemessen.
+let hudBottomPx = 120, hudBottomAt = 0;
+function hudBottom() {
+  const t = performance.now();
+  if (t - hudBottomAt < 400) return hudBottomPx;
+  hudBottomAt = t;
+  let b = 0;
+  const hud = UI['hud'];
+  if (hud && hud.style.display === 'block') hud.querySelectorAll('.hud-row, .xp-wrap, .hud-ring, .hud-mini, .hud-lf, .hud-boss-wrap.active').forEach(function(el){
+    if (el.offsetParent === null) return;
+    const r = el.getBoundingClientRect(); if (r.height > 0 && r.bottom > b) b = r.bottom;
+  });
+  hudBottomPx = Math.max(60, Math.min(SH * 0.45, b + 14));
+  return hudBottomPx;
+}
+// Pfeile am Rand: liegen zwei auf derselben Stelle, rutscht der zweite am Rand entlang (nichts liegt übereinander)
+const edgeSlots = [];
 function edgeArrow(wx, wy, rgb, scale, label) {    // Bildschirm-Pixel (screenSpace)
   const sp = worldToScreen(wx, wy), sx = sp.x, sy = sp.y;
   if (sx > 0 && sx < SW && sy > 0 && sy < SH) return false;
-  const a = Math.atan2(sy - SH / 2, sx - SW / 2);
-  const ax = Math.max(30, Math.min(SW - 30, sx)), ay = Math.max(Net.on ? 168 : 120, Math.min(SH - 30, sy));   // online: unter der Raum-Zeile
+  const a = Math.atan2(sy - SH / 2, sx - SW / 2), top = hudBottom() + 14;
+  let ax = Math.max(30, Math.min(SW - 30, sx)), ay = Math.max(top, Math.min(SH - 30, sy));
+  const side = ax <= 30 || ax >= SW - 30, dirSlide = side ? (ay > SH / 2 ? -1 : 1) : (ax > SW / 2 ? -1 : 1);
+  for (let k = 0; k < 10; k++) {
+    let hit = false;
+    for (let j = 0; j < edgeSlots.length; j++) if (Math.abs(edgeSlots[j].x - ax) < 30 && Math.abs(edgeSlots[j].y - ay) < 30) { hit = true; break; }
+    if (!hit) break;
+    if (side) ay = Math.max(top, Math.min(SH - 30, ay + dirSlide * 32)); else ax = Math.max(30, Math.min(SW - 30, ax + dirSlide * 32));
+  }
+  edgeSlots.push({ x: ax, y: ay });
+  edgeLabels.push({ x: ax, y: ay, w: 30, h: 30 });     // der Pfeil selbst: keine Schrift darauf
   ctx.save(); ctx.translate(ax, ay);
   ctx.save(); ctx.rotate(a); ctx.scale(scale, scale);
   ctx.fillStyle = 'rgba(' + rgb + ',' + (0.75 + Math.sin(runTime * 8) * 0.2) + ')';
@@ -3780,15 +4002,18 @@ function edgeArrow(wx, wy, rgb, scale, label) {    // Bildschirm-Pixel (screenSp
   ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-10, -13); ctx.lineTo(-10, 13); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
   if (label) {
-    const lx = Math.max(-ax + 50, Math.min(SW - ax - 50, ax < SW / 2 ? 26 : -26)), dir = ay > SH / 2 ? -1 : 1;
+    const lx = Math.max(-ax + 50, Math.min(SW - ax - 50, ax < SW / 2 ? 26 : -26));
+    // Schrift auf die freie Seite: ober- oder unterhalb, je nachdem, wo weniger im Weg ist
+    const busy = function(dy){ let n = 0; for (let j = 0; j < edgeLabels.length - 1; j++) { const o = edgeLabels[j]; if (Math.abs(o.y - (ay + dy)) < ((o.h || 14) + 14) / 2 && Math.abs(o.x - (ax + lx)) < (o.w + 90) / 2) n++; } return n; };
+    const dir = busy(24) < busy(-22) ? 1 : busy(24) > busy(-22) ? -1 : (ay > SH / 2 ? -1 : 1);
     let ly = dir < 0 ? -22 : 24;
     ctx.font = '800 11px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const lw = ctx.measureText(label).width + 8;
     for (let k = 0; k < 6; k++) {                       // Pfeile in dieselbe Richtung (Hafen, Leitfisch, Freund): Schriften untereinander
       let hit = false;
-      for (let j = 0; j < edgeLabels.length; j++) { const o = edgeLabels[j]; if (Math.abs(o.y - (ay + ly)) < 14 && Math.abs(o.x - (ax + lx)) < (o.w + lw) / 2) { hit = true; break; } }
+      for (let j = 0; j < edgeLabels.length; j++) { const o = edgeLabels[j]; if (Math.abs(o.y - (ay + ly)) < ((o.h || 14) + 14) / 2 && Math.abs(o.x - (ax + lx)) < (o.w + lw) / 2) { hit = true; break; } }
       if (!hit) break;
-      ly += dir * 15;
+      ly += dir * 16;
     }
     edgeLabels.push({ x: ax + lx, y: ay + ly, w: lw });
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, lx, ly);
@@ -3799,8 +4024,19 @@ function edgeArrow(wx, wy, rgb, scale, label) {    // Bildschirm-Pixel (screenSp
 }
 const edgeLabels = [];
 function drawEdgeArrows() {
-  edgeLabels.length = 0;
+  edgeLabels.length = 0; edgeSlots.length = 0;
   if (gameState === 'gameover') return;
+  // Mitspieler, die am Bildrand gerade noch zu sehen sind (Figur und Namensschild): dort kommt kein Pfeil und keine Schrift hin
+  if (Net.on) Net.peers.forEach(function(pe){
+    if (!pe.seen || pe.asleep) return;
+    const sp = worldToScreen(pe.x, pe.y);
+    if (sp.x < -40 || sp.x > SW + 40 || sp.y < -40 || sp.y > SH + 40) return;
+    if (sp.x > 70 && sp.x < SW - 70 && sp.y > 70 && sp.y < SH - 70) return;
+    edgeSlots.push({ x: Math.max(30, Math.min(SW - 30, sp.x)), y: sp.y });
+    edgeSlots.push({ x: Math.max(30, Math.min(SW - 30, sp.x)), y: sp.y - 30 });
+    edgeSlots.push({ x: Math.max(30, Math.min(SW - 30, sp.x)), y: sp.y + 30 });
+    edgeLabels.push({ x: sp.x, y: sp.y + 4, w: 70, h: 60 }, { x: sp.x, y: sp.y - 34 * txtScale(), w: 120, h: 18 });
+  });
   if (bossEntity) edgeArrow(bossEntity.x, bossEntity.y, '255,92,114', 1);
   for (let i = 0; i < pickups.length; i++) {          // Schatztruhen (Boss-Schatz, Champion-Truhen) zeigen sich am Rand, bis du sie holst
     const pk = pickups[i];
@@ -7017,7 +7253,7 @@ function buyCharacter(id) {
   save.ownedCharacters.push(id);
   selectedCharacterId = id; save.lastCharacter = id;
   persistSave();
-  Sfx.claim();
+  Sfx.buy(); Sfx.claim();
   checkAchievements();
   showToast('\uD83D\uDC21 ' + ch.name + ' geh\u00F6rt jetzt dir!');
   renderCharacterGrid();
@@ -7071,14 +7307,14 @@ function renderShop() {
       '<span class="shop-item-desc">'+u.desc+'</span>' +
       '<span class="shop-item-level"><span class="pips">' + pips.join('') + '</span> Stufe '+level+' / '+u.maxLevel +
       (!maxed && !open ? '<span class="shop-gate">\uD83D\uDD12 N\u00E4chste Stufe: besiege ' + gateName(gate) + '</span>' : '') + '</span></div>' +
-      '<button class="shop-buy-btn" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost))+'</button>';
+      '<button class="shop-buy-btn" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '' : '<small class="shop-miss">noch ' + (cost - save.totalPearls) + '</small>')))+'</button>';
     if (!maxed && open) {
       div.querySelector('.shop-buy-btn').addEventListener('click', function(){
         if (save.totalPearls >= cost && shopTierOpen(gate)) {
           save.totalPearls -= cost;
           save.shopLevels[u.id] = level+1;
           persistSave();
-          Sfx.click();
+          Sfx.buy();
           renderShop();
           updateMenuPearlsLabel();
         }
@@ -7099,6 +7335,29 @@ function countUp(el, from, to, ms) {
   })(t0);
 }
 
+// Fortschritt eines Erfolgs: [jetzt, Ziel] (für die Balken in "Erfolge" und das nächste Ziel im Spiel-vorbei-Fenster)
+function achProgress(id) {
+  const st = save.stats || {};
+  const m = { first_blood: [st.totalKills, 1], kills_100: [st.totalKills, 100], kills_1000: [st.totalKills, 1000],
+    survive_5: [Math.floor(st.bestTime || 0), 300], survive_15: [Math.floor(st.bestTime || 0), 900], boss_1: [st.bossesDefeated, 1],
+    boss_all: [(st.uniqueBossesDefeated || []).length, 4], pearls_1000: [st.totalPearlsEarned, 1000], level_20: [st.bestLevel, ENTWICKELT_LEVEL],
+    all_characters: [(save.ownedCharacters || []).length, CHARACTERS.length], champ_25: [st.championsDefeated, 25], champ_boss: [st.championBossesDefeated, 1] }[id];
+  if (!m) return null;
+  return [Math.min(m[1], Math.max(0, m[0] | 0)), m[1]];
+}
+function achRatio(id) { const p = achProgress(id); return p ? p[0] / p[1] : 0; }
+function achProgressText(id) {
+  const p = achProgress(id);
+  if (!p) return '';
+  const fmtT = function(t){ return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  return /^survive_/.test(id) ? fmtT(p[0]) + ' / ' + fmtT(p[1]) : p[0] + ' / ' + p[1];
+}
+// das nächste erreichbare Ziel: der gesperrte Erfolg, dem du am nächsten bist
+function achNextGoal() {
+  let best = null, br = -1;
+  ACHIEVEMENTS.forEach(function(a){ if (achUnlocked(a.id)) return; const r = achRatio(a.id); if (r < 1 && r > br) { br = r; best = a; } });
+  return best;
+}
 function renderAchievements(flashIds, fromPearls) {
   flashIds = flashIds || [];
   const list = UI['achievement-list'];
@@ -7107,8 +7366,14 @@ function renderAchievements(flashIds, fromPearls) {
   if (total) {
     if (typeof fromPearls === 'number') countUp(total, fromPearls, save.totalPearls, 700); else total.textContent = save.totalPearls;
   }
-  const rank = function(a) { return achUnlocked(a.id) ? (achClaimed(a.id) ? 1 : 0) : 2; };
-  const rows = ACHIEVEMENTS.map(function(a, i){ return { a: a, i: i }; }).sort(function(x, y){ return (rank(x.a) - rank(y.a)) || (x.i - y.i); });
+  // Reihenfolge: einlösbar, dann noch gesperrt (wem du am nächsten bist, zuerst), dann schon eingelöst
+  const rank = function(a) { return achUnlocked(a.id) ? (achClaimed(a.id) ? 2 : 0) : 1; };
+  const rows = ACHIEVEMENTS.map(function(a, i){ return { a: a, i: i }; }).sort(function(x, y){ return (rank(x.a) - rank(y.a)) || (rank(x.a) === 1 ? achRatio(y.a.id) - achRatio(x.a.id) : 0) || (x.i - y.i); });
+  const sumEl = document.getElementById('ach-summary');
+  if (sumEl) {
+    const n = ACHIEVEMENTS.filter(function(a){ return achUnlocked(a.id); }).length;
+    sumEl.innerHTML = '<span>🏆 ' + n + ' von ' + ACHIEVEMENTS.length + ' Erfolgen</span><span class="ach-bar"><i style="width:' + (n / ACHIEVEMENTS.length * 100).toFixed(1) + '%"></i></span>';
+  }
   const pend = pendingAchievements();
   const allBtn = document.getElementById('btn-ach-claim-all');
   if (allBtn) {
@@ -7122,7 +7387,8 @@ function renderAchievements(flashIds, fromPearls) {
     div.className = 'achievement-item ' + (claimable ? 'claimable' : (unlocked ? 'unlocked claimed' : 'locked')) + (flashIds.indexOf(a.id) !== -1 ? ' flash' : '');
     div.innerHTML = '<span class="achievement-icon">' + (claimable ? '🎁' : (unlocked ? '🏆' : '🔒')) + '</span>' +
       '<div class="achievement-item-info"><span class="achievement-item-name">' + a.name + (claimable ? '<span class="new-tag">NEU</span>' : '') + '</span>' +
-      '<span class="achievement-item-desc">' + a.desc + ' · ' + (claimed ? '✓ eingelöst' : '+' + reward + ' 💧') + '</span></div>' +
+      '<span class="achievement-item-desc">' + a.desc + ' · ' + (claimed ? '✓ eingelöst' : '+' + reward + ' 💧') + '</span>' +
+      (!unlocked && achProgress(a.id) ? '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (achRatio(a.id) * 100).toFixed(1) + '%"></i></span><span class="ach-prog-n">' + achProgressText(a.id) + '</span></span>' : '') + '</div>' +
       (claimable ? '<button class="ach-claim-btn">Einlösen<br>+' + reward + ' 💧</button>' : '');
     if (flashIds.indexOf(a.id) !== -1) {
       const f = document.createElement('span');
@@ -7205,9 +7471,30 @@ function renderGameOverScreen() {
   } else {
     achWrap.innerHTML = '';
   }
+  // nächstes Ziel (Erfolg, dem du am nächsten bist) und was du dir mit deinen Perlen jetzt leisten kannst
+  // nur ein Hinweis auf einmal: Belohnungen zuerst (oben), sonst eine Verbesserung, die du dir leisten kannst, sonst das nächste Ziel
+  let extra = '';
+  const goal = achNextGoal(), buy = pend.length ? null : shopAffordable();
+  if (buy) extra = '<div class="go-next">💧 Du hast jetzt <b>' + save.totalPearls + ' Perlen</b> – genug für <b>' + buy.u.name + '</b> (' + buy.cost + ' 💧).</div>';
+  else if (goal && !newly.length) extra = '<div class="go-next">🎯 Nächstes Ziel: <b>' + goal.name + '</b> – ' + goal.desc +
+    '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (achRatio(goal.id) * 100).toFixed(1) + '%"></i></span><span class="ach-prog-n">' + achProgressText(goal.id) + '</span></span></div>';
+  if (extra) achWrap.insertAdjacentHTML('beforeend', extra);
+  const goShop = document.getElementById('btn-gameover-shop');
+  if (goShop) goShop.style.display = buy ? '' : 'none';
   const goAch = document.getElementById('btn-gameover-achievements');
   if (goAch) goAch.style.display = pend.length ? '' : 'none';
   updateMenuPearlsLabel();
+}
+// die günstigste offene Verbesserung, die du dir gerade leisten kannst (oder null)
+function shopAffordable() {
+  let best = null;
+  SHOP_UPGRADES.forEach(function(u){
+    const level = save.shopLevels[u.id] || 0;
+    if (level >= u.maxLevel || !shopTierOpen(u.gates[level] || 0)) return;
+    const cost = shopCost(u, level);
+    if (cost <= save.totalPearls && (!best || cost < best.cost)) best = { u: u, cost: cost };
+  });
+  return best;
 }
 
 function initUI() {
@@ -7225,6 +7512,7 @@ function initUI() {
   document.getElementById('btn-goto-shop').addEventListener('click', function(){ Sfx.click(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-goto-achievements').addEventListener('click', function(){ Sfx.click(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-ach-claim-all').addEventListener('click', function(){ claimAllAchievements(); });
+  document.getElementById('btn-gameover-shop').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-gameover-achievements').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-instructions').addEventListener('click', function(){ Sfx.click(); showScreen('screen-instructions'); });
 
@@ -7252,15 +7540,20 @@ function initUI() {
   document.getElementById('btn-retry').addEventListener('click', function(){ startRun(selectedCharacterId, selectedStageId); });
   document.getElementById('btn-gameover-menu').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); });
 
+  // Ton an / aus: der Knopf zeigt, wie es gerade ist (im Pause-Menü in Worten)
+  function showMute() {
+    if (UI['btn-mute']) UI['btn-mute'].textContent = save.muted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+    if (UI['btn-mute-pause']) UI['btn-mute-pause'].textContent = save.muted ? '🔇 Ton: aus' : '🔊 Ton: an';
+  }
   function toggleMute() {
     save.muted = !save.muted;
     persistSave();
-    const label = save.muted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
-    if (UI['btn-mute']) UI['btn-mute'].textContent = label;
+    showMute();
+    if (!save.muted) { ensureAudio(); Sfx.click(); }
   }
   UI['btn-mute'].addEventListener('click', function(){ toggleMute(); });
   UI['btn-mute-pause'].addEventListener('click', function(){ toggleMute(); });
-  if (save.muted && UI['btn-mute']) UI['btn-mute'].textContent = '\uD83D\uDD07';
+  showMute();
 
   initOnlineUI();
   checkAchievements();
@@ -7269,9 +7562,31 @@ function initUI() {
 
 // ---------- Bildschirme "Online spielen": erst das Profil (Name, Blobi), dann die Spielart, dann Gebiet oder Code ----------
 let onlineArea = null, onlinePurpose = 'quick', onlineAreaTouched = false, onlineStats = null, onlineStatsTimer = 0;
-const ONLINE_SCREENS = ['screen-online', 'screen-online-mode', 'screen-online-area', 'screen-online-code'];
-const ONLINE_STATUS_IDS = ['online-status', 'online-status-mode', 'online-status-area', 'online-status-code'];
-const ONLINE_ACTION_IDS = ['btn-online-next', 'btn-mode-resume', 'btn-mode-quick', 'btn-mode-create', 'btn-mode-join', 'btn-area-go', 'btn-online-join'];
+// Schritt für Schritt, immer nur zwei Möglichkeiten: Profil → Zusammen / Gegeneinander → (PvP: Teams / Jeder gegen jeden)
+// → Schnellspiel / Mit Freunden → Gebiet. Ein Code von einem Freund geht direkt vom zweiten Schritt aus.
+const ONLINE_SCREENS = ['screen-online', 'screen-online-mode', 'screen-online-pvp', 'screen-online-with', 'screen-online-area', 'screen-online-code'];
+const ONLINE_STATUS_IDS = ['online-status', 'online-status-mode', 'online-status-pvp', 'online-status-with', 'online-status-area', 'online-status-code'];
+const ONLINE_ACTION_IDS = ['btn-online-next', 'btn-mode-resume', 'btn-kind-coop', 'btn-kind-pvp', 'btn-kind-team', 'btn-kind-ffa', 'btn-mode-quick', 'btn-mode-create', 'btn-mode-join', 'btn-area-go', 'btn-online-join'];
+const ONLINE_STEP_OF = { 'screen-online': 'profile', 'screen-online-mode': 'mode', 'screen-online-pvp': 'pvp', 'screen-online-with': 'with', 'screen-online-area': 'area', 'screen-online-code': 'code' };
+const ONLINE_MODE_LABEL = { coop: '🤝 COOP', pvp: '⚔️ Team-PvP', ffa: '🗡️ Jeder gegen jeden' };
+function onlineModeIsPvp(m) { return m === 'pvp' || m === 'ffa'; }
+// Fortschritt oben: der erste Schritt (Profil) ist schon erledigt, sobald du weiter bist
+function renderOnlineSteps(screenId) {
+  const at = ONLINE_STEP_OF[screenId];
+  if (!at) return;
+  const flow = at === 'code' ? ['profile', 'mode', 'code'] : ['profile', 'mode'].concat(onlineModeIsPvp(onlineMode()) || at === 'pvp' ? ['pvp'] : [], ['with', 'area']);
+  const k = Math.max(0, flow.indexOf(at));
+  const html = flow.map(function(f, i){ return '<i class="' + (i < k ? 'done' : i === k ? 'cur' : '') + '"></i>'; }).join('') + '<span>Schritt ' + (k + 1) + ' von ' + flow.length + '</span>';
+  const el = document.getElementById(screenId), box = el && el.querySelector('.osteps');
+  if (box) box.innerHTML = html;
+}
+// "Du spielst als …": was du schon gewählt hast, als Zeile über den nächsten Möglichkeiten
+function onlineWhoText(withMode, withPurpose) {
+  let t = 'Du spielst als <b>' + netEsc(onlineName()) + '</b> · ' + netEsc(charName(selectedCharacterId));
+  if (withMode) t += ' · ' + ONLINE_MODE_LABEL[onlineMode()];
+  if (withPurpose) t += ' · ' + (onlinePurpose === 'quick' ? '⚡ Schnellspiel' : '👥 Mit Freunden');
+  return t;
+}
 
 function onlineScreenOpen() {
   return ONLINE_SCREENS.some(function(id){ const el = document.getElementById(id); return !!(el && el.classList && el.classList.contains('active')); });
@@ -7300,16 +7615,23 @@ function renderOnlineProfile() {
   if (!netConfigured()) onlineStatus('Der Online-Server ist noch nicht eingerichtet (Anleitung: blobfisch-online/README.md).', true);
 }
 function renderOnlineMode() {
-  ['coop', 'pvp'].forEach(function(k){ const b = document.getElementById('btn-kind-' + k); if (b) { b.classList.toggle('selected', onlineMode() === k); b.setAttribute('aria-checked', onlineMode() === k ? 'true' : 'false'); } });
-  const jn = document.getElementById('btn-mode-join');
-  if (jn) { const sm = jn.querySelector('small'); if (sm) sm.textContent = 'Mit dem Code aus 4 Buchstaben, den dir ein Freund sagt (COOP oder PvP bestimmt sein Raum)'; }
-  const who = document.getElementById('online-who');
-  if (who) who.innerHTML = 'Du spielst als <b>' + netEsc(onlineName()) + '</b> · ' + netEsc(charName(selectedCharacterId));
+  const m = onlineMode(), chosen = !!save.onlineMode;
+  // die letzte Wahl ist vorgewählt (grün umrandet, "Zuletzt"); wer zum ersten Mal kommt, sieht COOP als Empfehlung
+  const mark = function(id, on, tag){ const b = document.getElementById(id); if (!b) return; b.classList.toggle('last', on); const t = b.querySelector('.om-tag'); if (t) t.textContent = tag; };
+  mark('btn-kind-coop', m === 'coop', chosen ? 'Zuletzt' : 'Für den Anfang');
+  mark('btn-kind-pvp', chosen && onlineModeIsPvp(m), 'Zuletzt');
+  mark('btn-kind-team', m === 'pvp', 'Zuletzt');
+  mark('btn-kind-ffa', m === 'ffa', 'Zuletzt');
+  ['online-who', 'online-who-pvp'].forEach(function(id){ const w = document.getElementById(id); if (w) w.innerHTML = onlineWhoText(false, false); });
+  const ww = document.getElementById('online-who-with'); if (ww) ww.innerHTML = onlineWhoText(true, false);
   const snap = onlineSnapshot(), rb = document.getElementById('btn-mode-resume');
   if (rb) {
     rb.style.display = snap ? '' : 'none';
     const sub = document.getElementById('mode-resume-sub');
-    if (snap && sub) sub.textContent = onlineSnapLabel(snap) + ' – dein Lauf wartet auf dich';
+    if (snap && sub) {
+      const left = Math.max(1, Math.ceil((ONLINE_SNAP_TTL - (Date.now() - (snap.savedAt || 0))) / 60000));
+      sub.textContent = onlineSnapLabel(snap) + ' – wartet noch ' + left + ' Min. auf dich, dann ist er weg';
+    }
   }
   renderOnlineCounts();
 }
@@ -7321,16 +7643,17 @@ function renderOnlineCounts() {
     !s ? '' : s.total > 0 ? '🟢 ' + s.total + ' Spieler online' : '⚪ Gerade ist niemand online – vielleicht kommt jemand dazu!';
   const q = document.getElementById('mode-quick-count');
   if (q) {
-    const pvp = onlineMode() === 'pvp', n = s ? onlineSum(pvp ? s.openPvp : s.open) : 0;
-    q.textContent = !s ? 'Spiel mit allen, die gerade online sind' : n > 0 ? n + (pvp ? ' gerade im PvP-Schnellspiel' : ' gerade im Schnellspiel') + ' – spring dazu!' : 'Noch niemand da – fang an, andere kommen dazu';
+    const n = s ? onlineSum(onlineOpen(s)) : 0;
+    q.textContent = !s ? 'Spiel mit allen, die gerade online sind' : n > 0 ? '🟢 ' + n + ' spielen gerade – spring dazu!' : 'Noch niemand da – fang an, andere kommen dazu';
   }
   renderOnlineAreas();
 }
 // Schnellspiel: das Gebiet, in dem gerade die meisten spielen (wenn freigeschaltet), sonst das zuletzt gewählte
+function onlineOpen(s) { const m = onlineMode(); return s ? (m === 'ffa' ? s.openFfa : m === 'pvp' ? s.openPvp : s.open) || null : null; }
 function onlineBestArea() {
   const s = onlineStats && !onlineStats.error ? onlineStats : null;
   let best = null, bn = 0;
-  const open = s ? (onlineMode() === 'pvp' ? s.openPvp : s.open) : null;
+  const open = onlineOpen(s);
   if (open) STAGES.forEach(function(st){ const n = open[st.id] | 0; if (n > bn && save.stagesUnlocked.indexOf(st.id) !== -1) { bn = n; best = st.id; } });
   return best || onlineLastArea();
 }
@@ -7341,21 +7664,20 @@ function renderOnlineAreas() {
   const quick = onlinePurpose === 'quick';
   if (quick && !onlineAreaTouched) onlineArea = onlineBestArea();
   if (!onlineArea || save.stagesUnlocked.indexOf(onlineArea) === -1) onlineArea = onlineLastArea();
-  const t = document.getElementById('online-area-title');
-  const pvp = onlineMode() === 'pvp';
-  if (t) t.textContent = (quick ? '⚡ Schnellspiel' : '➕ Neuer Raum') + (pvp ? ' · ⚔️ PvP' : ' · 🤝 COOP');
+  const wa = document.getElementById('online-who-area'); if (wa) wa.innerHTML = onlineWhoText(true, true);
   const n = document.getElementById('online-area-note');
-  if (n) n.textContent = quick ? 'Wähle ein Gebiet – du landest im ' + (pvp ? 'PvP-' : '') + 'Raum, in dem dort schon die meisten spielen (bis 24).' : 'Wähle das Gebiet für euren privaten ' + (pvp ? 'PvP-' : '') + 'Raum (bis 8 Spieler). Danach siehst du den Code für deine Freunde.';
-  const go = document.getElementById('btn-area-go');
-  if (go) go.textContent = quick ? 'Los geht’s!' : 'Raum erstellen';
+  if (n) n.textContent = quick ? 'Du landest im Raum, in dem dort schon die meisten spielen (bis 24).' : 'Euer privater Raum für bis zu 8. Danach siehst du den Code für deine Freunde.';
   const s = onlineStats && !onlineStats.error ? onlineStats : null;
+  const op = onlineOpen(s), here = quick && op ? (op[onlineArea] | 0) : 0;
+  const go = document.getElementById('btn-area-go');
+  if (go) go.textContent = !quick ? 'Raum erstellen' : here > 0 ? 'Los geht’s! · ' + here + ' warten' : 'Los geht’s!';
   areas.innerHTML = '';
   STAGES.forEach(function(st){
     const unlocked = save.stagesUnlocked.indexOf(st.id) !== -1;
     const b = document.createElement('button');
     b.className = 'online-chip' + (st.id === onlineArea ? ' selected' : '');
     b.disabled = !unlocked;
-    const op = s ? (pvp ? s.openPvp : s.open) : null, cnt = quick && op ? (op[st.id] | 0) : 0;
+    const cnt = quick && op ? (op[st.id] | 0) : 0;
     b.innerHTML = '<span class="sw" style="background:linear-gradient(135deg,' + st.bgTop + ',' + st.bgBottom + ')"></span>' + (unlocked ? '' : '🔒 ') + st.name +
       (cnt ? '<span class="cnt">' + cnt + ' 🟢</span>' : '');
     b.addEventListener('click', function(){ onlineArea = st.id; onlineAreaTouched = true; Sfx.click(); renderOnlineAreas(); });
@@ -7389,7 +7711,7 @@ function onlineCheckName() {
   save.onlineName = v; persistSave();
   return true;
 }
-function onlineShow(id) { onlineStatus(''); onlineEnable(true); showScreen(id); onlineStatsStart(); }
+function onlineShow(id) { onlineStatus(''); onlineEnable(true); renderOnlineSteps(id); showScreen(id); onlineStatsStart(); }
 function initOnlineUI() {
   Net.onStatus = onlineStatus;
   const on = function(id, ev, fn){ const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
@@ -7400,18 +7722,24 @@ function initOnlineUI() {
   });
   on('online-name', 'change', function(){ if (onlineCheckName()) onlineStatus(''); });
   on('online-name', 'keydown', function(e){ if (e.key === 'Enter') { const b = document.getElementById('btn-online-next'); if (b) b.click(); } });
-  on('btn-online-next', 'click', function(){ Sfx.click(); if (!netConfigured() || !onlineCheckName()) return; renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-online-next', 'click', function(){ if (!netConfigured() || !onlineCheckName()) { Sfx.click(); return; } Sfx.step(); renderOnlineMode(); onlineShow('screen-online-mode'); });
   on('btn-online-back', 'click', function(){ Sfx.click(); back(); onlineStatus(''); updateMenuPearlsLabel(); showScreen('screen-menu'); });
   on('btn-mode-resume', 'click', function(){ Sfx.click(); onlineResume(); });
-  ['coop', 'pvp'].forEach(function(k){ on('btn-kind-' + k, 'click', function(){ Sfx.click(); save.onlineMode = k; persistSave(); renderOnlineMode(); }); });
-  on('btn-mode-quick', 'click', function(){ Sfx.click(); onlinePurpose = 'quick'; onlineAreaTouched = false; renderOnlineAreas(); onlineShow('screen-online-area'); });
-  on('btn-mode-create', 'click', function(){ Sfx.click(); onlinePurpose = 'create'; onlineArea = onlineLastArea(); renderOnlineAreas(); onlineShow('screen-online-area'); });
+  const pick = function(mode){ save.onlineMode = mode; persistSave(); Sfx.step(); renderOnlineMode(); onlineShow('screen-online-with'); };
+  on('btn-kind-coop', 'click', function(){ pick('coop'); });
+  on('btn-kind-pvp', 'click', function(){ Sfx.step(); renderOnlineMode(); onlineShow('screen-online-pvp'); });
+  on('btn-kind-team', 'click', function(){ pick('pvp'); });
+  on('btn-kind-ffa', 'click', function(){ pick('ffa'); });
+  on('btn-pvp-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-with-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow(onlineModeIsPvp(onlineMode()) ? 'screen-online-pvp' : 'screen-online-mode'); });
+  on('btn-mode-quick', 'click', function(){ Sfx.step(); onlinePurpose = 'quick'; onlineAreaTouched = false; renderOnlineAreas(); onlineShow('screen-online-area'); });
+  on('btn-mode-create', 'click', function(){ Sfx.step(); onlinePurpose = 'create'; onlineArea = onlineLastArea(); renderOnlineAreas(); onlineShow('screen-online-area'); });
   on('btn-mode-join', 'click', function(){
     Sfx.click(); onlineShow('screen-online-code');
     const c = document.getElementById('online-code'); if (c && c.focus) { try { c.focus(); } catch (e) {} }
   });
   on('btn-mode-back', 'click', function(){ Sfx.click(); back(); renderOnlineProfile(); onlineShow('screen-online'); });
-  on('btn-area-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-mode'); });
+  on('btn-area-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-with'); });
   on('btn-code-back', 'click', function(){ Sfx.click(); back(); renderOnlineMode(); onlineShow('screen-online-mode'); });
   on('btn-area-go', 'click', function(){
     Sfx.click();
@@ -7433,7 +7761,7 @@ function initOnlineUI() {
   });
   on('btn-continue-online', 'click', function(){ Sfx.click(); ensureAudio(); renderOnlineMode(); onlineShow('screen-online-mode'); onlineResume(); });
   // im Lauf: Spielerliste (Tab oder Antippen der Raum-Anzeige) und Kurznachrichten (Q oder 💬)
-  ['hud-room', 'btn-chat'].forEach(function(id){ const el = document.getElementById(id); if (el) tapButton(el, function(){ if (id === 'hud-room') togglePlayerList(); else toggleQuickWheel(); }); });
+  ['hud-room', 'btn-chat', 'hud-lf'].forEach(function(id){ const el = document.getElementById(id); if (el) tapButton(el, function(){ if (id === 'btn-chat') toggleQuickWheel(); else togglePlayerList(); }); });
   on('plist-close', 'click', function(){ togglePlayerList(false); });
   // Schwarmruf (nur der Leitfisch), Folgen / Nein, Team wechseln
   [['btn-call', function(){ netRequestCall(); }], ['btn-call-follow', function(){ netFollow(); }], ['btn-call-no', function(){ netDeclineCall(); }],
@@ -7458,7 +7786,7 @@ function initOnlineUI() {
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 4;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams)
+const NET_PROTOCOL = 5;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden')
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
@@ -7554,11 +7882,15 @@ function onlineName() {
   return save.onlineName;
 }
 function netStatus(text, bad) { if (Net.onStatus) Net.onStatus(text, !!bad); }
-function netRoomName() { return Net.kind === 'global' ? (Net.title || Net.code) : 'Raum ' + Net.code + (Net.mode === 'pvp' ? ' (PvP)' : ''); }
-function netModeIcon() { return Net.mode === 'pvp' ? '⚔️' : '🤝'; }
-function netRoomLabel() { return netModeIcon() + ' ' + (Net.kind === 'global' ? (Net.title || Net.code) : Net.code) + ' · ' + (Net.peers.size + 1) + '/' + Net.cap + (netTeams() ? ' · ' + TEAM_ICONS[Net.team] + ' ' + TEAM_NAMES[Net.team] : ''); }
-// COOP oder PvP (Auswahl im Online-Menü, gespeichert)
-function onlineMode() { return save.onlineMode === 'pvp' ? 'pvp' : 'coop'; }
+function netRoomName() { return Net.kind === 'global' ? (Net.title || Net.code) : 'Raum ' + Net.code + (netModeTag()); }
+function netModeIcon() { return Net.mode === 'ffa' ? '🗡️' : netPvp() ? '⚔️' : '🤝'; }
+// PvP-Räume: 'pvp' = Team Blau gegen Team Rot, 'ffa' = jeder gegen jeden (ohne Teams, ohne Schwarmruf)
+function netPvp() { return Net.mode === 'pvp' || Net.mode === 'ffa'; }
+function netModeTag() { return Net.mode === 'ffa' ? ' (Jeder gegen jeden)' : Net.mode === 'pvp' ? ' (Team-PvP)' : ''; }
+function cleanOnlineMode(m) { return m === 'pvp' || m === 'ffa' ? m : 'coop'; }
+function netRoomLabel() { return netModeIcon() + ' ' + (Net.kind === 'global' ? (Net.title || Net.code) : Net.code) + ' · 👥 ' + (Net.peers.size + 1) + '/' + Net.cap; }
+// COOP, Team-PvP oder Jeder gegen jeden (Auswahl im Online-Menü, gespeichert)
+function onlineMode() { return cleanOnlineMode(save.onlineMode); }
 // Die Gratis-Grenze von Cloudflare gilt pro Tag bis 00:00 UTC (in der Schweiz 1 oder 2 Uhr nachts)
 function netLimitText() {
   let at = '2 Uhr nachts';
@@ -7714,9 +8046,9 @@ function netOnWelcome(m) {
   netClearRemote();
   Net.id = m.id; Net.code = m.code; Net.kind = m.kind === 'global' ? 'global' : 'private'; Net.title = m.title || m.code;
   Net.area = m.area; Net.name = m.name; Net.col = m.col || 0; Net.cap = m.cap || 8; Net.anchor = m.anchor || m.id;
-  Net.mode = m.mode === 'pvp' ? 'pvp' : 'coop';
+  Net.mode = cleanOnlineMode(m.mode);
   Net.rt = null; Net.multi = false; Net.wasAnchor = false; Net.doneB = 0; Net.doneC = 0;
-  Net.v4 = (m.v | 0) >= 4; Net.team = Net.v4 && Net.mode === 'pvp' && (m.tm === 0 || m.tm === 1) ? m.tm : -1; Net.lb = null;
+  Net.v4 = (m.v | 0) >= 4; Net.team = Net.v4 && netPvp() && (m.tm === 0 || m.tm === 1) ? m.tm : -1; Net.lb = null;
   // Schwarmpunkte zählen pro Raum; nach dem Neuladen (oder Wiederkommen) bringt der Server deine bisherigen mit
   if (Net.ptsRoom !== m.code) { Net.pts = Math.max(0, +m.pts || 0); Net.ptsRoom = m.code; } else Net.pts = Math.max(Net.pts, +m.pts || 0);
   (m.players || []).forEach(function(p){ netAddPeer(p, false); });
@@ -7738,7 +8070,7 @@ function netOnWelcome(m) {
   showToast(m.renamed ? 'Dein Name war nicht erlaubt – du heisst jetzt ' + m.name + '.' :
     resume ? '🔄 Dein Lauf geht weiter: Level ' + runLevel + ' · ' + netRoomName() + withWho :
     Net.kind === 'global' ? netModeIcon() + ' ' + Net.title + (withWho || ' – noch allein. Andere können jederzeit dazukommen!') :
-    Net.created ? netModeIcon() + ' Raum ' + m.code + (Net.mode === 'pvp' ? ' (PvP)' : '') + ' – gib deinen Freunden diesen Code!' : netModeIcon() + ' Raum ' + m.code + (Net.mode === 'pvp' ? ' (PvP)' : '') + withWho);
+    Net.created ? netModeIcon() + ' Raum ' + m.code + (netModeTag()) + ' – gib deinen Freunden diesen Code!' : netModeIcon() + ' Raum ' + m.code + (netModeTag()) + withWho);
 }
 function netAddPeer(p, announce) {
   if (!p || p.id === Net.id) return;
@@ -8255,7 +8587,7 @@ function netAdoptEnemies(pe, list) {
 // Die Mitspieler werden als Ziele (pvpTargets) in die Gegner-Liste deiner Waffen gemischt; ein Treffer wird gesammelt und an den
 // Getroffenen geschickt (pv), dessen Spiel ihn mit PVP_DMG abzieht. Nie im Hafen, nie an Ohnmächtigen.
 function netBuildPvpTargets(dt) {
-  if (Net.mode !== 'pvp' || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y) || netRiding() || netJustLanded()) { pvpTargets = []; return; }
+  if (!netPvp() || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y) || netRiding() || netJustLanded()) { pvpTargets = []; return; }
   const out = [];
   Net.peers.forEach(function(pe){
     const t = pe.tgt;
@@ -8268,7 +8600,7 @@ function netBuildPvpTargets(dt) {
   pvpTargets = out;
 }
 function netQueuePvp(t, dmg) {
-  if (Net.mode !== 'pvp' || !t.owner) return;
+  if (!netPvp() || !t.owner) return;
   Net.pvpOut.set(t.owner, (Net.pvpOut.get(t.owner) || 0) + dmg);
   Net.toOut.add(t.owner);
 }
@@ -8276,7 +8608,7 @@ function netQueuePvp(t, dmg) {
 function netProcessPvp(now) {
   if (!Net.pvpIn.length) return;
   const list = Net.pvpIn; Net.pvpIn = [];
-  if (Net.mode !== 'pvp' || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y)) return;
+  if (!netPvp() || !player || gameState !== 'playing' || playerDown > 0 || inHafen(player.x, player.y)) return;
   for (let i = 0; i < list.length; i++) {
     const h = list[i];
     if (invulnTimer > 0 || now - h.at > 2000 || netRiding()) continue;
@@ -8289,7 +8621,7 @@ function netProcessPvp(now) {
 }
 // besiegt (PvP): wer zuletzt getroffen hat, erfährt es ('x')
 function netPvpKnockout() {
-  if (!Net.on || Net.mode !== 'pvp' || !Net.lastPvpBy || performance.now() - Net.lastPvpAt > PVP_KO_WINDOW) return;
+  if (!Net.on || !netPvp() || !Net.lastPvpBy || performance.now() - Net.lastPvpAt > PVP_KO_WINDOW) return;
   Net.fxOut.push(['x', performance.now(), Net.lastPvpBy]); Net.toOut.add(Net.lastPvpBy); Net.urgent = true; Net.lastSend = 0;
   const pe = Net.peers.get(Net.lastPvpBy);
   if (pe) showToast('⚔️ ' + pe.name + ' hat dich besiegt!');
@@ -8302,7 +8634,7 @@ function netOnKnockout(pe, f) {
     const lead = netIsLeader(pe.id), pts = lead ? LF_POINTS.koLeader : LF_POINTS.ko;
     netAddPoints(pts);
     if (runActive() && playerDown <= 0) gainXp((pe.lv || 1) * PVP_KO_XP);           // ein besiegter Spieler gibt XP
-    showToast('⚔️ Du hast ' + pe.name + ' besiegt!' + (lead ? ' 👑 Leitfisch-Kopfgeld' : '') + (Net.v4 ? ' +' + pts + ' Schwarmpunkte' : '')); Sfx.champion();
+    showToast('⚔️ Du hast ' + pe.name + ' besiegt!' + (lead ? ' 👑 Leitfisch-Kopfgeld' : '') + (Net.v4 ? ' +' + pts + ' Schwarmpunkte' : '')); Sfx.ko();
   } else {
     const a = Net.peers.get(f[2]);
     if (a) showToast('⚔️ ' + a.name + ' hat ' + pe.name + ' besiegt');
@@ -8310,9 +8642,9 @@ function netOnKnockout(pe, f) {
 }
 
 // ---------- Teams (PvP ab Version 4: Blau gegen Rot) ----------
-function netTeams() { return Net.v4 && Net.mode === 'pvp' && Net.team >= 0; }
+function netTeams() { return Net.v4 && Net.mode === 'pvp' && Net.team >= 0; }   // Team-PvP (Blau gegen Rot); 'ffa' = jeder gegen jeden, ohne Teams
 // Gegner im PvP: das andere Team (ohne Teams, Version 3: alle). COOP: niemand.
-function netFoe(pe) { return Net.mode === 'pvp' && (!netTeams() || pe.tm !== Net.team); }
+function netFoe(pe) { return netPvp() && (!netTeams() || pe.tm !== Net.team); }
 function netMate(pe) { return !netFoe(pe); }                      // retten kann man nur Freunde (PvP: das eigene Team)
 function netPeerColor(pe) { return netTeams() && (pe.tm === 0 || pe.tm === 1) ? TEAM_COLORS[pe.tm] : NET_COLORS[pe.col % NET_COLORS.length]; }
 function netPeerRgb(pe) { return netTeams() && (pe.tm === 0 || pe.tm === 1) ? TEAM_RGB[pe.tm] : netColorRgb(pe.col); }
@@ -8365,7 +8697,8 @@ function netOnBoard(m) {
 }
 function netCrownNews(was, now) {
   if (now === Net.id) {
-    showToast(Net.crownHint ? '👑 Du bist wieder der Leitfisch!' : '👑 Du bist der Leitfisch! Mit 📯 (Taste R) rufst du deinen Schwarm zu dir.');
+    showToast(Net.mode === 'ffa' ? '👑 Du hast die Krone! Wer dich besiegt, bekommt 60 Punkte – pass auf dich auf.' :
+      Net.crownHint ? '👑 Du bist wieder der Leitfisch!' : '👑 Du bist der Leitfisch! Mit 📯 (Taste R) rufst du deinen Schwarm zu dir.');
     Net.crownHint = true; Sfx.champion();
   } else if (was === Net.id) {
     const pe = Net.peers.get(now);
@@ -8378,7 +8711,7 @@ function netCrownNews(was, now) {
 
 // ---------- Schwarmruf: der Leitfisch ruft, wer folgt, reitet auf einer Strömung zu ihm ----------
 function netRequestCall() {
-  if (!netAmLeader()) return false;
+  if (!netAmLeader() || Net.mode === 'ffa') return false;      // jeder gegen jeden: niemand folgt dir, also kein Ruf
   const left = netCallLeft();
   if (left > 0) { showToast('📯 Der Schwarmruf ist in ' + fmtClock(left) + ' wieder bereit.'); return false; }
   if (gameState !== 'playing' || playerDown > 0 || chanceOpen() || Net.ride) { showToast('📯 Jetzt geht das nicht.'); return false; }
@@ -8593,26 +8926,44 @@ function netCallBarUpdate(now) {
 }
 
 // ---------- Anzeige: Zeile unter der Raum-Anzeige, Ruf-Knopf, Schwarmgeist ----------
-// die Zeile unter der Raum-Anzeige: PvP die Teamsummen, dann der Leitfisch mit Punkten und dein Platz
-function netLfLine() {
-  const me = Net.id, lid = netMyLeader(), myPts = netPointsOf(me);
-  let rank = 1;
-  Net.lb.order.forEach(function(id){ if (id !== me && (Net.lb.pts.get(id) || 0) > myPts) rank++; });
+// die Punkte-Karte unter der Raum-Anzeige: Team-PvP oben der Spielstand Blau gegen Rot, dann dein Platz mit deinen Punkten,
+// dann wer die Krone hat. Jede Zeile sagt in Worten, was die Zahl ist (früher stand alles in einer Zeile).
+function netMyRank() {
+  const me = Net.id, myPts = netPointsOf(me), teams = netTeams();
+  let rank = 1, of = 1;
+  Net.lb.order.forEach(function(id){
+    if (id === me) return;
+    const pe = Net.peers.get(id);
+    if (teams && (!pe || pe.tm !== Net.team)) return;
+    of++;
+    if ((Net.lb.pts.get(id) || 0) > myPts) rank++;
+  });
+  return { rank: rank, of: Math.max(of, rank) };
+}
+function netScoreCard() {
+  const me = Net.id, lid = netMyLeader(), myPts = netPointsOf(me), teams = netTeams(), r = netMyRank();
   let html = '';
-  if (netTeams() && Net.lb.ts) html += '<span class="tb">🔵 ' + fmtPts(Net.lb.ts[0]) + '</span> : <span class="tr">' + fmtPts(Net.lb.ts[1]) + ' 🔴</span> · ';
-  if (lid === me) html += '👑 <b>Du bist der Leitfisch</b> · ' + fmtPts(myPts);
+  if (teams && Net.lb.ts) {
+    const a = Net.lb.ts[0], b = Net.lb.ts[1], share = a + b > 0 ? a / (a + b) * 100 : 50;
+    html += '<div class="sc-teams"><span class="tb' + (Net.team === 0 ? ' mine' : '') + '">🔵 ' + fmtPts(a) + '</span><span class="sc-tug"><i style="width:' + share.toFixed(1) + '%"></i></span>' +
+      '<span class="tr' + (Net.team === 1 ? ' mine' : '') + '">' + fmtPts(b) + ' 🔴</span></div>';
+  }
+  html += '<div class="sc-row sc-me">🏅 ' + (teams ? (Net.team === 0 ? '🔵 ' : '🔴 ') + 'Im Team: ' : '') + 'Platz ' + r.rank + ' von ' + r.of + ' · ' + fmtPts(myPts) + ' Punkte</div>';
+  if (lid === me) html += '<div class="sc-row sc-crown">' + (Net.mode === 'ffa' ? '👑 Du hast die Krone! Alle jagen dich.' : '👑 Du hast die Krone!') + '</div>';
   else {
     const pe = Net.peers.get(lid);
-    if (lid && pe) html += '👑 ' + netEsc(pe.name) + ' <b>' + fmtPts(Net.lb.pts.get(lid) || 0) + '</b> · ';
-    html += 'Du: Platz ' + rank + ' · <b>' + fmtPts(myPts) + '</b>' + (!lid ? ' · 👑 ab 100' : '');
+    let grp = 1; Net.peers.forEach(function(q){ if (!teams || q.tm === Net.team) grp++; });
+    html += '<div class="sc-row sc-crown">' + (lid && pe ? '👑 Krone: ' + netEsc(pe.name) + ' · ' + fmtPts(Net.lb.pts.get(lid) || 0) :
+      grp < 2 ? (teams ? '👑 Krone ab 2 Spielern im Team' : '👑 Krone ab 2 Spielern') : '👑 Krone ab 100 Punkten') + '</div>';
   }
   return html;
 }
+function netLfLine() { return netScoreCard(); }
 function netHudLeitfisch() {
   if (!Net.on || !Net.v4 || !Net.lb) { hudSet('hud-lf', 'disp', 'none'); hudSet('btn-call', 'disp', 'none'); hudSet('hud-sg', 'disp', 'none'); return; }
   const me = Net.id, lid = netMyLeader();
-  hudSet('hud-lf', 'disp', 'block'); hudSet('hud-lf', 'html', netLfLine());
-  if (lid === me) {
+  hudSet('hud-lf', 'disp', 'block'); hudSet('hud-lf', 'html', netScoreCard());
+  if (lid === me && Net.mode !== 'ffa') {
     const left = netCallLeft();
     hudSet('btn-call', 'disp', 'inline-block');
     hudSet('btn-call', 'text', left > 0 && left < Infinity ? '📯 ' + fmtClock(left) : '📯');
@@ -8929,6 +9280,11 @@ function togglePlayerList(open) {
   plistOpen = !!open;
   const el = document.getElementById('plist');
   if (el) el.classList.toggle('show', plistOpen);
+  // die Liste zeigt Punkte und Krone selbst: die Punkte-Karte macht so lange Platz (nichts liegt übereinander)
+  if (UI['hud']) UI['hud'].classList.toggle('plist-open', plistOpen);
+  const room = document.getElementById('hud-room');
+  if (el && plistOpen && room && room.offsetParent !== null) el.style.top = Math.round(room.getBoundingClientRect().bottom + 8) + 'px';
+  hudBottomAt = 0;
   if (plistOpen) renderPlayerList();
 }
 function netPeerStatus(pe) {
@@ -8970,7 +9326,8 @@ function renderPlayerList() {
     sw.style.display = can ? 'block' : 'none';
     if (can) { const inH = !!player && inHafen(player.x, player.y); sw.disabled = !inH; sw.textContent = '⇄ Ins Team ' + TEAM_NAMES[1 - Net.team] + ' wechseln' + (inH ? '' : ' (nur im Hafen)'); }
   }
-  if (note) note.textContent = lf ? 'Schwarmpunkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Retten 15' + (Net.mode === 'pvp' ? ' · Spieler 30 (Leitfisch 60)' : '') + '. Der Beste ist der Leitfisch 👑.' : '';
+  if (note) note.textContent = !lf ? '' : Net.mode === 'ffa' ? 'Punkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Spieler besiegen 30 (mit Krone 60). Wer die meisten hat, trägt die Krone 👑.' :
+    'Punkte: Gegner 1 · Elite 3 · Champion 20 · Boss 50 · Retten 15' + (netPvp() ? ' · Spieler besiegen 30 (Leitfisch 60)' : '') + '. Der Beste ' + (netTeams() ? 'jedes Teams ' : '') + 'ist der Leitfisch 👑 und kann mit 📯 alle zu sich rufen.';
 }
 
 // ---------- Online-Lauf speichern: nach dem Neuladen geht er im selben Raum weiter ----------
@@ -8983,7 +9340,7 @@ function onlineSnapshot() {
 }
 function onlineSnapLabel(s) {
   const t = s.runTime || 0;
-  return (s.mode === 'pvp' ? '⚔️ ' : '') + (s.kind === 'global' ? (s.title || s.room) : 'Raum ' + s.room) + ' · Lv ' + (s.runLevel || 1) + ' · ' + Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+  return (s.mode === 'ffa' ? '🗡️ ' : s.mode === 'pvp' ? '⚔️ ' : '') + (s.kind === 'global' ? (s.title || s.room) : 'Raum ' + s.room) + ' · Lv ' + (s.runLevel || 1) + ' · ' + Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
 }
 // ein alter Online-Lauf, der nicht mehr weitergeht: seine Perlen werden gutgeschrieben
 function bankOnlineSnapshot(s) {
@@ -9467,7 +9824,7 @@ function drawPeerArrows() {
     list.push(pe);
   });
   list.sort(function(a, b){ return distXY(a.x, a.y, player.x, player.y) - distXY(b.x, b.y, player.x, player.y); });
-  for (let i = 0; i < Math.min(5, list.length); i++) {
+  for (let i = 0; i < Math.min(3, list.length); i++) {             // die 3 nächsten (früher 5: zu viel auf einmal am Rand)
     const pe = list[i], d = distXY(pe.x, pe.y, player.x, player.y);
     edgeArrow(pe.x, pe.y, netPeerRgb(pe), 0.85, pe.name + ' · ' + Math.round(d / 10) + ' m');
   }
