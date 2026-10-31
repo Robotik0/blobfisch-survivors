@@ -318,9 +318,12 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .online-mode.last { border-color: var(--bioluma); box-shadow: 0 0 0 3px rgba(94,242,192,0.15); }
 .online-mode.last .om-tag, .online-mode .om-tag.rec { display: block; }
 .online-mode .om-tag.rec { background: linear-gradient(135deg, #ffb070, #ff7a59); color: #2a0d00; }
-.online-link { display: block; width: 100%; margin: 12px 0 0; padding: 8px; border: 0; background: none; color: var(--foam-dim); font: 700 13px 'Nunito', sans-serif; cursor: pointer; text-align: center; }
-.online-link u { color: var(--bioluma); text-underline-offset: 3px; }
-.online-link:hover u { color: #fff; }
+.online-link { display: flex; align-items: center; gap: 10px; width: 100%; margin: 14px 0 0; padding: 10px 10px 10px 12px; border: 2px dashed rgba(94,242,192,0.55); border-radius: 14px; background: rgba(94,242,192,0.08); color: var(--foam); font: 800 13.5px/1.25 'Nunito', sans-serif; cursor: pointer; text-align: left; transition: all 0.15s ease; }
+.online-link .oj-ico { font-size: 22px; flex-shrink: 0; }
+.online-link .oj-text { flex: 1; min-width: 0; }
+.online-link .oj-go { flex-shrink: 0; padding: 7px 13px; border-radius: 999px; background: var(--bioluma); color: #04241a; font-weight: 900; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+.online-link:hover { border-style: solid; background: rgba(94,242,192,0.15); }
+.online-link:hover .oj-go { background: #fff; }
 .osteps { display: flex; align-items: center; justify-content: center; gap: 6px; margin: -4px 0 10px; font: 800 11px 'Nunito', sans-serif; color: var(--foam-dim); letter-spacing: 0.3px; }
 .osteps i { width: 22px; height: 6px; border-radius: 99px; background: rgba(126,224,255,0.18); }
 .osteps i.done { background: var(--bioluma); }
@@ -605,7 +608,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <button class="online-mode" id="btn-kind-coop"><span class="om-icon">🤝</span><span><b>Zusammen (COOP)</b><small>Ihr kämpft gemeinsam gegen die Gegner und rettet euch gegenseitig.</small></span><span class="om-tag">Zuletzt</span></button>
         <button class="online-mode" id="btn-kind-pvp"><span class="om-icon">⚔️</span><span><b>Gegeneinander (PvP)</b><small>Eure Waffen treffen auch andere Spieler. Wenige Gegner, viel Action.</small></span><span class="om-tag">Zuletzt</span></button>
       </div>
-      <button class="online-link" id="btn-mode-join">🔑 Du hast einen Code von einem Freund? <u>Hier beitreten</u></button>
+      <button class="online-link" id="btn-mode-join"><span class="oj-ico">🔑</span><span class="oj-text">Du hast einen Code von einem Freund?</span><span class="oj-go">Hier beitreten</span></button>
       <p class="online-status" id="online-status-mode"></p>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-mode-back">Zurück</button>
@@ -1469,6 +1472,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Gegeneinander (PvP)", "Against each other (PvP)", "Один проти одного (PvP)"],
 ["Eure Waffen treffen auch andere Spieler. Wenige Gegner, viel Action.", "Your weapons also hit other players. Few enemies, lots of action.", "Ваша зброя влучає й в інших гравців. Мало ворогів, багато екшену."],
 ["🔑 Du hast einen Code von einem Freund?", "🔑 Got a code from a friend?", "🔑 Маєш код від друга?"],
+["Du hast einen Code von einem Freund?", "Got a code from a friend?", "Маєш код від друга?"],
 ["Hier beitreten", "Join here", "Увійти тут"],
 ["⚔️ Welches PvP?", "⚔️ Which PvP?", "⚔️ Яке PvP?"],
 ["Team gegen Team", "Team vs team", "Команда на команду"],
