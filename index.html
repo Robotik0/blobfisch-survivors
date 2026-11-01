@@ -8251,9 +8251,8 @@ function artBlobBody(g, rx, ry, top, bottom, rim) {
   if (rim !== false) bossRim(g, Math.max(rx, ry));
 }
 function artShine(g, x, y, r) { g.fillStyle = 'rgba(255,255,255,0.32)'; g.beginPath(); g.ellipse(x, y, r, r * 0.6, -0.5, 0, Math.PI * 2); g.fill(); }
-/*>>bkit*/
 /* ---- Boss-Werkzeugkasten (7.3): Körper mit Licht, Schuppen, Flecken, Flossen, Tentakel, Zähne, Halo auf das gegebene Zeichenbrett ---- */
-function bkHalo(g, x, y, r, rgb, a) { const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); q.addColorStop(1, 'rgba(' + rgb + ',0)'); g.fillStyle = q; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); }
+function bkHalo(g, x, y, r, rgb, a) { g.save(); g.globalAlpha *= a; g.drawImage(stGlowImg(rgb, 0), x - r, y - r, r * 2, r * 2); g.restore(); }
 function bkBody(g, x, y, rx, ry, c, o) {         // Körper: Kugelverlauf (Licht oben links), dunkler Rand, Umriss
   o = o || {};
   const q = g.createRadialGradient(x - rx * 0.35, y - ry * 0.45, Math.min(rx, ry) * 0.08, x, y, Math.max(rx, ry) * 1.08);
@@ -8302,8 +8301,6 @@ function bkCoral(g, x, y, ang, len, w, col, d, sd, t) {   // verzweigte Koralle 
 function bkSmoke(g, t, x, y, n, r, rise, rgb) {  // aufsteigende weiche Rauch- oder Blasenwolken
   for (let i = 0; i < n; i++) { const f = (t * 0.4 + i / n) % 1; g.fillStyle = 'rgba(' + rgb + ',' + (0.38 * (1 - f)) + ')'; g.beginPath(); g.arc(x + Math.sin(f * 6 + i) * r * 0.8, y - f * rise, r * (0.5 + f), 0, 6.2832); g.fill(); }
 }
-/*<<bkit*/
-/*>>bossA*/
 // Kugelfisch-Kapitän: gelber Kugelfisch im Kapitänsrock mit Dreispitz, Pfeife und Kanone an der Hüfte; o.vv = wie stark aufgebläht (0–1); o.toxic: Gift-Variante
 function drawPufferCaptain(g, R, o) {
   const t = o.t, TAU = 6.2832, puff = Math.max(0, Math.min(1, o.vv || 0)), tox = !!o.toxic, ph = o.phase || 1, pale = puff > 0.5 ? 0.28 : 0;
@@ -8500,9 +8497,7 @@ function drawTreasureCrab(g, R, o) {
   for (let s = -1; s <= 1; s += 2) { g.strokeStyle = c; g.lineWidth = R * 0.07; g.lineCap = 'round'; g.beginPath(); g.moveTo(s * R * 0.12, -R * 0.45); g.lineTo(s * R * 0.2, -R * 0.82); g.stroke(); bossEye(g, s * R * 0.22, -R * 0.88, R * 0.12, R * 0.13, '#4a2a10', o.lookX, o.lookY, ph >= 2 ? s * -0.3 : 0, false, false); }
   for (let i = 0; i < 6; i++) { g.fillStyle = i % 3 === 2 ? '#7ae0ff' : '#ffd24a'; g.beginPath(); g.ellipse(-R * 0.5 + i * R * 0.2, -R * 0.42 - (i % 2) * R * 0.07, R * 0.09, R * 0.05, 0.2 * (i % 3), 0, TAU); g.fill(); bossRim(g, R * 0.1, 0.4); }
 }
-/*<<bossA*/
 /* ------------------------------------------------------------------ Kelpwald- und Graben-Bosse (7.2) */
-/*>>bossB*/
 function drawPoisonPuffer(g, R, o) { drawPufferCaptain(g, R, Object.assign({}, o, { spots: '#8a3ad1', torn: true, toxic: true })); }
 function bkBlade(g, x, y, ang, len, w, t, c, ph) {   // Tangblatt: wellig, an beiden Enden spitz, mit Mittelrippe
   const N = 12, ca = Math.cos(ang), sa = Math.sin(ang), P = [];
@@ -8630,8 +8625,6 @@ function drawSeahorseKnight(g, R, o) {
     if (o.pose === 'dash') bkHalo(g, R * 1.7, 0, R * 0.3, '200,240,255', 0.5); g.restore(); }
   g.restore();
 }
-/*<<bossB*/
-/*>>bossC*/
 // Panzerassel (von oben): graue Platten, viele Beine; vv 2: eingerollt (Kugel), vv 3: eingerollt mit Glanz (Konter)
 function drawIsopod(g, R, o) {
   const TAU = 6.2832, c = o.color, dk = stDrk(c, 0.45), t = o.t, vv = o.vv | 0, up = o.pose === 'tired', ph = o.phase || 1;
@@ -8732,9 +8725,7 @@ function drawGulper(g, R, o) {
   bkFin(g, -R * 0.1, -R * 0.26, -1.9, R * 0.4, R * 0.24, stDrk(c, 0.2), t, 5, 5); bkFin(g, -R * 0.1, R * 0.26, 1.9, R * 0.4, R * 0.24, stDrk(c, 0.2), t, 5, 5);
   bossEye(g, R * 0.07, -R * 0.08, R * 0.08, R * 0.08, '#ffd24a', o.lookX, o.lookY, 0, false, true);
 }
-/*<<bossC*/
 /* ------------------------------------------------------------------ Vulkan-Bosse (7.2) */
-/*>>bossD*/
 function bkFlame(g, x, y, s, t, sd, hot) {      // flackernde Flamme (Tropfenform mit hellem Kern)
   const w = s * (0.55 + 0.12 * Math.sin(t * 9 + sd)), h = s * (1.4 + 0.3 * Math.sin(t * 7 + sd * 2)), lean = Math.sin(t * 5 + sd) * s * 0.25;
   g.fillStyle = hot ? 'rgba(255,90,30,0.85)' : 'rgba(255,120,40,0.8)'; g.beginPath(); g.moveTo(x - w, y); g.quadraticCurveTo(x - w * 0.8, y - h * 0.6, x + lean, y - h); g.quadraticCurveTo(x + w * 0.8, y - h * 0.6, x + w, y); g.closePath(); g.fill();
@@ -8873,9 +8864,7 @@ function drawLionfish(g, R, o) {
   bossEye(g, R * 0.35, -R * 0.12, R * 0.14, R * 0.15, '#ffd24a', o.lookX, o.lookY, -0.35, false, ph >= 3);
   if (vv !== 10) { g.save(); g.translate(0, -R * 0.62); drawChampBossCrownArt(g, R * 0.6, '255,140,60', o.time || 0, BOSS_FX.dead); g.restore(); }
 }
-/*<<bossD*/
 /* ------------------------------------------------------------------ Legenden-Bosse (7.2) */
-/*>>legends*/
 // Atollon: riesige alte Meeresschildkröte, auf deren Rücken ein ganzes Atoll wächst (Korallenringe, Lagune, Türme, Laternen); vv 20: ein Korallenturm
 function drawAtollon(g, R, o) {
   const TAU = 6.2832, t = o.t, vv = o.vv | 0, ph = o.phase || 1, ruin = ph >= 4, cor = ['#ff8a6a', '#ffb36b', '#ff7ad9', '#5ef2c0', '#e0796a', '#f2e2a0', '#a98aff'];
@@ -9088,7 +9077,6 @@ function drawMagmaros(g, R, o) {
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { g.fillStyle = '#1a1620'; g.beginPath(); g.moveTo(s * R * (0.74 + k * 0.1), R * (0.0 + k * 0.22)); g.lineTo(s * R * (1.0 + k * 0.1), R * (-0.14 + k * 0.22)); g.lineTo(s * R * (0.8 + k * 0.1), R * (0.16 + k * 0.22)); g.closePath(); g.fill(); bossRim(g, R * 0.2, 0.4); }
   g.fillStyle = 'rgba(255,100,30,0.8)'; for (let i = 0; i < 7; i++) { const f = (t * 0.5 + i * 0.15) % 1; g.beginPath(); g.ellipse((i - 3) * R * 0.3, R * (0.78 + f * 0.18), R * 0.02, R * (0.03 + f * 0.05), 0, 0, TAU); g.fill(); }
 }
-/*<<legends*/
 // Zonen der Legenden (mit absoluten Positionen: Markierungen folgen dem Spieler, Ranken verbinden zwei Spieler)
 function drawLegendZone(z, ox, oy) {
   const TAU = Math.PI * 2, tm = runTime, k = Math.min(1, z.t / Math.max(0.01, z.warn)), warn = z.t < z.warn;
@@ -11254,7 +11242,6 @@ function stOpenInfo(b) {
 }
 
 // ---------- Zeichnen ----------
-/*>>core*/
 /* ---------- Strategie-Grafik (7.3): Gebäude, Boden, Rand ---------- */
 // Jedes Gebäude ist ein gezeichnetes Bild (Sprite): einmal pro Typ, Stufe und Zustand in ein Canvas gemalt, danach nur noch kopiert.
 // Was sich bewegt (Flaggen, Blasen, Licht, Zielrichtung, die Plätze der Truppen) zeichnet ST_ANIM in jedem Bild live darüber.
@@ -11319,7 +11306,7 @@ function stBubbles(g, tm, x, y, spread, rise, n, seed) {   // aufsteigende Blase
   for (let i = 0; i < n; i++) { const ph = (tm * (0.22 + bhash(seed + i) * 0.18) + bhash(seed + i + 9)) % 1; stBub(g, x + (bhash(seed + i + 3) - 0.5) * spread + Math.sin(tm * 2 + i) * 1.5, y - ph * rise, 0.9 + bhash(seed + i + 6) * 1.4 * (0.5 + ph)); }
 }
 
-function stSprScale() { return Math.max(0.5, Math.min(1.5, Math.ceil(DPR * ZOOM * 4) / 4)); }
+function stSprScale() { return Math.max(0.5, Math.min(1.5, Math.round(DPR * ZOOM * 100) / 100)); }
 function stBitmap(key, wU, hU, pad, fn) {        // kleines Bild im Cache; fn malt in Welt-Einheiten (0,0 = links oben ohne Rand)
   const k = stSprScale();
   if (k !== stSprK) { for (const q in stSprites) delete stSprites[q]; stSprK = k; stSprN = 0; }
@@ -11329,8 +11316,12 @@ function stBitmap(key, wU, hU, pad, fn) {        // kleines Bild im Cache; fn ma
   const c = document.createElement('canvas'); c.width = Math.ceil((wU + 2 * pad) * k); c.height = Math.ceil((hU + 2 * pad) * k);
   const g = c.getContext('2d'); g.scale(c.width / (wU + 2 * pad), c.height / (hU + 2 * pad)); g.translate(pad, pad);
   fn(g);
-  s = stSprites[key] = { c: c, pad: pad, use: renderFrame }; stSprN++;
+  s = stSprites[key] = { c: c, pad: pad, k: k, use: renderFrame }; stSprN++;
   return s;
+}
+function stBlit(g, spr, wx, wy) {                // Bild mit linker oberer Ecke bei (wx, wy) in Welt-Einheiten als Pixel-Kopie (1:1, wenn der Massstab des Bildes zum Bildschirm passt)
+  const m = g.getTransform(), s = m.a, f = s / spr.k;
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(spr.c, Math.round(m.e + wx * s), Math.round(m.f + wy * s), Math.round(spr.c.width * f), Math.round(spr.c.height * f)); g.restore();
 }
 function stSprite(type, lv, state, conn) {
   const S = ST_B[type].size * ST_TILE, u = S / 100;
@@ -11394,9 +11385,9 @@ function stDrawBuilding(g, b, x, y, tm, conn) {
   if (stUi.mode === 'move' && stUi.move === b) a = 0.35;
   if (b.type === 'stachelfalle' && !b.sprung && !b.ruin) a *= 0.6;
   g.save(); g.globalAlpha = a;
-  g.drawImage(spr.c, x - ST_PAD, y - ST_PAD, S + 2 * ST_PAD, S + 2 * ST_PAD);
+  stBlit(g, spr, x - ST_PAD, y - ST_PAD);
   const fl = b.hitT && runTime - b.hitT < 0.18 ? 1 - (runTime - b.hitT) / 0.18 : 0;
-  if (fl > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * fl * 0.5; g.drawImage(spr.c, x - ST_PAD, y - ST_PAD, S + 2 * ST_PAD, S + 2 * ST_PAD); g.globalCompositeOperation = 'source-over'; g.globalAlpha = a; }
+  if (fl > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * fl * 0.5; stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.globalCompositeOperation = 'source-over'; g.globalAlpha = a; }
   if (!b.ruin) {
     g.translate(x, y); g.scale(u, u); g.ow = 2.6 / u;
     const f = ST_ANIM[b.type]; if (f) f(g, b, tm, u);
@@ -11419,7 +11410,7 @@ function stDrawBars(g, b, x, y, S) {             // Leben, Stufe, Auswahl
 function stRectC(g, x, y, w, h, fill) { g.fillStyle = fill; g.beginPath(); roundRect(g, x, y, w, h, h / 2); g.fill(); }
 function stWallConn(b) { const k = function(dx, dy){ return stWalls[(b.x + dx) + ',' + (b.y + dy)] ? 1 : 0; }; return k(0, -1) | (k(1, 0) << 1) | (k(0, 1) << 2) | (k(-1, 0) << 3); }
 
-let stFloorCan = null, stFloorPatG = null, stFloorPat = null;
+let stFloorCan = null, stFloorDev = null, stFloorDevTp = 0;
 function stFloorTile() {                         // Sandboden, nahtlos wiederholbar
   if (stFloorCan) return stFloorCan;
   const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d');
@@ -11436,16 +11427,20 @@ function stFloorTile() {                         // Sandboden, nahtlos wiederhol
     wrap(x, y, 12, function(X, Y){ g.fillStyle = '#f0dcc8'; g.strokeStyle = 'rgba(120,80,60,0.5)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(X, Y + 5); g.arc(X, Y + 5, 7, Math.PI * 1.1, Math.PI * 1.9); g.closePath(); g.fill(); g.stroke(); for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(X, Y + 5); g.lineTo(X + k * 2.6, Y - 1.5 + Math.abs(k) * 0.9); g.stroke(); } }); }
   return (stFloorCan = c);
 }
-function stDrawFloor(g, x0, y0, sz) {
-  if (!stFloorPat || stFloorPatG !== g) { stFloorPat = g.createPattern(stFloorTile(), 'repeat'); stFloorPatG = g; }
+function stDrawFloor(g, x0, y0, sz) {            // Sandboden: die Kachel in Bildschirm-Pixeln, ohne Skalieren und ohne grosse Füllpfade (schnell auch ohne Grafikkarte)
+  const m = g.getTransform(), s = m.a, tp = Math.max(48, Math.round(256 * s));
+  if (!stFloorDev || stFloorDevTp !== tp) { const cv = document.createElement('canvas'); cv.width = cv.height = tp; cv.getContext('2d').drawImage(stFloorTile(), 0, 0, tp, tp); stFloorDev = cv; stFloorDevTp = tp; }
+  const vx0 = Math.max(0, x0), vy0 = Math.max(0, y0), vx1 = Math.min(W, x0 + sz), vy1 = Math.min(H, y0 + sz);
   g.save();
-  g.fillStyle = 'rgba(4,16,28,0.28)'; g.beginPath(); roundRect(g, x0 - 10, y0 - 2, sz + 20, sz + 22, 30); g.fill();      // Schatten rund um den Platz
-  g.translate(x0, y0); g.globalAlpha = 0.9; g.fillStyle = stFloorPat; g.beginPath(); roundRect(g, 0, 0, sz, sz, 24); g.fill(); g.globalAlpha = 1;
-  g.beginPath(); roundRect(g, 0, 0, sz, sz, 24); g.clip();                                                                 // dunkler Rand nach innen
-  const q = g.createLinearGradient(0, 0, 0, 90); q.addColorStop(0, 'rgba(40,28,14,0.34)'); q.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q; g.fillRect(0, 0, sz, 90);
-  const q2 = g.createLinearGradient(0, sz, 0, sz - 70); q2.addColorStop(0, 'rgba(40,28,14,0.3)'); q2.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q2; g.fillRect(0, sz - 70, sz, 70);
-  const q3 = g.createLinearGradient(0, 0, 70, 0); q3.addColorStop(0, 'rgba(40,28,14,0.3)'); q3.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q3; g.fillRect(0, 0, 70, sz);
-  const q4 = g.createLinearGradient(sz, 0, sz - 70, 0); q4.addColorStop(0, 'rgba(40,28,14,0.3)'); q4.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q4; g.fillRect(sz - 70, 0, 70, sz);
+  g.fillStyle = 'rgba(4,16,28,0.3)'; g.fillRect(x0 - 14, y0 - 6, sz + 28, 14); g.fillRect(x0 - 14, y0 + sz - 4, sz + 28, 22); g.fillRect(x0 - 14, y0, 14, sz); g.fillRect(x0 + sz, y0, 14, sz);   // Schatten rund um den Platz
+  if (vx1 > vx0 && vy1 > vy0) {
+    const dx0 = Math.round(m.e + vx0 * s), dy0 = Math.round(m.f + vy0 * s), dx1 = Math.round(m.e + vx1 * s), dy1 = Math.round(m.f + vy1 * s), ox = Math.round(m.e + x0 * s), oy = Math.round(m.f + y0 * s);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.beginPath(); g.rect(dx0, dy0, dx1 - dx0, dy1 - dy0); g.clip();
+    for (let ty = Math.floor((dy0 - oy) / tp); oy + ty * tp < dy1; ty++) for (let tx = Math.floor((dx0 - ox) / tp); ox + tx * tp < dx1; tx++) g.drawImage(stFloorDev, ox + tx * tp, oy + ty * tp);
+    g.setTransform(m);                                                                                                           // zurück in Welt-Einheiten (die Auswahl bleibt)
+    const band = function(xa, ya, xb, yb, rx, ry, rw, rh) { const q = g.createLinearGradient(xa, ya, xb, yb); q.addColorStop(0, 'rgba(40,28,14,0.34)'); q.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q; g.fillRect(rx, ry, rw, rh); };
+    band(0, y0, 0, y0 + 90, x0, y0, sz, 90); band(0, y0 + sz, 0, y0 + sz - 70, x0, y0 + sz - 70, sz, 70); band(x0, 0, x0 + 70, 0, x0, y0, 70, sz); band(x0 + sz, 0, x0 + sz - 70, 0, x0 + sz - 70, y0, 70, sz);
+  }
   g.restore();
 }
 function stPostSprite(gate) {                    // Säule am Rand (Tor: höher, mit Laterne)
@@ -11470,7 +11465,7 @@ function stPostSprite(gate) {                    // Säule am Rand (Tor: höher,
 }
 function stDrawRim(g, x0, y0, n, T, front) {     // Rand: Säulen und Seile; auf der Südseite das Tor
   const post = stPostSprite(false), gate = stPostSprite(true), gi = (n - 1) / 2;
-  const put = function(px, py, isGate){ const s = isGate ? gate : post, w = isGate ? 56 : 38, h = isGate ? 124 : 80; g.drawImage(s.c, px - w / 2 - s.pad, py - h + 7 - s.pad, w + 2 * s.pad, h + 2 * s.pad); };
+  const put = function(px, py, isGate){ const s = isGate ? gate : post, w = isGate ? 56 : 38, h = isGate ? 124 : 80; stBlit(g, s, px - w / 2 - s.pad, py - h + 7 - s.pad); };
   const rope = function(ax, ay, bx, by, sag){
     const mx = (ax + bx) / 2, my = (ay + by) / 2 + sag;
     g.strokeStyle = '#6c5636'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(mx, my + 2, bx, by); g.stroke();
@@ -11494,7 +11489,7 @@ function stDrawRim(g, x0, y0, n, T, front) {     // Rand: Säulen und Seile; auf
 function stDrawGhost(g, ox, oy, tm) {
   const type = stUi.mode === 'place' ? stUi.type : stUi.move.type, d = ST_B[type], T = ST_TILE, S = d.size * T, gh = stUi.ghost, ok = stFree(type, gh.x, gh.y, stUi.move), gx = gh.x * T - ox, gy = gh.y * T - oy;
   const spr = stSprite(type, stUi.mode === 'move' ? stUi.move.lv : 1, 'ok', 0);
-  g.save(); g.globalAlpha = 0.62; g.drawImage(spr.c, gx - ST_PAD, gy - ST_PAD, S + 2 * ST_PAD, S + 2 * ST_PAD); g.restore();
+  g.save(); g.globalAlpha = 0.62; stBlit(g, spr, gx - ST_PAD, gy - ST_PAD); g.restore();
   g.save(); g.fillStyle = ok ? 'rgba(94,242,192,0.2)' : 'rgba(255,92,108,0.3)'; g.beginPath(); roundRect(g, gx + 2, gy + 2, S - 4, S - 4, 12); g.fill();
   g.strokeStyle = ok ? '#5ef2c0' : '#ff5c6c'; g.lineWidth = 4; g.setLineDash([14, 9]); g.lineDashOffset = -tm * 24; g.stroke(); g.setLineDash([]);
   if (!ok) { g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(gx + S * 0.38, gy + S * 0.38); g.lineTo(gx + S * 0.62, gy + S * 0.62); g.moveTo(gx + S * 0.62, gy + S * 0.38); g.lineTo(gx + S * 0.38, gy + S * 0.62); g.stroke(); }
@@ -11537,8 +11532,6 @@ function stIcon(type, px) {                      // kleines Bild eines Gebäudes
   const s = stSprite(type, 1, 'ok', 0); c.getContext('2d').drawImage(s.c, 0, 0, q, q); return c;
 }
 function stLabel(type, text) { const s = el('span', 'st-lab'); s.appendChild(stIcon(type, 38)); s.appendChild(el('span', 'st-name', text)); return s; }
-/*<<core*/
-/*>>troops*/
 // ---------- Truppen: vier Tiere mit Schal in der Farbe des Besitzers ----------
 function drawStrategyTroops() {
   const g = ctx, ox = camera.x - W / 2, oy = camera.y - H / 2, col = netMyColor ? netMyColor() : '#ff9eb5';
@@ -11615,8 +11608,6 @@ function stTroopBody(g, type, r, fl, col, w) {   // Blick nach rechts (der Aufru
     g.fillStyle = '#c64a4a'; g.strokeStyle = ol; g.lineWidth = L * 0.8; g.beginPath(); g.ellipse(r * 0.8, r * 0.3, r * 0.14, r * 0.17, 0, 0, 6.2832); g.fill(); g.stroke();
   }
 }
-/*<<troops*/
-/*>>artA*/
 // ---------- gemeinsame Bausteine ----------
 function stStone(g, x, y, w, h, r, c0, c1) {      // Mauerwerk: Verlauf, Fugen, Glanzstreifen, Umriss
   c0 = c0 || '#fbf1df'; c1 = c1 || '#d6bf9b'; r = r == null ? 1.5 : r;
@@ -11760,11 +11751,15 @@ ST_ANIM.brutstaette = function(g, b, tm) {
   if (b.lv >= 5) { g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = stRG(g, 50, 4, 1, 16, 'rgba(255,214,150,' + (0.5 + 0.2 * Math.sin(tm * 3)) + ')', 'rgba(255,214,150,0)'); g.fillRect(30, -14, 40, 36); g.restore(); }
   g.save(); g.fillStyle = stRG(g, 50, 92, 1, 17, 'rgba(255,220,150,' + (0.22 + 0.08 * Math.sin(tm * 2.2)) + ')', 'rgba(255,220,150,0)'); g.fillRect(30, 76, 40, 30); g.restore();
 };
-/*<<artA*/
-/*>>artB*/
+const stGlowSpr = {};
+function stGlowImg(rgb, mid) {                   // weicher Leuchtfleck als kleines Bild: Mitte hell, Rand 0
+  const key = rgb + '|' + mid; let c = stGlowSpr[key]; if (c) return c;
+  c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), q = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  q.addColorStop(0, 'rgba(' + rgb + ',1)'); if (mid) q.addColorStop(0.55, 'rgba(' + rgb + ',' + mid + ')'); q.addColorStop(1, 'rgba(' + rgb + ',0)'); x.fillStyle = q; x.fillRect(0, 0, 64, 64);
+  return (stGlowSpr[key] = c);
+}
 function stGlow(g, x, y, r, rgb, a) {            // weicher Leuchtfleck (additiv)
-  g.save(); g.globalCompositeOperation = 'lighter'; const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); q.addColorStop(0.55, 'rgba(' + rgb + ',' + a * 0.4 + ')'); q.addColorStop(1, 'rgba(' + rgb + ',0)');
-  g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore();
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha *= a; g.drawImage(stGlowImg(rgb, 0.4), x - r, y - r, r * 2, r * 2); g.restore();
 }
 function stBarrel(g, x, y, w, h, band, lid) {
   stRect(g, x - w / 2, y - h / 2, w, h, w * 0.32, stLG(g, x - w / 2, 0, x + w / 2, 0, '#d0975c', '#7e5030', '#b27a46'), 1);
@@ -11936,8 +11931,6 @@ ST_ANIM.stachelfalle = function(g, b, tm) {
   spike(50, 62, 34 * ext, 4.4);
   if (k > 0.2) stGlow(g, 50, 52, 36, '190,120,255', 0.25 * k);
 };
-/*<<artB*/
-/*>>artC*/
 function stCrystal(g, x, y, w, h, tilt, col) {
   const hw = w / 2, a = [x - hw, y], b = [x + hw, y], c = [x + hw * 0.9 + tilt * 0.4, y - h * 0.78], d = [x + tilt, y - h], e = [x - hw * 0.9 + tilt * 0.4, y - h * 0.78];
   stPoly(g, [a, b, c, d, e], stLG(g, x - hw, 0, x + hw, 0, stLit(col, 0.45), stDrk(col, 0.25)), 1);
@@ -12111,7 +12104,6 @@ ST_ANIM.elektroaal = function(g, b, tm) {
   if (on) { const p = jag(33, 2.6, 67, 2.6, fr * 7, 7); g.save(); g.lineJoin = 'round'; g.lineCap = 'round'; g.strokeStyle = 'rgba(100,255,230,0.55)'; g.lineWidth = g.ow * 3.8; g.beginPath(); p.forEach(function(q, i){ if (i) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); g.stroke(); g.strokeStyle = '#ffffff'; g.lineWidth = g.ow * 1.3; g.stroke(); g.restore(); }
   if (fr % 4 < 2) { const k = (fr * 5) % 7, p = jag(50 + Math.sin(k) * 10, 34 + k * 4, 50 + Math.sin(k + 2) * 20, 38 + k * 5, fr * 3, 3); g.save(); g.strokeStyle = 'rgba(190,255,255,0.8)'; g.lineWidth = g.ow * 1; g.beginPath(); p.forEach(function(q, i){ if (i) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); g.stroke(); g.restore(); }
 };
-/*<<artC*/
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 
 function updateMenuPearlsLabel() {
@@ -12216,7 +12208,6 @@ function buyCharacter(id) {
   return true;
 }
 
-/*>>menuart*/
 /* ---------- Menü-Bilder (7.3): Gebiets-Symbole und Rohstoff-Symbole der Strategie, gemalt statt Emoji oder einfarbiger Kreise ---------- */
 function stageIcon(st, px) {
   const c = document.createElement('canvas'); c.width = c.height = px * 2; c.className = 'pick-swatch'; c.style.width = c.style.height = px + 'px';
@@ -12265,7 +12256,6 @@ function stHudBuild(h) {                         // die Leiste einmal bauen: Sym
     const s = el('span', 'st-stat'), v = el('span', 'st-val'); s.appendChild(stHudIcon(p[1], 17)); s.appendChild(v); h.appendChild(s); stHudEls[p[0]] = v;
   });
 }
-/*<<menuart*/
 function renderStageGrid() {
   const grid = UI['stage-grid'];
   grid.innerHTML = '';
