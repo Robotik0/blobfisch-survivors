@@ -57,9 +57,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 #hud { position: absolute; top: 0; left: 0; right: 0; padding: max(12px, env(safe-area-inset-top)) 14px 0; pointer-events: none; z-index: 5; display: none; }
 .hud-row { display: flex; align-items: center; gap: 8px; }
 .hud-pill {
-  background: rgba(5,20,35,0.72); border: 1px solid rgba(126,224,255,0.28);
+  background: rgba(5,20,35,0.8); border: 1px solid rgba(126,224,255,0.28);
   border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 14px;
-  backdrop-filter: blur(6px); white-space: nowrap; flex-shrink: 0;
+  white-space: nowrap; flex-shrink: 0;   /* 7.4: kein backdrop-filter mehr: er verwischt jedes Bild den Hintergrund hinter jeder Kapsel neu (teuer auf schwachen Grafikkarten, Ruckeln des Mauszeigers, Kacheln im Bild) */
 }
 .hud-timer { font-variant-numeric: tabular-nums; }
 .hud-bar-wrap {
@@ -126,6 +126,21 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .btn-sub { font-size: 11px; font-weight: 700; opacity: 0.8; margin-left: auto; }
 .menu-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
 .panel-actions { display: flex; gap: 10px; margin-top: 18px; }
+/* Hauptmenü: Verbesserungen, Erfolge, Boss-Album, Konto als vier Kacheln (kein Scrollbalken mehr); Anleitung klein neben dem Ton-Knopf */
+.menu-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.menu-tiles .btn { flex-direction: column; gap: 3px; padding: 11px 8px; font-size: 14px; min-width: 0; text-align: center; }
+.menu-tiles .btn .btn-sub { margin-left: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn-mini { width: auto; padding: 9px 16px; font-size: 13px; border-radius: 999px; }
+/* Scrollbalken in Fenstern und Menüs: schmal und in den Farben des Spiels (statt grauem Standardbalken) */
+.screen, .panel, .shop-list, .achievement-list, .album-grid { scrollbar-width: thin; scrollbar-color: rgba(126,224,255,0.35) transparent; }
+.screen::-webkit-scrollbar, .panel::-webkit-scrollbar, .shop-list::-webkit-scrollbar, .achievement-list::-webkit-scrollbar, .album-grid::-webkit-scrollbar { width: 8px; }
+.screen::-webkit-scrollbar-track, .panel::-webkit-scrollbar-track, .shop-list::-webkit-scrollbar-track, .achievement-list::-webkit-scrollbar-track, .album-grid::-webkit-scrollbar-track { background: transparent; }
+.screen::-webkit-scrollbar-thumb, .panel::-webkit-scrollbar-thumb, .shop-list::-webkit-scrollbar-thumb, .achievement-list::-webkit-scrollbar-thumb, .album-grid::-webkit-scrollbar-thumb { background: rgba(126,224,255,0.3); border-radius: 8px; }
+.screen::-webkit-scrollbar-thumb:hover, .panel::-webkit-scrollbar-thumb:hover { background: rgba(126,224,255,0.5); }
+/* Niedrige Fenster: das Menü rückt zusammen, damit es auch dann ohne Scrollen passt (auch wenn "Weiterspielen" und "Online weiterspielen" beide da sind) */
+@media (max-height: 900px) { #screen-menu .panel { max-height: 96vh; padding-top: 16px; padding-bottom: 16px; } #screen-menu .game-logo h1 br { display: none; } #screen-menu .game-logo h1 .logo-accent { margin-left: 0.26em; } #screen-menu .logo-blobi { width: 64px; height: 64px; } #screen-menu .tagline { margin: 4px 0 10px; } #screen-menu .menu-footer { margin-top: 10px; } #screen-menu .lang-toggle { margin-bottom: 6px; } }
+@media (max-height: 780px) { #screen-menu .tagline { display: none; } #screen-menu .logo-blobi { width: 48px; height: 48px; } #screen-menu .btn { padding-top: 10px; padding-bottom: 10px; } #screen-menu .btn-large { padding-top: 12px; padding-bottom: 12px; } #screen-menu .menu-buttons { gap: 8px; } #screen-menu .menu-tiles { gap: 8px; } #screen-menu .menu-tiles .btn { padding-top: 8px; padding-bottom: 8px; } }
+@media (max-height: 640px) { #screen-menu .logo-blobi { display: none; } #screen-menu .game-logo h1 { font-size: 24px; margin-top: 0; } #screen-menu .menu-buttons { gap: 6px; } #screen-menu .menu-footer { margin-top: 6px; } #screen-menu .icon-btn { width: 38px; height: 38px; } }
 
 /* ---------- Menü ---------- */
 .game-logo { margin-bottom: 6px; }
@@ -421,7 +436,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .chance-btns .btn-primary { flex: 2; background: linear-gradient(135deg, #5ef2c0, #2fc493); color: #04241a; box-shadow: 0 6px 18px rgba(94,242,192,0.35); }
 .chance-btns .btn-ghost { flex: 1; }
 .chance-hint { margin: 7px 0 0; font-size: 11px; color: var(--foam-dim); font-weight: 700; }
-@media (hover: none) { .chance-hint { display: none; } }
+@media (hover: none) { .chance-hint, .keycap { display: none; } }
+.keycap { font: 900 12px 'Nunito', sans-serif; min-width: 22px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.35); border-bottom-width: 2px; color: inherit; margin-left: 6px; }
+.callbar .keyhint { font-size: 13px; color: #ffe7a6; }
 /* Schwarmruf: der Leitfisch ruft – 10 s zum Folgen */
 .callbar { position: absolute; left: 50%; bottom: max(16%, calc(env(safe-area-inset-bottom) + 70px)); transform: translateX(-50%); width: min(440px, calc(100% - 24px)); z-index: 9; display: none;
   background: linear-gradient(180deg, rgba(42,32,8,0.95), rgba(12,14,22,0.96)); border: 1px solid rgba(255,215,106,0.7); border-radius: 18px; padding: 10px 14px 9px; box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 30px rgba(255,215,106,0.18); text-align: center; }
@@ -576,10 +593,10 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="chance-head"><span id="call-title">📯 Der Leitfisch ruft!</span><span class="chance-time" id="call-time">10 s</span></div>
     <div class="chance-track"><div class="chance-fill call-fill" id="call-fill"></div></div>
     <div class="chance-btns">
-      <button class="btn btn-primary" id="btn-call-follow">🐟 Folgen <span class="btn-sub" id="call-sub">Strömungsritt zum Leitfisch</span></button>
-      <button class="btn btn-ghost" id="btn-call-no">Nein</button>
+      <button class="btn btn-primary" id="btn-call-follow">🐟 Folgen <span class="btn-sub" id="call-sub">Strömungsritt zum Leitfisch</span><kbd class="keycap">F</kbd></button>
+      <button class="btn btn-ghost" id="btn-call-no"><span id="call-no-t">Nein</span><kbd class="keycap">N</kbd></button>
     </div>
-    <p class="chance-hint">F = Folgen · N = Nein</p>
+    <p class="chance-hint keyhint">F = Folgen · N = Nein</p>
   </div>
   <div class="qwheel" id="qwheel"><div class="qwheel-ring" id="qwheel-ring"></div><div class="qwheel-hint">Nachricht an alle im Raum · Q schliesst</div></div>
   <div class="plist" id="plist">
@@ -604,14 +621,16 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
         <button class="btn btn-secondary" id="btn-goto-strategy">🏰 Strategie <span class="beta-tag">Test</span></button>
         <button class="btn btn-secondary" id="btn-goto-online">🌐 Online spielen <span class="beta-tag">Beta</span></button>
-        <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
-        <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
-        <button class="btn btn-secondary" id="btn-goto-album">📖 Boss-Album <span class="btn-sub" id="album-count"></span></button>
-        <button class="btn btn-secondary" id="btn-goto-account">👤 Konto <span class="btn-sub" id="acc-badge">Gast</span></button>
-        <button class="btn btn-secondary" id="btn-goto-instructions">Anleitung</button>
+        <div class="menu-tiles">
+          <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
+          <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
+          <button class="btn btn-secondary" id="btn-goto-album">📖 Boss-Album <span class="btn-sub" id="album-count"></span></button>
+          <button class="btn btn-secondary" id="btn-goto-account">👤 Konto <span class="btn-sub" id="acc-badge">Gast</span></button>
+        </div>
       </div>
       <div class="menu-footer">
         <button class="icon-btn" id="btn-mute" aria-label="Ton umschalten">🔊</button>
+        <button class="btn btn-ghost btn-mini" id="btn-goto-instructions">Anleitung</button>
         <span class="best-time-label" id="menu-best-time"></span>
       </div>
     </div>
@@ -818,6 +837,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
       <div class="menu-buttons">
         <button class="btn btn-primary" id="btn-resume">Fortsetzen</button>
         <button class="btn btn-secondary" id="btn-mute-pause">Ton umschalten</button>
+        <button class="btn btn-secondary" id="btn-gfx-pause">Grafik umschalten</button>
         <button class="btn btn-secondary" id="btn-restart-pause">Neustart</button>
         <button class="btn btn-ghost" id="btn-quit-pause">Zum Menü</button>
       </div>
@@ -1925,7 +1945,10 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["{} Perlen", "{} pearls", "{} перлин"],
 ["noch {}", "{} more", "ще {}"],
 ["🔇 Ton: aus", "🔇 Sound: off", "🔇 Звук: вимк."],
-["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."]];
+["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."],
+["🖼️ Grafik: normal", "🖼️ Graphics: normal", "🖼️ Графіка: звичайна"],
+["🖼️ Grafik: einfach", "🖼️ Graphics: simple", "🖼️ Графіка: проста"],
+["🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sie sich wieder ausschalten.", "🖼️ Simple graphics are on because the game froze several times. You can turn them off in the pause menu.", "🖼️ Просту графіку ввімкнено, бо гра кілька разів зависала. Вимкнути її можна в меню паузи."]];
 
 // Anleitung in drei Sprachen (Bildschirm "Anleitung"); renderInstructions() setzt die gewählte ein
 const INSTRUCTIONS = {
@@ -2166,7 +2189,7 @@ function renderInstructions() {
    CANVAS, EINGABE, AUDIO
    ============================================================ */
 const canvas = document.getElementById('game-canvas');
-let ctx = canvas.getContext('2d');
+let ctx = canvas.getContext('2d', { alpha: false });   // 7.4: undurchsichtige Zeichenfläche (das Bild füllt jedes Mal alles): der Browser muss sie nicht mit der Seite mischen
 // W × H: der sichtbare Ausschnitt der Welt (Welt-Einheiten). SW × SH: der Bildschirm (CSS-Pixel). ZOOM = SW / W.
 // Jedes Gerät sieht ungefähr gleich viel Welt (VIEW_AREA): ein Handy zeigt alles etwas kleiner, ein grosser Bildschirm etwas grösser,
 // damit Reichweiten, Gegner-Abstände und die Schwierigkeit nicht mehr von der Bildschirmgrösse abhängen.
@@ -6865,22 +6888,31 @@ function pauseRoomText() {
 window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing' && !pauseOverlay) togglePause(); saveRunSnapshotIfActive(); });
 document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); hardPause(); saveRunSnapshotIfActive(); } });
 window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
-setInterval(function(){ saveRunSnapshotIfActive(); }, 8000);
+setInterval(function(){ if (window.requestIdleCallback) window.requestIdleCallback(saveRunSnapshotIfActive, { timeout: 4000 }); else saveRunSnapshotIfActive(); }, 8000);   // 7.4: im Leerlauf zwischen zwei Bildern (der Schnappschuss mit allen Gegnern dauert in Boss-Kämpfen spürbar)
 
 // Bildqualität passt sich an: ruckelt das Spiel (unter 45 Bilder/s, 2 Sekunden lang), sinkt die Auflösung stufenweise;
 // läuft es wieder lange flüssig (über 57 Bilder/s, 12 Sekunden), steigt sie wieder. Schwache Schul-Laptops und Handys profitieren.
 const RES_STEPS = [1, 0.8, 0.65, 0.5], RES_MIN_DPR = 0.6;
-let perfAcc = 0, perfN = 0, perfSlow = 0, perfFast = 0, resIdx = 0;
+let perfAcc = 0, perfN = 0, perfSlow = 0, perfFast = 0, resIdx = 0, resUpAfter = 12, resDownAt = 0;
 function perfTick(dt) {
   if (gameState !== 'playing' || document.hidden) { perfAcc = 0; perfN = 0; return; }
+  if (dt > 0.35 && dt < 0.5) {                      // ein Bild hat über 0,35 s gedauert: Hänger. Mehrere in kurzer Zeit schalten die einfache Grafik ein (GFX).
+    const tn = performance.now(); GFX.freezes.push(tn);
+    while (GFX.freezes.length && tn - GFX.freezes[0] > 30000) GFX.freezes.shift();
+    if (GFX.freezes.length >= 4 && !GFX.safe) { GFX.safe = true; releaseBossBufs(true); if (GFX.onAuto) GFX.onAuto(); }
+  }
   perfAcc += dt; perfN++;
   if (perfAcc < 1) return;
   const fps = perfN / perfAcc; perfAcc = 0; perfN = 0;
   const tgt = paceTarget();                         // 60 Hz: unter 45 langsam, über 57 flüssig (halber Takt auf 90 Hz: 45 Bilder sind das Ziel)
   if (fps < tgt * 0.75) { perfSlow++; perfFast = 0; } else if (fps > tgt * 0.95) { perfFast++; perfSlow = 0; } else { perfSlow = 0; perfFast = 0; }
   const base = Math.min(window.devicePixelRatio || 1, 2);
-  if (perfSlow >= 2 && resIdx < RES_STEPS.length - 1 && base * RES_STEPS[resIdx + 1] >= RES_MIN_DPR) { resIdx++; perfSlow = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
-  else if (perfFast >= 12 && resIdx > 0) { resIdx--; perfFast = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
+  // Qualität wieder erhöhen: erst nach resUpAfter ruhigen Sekunden; sinkt sie kurz danach wieder, wartet es doppelt so lange (kein Hin und Her mit Neuaufbau der Zeichenfläche)
+  if (perfSlow >= 2 && resIdx < RES_STEPS.length - 1 && base * RES_STEPS[resIdx + 1] >= RES_MIN_DPR) {
+    const tn = performance.now(); if (resDownAt && tn - resDownAt < 90000) resUpAfter = Math.min(120, resUpAfter * 2);
+    resDownAt = tn; resIdx++; perfSlow = 0; RES = RES_STEPS[resIdx]; resizeCanvas();
+  }
+  else if (perfFast >= resUpAfter && resIdx > 0) { resIdx--; perfFast = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
 }
 // ein Bild Spiellogik (ohne Zeichnen): Netz, Lauf, Countdown nach dem Neuladen, Bedenkzeit der Zweiten Chance
 function stepGame(dt) {
@@ -6923,7 +6955,7 @@ function gameLoop(timestamp) {
     const rawDt = Math.min(dt, 0.5);
     dt = Math.min(dt, 0.05);
     lastTime = timestamp;
-    stepGame(dt);
+    try { stepGame(dt); } catch (err) { if (window.console && console.error) console.error(err); }   // ein Fehler in der Spiellogik darf das Zeichnen nicht ausfallen lassen
     perfTick(rawDt);
     render();
   } catch (err) {
@@ -6958,46 +6990,50 @@ function drawEye(x, y, r) {
 function drawAccessory(type, r, color, dark, opts) {
   ctx.fillStyle = dark || color;
   ctx.strokeStyle = dark || color;
+  const an = opts.anim || 0, sa = Math.sin(an);    // Animationsphase (Bogenmass): nur beim Vorzeichnen der Bilder (getEnemySprite), sonst 0
   if (type === 'fin') {
+    const fl = sa * r * 0.16;                       // die Rückenflosse schlägt leicht hin und her
     ctx.beginPath();
     ctx.moveTo(-r*0.1, -r*0.85);
-    ctx.lineTo(r*0.25, -r*1.35);
+    ctx.lineTo(r*0.25 + fl, -r*1.35 - Math.abs(fl) * 0.25);
     ctx.lineTo(r*0.45, -r*0.7);
     ctx.closePath();
     ctx.fill();
   } else if (type === 'tentacles') {
-    const n = 5;
+    const n = 5, k = r / 15;
     ctx.lineWidth = Math.max(2, r*0.14);
     ctx.lineCap = 'round';
     for (let i=0;i<n;i++){
-      const tx = -r*0.6 + (i/(n-1))*r*1.2;
+      const tx = -r*0.6 + (i/(n-1))*r*1.2, ph = (opts.wobble||0) + an + i;
       ctx.beginPath();
       ctx.moveTo(tx, r*0.75);
-      ctx.quadraticCurveTo(tx + Math.sin((opts.wobble||0)+i)*6, r*1.3, tx + Math.sin((opts.wobble||0)+i)*10, r*1.75);
+      ctx.quadraticCurveTo(tx + Math.sin(ph)*6*k, r*1.3, tx + Math.sin(ph - 0.7)*11*k, r*1.75 + Math.cos(ph) * r * 0.05);
       ctx.stroke();
     }
   } else if (type === 'pincers') {
-    ctx.beginPath(); ctx.arc(-r*0.95, -r*0.15, r*0.32, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(r*0.95, -r*0.15, r*0.32, 0, Math.PI*2); ctx.fill();
+    const cy = -r*0.15 - sa * r * 0.09, cx = r * (0.95 + sa * 0.03), cr = r * 0.32 * (1 + sa * 0.07);   // die Scheren öffnen und schliessen sich ein wenig
+    ctx.beginPath(); ctx.arc(-cx, cy, cr, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.fill();
   } else if (type === 'spikes') {
     const n = 10;
     ctx.lineWidth = Math.max(2, r*0.1);
     for (let i=0;i<n;i++){
-      const a = (i/n)*Math.PI*2;
+      const a = (i/n)*Math.PI*2 + sa * 0.04, len = r * (1.4 + 0.07 * Math.sin(an * 2 + i * 1.3));   // die Stacheln atmen und drehen sich minimal
       ctx.beginPath();
       ctx.moveTo(Math.cos(a)*r*0.8, Math.sin(a)*r*0.8);
-      ctx.lineTo(Math.cos(a)*r*1.4, Math.sin(a)*r*1.4);
+      ctx.lineTo(Math.cos(a)*len, Math.sin(a)*len);
       ctx.stroke();
     }
   } else if (type === 'lure') {
+    const bob = sa * r * 0.1, lx = r*0.2 + bob, ly = -r*1.9 + bob * 0.5;    // die Leuchtkugel schaukelt und pulsiert
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, -r*0.9);
-    ctx.quadraticCurveTo(r*0.5, -r*1.6, r*0.2, -r*1.9);
+    ctx.quadraticCurveTo(r*0.5 + bob * 0.6, -r*1.6 + bob * 0.4, lx, ly);
     ctx.stroke();
     ctx.fillStyle = '#bdf2ff';
     ctx.shadowColor = '#bdf2ff'; ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(r*0.2, -r*1.9, r*0.16, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(lx, ly, r*0.16 * (1 + 0.18 * Math.sin(an * 2)), 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
   } else if (type === 'crown') {
     ctx.fillStyle = '#ffd76a';
@@ -9186,7 +9222,7 @@ function lavaSkinSprite() {
   return (lavaSkinSpr = c);
 }
 function drawLavaPool(g, r, age, left, tm, seed) {
-  const TAU = Math.PI * 2, grow = Math.min(1, age / 0.22), cool = Math.max(0, 1 - left / 0.9) * 0.6;
+  const TAU = Math.PI * 2, grow = Math.max(0, Math.min(1, age / 0.22)), cool = Math.max(0, 1 - left / 0.9) * 0.6;
   const N = 44, R = r * grow, hot = 1 - cool * 0.6;
   // weiche Wellen statt Zacken: wenige tiefe Frequenzen ums Rund, die langsam wandern
   const edge = (i, s) => { const a = (i / N) * TAU; return R * s * (0.95 + 0.04 * Math.sin(3 * a + seed * 10) + 0.025 * Math.sin(5 * a + seed * 17 + tm * 1.6) + 0.012 * Math.sin(8 * a - tm * 2.2)); };
@@ -9396,6 +9432,32 @@ const BOSS_AURA = { haikoenig: '190,225,255', kraken: '225,120,255', seeungeheue
   vulkanschildkroete: '255,140,60', schwefelrochen: '255,226,58', glutqualle: '255,150,70', schlotwurm: '255,90,60', feuerfisch: '255,160,70',
   atollon: '255,215,106', tangmutter: '170,240,110', abyssos: '255,233,160', magmaros: '255,140,60' };
 let tintBuf = null, tintCtx = null, renderFrame = 0;
+// 7.4: Zwischenpuffer (Kunst, Silhouette, Ring, Überzug) gehören allen Bossen gemeinsam und wachsen nur; jeder Boss behält nur sein
+// fertiges Bild (outBuf, höchstens BOSS_BUF_MAX Pixel breit, unabhängig von der automatischen Bildqualität). Vorher hatte jeder Boss (auch
+// jedes Glied einer Seeschlange) vier eigene Zeichenflächen, die bei jedem Qualitätswechsel neu angelegt wurden und nie frei wurden.
+const BOSS_BUF_MAX = 1024, bossTmp = {}, bossBufOwners = new Set();
+// Zwischenflächen nach genauer Grösse (Mischoperationen wie destination-in wirken auf die ganze Fläche: eine zu grosse wäre langsam).
+// Gleich grosse Bosse (z. B. alle Glieder einer Seeschlange) teilen sich dieselben; ungenutzte werden nach 4 s freigegeben (releaseBossBufs).
+const bossPool = new Map();
+function bossTmpBuf(name, size) {
+  const key = name + '|' + size;
+  let e = bossPool.get(key);
+  if (!e) { const c = document.createElement('canvas'); c.width = c.height = size; e = { c: c, g: c.getContext('2d'), used: 0 }; bossPool.set(key, e); }
+  e.used = renderFrame; bossTmp[name + 'X'] = e.g;
+  return e.c;
+}
+function bossBake() { return Math.min(window.devicePixelRatio || 1, 1.5); }
+// einfache Grafik: ohne Umriss und nur jedes 3. Bild neu gezeichnet. Schaltet sich ein, wenn das Spiel mehrmals hängt (siehe perfTick); ?gfx=safe erzwingt es.
+const GFX = { safe: typeof location !== 'undefined' && /[?&]gfx=safe/.test(location.search || ''), freezes: [] };
+function releaseBossBufs(all) {
+  bossPool.forEach(function(e, k){ if (all || renderFrame - e.used > 240) { e.c.width = e.c.height = 0; bossPool.delete(k); } });
+  bossBufOwners.forEach(function(en){
+    if (all || en.dead || renderFrame - (en.artFrame || 0) > 150) {
+      if (en.outBuf) { en.outBuf.width = en.outBuf.height = 0; }
+      en.outBuf = en.outCtx = null; en.artKey = ''; bossBufOwners.delete(en);
+    }
+  });
+}
 // mode 0 = normal, mode 1 = Dunkelheits-Ebene im Tiefsee-Graben (halbhell + leuchtende Teile obendrauf; benutzt den Puffer des Hauptdurchgangs)
 // Bosse sind grösser gezeichnet als ihr Trefferkreis und haben einen leuchtenden Umriss in ihrer Farbe: man erkennt sie sofort
 const BOSS_VIS = 1.12, BOSS_OUTLINE = 2.2;
@@ -9405,7 +9467,7 @@ function animSeed(en) {
   return en.aSeed;
 }
 function drawBossSprite(en, sx, sy, mode) {
-  const R = en.r * BOSS_VIS, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.75), dim = pad * 2, px = Math.ceil(dim * DPR);
+  const R = en.r * BOSS_VIS, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.75), dim = pad * 2, px = Math.min(BOSS_BUF_MAX, Math.ceil(dim * bossBake())), bs = px / dim;
   const tg = en.tg || player, dxp = tg.x - en.x, dyp = tg.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer';
   let dirx = dxp, diry = dyp;
   if (en.type === 'haikoenig' && (st === 'windup' || st === 'dash')) { dirx = Math.cos(en.ang); diry = Math.sin(en.ang); }
@@ -9438,47 +9500,50 @@ function drawBossSprite(en, sx, sy, mode) {
   o.pose = st; o.wk = wk; o.slam = slam; o.atk = atk; o.swim = en.mvS || 0;
 
   const key = en.type + '|' + ph + '|' + faceSign + '|' + open + '|' + px + '|' + (champT ? en.champ[0] : '') + '|' + (en.vv || 0);
-  if (!en.artBuf || key !== en.artKey || renderFrame - en.artFrame >= 2) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel (eigener Puffer je Boss)
-    if (!en.artBuf) { en.artBuf = document.createElement('canvas'); en.artCtx = en.artBuf.getContext('2d'); }
-    if (en.artBuf.width !== px) { en.artBuf.width = px; en.artBuf.height = px; }
-    const bx = en.artCtx;
-    bx.setTransform(1, 0, 0, 1, 0, 0); bx.clearRect(0, 0, px, px);
-    bx.setTransform(DPR, 0, 0, DPR, 0, 0); bx.translate(pad, pad);
+  const every = GFX.safe ? 3 : 2;
+  if (!en.outBuf || key !== en.artKey || renderFrame - en.artFrame >= every) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel
+    if (!en.outBuf) { en.outBuf = document.createElement('canvas'); en.outCtx = en.outBuf.getContext('2d'); bossBufOwners.add(en); }
+    if (en.outBuf.width !== px) { en.outBuf.width = en.outBuf.height = px; }
+    const ab = bossTmpBuf('art', px), bx = bossTmp.artX;
+    bx.setTransform(1, 0, 0, 1, 0, 0); bx.globalCompositeOperation = 'source-over'; bx.clearRect(0, 0, px, px);
+    bx.setTransform(bs, 0, 0, bs, 0, 0); bx.translate(pad, pad);
     BOSS_FX.blink = blink; BOSS_FX.lid = BOSS_LID[en.type] || '#333333';
     drawBossArt(bx, en.type, R, o);
     BOSS_FX.blink = 0;
-    // Umriss: Silhouette in der Aura-Farbe, in 8 Richtungen versetzt hinter die Figur. Auf hochauflösenden Bildschirmen wird er in halber
-    // Auflösung gerechnet (die nötigen Misch-Modi sind teuer) und als ein einziger Ring hinter die Figur gelegt.
-    const os = DPR >= 1.5 ? 0.5 : 1, hp = Math.max(1, Math.ceil(px * os));
-    if (!en.outBuf) { en.outBuf = document.createElement('canvas'); en.outCtx = en.outBuf.getContext('2d'); en.silBuf = document.createElement('canvas'); en.silCtx = en.silBuf.getContext('2d'); en.ringBuf = document.createElement('canvas'); en.ringCtx = en.ringBuf.getContext('2d'); }
-    if (en.outBuf.width !== px) { en.outBuf.width = en.outBuf.height = px; }
-    if (en.silBuf.width !== hp) { en.silBuf.width = en.silBuf.height = hp; en.ringBuf.width = en.ringBuf.height = hp; }
-    const sc = en.silCtx, rc = en.ringCtx, oc = en.outCtx, w = Math.max(1.5, BOSS_OUTLINE * DPR) * os, d2 = w * 0.7071;
-    sc.globalCompositeOperation = 'source-over'; sc.clearRect(0, 0, hp, hp); sc.drawImage(en.artBuf, 0, 0, hp, hp);
-    sc.globalCompositeOperation = 'destination-in';           // Deckkraft hoch 4: Leuchten, Rauch und Schimmer bekommen keinen Umriss
-    sc.drawImage(en.artBuf, 0, 0, hp, hp); sc.drawImage(en.artBuf, 0, 0, hp, hp); sc.drawImage(en.artBuf, 0, 0, hp, hp);
-    sc.globalCompositeOperation = 'source-in';
-    sc.fillStyle = 'rgba(' + (champT ? (en.champ[0] === 'anfuehrer' ? '255,248,214' : '255,212,96') : (BOSS_AURA[en.type] || '255,230,180')) + ',0.95)'; sc.fillRect(0, 0, hp, hp);
-    sc.globalCompositeOperation = 'source-over';
-    rc.clearRect(0, 0, hp, hp);
-    if (champT) {   // Champion-Boss: doppelter Umriss, aussen Gold, innen die Farbe seiner Eigenschaft
-      const w2 = w * 2.15, d3 = w2 * 0.7071, o2 = [[w2, 0], [-w2, 0], [0, w2], [0, -w2], [d3, d3], [-d3, d3], [d3, -d3], [-d3, -d3]];
-      for (let i = 0; i < 8; i++) rc.drawImage(en.silBuf, o2[i][0], o2[i][1]);
-      sc.globalCompositeOperation = 'source-in'; sc.fillStyle = 'rgba(' + champT.rgb + ',0.95)'; sc.fillRect(0, 0, hp, hp); sc.globalCompositeOperation = 'source-over';
+    const oc = en.outCtx;
+    oc.setTransform(1, 0, 0, 1, 0, 0); oc.globalCompositeOperation = 'source-over'; oc.clearRect(0, 0, px, px);
+    if (GFX.safe) oc.drawImage(ab, 0, 0, px, px, 0, 0, px, px);
+    else {
+      // Umriss: Silhouette in der Aura-Farbe, in 8 Richtungen versetzt hinter die Figur. Auf hochauflösenden Bildschirmen wird er in halber
+      // Auflösung gerechnet (die nötigen Misch-Modi sind teuer) und als ein einziger Ring hinter die Figur gelegt.
+      // 7.4: der Umriss wird in halber (bei Legenden gut einem Drittel der) Auflösung gerechnet, mit Deckkraft hoch 3 und 4 diagonal versetzten Kopien
+      // (vorher: volle Auflösung, hoch 4, 8 Kopien = bei einer Legende über 90 ms je Neuzeichnen ohne Grafikkarte)
+      const os = px > 560 ? 0.35 : 0.5, hp = Math.max(1, Math.ceil(px * os));
+      const sb = bossTmpBuf('sil', hp), rb = bossTmpBuf('ring', hp), sc = bossTmp.silX, rc = bossTmp.ringX;
+      const w = Math.max(0.9, BOSS_OUTLINE * bs * os), d2 = w * 0.7071;
+      sc.globalCompositeOperation = 'source-over'; sc.clearRect(0, 0, hp, hp); sc.drawImage(ab, 0, 0, px, px, 0, 0, hp, hp);
+      sc.globalCompositeOperation = 'destination-in';           // Deckkraft hoch 3: Leuchten, Rauch und Schimmer bekommen keinen Umriss
+      sc.drawImage(ab, 0, 0, px, px, 0, 0, hp, hp); sc.drawImage(ab, 0, 0, px, px, 0, 0, hp, hp);
+      sc.globalCompositeOperation = 'source-in';
+      sc.fillStyle = 'rgba(' + (champT ? (en.champ[0] === 'anfuehrer' ? '255,248,214' : '255,212,96') : (BOSS_AURA[en.type] || '255,230,180')) + ',0.95)'; sc.fillRect(0, 0, hp, hp);
+      sc.globalCompositeOperation = 'source-over';
+      rc.clearRect(0, 0, hp, hp);
+      if (champT) {   // Champion-Boss: doppelter Umriss, aussen Gold, innen die Farbe seiner Eigenschaft
+        const w2 = w * 2.15, d3 = w2 * 0.7071, o2 = [[w2, 0], [-w2, 0], [0, w2], [0, -w2], [d3, d3], [-d3, d3], [d3, -d3], [-d3, -d3]];
+        for (let i = 0; i < 8; i++) rc.drawImage(sb, 0, 0, hp, hp, o2[i][0], o2[i][1], hp, hp);
+        sc.globalCompositeOperation = 'source-in'; sc.fillStyle = 'rgba(' + champT.rgb + ',0.95)'; sc.fillRect(0, 0, hp, hp); sc.globalCompositeOperation = 'source-over';
+      }
+      const offs = champT ? [[w, 0], [-w, 0], [0, w], [0, -w], [d2, d2], [-d2, d2], [d2, -d2], [-d2, -d2]] : [[w, w], [-w, w], [w, -w], [-w, -w]];
+      for (let i = 0; i < offs.length; i++) rc.drawImage(sb, 0, 0, hp, hp, offs[i][0], offs[i][1], hp, hp);
+      oc.drawImage(rb, 0, 0, hp, hp, 0, 0, px, px);
+      oc.drawImage(ab, 0, 0, px, px, 0, 0, px, px);
     }
-    const offs = [[w, 0], [-w, 0], [0, w], [0, -w], [d2, d2], [-d2, d2], [d2, -d2], [-d2, -d2]];
-    for (let i = 0; i < 8; i++) rc.drawImage(en.silBuf, offs[i][0], offs[i][1]);
-    oc.clearRect(0, 0, px, px);
-    oc.drawImage(en.ringBuf, 0, 0, px, px);
-    oc.drawImage(en.artBuf, 0, 0);
-    en.artKey = key; en.artFrame = renderFrame;
+    en.artKey = key; en.artFrame = renderFrame + (en.artFrame === undefined ? (sd & 1) : 0);   // die Hälfte aller Bosse zeichnet in den geraden, die andere in den ungeraden Bildern: gleichmässigere Last
   }
   let img = en.outBuf;
   const flash = en.hitFlash > 0 ? Math.min(1, en.hitFlash / 0.12) : 0;
   if (st === 'tired' || flash) {   // Treffer-Blitz / Erschöpfung als Überzug nur auf den Boss-Pixeln
-    if (!tintBuf) { tintBuf = document.createElement('canvas'); tintCtx = tintBuf.getContext('2d'); }
-    if (tintBuf.width !== px) { tintBuf.width = px; tintBuf.height = px; }
-    const tx = tintCtx;
+    tintBuf = bossTmpBuf('tint', px); const tx = bossTmp.tintX;
     tx.globalCompositeOperation = 'source-over'; tx.setTransform(1, 0, 0, 1, 0, 0); tx.clearRect(0, 0, px, px); tx.drawImage(en.outBuf, 0, 0);
     tx.globalCompositeOperation = 'source-atop';
     if (st === 'tired') { tx.fillStyle = 'rgba(235,225,120,0.3)'; tx.fillRect(0, 0, px, px); }
@@ -9547,7 +9612,7 @@ function drawBossSprite(en, sx, sy, mode) {
   if (en.tilt) ctx.rotate(en.tilt);
   if (sideView) ctx.scale(squeeze, 1);
   if (mode === 1) ctx.globalAlpha = 0.55;
-  ctx.drawImage(img, -pad, -pad, dim, dim);
+  ctx.drawImage(img, 0, 0, px, px, -pad, -pad, dim, dim);
   ctx.restore();
   if (mode === 1 && en.type === 'seeungeheuer') {   // im Dunkeln leuchten Laterne, Punkte und Auge voll
     if (en.tilt) ctx.rotate(en.tilt);
@@ -9568,8 +9633,8 @@ function drawBossSprite(en, sx, sy, mode) {
 
 const SPRITE_BAKE_SCALE = 2;
 const enemySpriteCache = {};
-function getEnemySprite(color, dark, r, accessory) {
-  const key = color + '|' + (dark||'') + '|' + r + '|' + accessory;
+function getEnemySprite(color, dark, r, accessory, fr) {
+  const key = color + '|' + (dark||'') + '|' + r + '|' + accessory + (fr ? '|' + fr : '');
   const existing = enemySpriteCache[key];
   if (existing) return existing;
 
@@ -9584,7 +9649,7 @@ function getEnemySprite(color, dark, r, accessory) {
   const savedCtx = ctx;
   try {
     ctx = octx;
-    drawBlob(pad, pad, r, color, dark, { accessory: accessory, wobble: 0, glow: 0 });
+    drawBlob(pad, pad, r, color, dark, { accessory: accessory, wobble: 0, glow: 0, anim: (fr || 0) / BLOB_FRAMES * Math.PI * 2 });
   } finally {
     ctx = savedCtx;
   }
@@ -9594,12 +9659,22 @@ function getEnemySprite(color, dark, r, accessory) {
   return entry;
 }
 
+// Gewöhnliche Gegner (8 Bilder je Schleife): Tentakel wellen, Flossen schlagen, Scheren öffnen sich, Stacheln atmen, die Leuchtkugel schaukelt.
+// Die Bilder werden bei Bedarf einmal vorgezeichnet; der Treffer-Blitz (weiss) bleibt ein einziges Bild.
+const BLOB_FRAMES = 8, BLOB_ACC_RATE = { tentacles: 0.7, fin: 1.1, pincers: 0.9, spikes: 0.45, lure: 0.8 };
 function drawEnemySprite(x, y, r, color, accessory, wobble) {
-  const sprite = getEnemySprite(color, null, r, accessory || 'none');
+  const acc = accessory || 'none', rate = BLOB_ACC_RATE[acc], anim = rate && color !== '#ffffff' && !prefersReducedMotion;
+  let rr = r, fr = 0;
+  if (anim) {
+    rr = Math.max(4, Math.round(r * 2) / 2);                       // Grössen zusammenfassen (wenige Bilder im Speicher), beim Zeichnen angepasst
+    const ph = ((wobble || 0) * rate / (Math.PI * 2)) % 1;
+    fr = Math.min(BLOB_FRAMES - 1, Math.floor((ph < 0 ? ph + 1 : ph) * BLOB_FRAMES));
+  }
+  const sprite = getEnemySprite(color, null, rr, acc, fr), k = r / rr;
   const squash = 1 + Math.sin(wobble || 0) * 0.06;
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale(1/squash, squash);
+  ctx.scale(k/squash, k*squash);
   ctx.drawImage(sprite.canvas, -sprite.pad, -sprite.pad, sprite.size, sprite.size);
   ctx.restore();
 }
@@ -10202,48 +10277,64 @@ function drawRingBubbles() {
   }
 }
 
+// 7.4: Stürzt eine Zeichenfunktion ab (z. B. ein Kreis mit negativem Radius), brach früher das ganze Bild an dieser Stelle ab: alles danach (Gegner,
+// Perlen, Spieler) fehlte für dieses Bild, und die Zeichenfläche blieb verschoben oder beschnitten – das Bild wirkte zerschnitten, und die Spielfläche zeigte im
+// nächsten Bild alte Reste. Jetzt fängt jede Ebene ihren Fehler selbst: der Zeichenzustand wird zurückgesetzt und es wird weitergezeichnet.
+let renderFaults = 0, renderFaultLast = '';
+function renderFault(e, where) {
+  for (let i = 0; i < 48; i++) ctx.restore();       // offene save()-Stände (und Beschneidungen) verwerfen; ein restore() ohne Stand tut nichts
+  worldSpace(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; ctx.setLineDash([]);
+  renderFaults++;
+  const msg = where + ': ' + (e && e.message);
+  if (msg !== renderFaultLast && renderFaults < 400) { renderFaultLast = msg; if (window.console && console.error) console.error('render', msg, e); }
+}
+function rtry(f, a, b) { try { f(a, b); } catch (e) { renderFault(e, f.name); } }
 function render() {
   renderFrame++;
-  drawBackground();
-  drawAmbientBubbles();
+  if ((renderFrame & 63) === 0 && (bossBufOwners.size || bossPool.size)) releaseBossBufs(false);
+  rtry(drawBackground);
+  rtry(drawAmbientBubbles);
 
   const inRun = runVisible();
   if (inRun) {
-    if (Net.on) drawHafen();
-    if (Legend) drawLegendArena();                     // Arena oder Warnung einer Legende
-    if (strategyMode) drawStrategyBase();              // Strategie: deine Basis
-    drawHazards();
-    if (bossCorpses.length) drawBossCorpses();
+    if (Net.on) rtry(drawHafen);
+    if (Legend) rtry(drawLegendArena);                 // Arena oder Warnung einer Legende
+    if (strategyMode) rtry(drawStrategyBase);          // Strategie: deine Basis
+    rtry(drawHazards);
+    if (bossCorpses.length) rtry(drawBossCorpses);
     const gm = 40;
-    drawPickups(gm);
+    rtry(drawPickups, gm);
     for (let i=0;i<enemyProjectiles.length;i++){
       const pr = enemyProjectiles[i];
+      try {
       const sx = pr.x-camera.x+W/2, sy = pr.y-camera.y+H/2;
       if (pr.skin && drawShotSkin(pr, sx, sy)) continue;
       if (pr.heavy) {
         drawHalo(sx, sy, pr.r * 3.2 + Math.sin(runTime * 14) * 3, '#ff3355', 0.9);
-        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,Math.max(0,pr.r),0,Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(sx,sy,pr.r+4,0,Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(sx,sy,Math.max(0,pr.r+4),0,Math.PI*2); ctx.stroke();
       } else {
-        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,pr.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(sx,sy,Math.max(0,pr.r),0,Math.PI*2); ctx.fill();
       }
+      } catch (e) { renderFault(e, 'enemyShot'); }
     }
     for (let i=0;i<projectiles.length;i++){
       const pr = projectiles[i];
       const sx = pr.x-camera.x+W/2, sy = pr.y-camera.y+H/2;
       if (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) continue;
-      drawProjectile(pr, sx, sy);
+      try { drawProjectile(pr, sx, sy); } catch (e) { renderFault(e, 'shot'); }
     }
-    if (Net.shots.length) drawNetShots();
-    drawLeaderLinks(enemies);
-    if (remoteEnemyList.length || remoteFrozen.length) drawLeaderLinks(remoteDrawList());
+    if (Net.shots.length) rtry(drawNetShots);
+    rtry(drawLeaderLinks, enemies);
+    if (remoteEnemyList.length || remoteFrozen.length) rtry(drawLeaderLinks, remoteDrawList());
     const drawList = (remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies;
     for (let i=0;i<drawList.length;i++){
       const en = drawList[i];
       if (en.predDead) continue;                     // vorhergesagt besiegt (Gegner eines Mitspielers)
-      const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2;
-      if (sx < -100 || sx > W+100 || sy < -100 || sy > H+100) continue;
+      try {
+      const sx = en.x-camera.x+W/2, sy = en.y-camera.y+H/2, mg = en.isBoss || en.proxyOf ? Math.max(100, en.r * 2.8) : 100;   // grosse Bosse samt Aura erst ausblenden, wenn sie ganz draussen sind
+      if (sx < -mg || sx > W+mg || sy < -mg || sy > H+mg) continue;
       if (en.isBoss || en.proxyOf) {               // Teile eines Bosses (Zwilling, Truhen) wie der Boss
         if (en.state === 'windup' || en.state === 'sog' || en.state === 'roar') drawBossTelegraph(en, sx, sy);
         const segPart = en.vv === 5 || en.vv === 6;
@@ -10258,10 +10349,11 @@ function render() {
         if (en.champ) drawChampionOver(en, sx, sy);
       }
       ctx.globalAlpha = 1;
+      } catch (e) { renderFault(e, 'enemy ' + en.type); }
     }
-    drawTethers();                                   // Lebensband des Vampirkalmars
-    if (strategyMode) drawStrategyTroops();
-    if (player.weapons.ring && playerDown <= 0) drawRingBubbles();
+    rtry(drawTethers);                               // Lebensband des Vampirkalmars
+    if (strategyMode) rtry(drawStrategyTroops);
+    if (player.weapons.ring && playerDown <= 0) rtry(drawRingBubbles);
     if (player.weapons.begleiter && playerDown <= 0) {
       for (let mi=0; mi<minionEntities.length; mi++) {
         const min = minionEntities[mi];
@@ -10269,8 +10361,8 @@ function render() {
         drawHalo(sx, sy, 22, '#9effc9', 0.55); drawEnemySprite(sx, sy, 11, '#9effc9', 'fin', runTime * 6 + mi * 3);
       }
     }
-    if (Net.on) drawPeers();
-    {
+    if (Net.on) rtry(drawPeers);
+    try {
       const sx = player.x-camera.x+W/2, sy = player.y-camera.y+H/2;
       if (playerDown > 0) {                        // online ohnmächtig: blass, roter Ring, grüner Fortschritt beim Retten
         drawDownRing(sx, sy, player.r, reviveProg / REVIVE_TIME);
@@ -10288,9 +10380,10 @@ function render() {
       }
       if (Net.on && netAmLeader() && playerDown <= 0) drawCrown(sx, sy - player.r * 1.55 - 6 * txtScale());
       if (Net.on && Net.myBubble) drawSpeech(sx, sy - player.r * 1.55 - (netAmLeader() ? 26 : 6) * txtScale(), Net.myBubble);
-    }
+    } catch (e) { renderFault(e, 'player'); }
     for (let i=0;i<particles.length;i++){
       const pt = particles[i];
+      try {
       if (pt.isText) {                                 // schwebende Zahl (+Korallen)
         const sx = pt.x - camera.x + W / 2, sy = pt.y - camera.y + H / 2;
         ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife); ctx.font = '800 13px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = pt.color; ctx.fillText(pt.text, sx, sy); ctx.globalAlpha = 1;
@@ -10359,22 +10452,23 @@ function render() {
       }
       ctx.globalAlpha = Math.max(0, pt.life/(pt.maxLife||0.6));
       ctx.fillStyle = pt.color;
-      ctx.beginPath(); ctx.arc(sx,sy,pt.r||3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx,sy,Math.max(0, pt.r||3),0,Math.PI*2); ctx.fill();
       ctx.globalAlpha = 1;
+      } catch (e) { renderFault(e, 'particle'); }
     }
 
-    drawInkOverlays();                               // Tintenpfützen der Riesenkrake verdecken alles darin
-    if (stageOf().id === 'graben') { drawDarkness(); if (Net.on) drawPeers(); }
-    if (gameState === 'playing' || gameState === 'resume' || gameState === 'chance') updateHud();
+    rtry(drawInkOverlays);                           // Tintenpfützen der Riesenkrake verdecken alles darin
+    if (stageOf().id === 'graben') { rtry(drawDarkness); if (Net.on) rtry(drawPeers); }
+    if (gameState === 'playing' || gameState === 'resume' || gameState === 'chance') rtry(updateHud);
     screenSpace();                                   // ab hier Bildschirm-Pixel: Pfeile am Rand, Meldungen, Steuerknüppel
-    drawEdgeArrows();
-    if (bossWarningTimer > 0) drawBossWarning();
-    if (reviveFlashTimer > 0) drawReviveBanner();
-    if (playerDown > 0) drawDownBanner();
-    if (gameState === 'chance') drawChanceBanner();
-    if (gameState === 'resume') drawResumeCount();
-    if (Net.on && gameState === 'playing') drawHafenHint();
-    if (touchState.active && gameState === 'playing') drawTouchStick();
+    rtry(drawEdgeArrows);
+    if (bossWarningTimer > 0) rtry(drawBossWarning);
+    if (reviveFlashTimer > 0) rtry(drawReviveBanner);
+    if (playerDown > 0) rtry(drawDownBanner);
+    if (gameState === 'chance') rtry(drawChanceBanner);
+    if (gameState === 'resume') rtry(drawResumeCount);
+    if (Net.on && gameState === 'playing') rtry(drawHafenHint);
+    if (touchState.active && gameState === 'playing') rtry(drawTouchStick);
     worldSpace();
   }
 }
@@ -10388,7 +10482,7 @@ function cacheUI() {
    'hud-boss','hud-boss-fill','hud-boss-name','hud-ring',
    'character-grid','stage-grid','shop-list','shop-pearls-total','achievement-list',
    'levelup-choices','gameover-stats','gameover-achievements','gameover-title',
-   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','hud-room','btn-chat','btn-call','hud-sg','hud-lf'
+   'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','btn-gfx-pause','hud-room','btn-chat','btn-call','hud-sg','hud-lf'
   ].forEach(function(id){ UI[id] = document.getElementById(id); });
 }
 
@@ -12562,6 +12656,14 @@ function initUI() {
   UI['btn-mute'].addEventListener('click', function(){ toggleMute(); });
   UI['btn-mute-pause'].addEventListener('click', function(){ toggleMute(); });
   showMute();
+  // Grafik: normal oder einfach (ohne Umriss um Bosse, sparsamer gezeichnet). Gilt für dieses Gerät; schaltet sich nach mehreren Hängern von selbst ein.
+  function showGfx() { if (UI['btn-gfx-pause']) UI['btn-gfx-pause'].textContent = GFX.safe ? '🖼️ Grafik: einfach' : '🖼️ Grafik: normal'; }
+  GFX.onAuto = function(){ Storage.set('blobfischGfx', 'safe'); showGfx(); showToast('🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sie sich wieder ausschalten.'); };
+  UI['btn-gfx-pause'].addEventListener('click', function(){
+    Sfx.click(); GFX.safe = !GFX.safe; GFX.freezes.length = 0; Storage.set('blobfischGfx', GFX.safe ? 'safe' : 'normal'); releaseBossBufs(true); showGfx();
+  });
+  if (Storage.get('blobfischGfx', null) === 'safe') GFX.safe = true;
+  showGfx();
 
   initOnlineUI();
   checkAchievements();
@@ -12799,6 +12901,7 @@ const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
 const NET_CROWD = [[12, 200], [6, 150]];   // viele Spieler in der Nähe (mehr als 12 / 6): seltener senden (Bandbreite und Tagesgrenze)
+const NET_DELAY_MAX = 420;           // ms: so tief darf der Puffer bei schlechter Verbindung werden (er wächst mit den Verspätungen der Nachrichten)
 const NET_DELAY = 130;              // ms: Mitspieler und ihre Gegner werden so weit in der Vergangenheit gezeigt (dafür glatt; mindestens)
 const NET_ASLEEP = 3500;            // ms ohne Nachricht: der Mitspieler "schläft" (Tab im Hintergrund) und verschwindet samt Gegnern
 const NET_COLORS = ['#5ef2c0', '#ffd76a', '#ff7ab8', '#7eb6ff', '#ff9a3c', '#b98cff', '#c8ff6a', '#ffffff', '#ff6b6b', '#6bffef', '#ffb3f0', '#a3a3ff'];
@@ -13108,9 +13211,20 @@ function netOnWelcome(m) {
     Net.kind === 'global' ? netModeIcon() + ' ' + Net.title + (withWho || ' – noch allein. Andere können jederzeit dazukommen!') :
     Net.created ? netModeIcon() + ' Raum ' + m.code + (netModeTag()) + ' – gib deinen Freunden diesen Code!' : netModeIcon() + ' Raum ' + m.code + (netModeTag()) + withWho);
 }
+// Jeder Mitspieler bekommt ein eigenes Bit (0..29) für die Maske "wer hat diesen Gegner schon vollständig bekommen" (netEnemyRecords).
+// Früher war es id % 30: nach 30 Beitritten in einem Raum teilten sich zwei Spieler ein Bit, und der Neue bekam die Gegner nur noch
+// alle 1,0 s vollständig (sie fehlten oder sprangen herein). Frei gewordene Bits werden wiederverwendet; alte Markierungen werden gelöscht.
+function netFreeBit() {
+  let used = 0;
+  Net.peers.forEach(function(pe){ if (pe.bit !== undefined) used |= 1 << pe.bit; });
+  for (let b = 0; b < 30; b++) if (!(used & (1 << b))) return b;
+  return -1;
+}
 function netAddPeer(p, announce) {
   if (!p || p.id === Net.id) return;
-  Net.peers.set(p.id, { id: p.id, name: String(p.name || '?'), ch: p.ch || 'standard', col: p.col || 0, x: 0, y: 0, r: 19, a: 0, hp: 1, mh: 1, lv: 1, fl: 0,
+  const bit = netFreeBit();
+  if (bit >= 0) for (let i = 0; i < enemies.length; i++) enemies[i].netMask &= ~(1 << bit);
+  Net.peers.set(p.id, { id: p.id, bit: bit, name: String(p.name || '?'), ch: p.ch || 'standard', col: p.col || 0, x: 0, y: 0, r: 19, a: 0, hp: 1, mh: 1, lv: 1, fl: 0,
     last: 0, seen: false, snaps: [], off: null, speed: 0, mv: { x: 0, y: 0, mag: 0 }, bob: 0, enemies: new Map(), active: false, asleep: false,
     rg: null, rgT: 0, mn: null, mnD: null, wb: null, bubble: null, q0: -1e9, revT: 0, warnAt: -1e9, lastTs: 0, ivl: 0, delay: NET_DELAY,
     pickups: new Map(), pkKnown: false, goneIds: null, tgt: null, deadSeen: false,
@@ -13158,17 +13272,22 @@ function netOnTick(m) {
   // Abstand seiner Nachrichten (in einer Menge sendet er seltener): so weit in der Vergangenheit zeigen, dass es glatt bleibt
   const gap = pe.lastTs ? m.ts - pe.lastTs : 0;
   pe.lastTs = m.ts;
-  if (gap > 0 && gap < 600) { pe.ivl = pe.ivl ? pe.ivl + (gap - pe.ivl) * 0.15 : gap; pe.delay = Math.min(300, Math.max(NET_DELAY, pe.ivl + 30)); }
+  // Verspätung dieser Nachricht gegenüber der schnellsten (Spitzenwert, der langsam abklingt): so tief ist der Puffer nötig, damit eine
+  // verspätete Nachricht kein Stocken und keinen Sprung macht. Der Puffer (pe.delay) folgt dem Ziel in netUpdatePeers weich.
+  pe.late = Math.max(Math.min(400, Math.max(0, sample - pe.off)), (pe.late || 0) * 0.985);
+  if (gap > 0 && gap < 600) pe.ivl = pe.ivl ? pe.ivl + (gap - pe.ivl) * 0.15 : gap;
+  pe.delayT = Math.min(NET_DELAY_MAX, Math.max(NET_DELAY, (pe.ivl || 100) + 30 + pe.late * 0.9));
   pe.last = now; pe.seen = true;
   netPeerFlags(pe, m.fl | 0, now); pe.hp = m.hp; pe.mh = m.mh; pe.lv = m.lv; if (m.ch) pe.ch = m.ch;
   netPeerRunTime(pe, m, now); pe.bd = m.bd | 0;
-  if (pe.snaps.length && (t <= pe.snaps[pe.snaps.length - 1].t || pe.snaps[pe.snaps.length - 1].far)) pe.snaps.length = 0;   // nach Fern-Meldungen: springen statt gleiten
-  pe.snaps.push({ t: t, x: m.x, y: m.y, a: m.a || 0 });
-  if (pe.snaps.length > 8) pe.snaps.shift();
+  const lastS = pe.snaps.length ? pe.snaps[pe.snaps.length - 1] : null;
+  if (lastS && lastS.far) pe.snaps.length = 0;                                             // nach Fern-Meldungen: springen statt gleiten
+  else if (lastS && t <= lastS.t) { if (t < lastS.t - 600) pe.snaps.length = 0; }          // etwas älter als die letzte: auslassen (früher: alle Messpunkte weg, der Blobi stand still und sprang)
+  if (!pe.snaps.length || t > pe.snaps[pe.snaps.length - 1].t) { pe.snaps.push({ t: t, x: m.x, y: m.y, a: m.a || 0 }); if (pe.snaps.length > 8) pe.snaps.shift(); }
   pe.rg = Array.isArray(m.rg) && m.rg.length === 3 ? m.rg : null; pe.rgT = t;           // Blasenring: [Stufe, heile Blasen (Bits), Winkel]
   pe.mn = Array.isArray(m.mn) && m.mn.length <= 4 && m.mn.every(function(v){ return typeof v === 'number' && isFinite(v) && Math.abs(v) < 2000; }) ? m.mn : null;
   if (!pe.mn) pe.mnD = null;   // Schwarm-Freunde: Abstand zum Blobi
-  if (pe.fl & NF_DEAD) { netDropEnemies(pe, true); if (!pe.deadSeen) { pe.deadSeen = true; netAdoptPickups(pe); } }
+  if (pe.fl & NF_DEAD) { netDropEnemies(pe, true); if (!pe.deadSeen) { pe.deadSeen = true; netAdoptPickups(pe); pe.goneIds = null; } }
   else { pe.deadSeen = false; if (m.e) netApplyEnemies(pe, m.e, t); else netDropEnemies(pe, false); }
   if (m.fx) for (let i = 0; i < m.fx.length; i++) {
     const f = m.fx[i];
@@ -13201,9 +13320,7 @@ function netApplyEnemies(pe, list, t) {
     if (r.length < 9) {                         // kurz: [id, x, y, HP %, Merkmale] – nur für schon bekannte Gegner
       const k = pe.enemies.get(r[0]);
       if (!k) continue;
-      if (k.snaps.length && t <= k.snaps[k.snaps.length - 1].t) k.snaps.length = 0;
-      k.snaps.push({ t: t, x: r[1], y: r[2] });
-      if (k.snaps.length > 4) k.snaps.shift();
+      netPushSnap(k.snaps, t, r[1], r[2], 8);
       k.hp = k.maxHp * netClamp(r[3], 100) / 100;
       netReconcile(k);
       const sf = r[4] | 0;
@@ -13221,9 +13338,7 @@ function netApplyEnemies(pe, list, t) {
         frozen: false, dead: false, snaps: [] };
       pe.enemies.set(r[0], en);
     }
-    if (en.snaps.length && t <= en.snaps[en.snaps.length - 1].t) en.snaps.length = 0;
-    en.snaps.push({ t: t, x: r[2], y: r[3] });
-    if (en.snaps.length > 4) en.snaps.shift();
+    netPushSnap(en.snaps, t, r[2], r[3], 8);
     en.hp = netClamp(r[4], 1e9); en.maxHp = Math.max(1, netClamp(r[5], 1e9)); en.r = Math.max(4, netClamp(r[6], 200)); en.dmg = netClamp(r[7], NET_MAX_DMG);
     netReconcile(en);
     const f = r[8] | 0;
@@ -13255,12 +13370,46 @@ function netApplyEnemies(pe, list, t) {
   });
 }
 
+// Messpunkt anhängen: ein etwas älterer (zu spät einsortierter) wird ausgelassen, ein viel älterer (neue Zeitbasis) beginnt die Liste neu
+function netPushSnap(snaps, t, x, y, max) {
+  const n = snaps.length;
+  if (n && t <= snaps[n - 1].t) { if (t > snaps[n - 1].t - 600) return; snaps.length = 0; }
+  snaps.push({ t: t, x: x, y: y });
+  if (snaps.length > max) snaps.shift();
+}
+// Anzeige-Ort: die normale Bewegung des Messpunkts (netSample) wird 1:1 übernommen, also ohne Nachlauf; Sprünge (verspätete Nachricht, Ende der
+// Hochrechnung, Korrektur des Besitzers) holt der Ort in etwa 100 ms ein, statt im nächsten Bild zu springen. Über 300 Einheiten: sofort.
+const NS_T = { x: 0, y: 0 };
+function netSpeed(snaps) {
+  const n = snaps.length;
+  if (n < 2) return 0;
+  const a = snaps[n - 2], b = snaps[n - 1];
+  return b.t > a.t ? Math.hypot(b.x - a.x, b.y - a.y) / (b.t - a.t) * 1000 : 0;
+}
+function netGlide(o, snaps, tD, dt, maxEx) {
+  if (!snaps.length) return;
+  NS_T.x = o.gx === undefined ? o.x : o.gx; NS_T.y = o.gx === undefined ? o.y : o.gy;
+  netSample(snaps, tD, NS_T, maxEx);
+  const tx = NS_T.x, ty = NS_T.y;
+  if (o.gx === undefined || !isFinite(o.x) || !isFinite(o.y) || !(dt > 0) || dt > 0.25) { o.x = tx; o.y = ty; o.gx = tx; o.gy = ty; return; }
+  let sx = tx - o.gx, sy = ty - o.gy;
+  const cap = (netSpeed(snaps) * 1.5 + 40) * dt, sl = Math.hypot(sx, sy);
+  if (sl > cap) { sx *= cap / sl; sy *= cap / sl; }
+  o.gx = tx; o.gy = ty;
+  o.x += sx; o.y += sy;
+  const ex = tx - o.x, ey = ty - o.y;
+  if (Math.abs(ex) + Math.abs(ey) > 300) { o.x = tx; o.y = ty; return; }
+  const k = 1 - Math.exp(-dt * 14);
+  o.x += ex * k; o.y += ey * k;
+}
+
 // Vorhersage gegen die Angaben des Besitzers: kurz nach eigenen Treffern zählt die eigene (niedrigere) Schätzung; lebt ein
 // vorhergesagt besiegter Gegner nach 0,9 s noch, taucht er wieder auf (z. B. weil er sich als Vampir geheilt hat)
 function netReconcile(en) {
   const now = performance.now();
-  if (en.predHp != null) { if (now - en.predAt < 700) en.hp = Math.max(0, Math.min(en.hp, en.predHp)); else en.predHp = null; }
-  if (en.predDead && now - en.predDead > 900) en.predDead = 0;
+  const lat = netLat() * 2;                                       // Laufzeit hin und zurück: bei schlechter Verbindung gilt die Vorhersage länger (sonst flackerte der Gegner)
+  if (en.predHp != null) { if (now - en.predAt < 700 + lat) en.hp = Math.max(0, Math.min(en.hp, en.predHp)); else en.predHp = null; }
+  if (en.predDead && now - en.predDead > 900 + lat) en.predDead = 0;
 }
 // ---------- jedes Bild: Mitspieler und ihre Gegner glätten, Treffer und Ereignisse anwenden, Zustand senden ----------
 function netLat() { return Net.lat == null ? 100 : Net.lat; }
@@ -13281,6 +13430,8 @@ function netUpdatePeers(now, dt) {
   const meOk = !!player && gameState === 'playing' && playerDown <= 0;
   let live = false;
   Net.peers.forEach(function(pe){
+    const dT = pe.delayT || NET_DELAY;                           // Puffer weich ans Ziel führen: schnell tiefer (bis 350 ms/s), langsam wieder flacher (80 ms/s)
+    if (pe.delay < dT) pe.delay = Math.min(dT, pe.delay + dt * 350); else if (pe.delay > dT) pe.delay = Math.max(dT, pe.delay - dt * 80);
     const tD = now - pe.delay;
     pe.asleep = pe.seen && now - pe.last > NET_ASLEEP;
     if (pe.snaps.length) {
@@ -13297,7 +13448,7 @@ function netUpdatePeers(now, dt) {
           if (st > cap) { sx *= cap / st; sy *= cap / st; }
           pe.x = ox + sx; pe.y = oy + sy;
         }
-      } else netSample(pe.snaps, tD, pe);
+      } else netGlide(pe, pe.snaps, tD, dt, 150);
       const s = pe.snaps[pe.snaps.length - 1];
       pe.a = s.a;
       const vx = dt > 0 ? (pe.x - ox) / dt : 0, vy = dt > 0 ? (pe.y - oy) / dt : 0, sp = Math.hypot(vx, vy);
@@ -13308,7 +13459,7 @@ function netUpdatePeers(now, dt) {
     pe.active = netPeerActive(pe);
     if (player && pe.seen && !pe.asleep && !(pe.fl & NF_DEAD) && distXY(pe.x, pe.y, player.x, player.y) <= NET_LIVE) live = true;
     pe.enemies.forEach(function(en){
-      netSample(en.snaps, tD, en);
+      netGlide(en, en.snaps, tD, dt, 150);
       if (en.hitFlash > 0) en.hitFlash -= dt;
       if (en.isBoss && en.stT > 0 && pe.active) en.stT = Math.max(0, en.stT - dt);
       if (pe.active) en.wobble += dt * 8;
@@ -13515,7 +13666,7 @@ function netAddPickups(pe, list, full) {
     const type = PK_TYPES[r[1]];
     if (!type) continue;
     if (seen) seen.add(r[0]);
-    if (pe.goneIds && pe.goneIds.has(r[0])) continue;              // schon weg (die Meldung kam vor der Beute an)
+    if (pe.goneIds && pe.goneIds.has(r[0])) { if (performance.now() - pe.goneIds.get(r[0]) < 8000) continue; pe.goneIds.delete(r[0]); }   // schon weg (die Meldung kam vor der Beute an); nach 8 s gilt die Nummer wieder (neuer Lauf, Neuladen)
     const fl = r[6] | 0, amount = netClamp(r[4], type === 'heal' ? 1 : 50000);
     let pk = pe.pickups.get(r[0]);
     if (!pk) {
@@ -14012,7 +14163,7 @@ function netCallBarUpdate(now) {
     set('call-time', wind ? '' : secs + ' s');
     set('call-sub', why === 'down' ? 'Erst wenn du gerettet bist' : why === 'boss' ? 'Besiege zuerst deinen Boss' : why === 'wind' ? 'Gleich geht’s los …' : 'Strömungsritt zum Leitfisch');
     const fb = document.getElementById('btn-call-follow'); if (fb) fb.disabled = !!why;
-    set('btn-call-no', wind ? 'Abbrechen' : 'Nein');
+    set('call-no-t', wind ? 'Abbrechen' : 'Nein');
     el.classList.add('show');
   }
   const fill = document.getElementById('call-fill');
@@ -14584,10 +14735,10 @@ function netEnemyRecords() {
   for (let i = 0; i < enemies.length; i++) {
     const en = enemies[i];
     if (en.dead) continue;
-    let mask = 0;                              // welche Mitspieler diesen Gegner gerade bekommen (ein Bit pro Spieler)
-    for (let j = 0; j < near.length; j++) if (distXY(near[j].x, near[j].y, en.x, en.y) <= NET_NEAR) { mask |= 1 << (near[j].id % 30); Net.needTo.add(near[j].id); }
-    if (!mask) { en.netMask = 0; continue; }
-    const fresh = (mask & ~(en.netMask || 0)) !== 0;   // jemand sieht ihn neu: er braucht alle Angaben
+    let mask = 0, fresh0 = false;              // welche Mitspieler diesen Gegner gerade bekommen (ein Bit pro Spieler; ohne freies Bit: immer vollständig)
+    for (let j = 0; j < near.length; j++) if (distXY(near[j].x, near[j].y, en.x, en.y) <= NET_NEAR) { if (near[j].bit >= 0) mask |= 1 << near[j].bit; else fresh0 = true; Net.needTo.add(near[j].id); }
+    if (!mask && !fresh0) { en.netMask = 0; continue; }
+    const fresh = fresh0 || (mask & ~(en.netMask || 0)) !== 0;   // jemand sieht ihn neu: er braucht alle Angaben
     en.netMask = mask;
     const fl = (en.elite ? 1 : 0) | (en.hitFlash > 0 ? 2 : 0) | (en.shell ? 4 : 0);
     const mh = netR1(en.maxHp), rr = netR1(en.r), dm = netR1(en.dmg * (en.lead ? LEADER_DMG : 1)), sig = mh + '|' + rr + '|' + dm;
@@ -14620,7 +14771,7 @@ function netEnemyRecords() {
 // 7.2: alle Beute-Meldungen gehen ausdrücklich (to) an jeden, der meine Beute kennt – der Server leitet sonst nur bis 2'400
 // weiter, das Spiel hält einen Mitspieler aber bis 2'700 für "kennt sie" (seine Perlen fehlten dann). Dazu alle PK_RESEND ms
 // noch einmal die ganze Liste, falls doch etwas verloren ging.
-const PK_RESEND = 10000;
+const PK_RESEND = 5000;
 function netLootOut(now, dead) {
   if (dead) { Net.dropOut = []; Net.goneOut = []; Net.updOut = []; return; }      // Lauf vorbei: die anderen übernehmen meine Beute
   let full = false, known = 0;
