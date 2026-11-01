@@ -1548,6 +1548,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Zu viele Versuche aus diesem Netz – bitte warte etwas.", "Too many tries from this network – please wait a bit.", "Забагато спроб з цієї мережі – трохи зачекай."],
 ["Anmelden geht nur auf der Seite des Spiels.", "You can only log in on the game's own page.", "Увійти можна лише на сторінці гри."],
 ["Der Server ist gerade nicht erreichbar.", "The server can't be reached right now.", "Сервер зараз недоступний."],
+["Spielstand deines Kontos geladen – bitte nochmal kaufen.", "Your account's save was loaded – please buy again.", "Збереження твого акаунта завантажено – купи ще раз."],
 ["Den Anzeigenamen kann man nur einmal pro Tag ändern.", "The display name can only be changed once a day.", "Ім'я можна змінювати лише раз на день."],
 ["Dieses Konto ist gesperrt.", "This account is locked.", "Цей акаунт заблоковано."],
 ["Konten sind auf diesem Server noch nicht eingerichtet.", "Accounts aren't set up on this server yet.", "Акаунти на цьому сервері ще не налаштовано."],
@@ -10609,10 +10610,10 @@ function accDevice() {
   const o = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : '';
   return b + (o ? ' · ' + o : '');
 }
-function accApi(path, body, withToken) {
-  const h = { 'Content-Type': 'application/json' };
+function accApi(path, body, withToken, keep) {
+  const h = { 'Content-Type': 'application/json' }, txt = JSON.stringify(body || {});
   if (withToken && accOn()) h.Authorization = 'Bearer ' + Acc.token;
-  return fetch(netServerBase() + '/acc/' + path, { method: 'POST', headers: h, body: JSON.stringify(body || {}) })
+  return fetch(netServerBase() + '/acc/' + path, { method: 'POST', headers: h, body: txt, keepalive: !!keep && txt.length < 60000 })     // keep: die Seite wird gerade geschlossen, die Anfrage soll trotzdem noch raus
     .then(function(r){ return r.json().then(function(j){ return { status: r.status, body: j || {} }; }, function(){ return { status: r.status, body: {} }; }); },
       function(){ return { status: 0, body: { error: 'offline' } }; });
 }
@@ -10635,23 +10636,52 @@ function accQueueSave() {
   accDirty = true;
   if (!accTimer) accTimer = setTimeout(function(){ accTimer = 0; accUpload(false); }, 2000);
 }
-function accUpload(claim) {
+function accUpload(claim, keep) {
   if (!accOn() || accBusy) return Promise.resolve(false);
   if (!accDirty && !claim) return Promise.resolve(true);
   accBusy = true; accDirty = false;
   const no = (Acc.no || 0) + 1;
-  return accApi('save', { no: no, data: accSaveData(), claim: !!claim }, true).then(function(r){
+  return accApi('save', { no: no, data: accSaveData(), claim: !!claim }, true, keep).then(function(r){
     accBusy = false;
-    if (r.status === 200) { Acc.no = no; Acc.active = true; accStore(); return true; }
+    if (r.status === 200) { Acc.no = no; Acc.active = true; accStore(); if (accDirty) accQueueSave(); return true; }      // inzwischen noch etwas geändert: nächste Runde
     if (r.status === 0) { accDirty = true; setTimeout(function(){ accUpload(false); }, 30000); return false; }   // offline: später nochmal
     if (r.status === 409 && r.body.error === 'inactive') { Acc.active = false; accStore(); accShowInactive(); return false; }
     if (r.status === 409 && r.body.error === 'stale') { accApplySave(r.body.save); return false; }
     if (r.status === 401) { accLocalLogout(); showToast('Deine Anmeldung ist abgelaufen – bitte melde dich neu an.'); return false; }
     if (r.status === 403) { accBlocked = true; showToast('Dein Konto ist gesperrt' + (r.body.reason ? ': ' + r.body.reason : '.')); return false; }
     if (r.status === 422) { accBlocked = true; showToast('Der Server hat diesen Spielstand abgelehnt. Lade die Seite neu.'); return false; }
-    accDirty = true; return false;
+    accDirty = true; setTimeout(function(){ accUpload(false); }, 30000); return false;      // Serverfehler: später nochmal
   });
 }
+// Die Seite wird versteckt oder geschlossen (Handy sperrt, Tab zu): was noch auf den Upload wartet, sofort senden
+function accFlush() {
+  if (!accOn() || accBlocked) return;
+  if (accTimer) { clearTimeout(accTimer); accTimer = 0; }
+  if (accDirty) accUpload(false, true);
+}
+// Zurück auf der Seite (Tab, Fenster, Handy entsperrt): im Menü den neuesten Spielstand des Kontos holen; ein offener Tab sah bisher nur beim Laden etwas Neues
+let accSyncAt = 0;
+function accSync() {
+  if (!accOn() || accBlocked || accBusy || gameState !== 'menu' || Net.on || document.hidden) return;
+  const now = Date.now(); if (now - accSyncAt < 8000) return; accSyncAt = now;
+  const before = Acc.no;
+  accUpload(false).then(accRefresh).then(function(){ if (accOn() && Acc.no !== before) accRerender(); });
+}
+function accRerender() {      // der offene Bildschirm zeigt den neuen Spielstand
+  const s = document.querySelector('.screen.active'), id = s ? s.id : '';
+  if (typeof updateMenuPearlsLabel === 'function') updateMenuPearlsLabel();
+  if (id === 'screen-shop') renderShop(); else if (id === 'screen-character') renderCharacterGrid(); else if (id === 'screen-stage') renderStageGrid();
+  else if (id === 'screen-achievements') renderAchievements(); else if (id === 'screen-album') renderAlbum();
+}
+// Kauf auf einem Gerät, das gerade nicht aktiv ist: erst den Spielstand des Kontos holen (sonst ginge der Kauf beim Übernehmen verloren)
+function accBuyGuard(redraw) {
+  if (!accOn() || Acc.active !== false) return false;
+  accClaim().then(function(){ redraw(); showToast(accOn() && Acc.active ? 'Spielstand deines Kontos geladen – bitte nochmal kaufen.' : 'Der Server ist gerade nicht erreichbar.'); });
+  return true;
+}
+document.addEventListener('visibilitychange', function(){ if (document.hidden) accFlush(); else accSync(); });
+window.addEventListener('pagehide', accFlush);
+window.addEventListener('focus', accSync);
 // beim Start: Spielstand und Gerätestatus vom Server holen
 function accRefresh() {
   if (!accOn()) return Promise.resolve();
@@ -10896,7 +10926,7 @@ function accPrivacy(add) {
 const STRAT_KEY = 'blobfischStrategyBase';
 // Massstab (7.3): eine Kachel = 144 (der Blobi hat Radius 19): Muschelburg und Brutstätte sind 3 Kacheln = 11 Blobis breit, die Basis 34–49 Blobis.
 // ST_REACH: die Reichweiten der Verteidigung, gemessen an der früheren Kachel von 48.
-const ST_TILE = 144, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 4, ST_MAX_MB = 5;
+const ST_TILE = 144, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 4, ST_MAX_MB = 5, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
 const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 0 }, { grid: 11, k: 800, c: 0, t: 0 }, { grid: 11, k: 1500, c: 60, t: 180 }, { grid: 13, k: 3000, c: 150, t: 420 }];
 // Gebäude: Grösse (Kacheln), ab welcher Muschelburg, Grundkosten (Korallen), HP, Anzahl je Muschelburg-Stufe
 const ST_B = {
@@ -10924,7 +10954,7 @@ const ST_T = {
   kugelfisch:   { name: 'Kugelfisch',   from: 5, xp: 40, train: 15, hp: 50,  dmg: 70, speed: 170, range: 0,   every: 0,   col: '#ffd76a', r: 12 }
 };
 let strategyMode = false, Base = null, stTroops = [], stCmd = 'follow', stHold = null, stSend = null, stUi = { mode: null, type: null, ghost: null, sel: null, move: null };
-let stWaveT = 0, stSaveT = 0, stBuilt = null;
+let stWaveT = 0, stSaveT = 0, stBuilt = null, stAnchor = null, stTrickleT = 0;
 function stLevelCost(type, lv) {      // Kosten der Stufe lv (1 = bauen)
   const d = ST_B[type], k = Math.round(d.k * Math.pow(1.8, lv - 1)), c = lv >= 3 ? Math.round(d.k * 0.08 * Math.pow(1.8, lv - 3)) : 0;
   return { k: k, c: c, t: lv <= 3 ? 0 : lv === 4 ? 120 : 300 };
@@ -11006,12 +11036,12 @@ function startStrategy(charId) {
   runXpToNext = xpForLevel(runLevel);
   stTroops = []; (Base.troops || []).forEach(function(t){ const q = stSpawnTroop(t.type); q.hp = Math.min(q.maxHp, t.hp || q.maxHp); });
   stCmd = 'follow'; stHold = null; stSend = null; stUi = { mode: null, type: null, ghost: null, sel: null, move: null };
-  stWaveT = ST_FIRST_WAVE; stSaveT = 10;
+  stWaveT = ST_FIRST_WAVE; stSaveT = 10; stTrickleT = 12; stAnchor = null;
   setStratUi(true); renderStratHud();
   if (away > 120 && (off.k >= 1 || off.c >= 1 || off.troops)) showToast('🏰 Während du weg warst: +' + Math.floor(off.k) + ' 🪸 · +' + Math.floor(off.c) + ' 💎' + (off.troops ? ' · ' + off.troops + ' 🐟' : ''));
   stSave();
 }
-function stLeave() { stSave(); strategyMode = false; setStratUi(false); stTroops = []; Base = null; }
+function stLeave() { stSave(); strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
 function setStratUi(on) {
   const rs = document.getElementById('btn-restart-pause'); if (rs) rs.style.display = on ? 'none' : '';   // Neustart gibt es in der Basis nicht
   const u = document.getElementById('strat-ui'); if (u) u.style.display = on ? 'block' : 'none';
@@ -11028,6 +11058,7 @@ function stratUpdate(dt) {
   const warnAt = stLv('leuchtturm') ? 15 : 5;
   if (stWaveT <= warnAt && stWaveT + dt > warnAt) showToast('🌊 Eine Welle kommt in ' + Math.ceil(stWaveT) + ' s!');
   if (stWaveT <= 0) { stWaveT = ST_WAVE_GAP; stWave(); }
+  stTrickleT -= dt; if (stTrickleT <= 0) { stTrickleT = ST_TRICKLE_GAP * (0.7 + Math.random() * 0.6); stTrickle(); }
   stTroopsUpdate(dt);
   stDefenses(dt);
   const ms = stBuildingsOf('muschelburg')[0];
@@ -11063,6 +11094,14 @@ function stWave() {
     showToast('⚠ Boss-Welle: ' + b.name + '!');
   } else showToast('🌊 Welle ' + Base.waves + ' greift deine Basis an!');
   Sfx.boss();
+}
+// Zwischen den Wellen: ab und zu ein einzelner schwacher Gegner um den Blobi (höchstens ST_TRICKLE_MAX gleichzeitig, nie Boss oder Champion)
+function stTrickle() {
+  if (!Base) return;
+  let n = 0; for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (!e.dead && !e.wave && !e.isBoss && !e.champ) n++; }
+  if (n >= ST_TRICKLE_MAX + Math.floor(Base.mb / 2) || !freeEnemySlot()) return;
+  const table = SPAWN_TABLE_BY_STAGE.riff, key = table[Math.floor(Math.random() * Math.min(3, 1 + Base.mb))];     // nur die ersten drei Sorten (Qualle, Kleinhai, Krebs)
+  const e = spawnEnemy(key, false); e.hp *= 1 + 0.06 * stStrength(); e.maxHp = e.hp;
 }
 // Beute im Strategie-Modus: grüne XP wie sonst, dazu Korallen; Bosse und Champions bringen Kristalle; keine Perlen
 function stratLoot(k) {
@@ -11142,6 +11181,7 @@ function stSpawnTroop(type) {
 function stTroopDie(t) { t.dead = true; spawnBurst(t.x, t.y, ST_T[t.type].col, 12); }
 function stTroopsUpdate(dt) {
   const list = allEnemies();
+  stAnchorUpdate(dt);
   for (let i = stTroops.length - 1; i >= 0; i--) {
     const t = stTroops[i], d = ST_T[t.type];
     if (t.dead) { stTroops.splice(i, 1); continue; }
@@ -11165,12 +11205,22 @@ function stTroopsUpdate(dt) {
         else { applyDamageToEnemy(foe, stTroopDmg(t.type)); spawnBurst(foe.x, foe.y, d.col, 3); }
       }
     } else if (home) {                                // Formation um den Blobi / den Punkt
-      const k = i / Math.max(1, stTroops.length) * 6.283 + runTime * 0.3, rr = 60 + (i % 3) * 22;
-      gx = home.x + Math.cos(k) * rr; gy = home.y + Math.sin(k) * rr; sp = d.speed * (stCmd === 'follow' ? 1.2 : 1);
+      const k = i / Math.max(1, stTroops.length) * 6.283 + runTime * 0.3, rr = 60 + (i % 3) * 22, fc = stCmd === 'follow' ? stAnchor : home;   // beim Folgen: um einen Punkt, der dem Blobi sanft hinterherschwimmt
+      gx = fc.x + Math.cos(k) * rr; gy = fc.y + Math.sin(k) * rr; sp = d.speed * (stCmd === 'follow' ? 1.2 : 1);
     } else { gx = t.x; gy = t.y; }
-    const dx = gx - t.x, dy = gy - t.y, dd = Math.hypot(dx, dy);
-    if (dd > 3) { const s = Math.min(dd, sp * dt); t.x += dx / dd * s; t.y += dy / dd * s; t.face = dx >= 0 ? 1 : -1; t.mv = { x: dx / dd, y: dy / dd, mag: 1 }; } else t.mv = { x: 0, y: 0, mag: 0 };
+    // Lenken statt Springen: Wunschtempo bremst vor dem Ziel, die Geschwindigkeit gleitet dorthin (im Kampf schneller)
+    const dx = gx - t.x, dy = gy - t.y, dd = Math.hypot(dx, dy), want = dd > 3 ? Math.min(sp, dd * 3) : 0, ease = 1 - Math.exp(-dt * (foe ? 9 : 2.6));
+    t.vx = (t.vx || 0) + ((want ? dx / dd * want : 0) - (t.vx || 0)) * ease; t.vy = (t.vy || 0) + ((want ? dy / dd * want : 0) - (t.vy || 0)) * ease;
+    const vm = Math.hypot(t.vx, t.vy);
+    t.x += t.vx * dt; t.y += t.vy * dt;
+    if (vm > 8) { if (Math.abs(t.vx) > 6) t.face = t.vx >= 0 ? 1 : -1; t.mv = { x: t.vx / vm, y: t.vy / vm, mag: 1 }; } else t.mv = { x: 0, y: 0, mag: 0 };
   }
+}
+// Mittelpunkt der Formation beim Folgen: gleitet dem Blobi hinterher (springt nur mit, wenn der Blobi weit weg versetzt wird)
+function stAnchorUpdate(dt) {
+  if (!stAnchor || distXY(stAnchor.x, stAnchor.y, player.x, player.y) > 700) { stAnchor = { x: player.x, y: player.y }; return; }
+  const e = 1 - Math.exp(-dt * 1.6);
+  stAnchor.x += (player.x - stAnchor.x) * e; stAnchor.y += (player.y - stAnchor.y) * e;
 }
 function stSetCmd(c) {
   stCmd = c;
@@ -12293,6 +12343,7 @@ function renderCharacterGrid() {
 function buyCharacter(id) {
   const ch = CHARACTERS.filter(function(c){ return c.id === id; })[0];
   if (!ch || ownsChar(id) || !charUnlocked(id) || save.totalPearls < ch.price) return false;
+  if (accBuyGuard(function(){ renderCharacterGrid(); updateMenuPearlsLabel(); })) return false;
   save.totalPearls -= ch.price;
   save.ownedCharacters.push(id);
   selectedCharacterId = id; save.lastCharacter = id;
@@ -12402,6 +12453,7 @@ function renderShop() {
       '<button class="shop-buy-btn" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '' : '<small class="shop-miss">noch ' + (cost - save.totalPearls) + '</small>')))+'</button>';
     if (!maxed && open) {
       div.querySelector('.shop-buy-btn').addEventListener('click', function(){
+        if (accBuyGuard(function(){ renderShop(); updateMenuPearlsLabel(); })) return;
         if (save.totalPearls >= cost && shopTierOpen(gate)) {
           save.totalPearls -= cost;
           save.shopLevels[u.id] = level+1;
