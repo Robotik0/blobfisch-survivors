@@ -5998,8 +5998,10 @@ function drawHazards() {
     } else if (z.t < z.warn) {
       if (lava) drawLavaWarn(ctx, z.r, z.t / z.warn, runTime, seed); else drawSlamWarn(ctx, z.r, z.t / z.warn, runTime);
     } else if (lava) drawLavaPool(ctx, z.r, z.t - z.warn, z.warn + z.life - z.t, runTime, seed);
-    if (z.kind === 'burst' && z.sk === 1 && z.t < z.warn) drawLanternZone(ctx, 1);     // falsche Laterne
     else drawSlamHit(ctx, z.r, Math.min(1, (z.t - z.warn) / z.life));
+    // 7.4: Seit 7.2 (Runde B) stand dieses "else" hinter der Laterne und rief drawSlamHit für JEDE Zone in JEDEM Bild auf, auch in der Warnzeit (negativer
+    // Radius: Fehler, der den Rest des Bildes abbrach – Gegner, Perlen und Spieler fehlten, das Bild wirkte zerschnitten, so lange eine Lava-, Stich- oder Schlagzone warnte)
+    if (z.kind === 'burst' && z.sk === 1 && z.t < z.warn) drawLanternZone(ctx, 1);     // falsche Laterne
     ctx.restore();
   }
   for (let i = 0; i < shockwaves.length; i++) {
