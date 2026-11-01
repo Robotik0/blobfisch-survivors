@@ -1947,9 +1947,10 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["noch {}", "{} more", "ще {}"],
 ["🔇 Ton: aus", "🔇 Sound: off", "🔇 Звук: вимк."],
 ["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."],
-["🖼️ Grafik: normal", "🖼️ Graphics: normal", "🖼️ Графіка: звичайна"],
+["🖼️ Grafik: automatisch", "🖼️ Graphics: automatic", "🖼️ Графіка: авто"],
+["🖼️ Grafik: hoch", "🖼️ Graphics: high", "🖼️ Графіка: висока"],
 ["🖼️ Grafik: einfach", "🖼️ Graphics: simple", "🖼️ Графіка: проста"],
-["🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sie sich wieder ausschalten.", "🖼️ Simple graphics are on because the game froze several times. You can turn them off in the pause menu.", "🖼️ Просту графіку ввімкнено, бо гра кілька разів зависала. Вимкнути її можна в меню паузи."]];
+["🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sich die Grafik einstellen.", "🖼️ Simple graphics are on because the game froze several times. You can change the graphics in the pause menu.", "🖼️ Просту графіку ввімкнено, бо гра кілька разів зависала. Налаштувати графіку можна в меню паузи."]];
 
 // Anleitung in drei Sprachen (Bildschirm "Anleitung"); renderInstructions() setzt die gewählte ein
 const INSTRUCTIONS = {
@@ -3079,6 +3080,7 @@ function drawBossCorpses() {
 }
 function spawnBurst(x,y,color,count){
   if (prefersReducedMotion) count = Math.min(count, 4);
+  else if (GFX.ql > 1) count = Math.max(1, Math.round(count * QUAL[GFX.ql].fx));     // einfachere Grafik: weniger Funken
   for (let i=0;i<count;i++){
     const a = Math.random()*Math.PI*2, sp = 40+Math.random()*90;
     particles.push({ x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:0.35+Math.random()*0.25, maxLife:0.6, color:color, r:2+Math.random()*3 });
@@ -6302,13 +6304,7 @@ function drawDarkness() {
   g.addColorStop(0, 'rgba(1,4,14,0)'); g.addColorStop(1, 'rgba(1,4,14,0.9)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   const ox = camera.x - W / 2, oy = camera.y - H / 2;
-  for (let i = 0; i < pickups.length; i++) {
-    const pk = pickups[i], qx = pk.x - ox, qy = pk.y - oy;
-    if (qx < -20 || qx > W + 20 || qy < -20 || qy > H + 20) continue;
-    ctx.fillStyle = GLOW_COL[pk.type] || '#5ef2c0';
-    ctx.beginPath(); ctx.arc(qx, qy, pk.r, 0, Math.PI * 2); ctx.fill();
-    if (pk.type === 'chest') { ctx.save(); ctx.translate(qx, qy); drawChest(ctx, 22, pk.card); ctx.restore(); }
-  }
+  rtry(drawPickups, 40);                                         // 7.6: Beute leuchtet im Dunkeln mit ihren richtigen Bildern (Kristalle, Perlen, Herzen, Truhen; vorher bunte Kreise)
   for (let i = 0; i < enemyProjectiles.length; i++) {
     const pr = enemyProjectiles[i];
     if (pr.skin === 'lantern') drawHalo(pr.x - ox, pr.y - oy, 130, '#bff6ff', 0.45);     // Laternen erhellen das Dunkel um sich
@@ -6893,29 +6889,60 @@ document.addEventListener('visibilitychange', function(){ if (document.hidden) {
 window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
 setInterval(function(){ if (window.requestIdleCallback) window.requestIdleCallback(saveRunSnapshotIfActive, { timeout: 4000 }); else saveRunSnapshotIfActive(); }, 8000);   // 7.4: im Leerlauf zwischen zwei Bildern (der Schnappschuss mit allen Gegnern dauert in Boss-Kämpfen spürbar)
 
-// Bildqualität passt sich an: ruckelt das Spiel (unter 45 Bilder/s, 2 Sekunden lang), sinkt die Auflösung stufenweise;
-// läuft es wieder lange flüssig (über 57 Bilder/s, 12 Sekunden), steigt sie wieder. Schwache Schul-Laptops und Handys profitieren.
-const RES_STEPS = [1, 0.8, 0.65, 0.5], RES_MIN_DPR = 0.6;
-let perfAcc = 0, perfN = 0, perfSlow = 0, perfFast = 0, resIdx = 0, resUpAfter = 12, resDownAt = 0;
-function perfTick(dt) {
-  if (gameState !== 'playing' || document.hidden) { perfAcc = 0; perfN = 0; return; }
-  if (dt > 0.35 && dt < 0.5) {                      // ein Bild hat über 0,35 s gedauert: Hänger. Mehrere in kurzer Zeit schalten die einfache Grafik ein (GFX).
-    const tn = performance.now(); GFX.freezes.push(tn);
-    while (GFX.freezes.length && tn - GFX.freezes[0] > 30000) GFX.freezes.shift();
-    if (GFX.freezes.length >= 4 && !GFX.safe) { GFX.safe = true; releaseBossBufs(true); if (GFX.onAuto) GFX.onAuto(); }
-  }
-  perfAcc += dt; perfN++;
-  if (perfAcc < 1) return;
-  const fps = perfN / perfAcc; perfAcc = 0; perfN = 0;
-  const tgt = paceTarget();                         // 60 Hz: unter 45 langsam, über 57 flüssig (halber Takt auf 90 Hz: 45 Bilder sind das Ziel)
-  if (fps < tgt * 0.75) { perfSlow++; perfFast = 0; } else if (fps > tgt * 0.95) { perfFast++; perfSlow = 0; } else { perfSlow = 0; perfFast = 0; }
+// Bildqualität (7.6): sechs Stufen, 0 = hoch … 5 = einfach. Die Automatik startet bei der zuletzt gemerkten Stufe (sonst 1 = so sah das Spiel bisher aus),
+// geht bei Geruckel schnell nach unten (je langsamer, desto schneller und weiter) und nach langer Ruhe wieder nach oben; mit viel Luft sogar auf 0 (hoch):
+// feinere Auflösung, schärfere Bosse, jedes Bild neu gezeichnet. Im Pause-Menü: Automatisch / Einfach / Hoch.
+//   res: Auflösung der Zeichenfläche (Faktor auf die Bildschirmdichte, höchstens 2 Pixel je CSS-Pixel), boss: Auflösung der Boss-Bilder (zusätzlicher Faktor),
+//   cap: obere Grenze der Boss-Bilder in Pixeln je Welt-Einheit (0 = hoch; sonst wie bisher die Bildschirmdichte, höchstens 1,5), every: Boss-Kunst alle n Bilder neu,
+//   outline: leuchtender Umriss um Bosse, fx: Anteil der Funken und Hintergrund-Dinge.
+const QUAL = [
+  { res: 1.5,  boss: 1,    cap: 2,   every: 1, outline: true,  fx: 1 },
+  { res: 1,    boss: 1,    cap: 0,   every: 2, outline: true,  fx: 1 },
+  { res: 0.8,  boss: 0.9,  cap: 0,   every: 2, outline: true,  fx: 0.85 },
+  { res: 0.65, boss: 0.75, cap: 0,   every: 3, outline: false, fx: 0.65 },
+  { res: 0.5,  boss: 0.6,  cap: 0,   every: 4, outline: false, fx: 0.5 },
+  { res: 0.5,  boss: 0.5,  cap: 0,   every: 6, outline: false, fx: 0.35 }
+];
+const RES_MIN_DPR = 0.6, QL_AUTO_START = 1;
+let perfAcc = 0, perfN = 0, perfBusy = 0, perfSlow = 0, perfFast = 0, resUpAfter = 12, resDownAt = 0, lastBusy = 0, qlSaveAt = 0;
+function resFor(q) {                                // Faktor für DPR: nie unter 0,6 und nie über 2 Pixel je CSS-Pixel
   const base = Math.min(window.devicePixelRatio || 1, 2);
-  // Qualität wieder erhöhen: erst nach resUpAfter ruhigen Sekunden; sinkt sie kurz danach wieder, wartet es doppelt so lange (kein Hin und Her mit Neuaufbau der Zeichenfläche)
-  if (perfSlow >= 2 && resIdx < RES_STEPS.length - 1 && base * RES_STEPS[resIdx + 1] >= RES_MIN_DPR) {
-    const tn = performance.now(); if (resDownAt && tn - resDownAt < 90000) resUpAfter = Math.min(120, resUpAfter * 2);
-    resDownAt = tn; resIdx++; perfSlow = 0; RES = RES_STEPS[resIdx]; resizeCanvas();
+  return Math.min(2 / base, Math.max(QUAL[q].res, RES_MIN_DPR / base));
+}
+function setQuality(q) {
+  q = Math.max(0, Math.min(QUAL.length - 1, q | 0));
+  const r = resFor(q);
+  GFX.ql = q;
+  if (Math.abs(r - RES) > 1e-6) { RES = r; resizeCanvas(); }
+  releaseBossBufs(true);                            // andere Boss-Bildgrösse: die Zeichenflächen neu anlegen
+}
+function perfTick(dt) {
+  if (gameState !== 'playing' || document.hidden) { perfAcc = 0; perfN = 0; perfBusy = 0; return; }
+  if (dt > 0.35 && dt < 0.5 && GFX.mode === 'auto') {   // ein Bild hat über 0,35 s gedauert: Hänger. Zwei in kurzer Zeit: gleich zwei Stufen runter.
+    const tn = performance.now(); GFX.freezes.push(tn);
+    while (GFX.freezes.length && tn - GFX.freezes[0] > 20000) GFX.freezes.shift();
+    if (GFX.freezes.length >= 2 && GFX.ql < QUAL.length - 1) {
+      GFX.freezes.length = 0; perfSlow = 0; perfFast = 0; perfAcc = 0; perfN = 0; perfBusy = 0; resDownAt = tn;     // dieselben Hänger zählen nicht noch einmal als langsame Sekunde
+      setQuality(GFX.ql + 2); if (GFX.ql >= 4 && GFX.onAuto) GFX.onAuto();
+    }
   }
-  else if (perfFast >= resUpAfter && resIdx > 0) { resIdx--; perfFast = 0; RES = RES_STEPS[resIdx]; resizeCanvas(); }
+  perfAcc += dt; perfN++; perfBusy += lastBusy;
+  if (perfAcc < 1) return;
+  const fps = perfN / perfAcc, busy = perfBusy / perfN; perfAcc = 0; perfN = 0; perfBusy = 0;
+  if (GFX.mode !== 'auto') return;
+  const r = fps / paceTarget();                     // 1 = so viele Bilder wie der Bildschirm zeigen kann (60 Hz: unter 45 langsam, über 57 flüssig; 90 Hz im halben Takt: 45 Bilder)
+  if (r < 0.75) { perfSlow += r < 0.5 ? 2 : 1; perfFast = 0; } else if (r > 0.95) { perfFast++; perfSlow = 0; } else { perfSlow = 0; perfFast = 0; }
+  // Nach unten: nach 2 langsamen Sekunden eine Stufe (bei unter der Hälfte der Bilder schon nach einer, dann bei unter 40 % gleich zwei).
+  if (perfSlow >= 2 && GFX.ql < QUAL.length - 1) {
+    const tn = performance.now(); if (resDownAt && tn - resDownAt < 90000) resUpAfter = Math.min(120, resUpAfter * 2);   // sinkt es kurz nach einem Anstieg wieder, wartet es doppelt so lange (kein Hin und Her)
+    resDownAt = tn; perfSlow = 0; perfFast = 0;
+    setQuality(GFX.ql + (r < 0.4 ? 2 : 1));
+    if (GFX.ql >= 4 && GFX.onAuto) GFX.onAuto();
+  }
+  // Nach oben: erst nach resUpAfter ruhigen Sekunden. Die Stufe 0 (hoch) nur, wenn dazu noch viel Luft ist: das Bild kostet im Schnitt unter 5 ms Rechenzeit
+  // (ein Bild darf 16 ms dauern) und der Bildschirm läuft nicht im halben Takt.
+  else if (perfFast >= resUpAfter && GFX.ql > 0 && (GFX.ql > 1 || (busy < 5 && !PACE.half))) { setQuality(GFX.ql - 1); perfFast = 0; resUpAfter = Math.max(12, Math.round(resUpAfter * 0.75)); }   // wieder oben: die Wartezeit schrumpft langsam
+  if (GFX.onLevel && performance.now() - qlSaveAt > 10000) { qlSaveAt = performance.now(); GFX.onLevel(GFX.ql); }
 }
 // ein Bild Spiellogik (ohne Zeichnen): Netz, Lauf, Countdown nach dem Neuladen, Bedenkzeit der Zweiten Chance
 function stepGame(dt) {
@@ -6958,9 +6985,11 @@ function gameLoop(timestamp) {
     const rawDt = Math.min(dt, 0.5);
     dt = Math.min(dt, 0.05);
     lastTime = timestamp;
+    const tb = performance.now();
     try { stepGame(dt); } catch (err) { if (window.console && console.error) console.error(err); }   // ein Fehler in der Spiellogik darf das Zeichnen nicht ausfallen lassen
     perfTick(rawDt);
     render();
+    lastBusy = performance.now() - tb;               // Rechenzeit dieses Bildes (Logik + Zeichenbefehle; die Grafikkarte arbeitet danach weiter)
   } catch (err) {
     if (window.console && console.error) console.error(err);
   }
@@ -9449,9 +9478,12 @@ function bossTmpBuf(name, size) {
   e.used = renderFrame; bossTmp[name + 'X'] = e.g;
   return e.c;
 }
-function bossBake() { return Math.min(window.devicePixelRatio || 1, 1.5); }
+// Auflösung der Boss-Bilder in Pixeln je Welt-Einheit: so fein wie der Bildschirm sie zeigt (Zeichenfläche × Zoom), höchstens wie bisher (Bildschirmdichte, 1,5);
+// die Stufe macht sie kleiner (weniger Pixel = viel weniger Rechenzeit beim Neuzeichnen) oder, auf Stufe 0, feiner (bis 2)
+function bossBake() { const q = QUAL[GFX.ql]; return Math.max(0.35, Math.min(q.cap || Math.min(window.devicePixelRatio || 1, 1.5), DPR * ZOOM) * q.boss); }
 // einfache Grafik: ohne Umriss und nur jedes 3. Bild neu gezeichnet. Schaltet sich ein, wenn das Spiel mehrmals hängt (siehe perfTick); ?gfx=safe erzwingt es.
-const GFX = { safe: typeof location !== 'undefined' && /[?&]gfx=safe/.test(location.search || ''), freezes: [] };
+// mode: 'auto' (die Automatik oben), 'safe' (immer Stufe 5) oder 'high' (immer Stufe 0); ?gfx=safe / ?gfx=high erzwingt es für diese Sitzung
+const GFX = { mode: typeof location !== 'undefined' && /[?&]gfx=safe/.test(location.search || '') ? 'safe' : (typeof location !== 'undefined' && /[?&]gfx=high/.test(location.search || '') ? 'high' : 'auto'), ql: QL_AUTO_START, freezes: [], onAuto: null, onLevel: null };
 function releaseBossBufs(all) {
   bossPool.forEach(function(e, k){ if (all || renderFrame - e.used > 240) { e.c.width = e.c.height = 0; bossPool.delete(k); } });
   bossBufOwners.forEach(function(en){
@@ -9470,7 +9502,7 @@ function animSeed(en) {
   return en.aSeed;
 }
 function drawBossSprite(en, sx, sy, mode) {
-  const R = en.r * BOSS_VIS, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.75), dim = pad * 2, px = Math.min(BOSS_BUF_MAX, Math.ceil(dim * bossBake())), bs = px / dim;
+  const R = en.r * BOSS_VIS, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.75), dim = pad * 2, px = Math.min(GFX.ql === 0 ? 1536 : BOSS_BUF_MAX, Math.ceil(dim * bossBake())), bs = px / dim;      // Stufe 0 (hoch): bis 1536 Pixel
   const tg = en.tg || player, dxp = tg.x - en.x, dyp = tg.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer';
   let dirx = dxp, diry = dyp;
   if (en.type === 'haikoenig' && (st === 'windup' || st === 'dash')) { dirx = Math.cos(en.ang); diry = Math.sin(en.ang); }
@@ -9503,7 +9535,7 @@ function drawBossSprite(en, sx, sy, mode) {
   o.pose = st; o.wk = wk; o.slam = slam; o.atk = atk; o.swim = en.mvS || 0;
 
   const key = en.type + '|' + ph + '|' + faceSign + '|' + open + '|' + px + '|' + (champT ? en.champ[0] : '') + '|' + (en.vv || 0);
-  const every = GFX.safe ? 3 : 2;
+  const Q = QUAL[GFX.ql], every = Q.every;
   if (!en.outBuf || key !== en.artKey || renderFrame - en.artFrame >= every) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel
     if (!en.outBuf) { en.outBuf = document.createElement('canvas'); en.outCtx = en.outBuf.getContext('2d'); bossBufOwners.add(en); }
     if (en.outBuf.width !== px) { en.outBuf.width = en.outBuf.height = px; }
@@ -9515,7 +9547,7 @@ function drawBossSprite(en, sx, sy, mode) {
     BOSS_FX.blink = 0;
     const oc = en.outCtx;
     oc.setTransform(1, 0, 0, 1, 0, 0); oc.globalCompositeOperation = 'source-over'; oc.clearRect(0, 0, px, px);
-    if (GFX.safe) oc.drawImage(ab, 0, 0, px, px, 0, 0, px, px);
+    if (!Q.outline) oc.drawImage(ab, 0, 0, px, px, 0, 0, px, px);
     else {
       // Umriss: Silhouette in der Aura-Farbe, in 8 Richtungen versetzt hinter die Figur. Auf hochauflösenden Bildschirmen wird er in halber
       // Auflösung gerechnet (die nötigen Misch-Modi sind teuer) und als ein einziger Ring hinter die Figur gelegt.
@@ -9541,7 +9573,7 @@ function drawBossSprite(en, sx, sy, mode) {
       oc.drawImage(rb, 0, 0, hp, hp, 0, 0, px, px);
       oc.drawImage(ab, 0, 0, px, px, 0, 0, px, px);
     }
-    en.artKey = key; en.artFrame = renderFrame + (en.artFrame === undefined ? (sd & 1) : 0);   // die Hälfte aller Bosse zeichnet in den geraden, die andere in den ungeraden Bildern: gleichmässigere Last
+    en.artKey = key; en.artFrame = renderFrame + (en.artFrame === undefined ? sd % every : 0);   // mehrere Bosse (Glieder einer Seeschlange) zeichnen in verschiedenen Bildern: gleichmässigere Last
   }
   let img = en.outBuf;
   const flash = en.hitFlash > 0 ? Math.min(1, en.hitFlash / 0.12) : 0;
@@ -9674,12 +9706,8 @@ function drawEnemySprite(x, y, r, color, accessory, wobble) {
     fr = Math.min(BLOB_FRAMES - 1, Math.floor((ph < 0 ? ph + 1 : ph) * BLOB_FRAMES));
   }
   const sprite = getEnemySprite(color, null, rr, acc, fr), k = r / rr;
-  const squash = 1 + Math.sin(wobble || 0) * 0.06;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(k/squash, k*squash);
-  ctx.drawImage(sprite.canvas, -sprite.pad, -sprite.pad, sprite.size, sprite.size);
-  ctx.restore();
+  const squash = 1 + Math.sin(wobble || 0) * 0.06, kx = k / squash, ky = k * squash;
+  ctx.drawImage(sprite.canvas, x - sprite.pad * kx, y - sprite.pad * ky, sprite.size * kx, sprite.size * ky);       // 7.6: ohne save / translate / scale / restore je Gegner (dasselbe Bild)
 }
 
 // Champion-Kunst: je Art, Grösse und Animationsbild einmal vorgezeichnet (8 Bilder je Schleife), Treffer-Blitz als weisse Silhouette.
@@ -10020,7 +10048,7 @@ function drawFloorScenery(camX, camY, stageId) {
   for (let cy = startRow; cy <= endRow; cy++) {
     for (let cx = startCol; cx <= endCol; cx++) {
       const h = hashCell(cx, cy);
-      if (h > 0.5) continue;
+      if (h > 0.5 * QUAL[GFX.ql].fx) continue;           // einfachere Grafik: weniger Hintergrund-Dinge (die übrigen bleiben an ihrem Platz)
       const h2 = hashCell(cx * 3 + 7, cy * 5 + 11);
       const h3 = hashCell(cx * 13 + 1, cy * 17 + 3);
       const worldX = cx * cell + h2 * cell * 0.6 + cell * 0.2;
@@ -10078,7 +10106,7 @@ function drawBackground() {
 
   const camX = inRun ? camera.x : 0, camY = inRun ? camera.y : 0;
 
-  drawDeepGlows(camX, camY, stage.id);
+  if (GFX.ql < 3) drawDeepGlows(camX, camY, stage.id);
   drawFloorScenery(camX, camY, stage.id);
   if (stage.id === 'kelp') drawKelp(camX, camY);
 
@@ -10245,6 +10273,11 @@ function projSprite(kind, col) {
 }
 function drawProjectile(pr, sx, sy, alpha) {
   const kind = projKind(pr), spr = projSprite(kind, pr.color), k = pr.r / spr.base;
+  if (kind === 'bubble' || kind === 'orb') {          // 7.6: runde Geschosse ohne Drehung: direkt zeichnen
+    const ga = ctx.globalAlpha; if (alpha !== undefined) ctx.globalAlpha = ga * alpha;
+    ctx.drawImage(spr.canvas, sx - spr.w / 2 * k, sy - spr.h / 2 * k, spr.w * k, spr.h * k);
+    ctx.globalAlpha = ga; return;
+  }
   ctx.save(); ctx.translate(sx, sy);
   if (kind !== 'bubble' && kind !== 'orb') ctx.rotate(Math.atan2(pr.vy || 0, pr.vx || 1));
   if (alpha !== undefined) ctx.globalAlpha *= alpha;
@@ -10252,6 +10285,22 @@ function drawProjectile(pr, sx, sy, alpha) {
   ctx.restore();
 }
 
+// 7.6: Blasen des Rings als vorgezeichnete Bilder (frisch / abgenutzt / kurz vorm Platzen / Treffer-Blitz): ein drawImage statt Leuchten, Füllung und drei Linien je Blase
+const ringSpr = {};
+function ringBubbleSpr(k) {
+  if (ringSpr[k]) return ringSpr[k];
+  const R = k === 3 ? 29 : 21, S = Math.ceil(R) * 2 + 4, c = document.createElement('canvas'); c.width = c.height = S * 2;
+  const g = c.getContext('2d');
+  g.scale(2, 2); g.translate(S / 2, S / 2);
+  g.globalAlpha = 0.75; g.drawImage(haloSprite(k === 2 ? '#ff9aae' : '#bdeeff'), -R, -R, R * 2, R * 2);
+  g.globalAlpha = 0.92; g.fillStyle = k === 3 ? '#ffffff' : (k === 2 ? '#ffd3dc' : (k === 1 ? '#d4ecff' : '#bdeeff'));
+  g.beginPath(); g.arc(0, 0, 10, 0, Math.PI * 2); g.fill();
+  g.globalAlpha = 1; g.strokeStyle = 'rgba(120,200,255,0.9)'; g.lineWidth = 1.2;
+  g.beginPath(); g.arc(0, 0, 10, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 1.6;
+  g.beginPath(); g.arc(0, 0, 6.5, Math.PI * 1.1, Math.PI * 1.55); g.stroke();
+  return (ringSpr[k] = { c: c, s: S });
+}
 function drawRingBubbles() {
   const p = player, bubbles = getOrbitBubbleWorldPositions(), canPop = (p.weapons.ring || 0) >= RING_POP_LEVEL;
   for (let i = 0; i < bubbles.length; i++) {
@@ -10259,24 +10308,16 @@ function drawRingBubbles() {
     let ox = b.x - camera.x + W/2, oy = b.y - camera.y + H/2;
     const wear = canPop ? Math.min(1, p.ringHits[b.slot] / RING_BUBBLE_HITS) : 0;
     if (wear > 0.8) { ox += Math.sin(runTime * 60 + b.slot) * 1.4; oy += Math.cos(runTime * 52 + b.slot) * 1.4; }
-    const flash = p.ringFlash[b.slot] > 0 ? 1 : 0;
-    ctx.save();
-    drawHalo(ox, oy, 21 + flash * 8, wear > 0.75 ? '#ff9aae' : '#bdeeff', 0.75);
-    ctx.fillStyle = flash ? '#ffffff' : (wear > 0.75 ? '#ffd3dc' : (wear > 0.4 ? '#d4ecff' : '#bdeeff'));
-    ctx.globalAlpha = 0.92 - wear * 0.22;
-    ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI * 2); ctx.fill();
+    const flash = p.ringFlash[b.slot] > 0, spr = ringBubbleSpr(flash ? 3 : (wear > 0.75 ? 2 : (wear > 0.4 ? 1 : 0)));
+    if (wear > 0) ctx.globalAlpha = 1 - wear * 0.24;
+    ctx.drawImage(spr.c, ox - spr.s / 2, oy - spr.s / 2, spr.s, spr.s);
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = 'rgba(120,200,255,0.9)'; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.arc(ox, oy, 6.5, Math.PI * 1.1, Math.PI * 1.55); ctx.stroke();
     if (wear > 0.4) {
       ctx.strokeStyle = 'rgba(255,90,120,' + (0.35 + wear * 0.6) + ')'; ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.moveTo(ox - 3, oy - 7); ctx.lineTo(ox + 1, oy - 1); ctx.lineTo(ox - 2, oy + 3); ctx.lineTo(ox + 3, oy + 8);
       if (wear > 0.7) { ctx.moveTo(ox + 1, oy - 1); ctx.lineTo(ox + 7, oy - 3); }
       ctx.stroke();
     }
-    ctx.restore();
   }
 }
 
@@ -12710,14 +12751,21 @@ function initUI() {
   UI['btn-mute'].addEventListener('click', function(){ toggleMute(); });
   UI['btn-mute-pause'].addEventListener('click', function(){ toggleMute(); });
   showMute();
-  // Grafik: normal oder einfach (ohne Umriss um Bosse, sparsamer gezeichnet). Gilt für dieses Gerät; schaltet sich nach mehreren Hängern von selbst ein.
-  function showGfx() { if (UI['btn-gfx-pause']) UI['btn-gfx-pause'].textContent = GFX.safe ? '🖼️ Grafik: einfach' : '🖼️ Grafik: normal'; }
-  GFX.onAuto = function(){ Storage.set('blobfischGfx', 'safe'); showGfx(); showToast('🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sie sich wieder ausschalten.'); };
+  // Grafik: Automatisch (Stufen 0–5 nach Bedarf, siehe perfTick), Einfach (immer Stufe 5) oder Hoch (immer Stufe 0). Gilt für dieses Gerät; die Automatik merkt sich ihre Stufe.
+  const GFX_NAMES = { auto: '🖼️ Grafik: automatisch', safe: '🖼️ Grafik: einfach', high: '🖼️ Grafik: hoch' }, GFX_NEXT = { auto: 'safe', safe: 'high', high: 'auto' };
+  function showGfx() { if (UI['btn-gfx-pause']) UI['btn-gfx-pause'].textContent = GFX_NAMES[GFX.mode]; }
+  function applyGfxMode(m) {
+    GFX.mode = m; GFX.freezes.length = 0; perfSlow = 0; perfFast = 0;
+    setQuality(m === 'safe' ? QUAL.length - 1 : m === 'high' ? 0 : Math.max(1, Math.min(QUAL.length - 1, Storage.get('blobfischGfxLevel', QL_AUTO_START) | 0)));
+    showGfx();
+  }
+  GFX.onAuto = function(){ showGfx(); if (!GFX.toldSimple) { GFX.toldSimple = true; showToast('🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sich die Grafik einstellen.'); } };
+  GFX.onLevel = function(q){ if (GFX.mode === 'auto') Storage.set('blobfischGfxLevel', q); };
   UI['btn-gfx-pause'].addEventListener('click', function(){
-    Sfx.click(); GFX.safe = !GFX.safe; GFX.freezes.length = 0; Storage.set('blobfischGfx', GFX.safe ? 'safe' : 'normal'); releaseBossBufs(true); showGfx();
+    Sfx.click(); const m = GFX_NEXT[GFX.mode]; Storage.set('blobfischGfx', m); applyGfxMode(m);
   });
-  if (Storage.get('blobfischGfx', null) === 'safe') GFX.safe = true;
-  showGfx();
+  { const saved = Storage.get('blobfischGfx', null); if (GFX.mode === 'auto' && (saved === 'safe' || saved === 'high')) GFX.mode = saved; }   // 'normal' (vor 7.6) = automatisch
+  applyGfxMode(GFX.mode);
 
   initOnlineUI();
   checkAchievements();
