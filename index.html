@@ -563,12 +563,14 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div id="strat-ui" style="display:none;">
     <div class="st-res" id="strat-res"></div>
+    <div id="st-raid" style="display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 102px);z-index:12;background:rgba(120,20,30,0.82);border:1px solid rgba(255,140,140,0.5);border-radius:14px;padding:6px 14px;font-weight:800;font-size:13px;text-align:center;"></div>
     <div class="st-btns">
       <button class="btn btn-secondary" id="st-build">🔨 Bauen</button>
       <button class="btn btn-primary" id="st-deposit">🟢 Einzahlen</button>
       <button class="btn btn-secondary st-cmd" id="st-follow">Folgen</button>
       <button class="btn btn-secondary st-cmd" id="st-hold">Halten</button>
       <button class="btn btn-secondary st-cmd" id="st-send">Schicken</button>
+      <button class="btn btn-secondary" id="st-map" style="display:none;">🗺️ Karte</button>
     </div>
     <div class="st-panel" id="strat-panel" style="display:none;"></div>
   </div>
@@ -784,6 +786,35 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="panel">
       <p>Dein Konto ist gerade auf einem anderen Gerät aktiv.</p>
       <button class="btn btn-primary" id="btn-acc-here">Hier weiterspielen</button>
+    </div>
+  </div>
+
+  <div class="acc-overlay" id="st-mapview" style="display:none;">
+    <div class="panel">
+      <h2 id="st-map-title">🗺️ Karte</h2>
+      <canvas id="st-map-cv" width="440" height="440" style="max-width:100%;"></canvas>
+      <div id="st-map-list"></div>
+      <button class="btn btn-primary" id="btn-st-map-close">Schliessen</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-strat">
+    <div class="panel">
+      <h2>🏰 Strategie</h2>
+      <p>Spiele allein oder auf einer Karte mit bis zu 24 Spielern. Wähle, in welchem Ring deine Basis steht.</p>
+      <div class="panel-actions" id="strat-rings" style="flex-direction:column;"></div>
+      <div class="panel-actions">
+        <button class="btn btn-secondary" id="btn-strat-solo">Allein in meiner Basis</button>
+        <button class="btn btn-ghost" id="btn-strat-back">Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc-overlay" id="st-away" style="display:none;">
+    <div class="panel">
+      <h2>🏰 Während du weg warst</h2>
+      <div id="st-away-lines" style="max-height:50vh;overflow-y:auto;"></div>
+      <button class="btn btn-primary" id="btn-st-away">Weiter</button>
     </div>
   </div>
 
@@ -1504,6 +1535,37 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).", "Tap a free spot on the grid (the outline shows whether it fits).", "Торкнися вільного місця на сітці (контур покаже, чи влазить)."],
 ["Tippe auf die Stelle, zu der deine Truppen schwimmen sollen.", "Tap the spot your troops should swim to.", "Торкнися місця, куди мають плисти твої війська."],
 ["🐟 Deine Truppen schwimmen los.", "🐟 Your troops are on their way.", "🐟 Твої війська вирушили."],
+["⚔ Überfall auf {} · {} s · {} von {} zerstört", "⚔ Raid on {} · {} s · {} of {} destroyed", "⚔ Напад на {} · {} с · знищено {} з {}"],
+["⚔ Überfall auf {} – drei Minuten!", "⚔ Raid on {} – three minutes!", "⚔ Напад на {} – три хвилини!"],
+["⚔ Überfall beendet – die Beute kommt gleich.", "⚔ Raid over – the loot is on its way.", "⚔ Напад закінчено – здобич зараз прийде."],
+["⚔ Überfall beendet.", "⚔ Raid over.", "⚔ Напад закінчено."],
+["⚔ Der Überfall ist zu Ende (zu lange gedauert oder dein Gegner ist weg).", "⚔ The raid is over (it took too long or your opponent left).", "⚔ Напад закінчено (він тривав надто довго або суперник пішов)."],
+["⚔ Diese Basis wird gerade von jemand anderem überfallen.", "⚔ Someone else is raiding this base right now.", "⚔ Цю базу зараз грабує хтось інший."],
+["🚨 {} überfällt deine Basis!", "🚨 {} is raiding your base!", "🚨 {} нападає на твою базу!"],
+["🏴‍☠️ Beute von {}: +{} 🪸 · +{} 💎 · +{} 🟢", "🏴‍☠️ Loot from {}: +{} 🪸 · +{} 💎 · +{} 🟢", "🏴‍☠️ Здобич від {}: +{} 🪸 · +{} 💎 · +{} 🟢"],
+["🏴‍☠️ {} hat dich überfallen: −{} 🪸 · −{} 💎 · −{} 🟢", "🏴‍☠️ {} raided you: −{} 🪸 · −{} 💎 · −{} 🟢", "🏴‍☠️ {} пограбував тебе: −{} 🪸 · −{} 💎 · −{} 🟢"],
+["🔧 {} Gebäude in Ruinen", "🔧 {} buildings in ruins", "🔧 {} будівель у руїнах"],
+["🗺️ Karte", "🗺️ Map", "🗺️ Карта"],
+["Spiele allein oder auf einer Karte mit bis zu 24 Spielern. Wähle, in welchem Ring deine Basis steht.", "Play alone or on a map with up to 24 players. Pick the ring your base stands in.", "Грай сам або на карті до 24 гравців. Обери кільце, у якому стоїть твоя база."],
+["Allein in meiner Basis", "Alone in my base", "Сам у моїй базі"],
+["{} · Platz {}", "{} · plot {}", "{} · ділянка {}"],
+["🗺️ {} – dein Platz ist Nr. {}", "🗺️ {} – your plot is no. {}", "🗺️ {} – твоя ділянка №{}"],
+["🗺️ Der Ring ist voll – du spielst allein.", "🗺️ That ring is full – you play alone.", "🗺️ Це кільце заповнене – ти граєш сам."],
+["🗺️ Keine Verbindung zur Karte – du spielst allein.", "🗺️ No connection to the map – you play alone.", "🗺️ Немає зв'язку з картою – ти граєш сам."],
+["🗺️ Bitte lade die Seite neu – das Spiel wurde aktualisiert.", "🗺️ Please reload the page – the game was updated.", "🗺️ Перезавантаж сторінку – гру оновлено."],
+["👋 {} ist auf der Karte", "👋 {} is on the map", "👋 {} на карті"],
+["{} (Muschelburg {})", "{} (Shell Castle {})", "{} (Мушлевий замок {})"],
+["Freier Platz", "Free plot", "Вільна ділянка"],
+["Das bist du", "That is you", "Це ти"],
+["🏰 Während du weg warst", "🏰 While you were away", "🏰 Поки тебе не було"],
+["Weiter", "Continue", "Далі"],
+["Du warst {} weg.", "You were away for {}.", "Тебе не було {}."],
+["Produziert: {} 🪸 · {} 💎", "Produced: {} 🪸 · {} 💎", "Вироблено: {} 🪸 · {} 💎"],
+["Ausgebildet: {} 🐟", "Trained: {} 🐟", "Навчено: {} 🐟"],
+["🌊 Welle {}: abgewehrt, +{} 🪸", "🌊 Wave {}: repelled, +{} 🪸", "🌊 Хвиля {}: відбито, +{} 🪸"],
+["🌊 Welle {}: Verluste −{} 🪸 · −{} 💎", "🌊 Wave {}: losses −{} 🪸 · −{} 💎", "🌊 Хвиля {}: втрати −{} 🪸 · −{} 💎"],
+["🐟 Eine Truppe ging verloren.", "🐟 A troop was lost.", "🐟 Один загін втрачено."],
+["🔧 {} liegt in Ruinen.", "🔧 {} lies in ruins.", "🔧 {} лежить у руїнах."],
 ["🏰 Während du weg warst: +{} 🪸 · +{} 💎", "🏰 While you were away: +{} 🪸 · +{} 💎", "🏰 Поки тебе не було: +{} 🪸 · +{} 💎"],
 ["🏗️ Fertig: {}", "🏗️ Done: {}", "🏗️ Готово: {}"],
 ["🌊 Eine Welle kommt in {} s!", "🌊 A wave is coming in {} s!", "🌊 Хвиля прийде за {} с!"],
@@ -2741,6 +2803,7 @@ function startRun(charId, stageId) {
 function levelFactor(level) { return Math.min(6, Math.max(0.7, Math.pow(level / 21, 1.3))); }
 
 function spawnEnemy(typeKey, isBoss) {
+  const tt = strategyMode ? 0 : runTime;               // Strategie (7.8): die Spielzeit der Basis macht Gegner nicht stärker (vorher: nach 20 Minuten über 20× so viele HP); die Stärke kommt aus der Basis (stWave)
   const angle = Math.random() * Math.PI * 2;
   const dist = Math.max(W, H) * 0.62 + 60;
   const x = player.x + Math.cos(angle) * dist;
@@ -2756,8 +2819,8 @@ function spawnEnemy(typeKey, isBoss) {
     const levelMult = championScale();                                  // Level-Faktor (online: Durchschnitt der Spieler in der Nähe)
     const nearN = Net.on ? netNearbyPeers(player.x, player.y).length : 0;
     const groupMult = 1 + WORLD_BOSS_HP * nearN;                                                     // Weltboss: +60 % pro weiterem Spieler
-    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult * groupMult * (champ ? CHAMPION_BOSS_HP : 1) * lateMult(Math.sqrt(LATE_HP), runTime);
-    const dmgMult = (1 + bossEncounterCount * 0.2) * lateMult(LATE_DMG, runTime) * (riff ? RIFF_BOSS_DMG : 1);
+    const hpMult = (1 + (stage.difficulty - 1) * 0.5) * encounterMult * levelMult * groupMult * (champ ? CHAMPION_BOSS_HP : 1) * lateMult(Math.sqrt(LATE_HP), tt) * (strategyMode ? ST_BOSS_HP : 1);
+    const dmgMult = (1 + bossEncounterCount * 0.2) * lateMult(LATE_DMG, tt) * (riff ? RIFF_BOSS_DMG : 1) * (strategyMode ? ST_BOSS_DMG : 1);
     bossEntity = {
       id: ++enemySeq, isBoss: true, type: typeKey, name: def.name, encounterNumber: bossEncounterCount + 1,
       x: x, y: y, r: def.r, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
@@ -2779,8 +2842,8 @@ function spawnEnemy(typeKey, isBoss) {
     return bossEntity;
   }
   const def = ENEMY_TYPES[typeKey];
-  const hpScale = (1 + (runTime / 60) * 0.24 * stage.difficulty) * lateMult(LATE_HP, runTime);     // ab 15:00 die Flut
-  const dmgScale = (1 + (runTime / 60) * 0.10 * stage.difficulty) * lateMult(LATE_DMG, runTime);
+  const hpScale = (1 + (tt / 60) * 0.24 * stage.difficulty) * lateMult(LATE_HP, tt);     // ab 15:00 die Flut
+  const dmgScale = (1 + (tt / 60) * 0.10 * stage.difficulty) * lateMult(LATE_DMG, tt) * (strategyMode ? ST_FOE_DMG : 1);
   const e = {
     id: ++enemySeq, isBoss: false, type: typeKey, name: def.name,
     x: x, y: y, r: def.r, hp: def.hp * hpScale, maxHp: def.hp * hpScale,
@@ -2895,10 +2958,11 @@ function distXY(x1,y1,x2,y2){ return Math.hypot(x1-x2, y1-y2); }
 // abgetaucht, vergraben, versteckter Wurm: kein Ziel für deine Waffen (Schüsse fliegen durch)
 function noTarget(en) { return !!en.untouch || (!!en.remote && (en.vv === 1 || en.vv === 9 || en.vv === 30 || en.vv === 31)); }
 function allEnemies() {
-  if (!remoteEnemyList.length && !pvpTargets.length) return enemies;
+  if (!remoteEnemyList.length && !pvpTargets.length && !raidTargets.length) return enemies;
   let l = enemies;
   if (remoteEnemyList.length) l = l.concat(remoteEnemyList);
   if (pvpTargets.length) l = l.concat(pvpTargets);
+  if (raidTargets.length) l = l.concat(raidTargets);
   return l;
 }
 
@@ -2922,6 +2986,7 @@ const NET_HIT_SLOW = 2, NET_HIT_VAMPIR = 4;
 // src: 'lava' = Umgebung (zählt für niemanden als Treffer; allein bekommst du trotzdem die Beute)
 function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.dead || en.predDead) return;
+  if (en.raidB) { raidHit(en, dmg); return; }                                      // Strategie-Überfall: ein Gebäude der überfallenen Basis
   if (!src && Net.sgMult !== 1) dmg *= Net.sgMult;                               // Schwarmgeist: +15 % auf deine eigenen Treffer
   if (en.isPlayer) { netQueuePvp(en, dmg, flags || 0); en.hitFlash = 0.12; Sfx.hit(); return; }   // PvP: ein Mitspieler (sein Spiel zieht die HP ab)
   if (!src && player && player.swallow) dmg = swallowBonus(en, dmg);              // verschluckt: deine Treffer zählen dreifach
@@ -10343,7 +10408,7 @@ function render() {
   if (inRun) {
     if (Net.on) rtry(drawHafen);
     if (Legend) rtry(drawLegendArena);                 // Arena oder Warnung einer Legende
-    if (strategyMode) rtry(drawStrategyBase);          // Strategie: deine Basis
+    if (strategyMode) { if (SN.on) rtry(drawStratMap); rtry(drawStrategyBase); if (SN.on) rtry(drawStratPeers); }          // Strategie: die Karte mit den anderen Basen, deine Basis, die anderen Blobis
     rtry(drawHazards);
     if (bossCorpses.length) rtry(drawBossCorpses);
     const gm = 40;
@@ -10758,6 +10823,7 @@ function accBeforeRun(go) {
 }
 function accLocalLogout() {
   Acc = null; accStore(); accBlocked = false; accDirty = false;
+  Storage.set('blobfischStrategyBase', null);                              // die Basis gehört zum Konto
   save = defaultSave(); Storage.set('blobfischSurvivorsSave', save);     // der Nächste am Schulcomputer beginnt als Gast
   if (typeof updateMenuPearlsLabel === 'function') updateMenuPearlsLabel();
   renderAccountBadge();
@@ -10967,6 +11033,7 @@ function accPrivacy(add) {
 const STRAT_KEY = 'blobfischStrategyBase';
 // Massstab (7.3): eine Kachel = 144 (der Blobi hat Radius 19): Muschelburg und Brutstätte sind 3 Kacheln = 11 Blobis breit, die Basis 34–49 Blobis.
 // ST_REACH: die Reichweiten der Verteidigung, gemessen an der früheren Kachel von 48.
+const ST_FOE_DMG = 0.7, ST_BOSS_HP = 0.7, ST_BOSS_DMG = 0.5, ST_CHAMP_HP = 0.5;   // 7.8: Gegner der Strategie sind schwächer (Bosse und Champions am meisten)
 const ST_TILE = 144, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 4, ST_MAX_MB = 5, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
 const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 0 }, { grid: 11, k: 800, c: 0, t: 0 }, { grid: 11, k: 1500, c: 60, t: 180 }, { grid: 13, k: 3000, c: 150, t: 420 }];
 // Gebäude: Grösse (Kacheln), ab welcher Muschelburg, Grundkosten (Korallen), HP, Anzahl je Muschelburg-Stufe
@@ -11006,14 +11073,67 @@ function stNewBase() {
     buildings: [{ id: 1, type: 'muschelburg', lv: 1, x: -1, y: -1, hp: 1500 }, { id: 2, type: 'korallenfarm', lv: 1, x: 2, y: -1, hp: 300 }, { id: 3, type: 'perlentresor', lv: 1, x: -3, y: -1, hp: 400 }],
     troops: [], blobi: null };
 }
-function stLoad() { const b = Storage.get(STRAT_KEY, null); return b && b.v === 1 && Array.isArray(b.buildings) ? b : stNewBase(); }
+function stValid(b) { return !!b && b.v === 1 && Array.isArray(b.buildings); }
+// Mit Konto liegt die Basis im Spielstand des Kontos (save.strategyBase, Strategie Schritt 2); der Server-Stand gilt, wenn er nicht älter ist als der im Browser
+function stLoad() {
+  const loc = Storage.get(STRAT_KEY, null), acc = accOn() ? save.strategyBase : null;
+  if (stValid(acc) && (!stValid(loc) || (acc.lastAt || 0) >= (loc.lastAt || 0))) return JSON.parse(JSON.stringify(acc));
+  return stValid(loc) ? loc : stNewBase();
+}
 function stSave() {
   if (!Base) return;
   Base.lastAt = Date.now();
   Base.troops = stTroops.filter(function(t){ return !t.dead; }).map(function(t){ return { type: t.type, hp: Math.round(t.hp) }; });
   if (player) Base.blobi = { char: selectedCharacterId, level: runLevel, xp: runXp, weapons: player.weapons, passives: player.passives };
   Storage.set(STRAT_KEY, Base);
+  if (accOn()) { save.strategyBase = JSON.parse(JSON.stringify(Base)); persistSave(); }      // persistSave reiht den Upload ein
 }
+// Wellen, die kamen, während du weg warst: eine je 2 Stunden, höchstens 6 pro Tag (Plan: „Offline waves“). Stark genug = nichts verloren, kleine Belohnung;
+// zu schwach = bis 10 % der Rohstoffe weg, eine Truppe verloren, mit der Lücke als Wahrscheinlichkeit ein Gebäude in Ruinen. Gibt je Welle einen Eintrag zurück.
+function stOfflineWaveCount(secs) { return Math.max(0, Math.min(Math.floor(secs / 7200), 6 * Math.max(1, Math.ceil(secs / 86400)), 24)); }
+function stOfflineWaves(base, n, rnd) {
+  rnd = rnd || Math.random;
+  const log = [], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle'];
+  for (let i = 0; i < n; i++) {
+    base.waves = (base.waves || 0) + 1;
+    let dl = 0; base.buildings.forEach(function(b){ if (defs.indexOf(b.type) !== -1 && !b.ruin) dl += b.lv; });
+    const wave = base.mb * 3 + dl, guard = base.mb * 2 + dl * 2 + (base.troops || []).length * 1.5, e = { n: base.waves, won: guard >= wave, k: 0, c: 0, troop: false, ruin: '' };
+    if (e.won) { e.k = 10 * base.mb; base.res.k += e.k; }
+    else {
+      const gap = Math.min(1, (wave - guard) / wave), cut = 0.1 * gap + 0.02;
+      e.k = Math.round(base.res.k * cut); e.c = Math.round(base.res.c * cut); base.res.k -= e.k; base.res.c -= e.c;
+      if (base.troops && base.troops.length) { base.troops.pop(); e.troop = true; }
+      if (rnd() < gap) {
+        const hit = base.buildings.filter(function(b){ return !b.ruin && b.type !== 'muschelburg'; });
+        if (hit.length) { const b = hit[Math.floor(rnd() * hit.length)]; b.ruin = true; b.hp = 0; e.ruin = ST_B[b.type].name; }
+      }
+    }
+    log.push(e);
+  }
+  return log;
+}
+function stAwayLines(away, off, waves) {
+  const L = [], h = Math.floor(away / 3600), m = Math.floor(away / 60) % 60;
+  L.push('Du warst ' + (h ? h + ' h ' : '') + m + ' min weg.');
+  if (off.k >= 1 || off.c >= 1) L.push('Produziert: ' + Math.floor(off.k) + ' 🪸 · ' + Math.floor(off.c) + ' 💎');
+  if (off.troops) L.push('Ausgebildet: ' + off.troops + ' 🐟');
+  if (off.built) L.push('🏗️ Fertig: ' + off.built);
+  waves.forEach(function(w){
+    if (w.won) { L.push('🌊 Welle ' + w.n + ': abgewehrt, +' + w.k + ' 🪸'); return; }
+    L.push('🌊 Welle ' + w.n + ': Verluste −' + w.k + ' 🪸 · −' + w.c + ' 💎');
+    if (w.troop) L.push('🐟 Eine Truppe ging verloren.');
+    if (w.ruin) L.push('🔧 ' + w.ruin + ' liegt in Ruinen.');
+  });
+  return L;
+}
+function stAwayShow(away, off, waves) {
+  const el = document.getElementById('st-away'), box = document.getElementById('st-away-lines');
+  if (!el || !box) return;
+  box.textContent = '';
+  stAwayLines(away, off, waves).forEach(function(t){ box.appendChild(Object.assign(document.createElement('p'), { textContent: t })); });
+  el.style.display = 'flex'; gameState = 'paused';
+}
+function stAwayClose() { const el = document.getElementById('st-away'); if (el) el.style.display = 'none'; if (gameState === 'paused' && strategyMode) gameState = 'playing'; }
 function stGrid() { return ST_MB[Base.mb].grid; }
 function stHalf() { return Math.floor(stGrid() / 2); }
 function stWorld(b) { const s = ST_B[b.type].size; return { x: (b.x + s / 2) * ST_TILE, y: (b.y + s / 2) * ST_TILE, r: s * ST_TILE * 0.5 }; }
@@ -11057,12 +11177,13 @@ function stTroopMaxHp(type) { return Math.round(ST_T[type].hp * (1 + 0.2 * (stTr
 function stTroopDmg(type) { return ST_T[type].dmg * (1 + 0.2 * (stTroopLv(type) - 1)); }
 
 // ---------- Start, Ende ----------
-function startStrategy(charId) {
-  if (accOn() && Acc.active === false) { accClaim().then(function(){ startStrategy(charId); }); return; }   // Konto: erst dieses Gerät aktiv machen
+function startStrategy(charId, fresh, ring) {
+  if (accOn() && Acc.active === false) { accClaim().then(function(){ startStrategy(charId, true, ring); }); return; }   // Konto: erst dieses Gerät aktiv machen
+  if (accOn() && !fresh && !Net.on) { accRefresh().then(function(){ startStrategy(charId, true, ring); }); return; }        // 7.7: erst den neuesten Stand des Kontos holen (die Basis kann auf einem anderen Gerät gewachsen sein)
   strategyMode = true;
   Base = stLoad();
   const away = Math.max(0, (Date.now() - (Base.lastAt || Date.now())) / 1000);
-  const off = stTick(away, true);
+  const off = stTick(away, true), waves = stOfflineWaves(Base, stOfflineWaveCount(away));
   selectedStageId = 'riff';
   startRun(charId || selectedCharacterId, 'riff');
   if (!strategyMode) return;
@@ -11079,16 +11200,329 @@ function startStrategy(charId) {
   stCmd = 'follow'; stHold = null; stSend = null; stUi = { mode: null, type: null, ghost: null, sel: null, move: null };
   stWaveT = ST_FIRST_WAVE; stSaveT = 10; stTrickleT = 12; stAnchor = null;
   setStratUi(true); renderStratHud();
-  if (away > 120 && (off.k >= 1 || off.c >= 1 || off.troops)) showToast('🏰 Während du weg warst: +' + Math.floor(off.k) + ' 🪸 · +' + Math.floor(off.c) + ' 💎' + (off.troops ? ' · ' + off.troops + ' 🐟' : ''));
   stSave();
+  if (away > 120 && (off.k >= 1 || off.c >= 1 || off.troops || off.built || waves.length)) stAwayShow(away, off, waves);
+  if (ring && !Net.on) snConnect(ring);                // 7.8: auf eine Karte mit anderen Spielern (die Basis läuft auch ohne Verbindung)
 }
-function stLeave() { stSave(); strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
+function stLeave() { snDisconnect(); stSave(); strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
 function setStratUi(on) {
   const rs = document.getElementById('btn-restart-pause'); if (rs) rs.style.display = on ? 'none' : '';   // Neustart gibt es in der Basis nicht
   const u = document.getElementById('strat-ui'); if (u) u.style.display = on ? 'block' : 'none';
   const pe = document.querySelector('#hud .hud-pearls'); if (pe) pe.style.display = on ? 'none' : '';
   if (!on) { stClosePanel(); }
 }
+
+/* ---------- Strategiekarte (7.8, Schritt 3 Teil 2): mit anderen Spielern auf einer Karte ----------
+   Eine eigene, leichte Verbindung (SN), getrennt vom Survivors-Netz (Net bleibt aus: Einzelspiel und alle Net-Hooks unverändert).
+   Deine Welt hat die Basis bei (0, 0); auf der Karte liegt sie bei dem Platz SN.pl[SN.plot]. Zum Server geht alles in Karten-Koordinaten
+   (Welt + Platz), von dort kommt es zurück und wird in deine Welt umgerechnet (Karte - dein Platz). */
+const ST_RINGS = [{ id: 'riff', name: 'Korallenriff', from: 1 }, { id: 'kelp', name: 'Kelpwald', from: 3 }, { id: 'graben', name: 'Tiefsee-Graben', from: 5 }, { id: 'vulkan', name: 'Vulkanschlucht', from: 7 }];
+const SN = { ws: null, on: false, want: false, id: 0, plot: -1, lastPlot: -1, pl: null, code: '', title: '', ring: 'riff', peers: new Map(), sendAt: 0, layAt: 0, lastLay: '', tries: 0, mapT: 0 };
+function snOrigin() { return SN.pl && SN.plot >= 0 && SN.pl[SN.plot] ? { x: SN.pl[SN.plot][0], y: SN.pl[SN.plot][1] } : { x: 0, y: 0 }; }
+function snLayout() {
+  const out = [];
+  for (let i = 0; i < Base.buildings.length && out.length < 160; i++) { const b = Base.buildings[i]; out.push([b.type, b.lv, b.x, b.y, b.ruin ? 1 : 0]); }
+  return out;
+}
+function snCleanLay(l) {                // was der Server schickt, trotzdem prüfen: nur bekannte Gebäude, ganze Zahlen
+  if (!Array.isArray(l)) return null;
+  const out = [];
+  for (let i = 0; i < l.length && out.length < 160; i++) { const e = l[i]; if (Array.isArray(e) && ST_B[e[0]] && e[1] >= 1 && e[1] <= 10 && Number.isInteger(e[2]) && Number.isInteger(e[3])) out.push({ type: e[0], lv: e[1], x: e[2], y: e[3], ruin: !!e[4] }); }
+  return out;
+}
+function snAddPeer(p) {
+  if (!p || p.id === SN.id) return null;
+  const old = SN.peers.get(p.id) || {};
+  const pe = Object.assign({ id: p.id, name: '?', ch: 'standard', col: 0, plot: -1, mb: 1, lay: null, x: 0, y: 0, mx: 0, my: 0, a: 0, lv: 1, hp: 1, mh: 1, fl: 0, seen: false }, old);
+  pe.name = String(p.name || pe.name); pe.ch = p.ch || pe.ch; pe.col = p.col || 0; pe.plot = p.plot; pe.mb = p.mb || 1;
+  SN.peers.set(p.id, pe); return pe;
+}
+function snConnect(ring) {
+  snDisconnect();
+  SN.ring = ring; SN.want = true; SN.tries = 0;
+  fetch(netServerBase() + '/quick?area=riff&mode=strat&v=' + NET_PROTOCOL)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (!SN.want || !strategyMode) return; if (d && d.room) snOpen(d.room); else snFail(); })
+    .catch(function(){ snFail(); });
+}
+function snFail() { if (!SN.want) return; SN.want = false; showToast('🗺️ Keine Verbindung zur Karte – du spielst allein.'); }
+function snOpen(code) {
+  SN.code = code;
+  if (accOn()) { accApi('ticket', {}, true).then(function(r){ if (SN.want && SN.code === code) snOpenWith(r.status === 200 ? r.body.ticket : ''); }); return; }
+  snOpenWith('');
+}
+function snOpenWith(tk) {
+  if (!strategyMode || !Base) return;
+  const url = netWsBase() + '/join/' + encodeURIComponent(SN.code) + '?v=' + NET_PROTOCOL + '&name=' + encodeURIComponent(onlineName()) + '&ch=' + encodeURIComponent(selectedCharacterId) + '&k=' + netKey() +
+    '&ring=' + SN.ring + '&mb=' + Base.mb + (SN.lastPlot >= 0 ? '&plot=' + SN.lastPlot : '') + (tk ? '&tk=' + encodeURIComponent(tk) : '');
+  let ws;
+  try { ws = new WebSocket(url); } catch (e) { snFail(); return; }
+  SN.ws = ws;
+  ws.onmessage = function(ev){ if (SN.ws === ws) snReceive(ev.data); };
+  ws.onclose = function(ev){ if (SN.ws === ws) snClosed(ev.code); };
+  ws.onerror = function(){};
+}
+function snDisconnect() {
+  raidAbort(); SNR = null; raidBanner();
+  SN.want = false; SN.on = false; SN.peers.clear(); SN.plot = -1; SN.pl = null; SN.lastLay = '';
+  if (SN.ws) { const ws = SN.ws; SN.ws = null; try { ws.close(1000, 'bye'); } catch (e) {} }
+  snMapOpen(false);
+}
+function snClosed(code) {
+  raidAbort(); SNR = null; raidBanner();
+  SN.ws = null; SN.on = false; SN.peers.clear();
+  if (!SN.want || !strategyMode) return;
+  if (code === 4001) { SN.want = false; showToast('🗺️ Der Ring ist voll – du spielst allein.'); return; }
+  if (code === 4002) { SN.want = false; showToast('🗺️ Bitte lade die Seite neu – das Spiel wurde aktualisiert.'); return; }
+  if (SN.tries < 4) { SN.tries++; setTimeout(function(){ if (SN.want && !SN.ws && strategyMode) snOpen(SN.code); }, 1000 * SN.tries); return; }
+  snFail();
+}
+function snReceive(data) {
+  if (typeof data !== 'string' || data === 'pong') return;
+  let m; try { m = JSON.parse(data); } catch (e) { return; }
+  if (!m) return;
+  if (m.t === 'welcome') {
+    SN.id = m.id; SN.plot = m.plot | 0; SN.lastPlot = SN.plot; SN.pl = Array.isArray(m.pl) ? m.pl : null; SN.title = m.title || ''; SN.on = !!SN.pl && SN.plot >= 0; SN.tries = 0;
+    SN.peers.clear(); (m.players || []).forEach(snAddPeer);
+    SN.sendAt = 0; SN.layAt = 0; SN.lastLay = '';
+    if (SN.on) showToast('🗺️ ' + SN.title + ' – dein Platz ist Nr. ' + (SN.plot + 1));
+  }
+  else if (m.t === 'join') { const pe = snAddPeer(m.p); if (pe) { SN.layAt = 0; SN.lastLay = ''; showToast('👋 ' + pe.name + ' ist auf der Karte'); Sfx.ping(); } }   // der Neue bekommt meinen Umriss gleich vom Server nicht: noch einmal schicken
+  else if (m.t === 'leave') { if (RD && RD.id === m.id) raidAbort(); SN.peers.delete(m.id); }
+  else if (m.t === 'raid') raidReceive(m);
+  else if (m.t === 'base') { const pe = SN.peers.get(m.id) || snAddPeer({ id: m.id, plot: m.plot, mb: m.mb }); if (pe && RD && RD.id === pe.id) { pe.mb = m.mb || pe.mb; } else if (pe) { pe.plot = m.plot; pe.mb = m.mb || pe.mb; pe.lay = snCleanLay(m.lay); } }
+  else if (m.t === 's' || m.t === 'p') {
+    const pe = SN.peers.get(m.f); if (!pe || !(typeof m.x === 'number' && isFinite(m.x) && typeof m.y === 'number' && isFinite(m.y))) return;
+    if (pe.seen) pe.a = Math.atan2(m.y - pe.my, m.x - pe.mx) || pe.a; else { pe.x = m.x; pe.y = m.y; }
+    pe.mx = m.x; pe.my = m.y; pe.seen = true; pe.lv = m.lv | 0 || 1; pe.hp = +m.hp || 0; pe.mh = +m.mh || 1; pe.fl = m.fl | 0; if (m.ch) pe.ch = m.ch;
+  }
+}
+function snSend(o) { const ws = SN.ws; if (ws && ws.readyState === 1) { try { ws.send(JSON.stringify(o)); } catch (e) {} } }
+function snTick(dt) {
+  if (!SN.on || !Base) return;
+  const o = snOrigin(), now = performance.now();
+  if (RD) raidUpdate(dt); else raidWatch();
+  SN.peers.forEach(function(pe){ if (pe.seen) { const k = Math.min(1, dt * 9); pe.x += (pe.mx - pe.x) * k; pe.y += (pe.my - pe.y) * k; } });
+  if (now - SN.sendAt >= (SN.peers.size ? 250 : 4000)) {
+    SN.sendAt = now;
+    snSend({ t: 's', x: Math.round(player.x + o.x), y: Math.round(player.y + o.y), lv: runLevel, hp: Math.round(player.hp), mh: Math.round(player.maxHp), fl: 0, ch: selectedCharacterId });
+  }
+  if (now - SN.layAt >= 2000) {
+    const lay = snLayout(), txt = JSON.stringify(lay) + Base.mb;
+    if (txt !== SN.lastLay || now - SN.layAt >= 60000) { SN.lastLay = txt; SN.layAt = now; snSend({ t: 'b', mb: Base.mb, lay: lay }); }   // der Server vergisst Umrisse beim Schlafen: einmal pro Minute wieder melden
+  }
+}
+function drawStratMap() {
+  if (!SN.pl) return;
+  const g = ctx, o = snOrigin(), T = ST_TILE, tm = runTime, owner = {};
+  SN.peers.forEach(function(pe){ owner[pe.plot] = pe; });
+  for (let i = 0; i < SN.pl.length; i++) {
+    if (i === SN.plot) continue;
+    const dx = SN.pl[i][0] - o.x, dy = SN.pl[i][1] - o.y;
+    if (Math.abs(dx - camera.x) > W / 2 + 1500 || Math.abs(dy - camera.y) > H / 2 + 1500) continue;
+    const pe = owner[i], ox = camera.x - W / 2 - dx, oy = camera.y - H / 2 - dy;
+    if (!pe || !pe.lay) {                                                   // freier Platz (oder der Umriss ist noch unterwegs)
+      g.save(); g.strokeStyle = 'rgba(255,255,255,0.25)'; g.lineWidth = 4; g.setLineDash([22, 18]); g.beginPath(); g.arc(dx - camera.x + W / 2, dy - camera.y + H / 2, 520, 0, 6.2832); g.stroke(); g.restore();
+      continue;
+    }
+    const n = ST_MB[Math.min(5, pe.mb)] ? ST_MB[Math.min(5, pe.mb)].grid : 9, h = Math.floor(n / 2), x0 = -h * T - ox, y0 = -h * T - oy, sz = n * T;
+    stDrawFloor(g, x0, y0, sz); stDrawRim(g, x0, y0, n, T, false);
+    stWalls = {}; for (let k = 0; k < pe.lay.length; k++) { const w = pe.lay[k]; if (w.type === 'korallenmauer') stWalls[w.x + ',' + w.y] = 1; }
+    const list = pe.lay.slice().sort(function(a, b){ return (a.y + ST_B[a.type].size) - (b.y + ST_B[b.type].size); });
+    for (let k = 0; k < list.length; k++) {
+      const b = list[k], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
+      if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
+      if (b.hp == null) b.hp = stMaxHp(b);
+      stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
+      if (RD && RD.id === pe.id) stDrawBars(g, b, x, y, S);
+    }
+    stDrawRim(g, x0, y0, n, T, true);
+    const lx = dx - camera.x + W / 2, ly = dy - camera.y + H / 2 - (h + 1) * T, ts = txtScale();           // Name über der Basis
+    g.save(); g.translate(lx, ly); g.scale(ts * 1.6, ts * 1.6); g.font = '800 14px "Nunito", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const label = pe.name + ' · 🏰 ' + pe.mb; g.lineWidth = 4; g.strokeStyle = 'rgba(2,10,20,0.85)'; g.strokeText(label, 0, 0); g.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; g.fillText(label, 0, 0); g.restore();
+  }
+}
+function drawStratPeers() {
+  const o = snOrigin();
+  SN.peers.forEach(function(pe){
+    if (!pe.seen || (pe.fl & NF_DEAD)) return;
+    const sx = pe.x - o.x - camera.x + W / 2, sy = pe.y - o.y - camera.y + H / 2;
+    if (sx < -120 || sx > W + 120 || sy < -120 || sy > H + 120) return;
+    const col = NET_COLORS[pe.col % NET_COLORS.length], ch = CHARACTERS.filter(function(c){ return c.id === pe.ch; })[0] || CHARACTERS[0];
+    drawNetRing(sx, sy, 19, col);
+    drawPlayerSprite(sx, sy, 19, { wobble: runTime * 6, angle: pe.a, glow: 10, charId: ch.id, color: ch.color, dark: ch.dark });
+    const ts = txtScale(), label = pe.name + ' · Lv ' + pe.lv;
+    ctx.save(); ctx.translate(sx, sy - 19 * 1.55 - 12 * ts); ctx.scale(ts, ts); ctx.font = '800 12px "Nunito", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,10,20,0.85)'; ctx.strokeText(label, 0, 0); ctx.fillStyle = col; ctx.fillText(label, 0, 0); ctx.restore();
+  });
+}
+/* ---------- Überfälle (7.8): du schwimmst in die Basis eines anderen ----------
+   Der Angreifer rechnet die Basis im eigenen Browser (RD): jedes Gebäude ist ein Ziel für deine Waffen und Truppen (raidTargets), die Türme
+   schiessen auf dich und deine Truppen. 3 Minuten, endet auch beim Verlassen der Basis oder wenn alles zerstört ist. Der Server vermittelt;
+   der Verteidiger (im Raum) gibt die Beute ab und bekommt die Ruinen gemeldet. Noch nicht: Verteidiger kämpft mit, Schlafende, Truppen schicken. */
+const RAID_SECS = 180, RAID_PLAYER_DMG = 0.4, RAID_SHARE_FULL = 0.2, RAID_SHARE_PART = 0.15, RAID_PROTECT = 0.25;
+const RAID_DEF = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle'];
+let RD = null, SNR = null, raidReqAt = 0, raidHudT = 0;
+function raidArea(pe, margin) {
+  if (!SN.pl || !SN.pl[pe.plot]) return false;
+  const o = snOrigin(), c = SN.pl[pe.plot], g = ST_MB[Math.min(5, pe.mb)] ? ST_MB[Math.min(5, pe.mb)].grid : 9, h = (Math.floor(g / 2) + 0.5 + margin) * ST_TILE;
+  return Math.abs(player.x - (c[0] - o.x)) < h && Math.abs(player.y - (c[1] - o.y)) < h;
+}
+function raidWatch() {                    // schwimmst du in die Basis eines anderen? Dann beginnt der Überfall
+  if (gameState !== 'playing' || playerDown > 0 || stInBase(player.x, player.y) || performance.now() < raidReqAt) return;
+  let hit = null; SN.peers.forEach(function(pe){ if (!hit && pe.lay && raidArea(pe, 0)) hit = pe; });
+  if (hit) { raidReqAt = performance.now() + 6000; snSend({ t: 'raid', op: 'start', def: hit.id }); }
+}
+function raidBegin(m) {
+  const pe = SN.peers.get(m.def); if (!pe || !pe.lay || !SN.pl) { snSend({ t: 'raid', op: 'end', share: 0, ruin: [], beaten: 0 }); return; }
+  const o = snOrigin(), c = SN.pl[pe.plot], ox = c[0] - o.x, oy = c[1] - o.y, T = ST_TILE;
+  RD = { n: m.n, id: pe.id, pe: pe, name: pe.name, left: RAID_SECS, outT: 0, beaten: false, destroyed: 0, total: 0, targets: [] };
+  raidTargets = [];
+  pe.lay.forEach(function(e){
+    if (e.ruin) return;
+    const S = ST_B[e.type].size * T, mh = stMaxHp(e), t = { raidB: e, type: 'raidbld', name: ST_B[e.type].name, isMB: e.type === 'muschelburg', x: ox + e.x * T + S / 2, y: oy + e.y * T + S / 2, r: S * 0.42, hp: mh, maxHp: mh, dead: false, hitFlash: 0, cd: 0, sprung: 0, lv: e.lv, ox: 0, oy: 0 };
+    t.hx = t.x; t.hy = t.y; e.hp = mh; RD.targets.push(t); raidTargets.push(t); if (!t.isMB) RD.total++;
+  });
+  showToast('⚔ Überfall auf ' + pe.name + ' – drei Minuten!'); Sfx.boss(); raidHud(true);
+}
+function raidHit(t, dmg) {
+  if (t.dead || !RD) return;
+  t.hp -= dmg; t.hitFlash = 0.12; t.raidB.hp = Math.max(0, t.hp); t.raidB.hitT = runTime; Sfx.hit();
+  if (t.isMB) { if (t.hp <= 1) { t.hp = 1; t.raidB.hp = 1; t.dead = true; RD.beaten = true; showToast('🏰 Die Muschelburg ist gefallen!'); Sfx.boss(); spawnBurst(t.x, t.y, '#ffd76a', 30); } return; }
+  if (t.hp <= 0) { t.hp = 0; t.dead = true; t.raidB.ruin = true; RD.destroyed++; spawnBurst(t.x, t.y, '#ffd76a', 18); Sfx.crack(); }
+}
+function raidFoeHurt(f, dmg) {
+  if (f === player) { if (gameState === 'playing') damagePlayer(dmg * RAID_PLAYER_DMG); }
+  else if (f && f.type && !f.dead) { f.hp -= dmg; f.hitFlash = 0.15; if (f.hp <= 0) stTroopDie(f); }
+}
+function raidFoes() { const l = []; if (player && player.hp > 0 && playerDown <= 0) l.push(player); for (let i = 0; i < stTroops.length; i++) if (!stTroops[i].dead) l.push(stTroops[i]); return l; }
+function raidDefenses(dt) {             // die Türme der überfallenen Basis schiessen auf dich und deine Truppen (Werte wie bei deinen eigenen Türmen)
+  const foes = raidFoes();
+  for (let i = 0; i < RD.targets.length; i++) {
+    const t = RD.targets[i], ty = t.raidB.type, lv = t.lv;
+    t.x = t.hx; t.y = t.hy; if (t.hitFlash > 0) t.hitFlash -= dt;
+    if (t.dead || RAID_DEF.indexOf(ty) === -1) continue;
+    t.cd -= dt; const w = { x: t.x, y: t.y };
+    if (ty === 'harpunenturm' && t.cd <= 0) {
+      const f = stNearest(foes, w, (420 + 30 * lv) * ST_REACH); if (!f) continue;
+      t.cd = 1.2; raidFoeHurt(f, 18 * (1 + 0.3 * (lv - 1))); particles.push({ x: w.x, y: w.y, tx: f.x, ty: f.y, isBolt: true, life: 0.15, maxLife: 0.15, color: '#bfe7ff' });
+    } else if (ty === 'blasenkanone' && t.cd <= 0) {
+      const R = (160 + 10 * lv) * ST_REACH; if (!stNearest(foes, w, R)) continue;
+      t.cd = 1.4; foes.forEach(function(f){ if (distXY(f.x, f.y, w.x, w.y) < R) raidFoeHurt(f, 10 * (1 + 0.3 * (lv - 1))); });
+      particles.push({ x: w.x, y: w.y, isRing: true, life: 0.5, maxLife: 0.5, r: 20, grow: R * 2, color: '126,224,255' });
+    } else if (ty === 'elektroaal' && t.cd <= 0) {
+      let f = stNearest(foes, w, (260 + 20 * lv) * ST_REACH), from = w; if (!f) continue; t.cd = 1.3;
+      const hit = [];
+      for (let k = 0; k < 4 && f; k++) { raidFoeHurt(f, 22 * (1 + 0.3 * (lv - 1))); particles.push({ x: from.x, y: from.y, tx: f.x, ty: f.y, isBolt: true, life: 0.15, maxLife: 0.15, color: '#5ef2c0' }); hit.push(f); from = f; f = stNearest(foes, f, 360, hit); }
+    } else if (ty === 'tintenwerfer') {
+      const R = (180 + 10 * lv) * ST_REACH; if (distXY(player.x, player.y, w.x, w.y) < R) player.slowTimer = Math.max(player.slowTimer || 0, 0.3);
+      for (let k = 0; k < stTroops.length; k++) if (distXY(stTroops[k].x, stTroops[k].y, w.x, w.y) < R) stTroops[k].slowTimer = 0.3;
+    } else if (ty === 'stachelfalle' && !t.sprung) {
+      if (!stNearest(foes, w, ST_TILE * 0.7)) continue;
+      foes.forEach(function(f){ if (distXY(f.x, f.y, w.x, w.y) < ST_TILE * 1.2) raidFoeHurt(f, 60 * (1 + 0.3 * (lv - 1))); });
+      spawnBurst(w.x, w.y, '#7a3fb0', 18); t.sprung = 8;
+    }
+    if (t.sprung) { t.sprung -= dt; if (t.sprung < 0) t.sprung = 0; }
+  }
+}
+function raidUpdate(dt) {
+  RD.left -= dt;
+  raidDefenses(dt);
+  if (!raidArea(RD.pe, 0.6)) RD.outT += dt; else RD.outT = 0;                         // du hast die Basis verlassen (oder bist zu Hause aufgewacht)
+  if (RD.left <= 0 || RD.outT > 1.5 || RD.targets.every(function(t){ return t.dead; })) raidEnd();
+  raidHudT -= dt; if (raidHudT <= 0) { raidHudT = 0.4; raidHud(false); }
+}
+function raidEnd() {
+  if (!RD) return;
+  const r = RD, nonMB = r.total, share = r.beaten ? RAID_SHARE_FULL : (nonMB ? RAID_SHARE_PART * r.destroyed / nonMB : 0);
+  const ruin = r.targets.filter(function(t){ return t.dead && !t.isMB; }).map(function(t){ return [t.raidB.type, t.raidB.x, t.raidB.y]; });
+  snSend({ t: 'raid', op: 'end', share: Math.round(share * 1000) / 1000, ruin: ruin, beaten: r.beaten ? 1 : 0 });
+  RD = null; raidTargets = []; raidBanner();
+  showToast(share > 0 || ruin.length ? '⚔ Überfall beendet – die Beute kommt gleich.' : '⚔ Überfall beendet.');
+}
+function raidAbort() { if (!RD) return; RD = null; raidTargets = []; raidBanner(); }   // Verbindung weg oder der Verteidiger ist gegangen: ohne Beute
+function raidHud(force) {
+  const e = document.getElementById('st-raid'); if (!e) return;
+  if (!RD) { raidBanner(); return; }
+  e.style.display = 'block'; e.textContent = '⚔ Überfall auf ' + RD.name + ' · ' + Math.max(0, Math.ceil(RD.left)) + ' s · ' + RD.destroyed + ' von ' + RD.total + ' zerstört';
+}
+function raidBanner() {                  // zeigt, was gerade läuft: dein Überfall, oder der Überfall auf dich
+  const e = document.getElementById('st-raid'); if (!e) return;
+  if (RD) return;
+  if (SNR) { e.style.display = 'block'; e.textContent = '🚨 ' + SNR.name + ' überfällt deine Basis!'; } else e.style.display = 'none';
+}
+function raidReceive(m) {
+  if (m.op === 'go') raidBegin(m);
+  else if (m.op === 'deny') { if (m.why === 'busy') showToast('⚔ Diese Basis wird gerade von jemand anderem überfallen.'); }
+  else if (m.op === 'warn') { SNR = { n: m.n, att: m.att, name: String(m.name || '?') }; showToast('🚨 ' + SNR.name + ' überfällt deine Basis!'); Sfx.boss(); raidBanner(); }
+  else if (m.op === 'over') {
+    if (SNR && SNR.n === m.n) { SNR = null; raidBanner(); }
+    if (RD && RD.n === m.n) { raidAbort(); showToast('⚔ Der Überfall ist zu Ende (zu lange gedauert oder dein Gegner ist weg).'); }
+  }
+  else if (m.op === 'result') raidResult(m);
+  else if (m.op === 'loot') raidLoot(m);
+}
+// Verteidiger: Ruinen eintragen, den Anteil des Ungeschützten abgeben (ein Viertel des Lagers bleibt immer sicher), dem Angreifer melden
+function raidResult(m) {
+  if (SNR && SNR.n === m.n) { SNR = null; raidBanner(); }
+  if (!Base) { snSend({ t: 'raid', op: 'loot', n: m.n, k: 0, c: 0, xp: 0 }); return; }
+  const cp = stCaps(), share = Math.max(0, Math.min(RAID_SHARE_FULL, +m.share || 0)), take = {};
+  ['k', 'c', 'xp'].forEach(function(r){ const free = Math.max(0, Base.res[r] - RAID_PROTECT * cp[r]); take[r] = Math.floor(free * share); Base.res[r] -= take[r]; });
+  let ruined = 0;
+  (m.ruin || []).forEach(function(e){ const b = Base.buildings.filter(function(x){ return x.type === e[0] && x.x === e[1] && x.y === e[2]; })[0]; if (b && !b.ruin && b.type !== 'muschelburg') { b.ruin = true; b.hp = 0; delete b.upUntil; ruined++; } });
+  stSave(); renderStratHud();
+  snSend({ t: 'raid', op: 'loot', n: m.n, k: take.k, c: take.c, xp: take.xp });
+  showToast('🏴‍☠️ ' + m.name + ' hat dich überfallen: −' + take.k + ' 🪸 · −' + take.c + ' 💎 · −' + take.xp + ' 🟢');
+  if (ruined) setTimeout(function(){ showToast('🔧 ' + ruined + ' Gebäude in Ruinen'); }, 2500);
+}
+function raidLoot(m) {
+  if (!Base) return;
+  const cp = stCaps();
+  Base.res.k = Math.min(cp.k, Base.res.k + m.k); Base.res.c = Math.min(cp.c, Base.res.c + m.c); Base.res.xp = Math.min(cp.xp, Base.res.xp + m.xp);
+  stSave(); renderStratHud();
+  showToast('🏴‍☠️ Beute von ' + m.name + ': +' + m.k + ' 🪸 · +' + m.c + ' 💎 · +' + m.xp + ' 🟢'); Sfx.pickup && Sfx.pickup();
+}
+// Kartenbild: die vier Ringe, die Plätze mit Besitzern, du
+function snMapOpen(on) {
+  const v = document.getElementById('st-mapview'); if (!v) return;
+  v.style.display = on ? 'flex' : 'none';
+  clearInterval(SN.mapT); SN.mapT = 0;
+  if (on) { snMapDraw(); SN.mapT = setInterval(snMapDraw, 500); }
+}
+function snMapDraw() {
+  const cv = document.getElementById('st-map-cv'), list = document.getElementById('st-map-list'); if (!cv || !cv.getContext || !SN.pl) return;
+  const g = cv.getContext('2d'), N = cv.width, c = N / 2, k = (N / 2 - 24) / 12500, o = snOrigin();
+  g.clearRect(0, 0, N, N); g.fillStyle = 'rgba(5,20,38,0.9)'; g.fillRect(0, 0, N, N);
+  [3000, 6000, 9000, 12500].forEach(function(r, i){ g.strokeStyle = 'rgba(126,224,255,' + (0.35 - i * 0.05) + ')'; g.lineWidth = 1.5; g.beginPath(); g.arc(c, c, r * k, 0, 6.2832); g.stroke(); });
+  const owner = {}; SN.peers.forEach(function(pe){ owner[pe.plot] = pe; });
+  for (let i = 0; i < SN.pl.length; i++) {
+    const x = c + SN.pl[i][0] * k, y = c + SN.pl[i][1] * k, pe = owner[i], me = i === SN.plot;
+    g.beginPath(); g.arc(x, y, me ? 9 : 7, 0, 6.2832);
+    if (me) { g.fillStyle = '#ffd76a'; g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, 12, 0, 6.2832); g.stroke(); } else if (pe) { g.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; g.fill(); } else { g.strokeStyle = 'rgba(255,255,255,0.3)'; g.lineWidth = 1.5; g.stroke(); }
+  }
+  SN.peers.forEach(function(pe){ if (!pe.seen) return; g.fillStyle = '#fff'; g.beginPath(); g.arc(c + pe.x * k, c + pe.y * k, 2.5, 0, 6.2832); g.fill(); });
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(c + (player.x + o.x) * k, c + (player.y + o.y) * k, 3, 0, 6.2832); g.fill();
+  if (list) {
+    list.textContent = '';
+    list.appendChild(Object.assign(document.createElement('p'), { textContent: onlineName() + ' (Muschelburg ' + Base.mb + ')' }));
+    SN.peers.forEach(function(pe){ list.appendChild(Object.assign(document.createElement('p'), { textContent: pe.name + ' (Muschelburg ' + pe.mb + ')' })); });
+  }
+  const t = document.getElementById('st-map-title'); if (t) t.textContent = SN.title ? '🗺️ ' + SN.title : '🗺️ Karte';
+}
+function renderStratMenu() {
+  const box = document.getElementById('strat-rings'); if (!box) return;
+  box.textContent = '';
+  const mb = (stLoad() || {}).mb || 1;
+  ST_RINGS.forEach(function(r){
+    const b = el('button', 'btn btn-primary'); b.appendChild(document.createTextNode(r.name));
+    if (mb < r.from) { b.disabled = true; b.appendChild(el('span', 'btn-sub', '🔒 Muschelburg ' + r.from)); }
+    b.addEventListener('click', function(){ Sfx.click(); startStrategy(selectedCharacterId, false, r.id); });
+    box.appendChild(b);
+  });
+}
+window.addEventListener('keydown', function(e){
+  if ((e.key === 'm' || e.key === 'M') && strategyMode && SN.on && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test((e.target && e.target.tagName) || '')) { const v = document.getElementById('st-mapview'); snMapOpen(!v || v.style.display === 'none'); }
+});
 
 // ---------- jedes Bild ----------
 function stratUpdate(dt) {
@@ -11101,6 +11535,7 @@ function stratUpdate(dt) {
   if (stWaveT <= 0) { stWaveT = ST_WAVE_GAP; stWave(); }
   stTrickleT -= dt; if (stTrickleT <= 0) { stTrickleT = ST_TRICKLE_GAP * (0.7 + Math.random() * 0.6); stTrickle(); }
   stTroopsUpdate(dt);
+  snTick(dt);
   stDefenses(dt);
   const ms = stBuildingsOf('muschelburg')[0];
   if (ms && ms.hp < stMaxHp(ms)) ms.hp = Math.min(stMaxHp(ms), ms.hp + stMaxHp(ms) * 0.01 * dt);   // die Muschelburg erholt sich
@@ -11125,9 +11560,9 @@ function stWave() {
     const key = table[Math.floor(Math.random() * avail)];
     if (key === 'piranha' && i % 3) continue;
     const e = spawnEnemy(key, false), a = side + (Math.random() - 0.5) * 0.9, d = R + Math.random() * 160;
-    e.x = Math.cos(a) * d; e.y = Math.sin(a) * d; e.hp *= 1 + 0.12 * str; e.maxHp = e.hp; e.wave = 1;
+    e.x = Math.cos(a) * d; e.y = Math.sin(a) * d; e.hp *= 1 + 0.07 * str; e.maxHp = e.hp; e.wave = 1;
   }
-  if (Base.mb >= 4 && Base.waves % 2 === 0) { const c = spawnChampion(); if (c) { c.x = Math.cos(side) * R; c.y = Math.sin(side) * R; } }
+  if (Base.mb >= 4 && Base.waves % 2 === 0) { const c = spawnChampion(); if (c) { c.hp *= ST_CHAMP_HP; c.maxHp = c.hp; c.x = Math.cos(side) * R; c.y = Math.sin(side) * R; } }
   if (Base.waves % ST_BOSS_EVERY === 0) {
     bossEncounterCount = Math.floor(Base.waves / ST_BOSS_EVERY) - 1;
     const b = spawnEnemy(drawBossType(bossBag, bossEncounterCount, 'riff'), true);
@@ -11189,7 +11624,7 @@ function stratContact(en, dt) {
   const tg = en.tg;
   if (tg && tg !== player && en.contactTimer <= 0 && distXY(en.x, en.y, tg.x, tg.y) < en.r + (tg.r || 12) + 4) {
     en.contactTimer = 0.8;
-    if (tg.building) stHurt(tg.building, en.dmg * (en.isBoss ? 2 : 1));
+    if (tg.building) stHurt(tg.building, en.dmg);
     else if (tg.troop) { tg.hp -= en.dmg; tg.hitFlash = 0.15; if (tg.hp <= 0) stTroopDie(tg); }
   }
   if (!Base) return;
@@ -11388,7 +11823,7 @@ function renderStratHud() {
   stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = Math.max(0, Math.ceil(stWaveT)) + ' s';
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
-  vis('st-build', inBase); vis('st-deposit', stNearVault());
+  vis('st-build', inBase); vis('st-deposit', stNearVault()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
 function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
@@ -12698,7 +13133,11 @@ function initUI() {
   document.getElementById('btn-goto-shop').addEventListener('click', function(){ Sfx.click(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-goto-achievements').addEventListener('click', function(){ Sfx.click(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-album').addEventListener('click', function(){ Sfx.click(); renderAlbum(); showScreen('screen-album'); });
-  document.getElementById('btn-goto-strategy').addEventListener('click', function(){ Sfx.click(); startStrategy(selectedCharacterId); });
+  document.getElementById('btn-goto-strategy').addEventListener('click', function(){ Sfx.click(); renderStratMenu(); showScreen('screen-strat'); });
+  document.getElementById('btn-strat-solo').addEventListener('click', function(){ Sfx.click(); startStrategy(selectedCharacterId); });
+  document.getElementById('btn-strat-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
+  document.getElementById('st-map').addEventListener('click', function(){ Sfx.click(); snMapOpen(true); });
+  document.getElementById('btn-st-map-close').addEventListener('click', function(){ Sfx.click(); snMapOpen(false); });
   tapButton(document.getElementById('st-build'), function(){ Sfx.click(); stOpenBuild(); });
   tapButton(document.getElementById('st-deposit'), function(){ stDeposit(); });
   tapButton(document.getElementById('st-follow'), function(){ Sfx.click(); stSetCmd('follow'); });
@@ -12707,6 +13146,7 @@ function initUI() {
   document.getElementById('btn-goto-account').addEventListener('click', function(){ Sfx.click(); if (accMode !== 'display' || !accOn() || !Acc.mustRename) accMode = 'home'; accMsg = accMsg && accMode === 'display' ? accMsg : ''; renderAccount(); showScreen('screen-account'); });
   document.getElementById('btn-account-back').addEventListener('click', function(){ Sfx.click(); accMode = 'home'; accMsg = ''; updateMenuPearlsLabel(); showScreen('screen-menu'); });
   document.getElementById('btn-acc-here').addEventListener('click', function(){ Sfx.click(); accClaim(); });
+  document.getElementById('btn-st-away').addEventListener('click', function(){ Sfx.click(); stAwayClose(); });
   document.getElementById('btn-album-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
   document.getElementById('btn-ach-claim-all').addEventListener('click', function(){ claimAllAchievements(); });
   document.getElementById('btn-gameover-shop').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderShop(); showScreen('screen-shop'); });
@@ -12998,7 +13438,7 @@ function initOnlineUI() {
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 6;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
+const NET_PROTOCOL = 7;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
@@ -13076,6 +13516,7 @@ const Net = {
   sgUntil: 0, sgLeader: 0, sgMult: 1, sgNear: false, landAt: 0, idle: LF_IDLE, crownHint: false, growAt: 0
 };
 let pvpTargets = [];   // PvP: Mitspieler als Ziele für deine Waffen (sonst leer)
+let raidTargets = [];  // Strategie-Überfall: die Gebäude der überfallenen Basis als Ziele für Waffen und Truppen (sonst leer)
 let remoteEnemyList = [], remoteFrozen = [];
 function remoteDrawList() { return remoteFrozen.length ? remoteEnemyList.concat(remoteFrozen) : remoteEnemyList; }
 function netR1(v) { return Math.round(v * 10) / 10; }
