@@ -570,6 +570,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="st-btns">
       <button class="btn btn-secondary" id="st-build">🔨 Bauen</button>
       <button class="btn btn-primary" id="st-deposit">🟢 Einzahlen</button>
+      <button class="btn btn-secondary" id="st-withdraw">🔵 Abheben</button>
       <button class="btn btn-secondary st-cmd" id="st-follow">Folgen</button>
       <button class="btn btn-secondary st-cmd" id="st-hold">Halten</button>
       <button class="btn btn-secondary st-cmd" id="st-send">Schicken</button>
@@ -1538,6 +1539,10 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["gratis", "free", "безкоштовно"],
 ["später", "later", "пізніше"],
 ["Einzahlen", "Deposit", "Внести"],
+["Abheben", "Withdraw", "Зняти"],
+["🔵 Abheben", "🔵 Withdraw", "🔵 Зняти"],
+["Der Perlentresor ist leer.", "The pearl vault is empty.", "Перлинна скарбниця порожня."],
+["🔵 {} XP abgehoben.", "🔵 {} XP withdrawn.", "🔵 Знято {} XP."],
 ["{} trainieren", "Train {}", "Тренувати: {}"],
 ["🔒 Muschelburg {}", "🔒 Shell Castle {}", "🔒 Мушлевий замок {}"],
 ["Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).", "Tap a free spot on the grid (the outline shows whether it fits).", "Торкнися вільного місця на сітці (контур покаже, чи влазить)."],
@@ -7293,7 +7298,7 @@ function drawBlob(x, y, r, color, dark, opts) {
 /* ---- Gegner-Kunst: neun Gegnerarten mit Animation (8 Bilder je Schleife) ----
    Jede Funktion zeichnet um (0,0) in den Kontext g, Fische schauen nach rechts (gespiegelt wird beim Zeichnen).
    R = Radius des Gegners, c = Grundfarbe (#hex), f = Animationsphase 0..1. Benötigt hexToRgb(), mixCol(), bhash(). */
-const ENEMY_FRAMES = 8;
+const ENEMY_FRAMES = 8, ENEMY_N = { qualle: 24, kleinhai: 16, krebs: 18, angler: 24, seeigel: 16, muraene: 20, tinte: 24, piranha: 12, riesenkrebs: 20 };   // 7.14: Bilder je Schleife nach Tempo (vorher 8 = nur etwa 8 Bilder pro Sekunde, ruckelig)
 const ENEMY_SIDE = { kleinhai: 1, angler: 1, muraene: 1, piranha: 1 };        // Seitenansicht: wird in Laufrichtung gespiegelt
 const ENEMY_ANIM_RATE = { qualle: 0.7, kleinhai: 1.2, krebs: 1.1, angler: 0.8, seeigel: 0.35, muraene: 1.0, tinte: 0.8, piranha: 1.6, riesenkrebs: 0.9 };
 const ANGLER_LURE = { x: 1.18, y: -1.22 };                                      // Lage der Leuchtkugel (für das Leuchten im Dunkeln)
@@ -9849,7 +9854,7 @@ function getEnemySprite(color, dark, r, accessory, fr) {
   const savedCtx = ctx;
   try {
     ctx = octx;
-    drawBlob(pad, pad, r, color, dark, { accessory: accessory, wobble: 0, glow: 0, anim: (fr || 0) / BLOB_FRAMES * Math.PI * 2 });
+    drawBlob(pad, pad, r, color, dark, { accessory: accessory, wobble: 0, glow: 0, anim: (fr || 0) / (BLOB_N[accessory] || BLOB_FRAMES) * Math.PI * 2 });
   } finally {
     ctx = savedCtx;
   }
@@ -9861,14 +9866,15 @@ function getEnemySprite(color, dark, r, accessory, fr) {
 
 // Gewöhnliche Gegner (8 Bilder je Schleife): Tentakel wellen, Flossen schlagen, Scheren öffnen sich, Stacheln atmen, die Leuchtkugel schaukelt.
 // Die Bilder werden bei Bedarf einmal vorgezeichnet; der Treffer-Blitz (weiss) bleibt ein einziges Bild.
-const BLOB_FRAMES = 8, BLOB_ACC_RATE = { tentacles: 0.7, fin: 1.1, pincers: 0.9, spikes: 0.45, lure: 0.8 };
+const BLOB_FRAMES = 8, BLOB_N = { tentacles: 24, fin: 16, pincers: 18, spikes: 12, lure: 24 }, BLOB_ACC_RATE = { tentacles: 0.7, fin: 1.1, pincers: 0.9, spikes: 0.45, lure: 0.8 };
 function drawEnemySprite(x, y, r, color, accessory, wobble) {
   const acc = accessory || 'none', rate = BLOB_ACC_RATE[acc], anim = rate && color !== '#ffffff' && !prefersReducedMotion;
   let rr = r, fr = 0;
   if (anim) {
     rr = Math.max(4, Math.round(r * 2) / 2);                       // Grössen zusammenfassen (wenige Bilder im Speicher), beim Zeichnen angepasst
     const ph = ((wobble || 0) * rate / (Math.PI * 2)) % 1;
-    fr = Math.min(BLOB_FRAMES - 1, Math.floor((ph < 0 ? ph + 1 : ph) * BLOB_FRAMES));
+    const bn = BLOB_N[acc] || BLOB_FRAMES;
+    fr = Math.min(bn - 1, Math.floor((ph < 0 ? ph + 1 : ph) * bn));
   }
   const sprite = getEnemySprite(color, null, rr, acc, fr), k = r / rr;
   const squash = 1 + Math.sin(wobble || 0) * 0.06, kx = k / squash, ky = k * squash;
@@ -9887,7 +9893,7 @@ function enemyArtSprite(type, r, color, fr) {
   c.width = c.height = Math.ceil(size * SPRITE_BAKE_SCALE);
   const g = c.getContext('2d');
   g.scale(SPRITE_BAKE_SCALE, SPRITE_BAKE_SCALE); g.translate(pad, pad);
-  drawEnemyArt(g, type, rr, color, fr / ENEMY_FRAMES);
+  drawEnemyArt(g, type, rr, color, fr / (ENEMY_N[type] || ENEMY_FRAMES));
   return (enemyArtCache[key] = { canvas: c, pad: pad, size: size, r: rr, white: null });
 }
 function enemyArtWhite(spr) {
@@ -9899,7 +9905,7 @@ function enemyArtWhite(spr) {
 function drawEnemyFancy(en, sx, sy) {
   const type = en.type, rate = ENEMY_ANIM_RATE[type];
   if (!en.champ || !rate || en.isBoss) { drawEnemySprite(sx, sy, en.r, en.hitFlash > 0 ? '#ffffff' : (en.state === 'tired' ? '#e0d890' : en.color), en.accessory, en.wobble); return; }
-  const ph = ((en.wobble || 0) * rate / (Math.PI * 2)) % 1, fr = Math.min(ENEMY_FRAMES - 1, Math.floor((ph < 0 ? ph + 1 : ph) * ENEMY_FRAMES));
+  const ph = ((en.wobble || 0) * rate / (Math.PI * 2)) % 1, fr = Math.min((ENEMY_N[type] || ENEMY_FRAMES) - 1, Math.floor((ph < 0 ? ph + 1 : ph) * (ENEMY_N[type] || ENEMY_FRAMES)));
   const spr = enemyArtSprite(type, en.r, en.color, fr), s = en.r / spr.r;
   ctx.save(); ctx.translate(sx, sy);
   if (ENEMY_SIDE[type]) {                  // Fische schauen in Laufrichtung und neigen sich leicht nach oben/unten
@@ -12116,6 +12122,11 @@ function stDeposit() {
   if (amt <= 0) { showToast('Dein XP-Balken ist leer.'); return; }
   runXp -= amt; Base.res.xp += amt; Sfx.pickup && Sfx.pickup(); showToast('🟢 ' + amt + ' XP eingezahlt.'); stSave(); renderStratHud();
 }
+function stWithdraw() {                      // 7.14: Abheben: die XP aus dem Perlentresor zurück in den XP-Balken (Level-Ups wie bei jeder XP)
+  const amt = Math.floor(Base.res.xp);
+  if (amt <= 0) { showToast('Der Perlentresor ist leer.'); return; }
+  Base.res.xp -= amt; gainXp(amt); Sfx.pickup && Sfx.pickup(); showToast('🔵 ' + amt + ' XP abgehoben.'); stSave(); renderStratHud();
+}
 function stNearVault() { const v = stBuildingsOf('perlentresor').filter(function(b){ return !b.ruin; })[0]; if (!v) return false; const w = stWorld(v); return distXY(w.x, w.y, player.x, player.y) < w.r + 30; }
 
 // ---------- Eingabe: tippen (Gebäude wählen, Ziel für "Schicken"), Geist beim Bauen ----------
@@ -12154,7 +12165,7 @@ function renderStratHud() {
   stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = Math.max(0, Math.ceil(stWaveT)) + ' s';
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
-  vis('st-build', inBase); vis('st-deposit', stNearVault()); vis('st-map', SN.on);
+  vis('st-build', inBase); vis('st-deposit', stNearVault()); vis('st-withdraw', stNearVault()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
 function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
@@ -12188,7 +12199,7 @@ function stOpenInfo(b) {
     else add('Ausbauen', nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
   if (b.type !== 'muschelburg') add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; });
-  if (b.type === 'perlentresor') add('Einzahlen', Math.floor(runXp) + ' XP', function(){ stDeposit(); }, !stNearVault());
+  if (b.type === 'perlentresor') { add('Einzahlen', Math.floor(runXp) + ' XP', function(){ stDeposit(); }, !stNearVault()); add('Abheben', Math.floor(Base.res.xp) + ' XP', function(){ stWithdraw(); }, !stNearVault()); }
   if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
   if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' → ' + tr('Stufe') + ' ' + (stTroopLv(t) + 1), 30 * stTroopLv(t) + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
   p.appendChild(row);
@@ -13499,6 +13510,7 @@ function initUI() {
   document.getElementById('st-map-cv').addEventListener('click', snMapPick);
   tapButton(document.getElementById('st-build'), function(){ Sfx.click(); stOpenBuild(); });
   tapButton(document.getElementById('st-deposit'), function(){ stDeposit(); });
+  tapButton(document.getElementById('st-withdraw'), function(){ stWithdraw(); });
   tapButton(document.getElementById('st-follow'), function(){ Sfx.click(); stSetCmd('follow'); });
   tapButton(document.getElementById('st-hold'), function(){ Sfx.click(); stSetCmd('hold'); });
   tapButton(document.getElementById('st-send'), function(){ Sfx.click(); stSetCmd('send'); });
