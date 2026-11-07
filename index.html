@@ -531,7 +531,44 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   .pick-card .pick-desc { display: none; }
   .panel-actions { margin-top: 10px; }
   .shop-list, .achievement-list { max-height: 40vh; }
-  #screen-instructions .panel-actions, #screen-album .panel-actions { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: rgba(6,22,38,0.97); }   /* the long Anleitung scrolls, the back button stays in sight */
+  .panel > .panel-actions, #screen-gameover .menu-buttons { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: rgba(6,22,38,0.97); }   /* long panels scroll, the buttons stay in sight */   /* the long Anleitung scrolls, the back button stays in sight */
+}
+/* very small windows (the tray app at 640x400 and down to 560x350) */
+@media (max-height: 440px) and (orientation: landscape) {
+  .panel { padding: 10px 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 5px; }
+  .btn { padding: 6px 12px; font-size: 12px; border-radius: 11px; }
+  .btn-large { font-size: 13px; padding: 8px 12px; }
+  .menu-buttons, .menu-tiles { gap: 4px; }
+  .menu-tiles .btn { padding: 4px 6px; font-size: 12px; gap: 1px; }
+  .menu-footer { margin-top: 4px; }
+  .game-logo h1, #screen-menu .game-logo h1 { font-size: 17px; margin-top: 0; }
+  #screen-menu .lang-toggle { margin-bottom: 3px; }
+  #screen-menu .icon-btn { width: 30px; height: 30px; }
+  .panel-actions { margin-top: 6px; }
+  .pick-card { padding: 5px 5px; }
+  .pick-card .pick-swatch { width: 30px; height: 30px; margin-bottom: 2px; }
+  .card-grid { gap: 5px; margin: 5px 0; }
+  .levelup-sub { margin-bottom: 6px; }
+  .levelup-choices { gap: 5px; }
+  .levelup-choice { padding: 7px 10px; }
+  .levelup-choice-desc { margin-top: 1px; }
+  .gameover-stats { margin: 6px 0; gap: 5px; }
+  .gameover-stat { padding: 5px; }
+  .gameover-stat-value { font-size: 16px; }
+  .online-panel .online-label { margin: 3px 0 2px; }
+  .online-panel .online-note { margin-bottom: 2px; }
+  #strat-ui .st-btns { width: 96px; gap: 3px; right: 6px; bottom: 6px; }
+  #strat-ui .st-btns .btn { padding: 4px 6px; font-size: 11px; }
+  #strat-ui .st-res { top: 48px; padding: 3px 9px; font-size: 11px; gap: 8px; }
+  #strat-ui .st-panel { max-height: 72vh; width: min(260px, calc(100vw - 120px)); left: 6px; bottom: 6px; }
+  #st-raid { top: 78px !important; font-size: 11px !important; padding: 3px 10px !important; }
+}
+@media (max-height: 380px) and (orientation: landscape) {
+  #screen-menu .menu-tiles .btn-sub { display: none; }
+  #screen-menu .btn { padding: 4px 10px; }
+  #screen-menu .menu-tiles .btn { padding: 3px 6px; }
+  #screen-menu .game-logo h1 { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn, .pick-card, .levelup-choice, .hud-boss-wrap, .hud-bar-fill { transition: none; }
