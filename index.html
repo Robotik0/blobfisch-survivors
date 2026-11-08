@@ -232,6 +232,10 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .st-list { display: flex; flex-direction: column; gap: 5px; }
 .st-item { display: flex; flex-direction: column; align-items: flex-start; padding: 7px 9px; font-size: 13px; text-align: left; }
 .st-item .btn-sub { margin-left: 0; }
+.st-up { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 6px 9px; margin: 6px 0; font-size: 12.5px; color: var(--foam); }
+.st-stat { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
+.st-val { font-weight: 600; white-space: nowrap; }
+.st-note { margin-top: 3px; color: var(--foam-dim); line-height: 1.35; }
 .st-lab { display: flex; align-items: center; gap: 8px; }
 .st-ico { flex: none; border-radius: 7px; background: rgba(0,0,0,0.2); vertical-align: middle; margin-right: 8px; }
 .st-lab .st-ico { margin-right: 0; }
@@ -311,6 +315,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .album-card { border-radius: 12px; padding: 6px 4px 8px; text-align: center; background: rgba(126,224,255,0.07); border: 2px solid rgba(126,224,255,0.18); }
 .album-card.beaten { border-color: #f2c240; box-shadow: 0 0 10px rgba(242,194,64,0.35) inset; }
 .album-card canvas { width: 100%; max-width: 96px; aspect-ratio: 1; display: block; margin: 0 auto 4px; }
+.album-card .album-claim { margin-top: 5px; padding: 4px 8px; font-size: 11px; }
 .album-card .album-name { font-weight: 800; font-size: 11.5px; display: block; line-height: 1.2; }
 .album-card .album-state { font-size: 10.5px; color: var(--foam-dim); display: block; margin-top: 2px; }
 .ach-summary { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 800; color: var(--foam); margin: -4px 0 10px; }
@@ -737,7 +742,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <div class="menu-tiles">
           <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
           <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
-          <button class="btn btn-secondary" id="btn-goto-album">📖 Boss-Album <span class="btn-sub" id="album-count"></span></button>
+          <button class="btn btn-secondary" id="btn-goto-album">📖 Boss-Album <span class="btn-sub" id="album-count"></span> <span class="menu-badge" id="album-badge" style="display:none;"></span></button>
           <button class="btn btn-secondary" id="btn-goto-account">👤 Konto <span class="btn-sub" id="acc-badge">Gast</span></button>
         </div>
       </div>
@@ -950,6 +955,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
       <h2>📖 Boss-Album</h2>
       <p class="pearls-total" id="album-summary"></p>
       <div class="album-tabs" id="album-tabs"></div>
+      <button class="btn btn-primary" id="btn-album-claim-all" style="display:none;margin-bottom:10px;">Alle einlösen</button>
       <div class="album-grid" id="album-grid"></div>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-album-back">Zurück</button>
@@ -1061,7 +1067,7 @@ const CHARACTERS = [
     unlockBoss: 'kraken', unlockDesc: 'Besiege einen Boss im Kelpwald.', base: { hp: 75, speed: 196, damage: 0.9, cooldown: 1, luck: 0 } },
   { id: 'panzer', name: 'Panzer-Blobi', desc: 'Zäh und robust, dafür etwas gemütlicher unterwegs.', color: '#b28dff', dark: '#8a63d9', price: 1500,
     unlockBoss: 'seeungeheuer', unlockDesc: 'Besiege einen Boss im Tiefsee-Graben.', base: { hp: 145, speed: 122, damage: 1, cooldown: 1.05, luck: 0 } },
-  { id: 'gluecks', name: 'Glücks-Blobi', desc: 'Findet mehr Perlen und bekommt öfter eine vierte Upgrade-Karte.', color: '#ffd76a', dark: '#e0ab2e', price: 2500,
+  { id: 'gluecks', name: 'Glücks-Blobi', desc: 'Startet mit Glück +3: +30 % Perlen und 18 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg.', color: '#ffd76a', dark: '#e0ab2e', price: 2500,
     unlockLevel: GLUECKS_LEVEL, unlockDesc: 'Erreiche Level ' + GLUECKS_LEVEL + ' in einem Lauf.', base: { hp: 90, speed: 155, damage: 1, cooldown: 0.95, luck: 3 } }
 ];
 
@@ -1225,7 +1231,7 @@ const PASSIVE_DEFS = {
   panzerung:     { name: 'Panzerung',       desc: 'Reduziert erlittenen Schaden.',        maxLevel: 5 },
   anziehung:     { name: 'Anziehungskraft', desc: '+Aufsammel-Radius pro Stufe.',         maxLevel: 5 },
   angriffstempo: { name: 'Angriffstempo',   desc: 'Waffen laden schneller nach.',         maxLevel: 5 },
-  glueck:        { name: 'Glück',           desc: '+10% Perlen pro Stufe und öfter eine vierte Upgrade-Karte.',         maxLevel: 5 },
+  glueck:        { name: 'Glück',           desc: '+1 Glück pro Stufe: +10 % Perlen aus jedem Fund und +6 % Chance auf eine vierte Karte beim Levelaufstieg.',         maxLevel: 5 },
   schild:        { name: 'Schutzschild',    desc: 'Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.', maxLevel: 5 },
   regeneration:  { name: 'Regeneration',    desc: 'Heilt langsam, aber stetig Lebenspunkte.', maxLevel: 5 },
   schlag:        { name: 'Schlagkraft',     desc: '+8% Schaden pro Stufe (nicht für die Tintenwolke).', maxLevel: 5 }
@@ -1240,7 +1246,7 @@ const SHOP_UPGRADES = [
   { id: 'shop_speed',  name: 'Bessere Flossen',        desc: '+3% Start-Tempo pro Stufe.',    maxLevel: 5, costs: [20, 95, 330, 800, 1800],   gates: [0, 0, 1, 2, 3] },
   { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, costs: [30, 150, 500, 1200, 2600], gates: [0, 0, 1, 2, 3] },
   { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, costs: [15, 80, 280, 700, 1500],   gates: [0, 0, 1, 2, 3] },
-  { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück: mehr Perlen und öfter eine vierte Upgrade-Karte.', maxLevel: 3, costs: [250, 1200, 3000], gates: [0, 2, 3] },
+  { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück: +10 % Perlen aus jedem Fund (Kugeln und Truhen) und +6 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg (höchstens 60 %).', maxLevel: 3, costs: [250, 1200, 3000], gates: [0, 2, 3] },
   { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Einmal pro Lauf: Wirst du besiegt, kannst du per Knopfdruck mit halber Gesundheit weitermachen.', maxLevel: 1, costs: [1200], gates: [1] }
 ];
 function shopCost(u, level) { return u.costs[Math.min(level, u.costs.length - 1)]; }
@@ -1295,6 +1301,8 @@ const ACHIEVEMENTS = [
 ];
 
 const ACH_REWARDS = { first_blood:10, kills_100:25, kills_1000:100, survive_5:40, survive_15:150, boss_1:60, boss_all:200, pearls_1000:100, level_20:75, all_characters:50, champ_25:60, champ_boss:120, album_riff:80, album_kelp:150, album_graben:250, album_vulkan:400, bestiarium:600, legend_1:200, legend_all:800 };
+// 7.21: Boss-Album: jeder besiegte Boss gibt einmal eine kleine Belohnung (Riff 10, Kelp 20, Graben 35, Vulkan 50), die man auf seiner Karte abholt
+const BOSS_REWARDS = { haikoenig:10, kugelkapitaen:10, korallenwaechter:10, mantarochen:10, anemonen:10, schatzkrabbe:10, kraken:20, giftkugelfisch:20, tangschrat:20, seeschlange:20, hummergeneral:20, seepferdchen:20, seeungeheuer:35, panzerassel:35, tiefseelaterne:35, abgrundschlange:35, vampirkalmar:35, schlinger:35, lavatitan:50, vulkanschildkroete:50, schwefelrochen:50, glutqualle:50, schlotwurm:50, feuerfisch:50 };
 
 // ---------- Speicherstand laden ----------
 function defaultSave() {
@@ -1312,6 +1320,7 @@ function defaultSave() {
     lastStage: 'riff',
     tips: { runStart: 0 },                     // 7.17: wie oft der Start-Hinweis schon kam (nur die ersten 2 Läufe)
     rewarded: [],
+    bossClaimed: [],                           // 7.21: Boss-Album-Belohnungen, die schon abgeholt sind
     stagesUnlocked: ['riff']
   };
 }
@@ -1329,6 +1338,7 @@ let save = defaultSave();
     if (save.ownedCharacters.indexOf('standard') === -1) save.ownedCharacters.unshift('standard');
     if (save.unlockedCharacters.indexOf('standard') === -1) save.unlockedCharacters.unshift('standard');
     save.v = 5;
+    if (!Array.isArray(save.bossClaimed)) save.bossClaimed = [];
     save.stats = Object.assign({ totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [], championsDefeated: 0, championBossesDefeated: 0 }, loaded.stats || {});
     if (!Array.isArray(save.stats.uniqueBossesDefeated)) save.stats.uniqueBossesDefeated = [];
     if (!save.stats.stageBest || typeof save.stats.stageBest !== 'object') save.stats.stageBest = {};
@@ -1477,6 +1487,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Schaden ×{}","Damage ×{}","Шкода ×{}"],
 ["Abklingzeit ×{}","Cooldown ×{}","Перезарядка ×{}"],
 ["Glück +{}","Luck +{}","Удача +{}"],
+["Glück +{} (+{} % Perlen · {} % 4. Karte)","Luck +{} (+{} % pearls · {} % 4th card)","Удача +{} (+{} % перлин · {} % 4-та картка)"],
 ["Schwierigkeit ×{}","Difficulty ×{}","Складність ×{}"],
 ["Perlen ×{}","Pearls ×{}","Перлини ×{}"],
 ["Boss: {}","Boss: {}","Бос: {}"],
@@ -1501,7 +1512,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Besiege die Riesenkrake im Kelpwald.","Defeat the Giant Kraken in the Kelp Forest.","Перемож Гігантського кракена в Лісі водоростей."],
 ["Zäh und robust, dafür etwas gemütlicher unterwegs.","Tough and sturdy, but a bit slower.","Міцний і витривалий, зате трохи повільніший."],
 ["Besiege das Meeresungeheuer im Tiefsee-Graben.","Defeat the Sea Monster in the Deep-Sea Trench.","Перемож Морське чудовисько в Глибоководній западині."],
-["Findet mehr Perlen und bekommt öfter eine vierte Upgrade-Karte.","Finds more pearls and more often gets a fourth upgrade card.","Знаходить більше перлин і частіше отримує четверту картку покращення."],
+["Startet mit Glück +3: +30 % Perlen und 18 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg.","Starts with Luck +3: +30 % pearls and an 18 % chance of a fourth upgrade card at every level-up.","Починає з удачею +3: +30 % перлин і 18 % шанс на четверту картку покращення при кожному рівні."],
 ["Erreiche Level {} in einem Lauf.","Reach level {} in one run.","Досягни рівня {} за один забіг."],
 ["Korallenriff","Coral Reef","Кораловий риф"],
 ["Kelpwald","Kelp Forest","Ліс водоростей"],
@@ -1556,7 +1567,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Angriffstempo","Attack Speed","Темп атаки"],
 ["Waffen laden schneller nach.","Weapons reload faster.","Зброя перезаряджається швидше."],
 ["Glück","Luck","Удача"],
-["+10% Perlen pro Stufe und öfter eine vierte Upgrade-Karte.","+10% pearls per level and more often a fourth upgrade card.","+10% перлин за рівень і частіше четверта картка покращення."],
+["+1 Glück pro Stufe: +10 % Perlen aus jedem Fund und +6 % Chance auf eine vierte Karte beim Levelaufstieg.","+1 Luck per level: +10 % pearls from every find and +6 % chance of a fourth card at level-up.","+1 удачі за рівень: +10 % перлин з кожної знахідки та +6 % шанс на четверту картку при рівні."],
 ["Schutzschild","Shield","Захисний щит"],
 ["Blockt in Abständen den nächsten Treffer komplett - auch grosse Treffer.","Every so often fully blocks the next hit – even big ones.","Час від часу повністю блокує наступний удар – навіть великий."],
 ["Regeneration","Regeneration","Регенерація"],
@@ -1571,7 +1582,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["+4% Schaden pro Stufe.","+4% damage per level.","+4% шкоди за рівень."],
 ["Perlen-Magnet","Pearl Magnet","Перлинний магніт"],
 ["Glücksbringer","Lucky Charm","Талісман удачі"],
-["+1 Glück: mehr Perlen und öfter eine vierte Upgrade-Karte.","+1 Luck: more pearls and more often a fourth upgrade card.","+1 удачі: більше перлин і частіше четверта картка покращення."],
+["+1 Glück: +10 % Perlen aus jedem Fund (Kugeln und Truhen) und +6 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg (höchstens 60 %).","+1 Luck: +10 % pearls from every find (orbs and chests) and +6 % chance of a fourth upgrade card at every level-up (60 % at most).","+1 удачі: +10 % перлин з кожної знахідки (кульки й скрині) та +6 % шанс на четверту картку покращення при кожному рівні (щонайбільше 60 %)."],
 ["Zweite Chance","Second Chance","Другий шанс"],
 ["Einmal pro Lauf: Wirst du besiegt, kannst du per Knopfdruck mit halber Gesundheit weitermachen.","Once per run: when you are defeated, one button press lets you go on with half your health.","Раз за забіг: якщо тебе переможуть, одним натиском кнопки продовжиш із половиною здоров'я."],
 ["Erster Blubb","First Blub","Перший бульк"],
@@ -1672,6 +1683,38 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Reparieren", "Repair", "Полагодити"],
 ["Ausbauen", "Upgrade", "Покращити"],
 ["Verschieben", "Move", "Перемістити"],
+["Das Herz der Basis. Sie bestimmt, wie hoch alles andere ausgebaut werden darf.", "The heart of the base. It decides how high everything else may be upgraded.", "Серце бази. Вона визначає, до якого рівня можна покращувати все інше."],
+["Erzeugt Korallen, auch wenn du weg bist.", "Makes corals, even while you are away.", "Виробляє корали, навіть коли тебе немає."],
+["Hier lagern deine Korallen und Kristalle. Ohne Lager passen nur 300 🪸 und 30 💎 hinein.", "Your corals and crystals are stored here. Without a storehouse only 300 🪸 and 30 💎 fit.", "Тут зберігаються твої корали та кристали. Без складу вміщується лише 300 🪸 і 30 💎."],
+["Hier lagern deine eingezahlten XP für die Truppen.", "Your deposited XP for the troops is stored here.", "Тут зберігається внесений XP для загонів."],
+["Schiesst alle 1,2 s einen Pfeil, der bis zu 3 Gegner durchbohrt.", "Fires an arrow every 1.2 s that pierces up to 3 enemies.", "Кожні 1,2 с випускає стрілу, що пробиває до 3 ворогів."],
+["Hier wachsen deine Truppen. Eine zweite Brutstätte bringt je Stufe nur 2 Plätze, trainiert aber doppelt so schnell.", "Your troops grow here. A second hatchery gives only 2 places per level but trains twice as fast.", "Тут ростуть твої загони. Друга інкубаційна дає лише 2 місця за рівень, але тренує вдвічі швидше."],
+["Hält Gegner auf.", "Holds enemies back.", "Стримує ворогів."],
+["Warnt 15 s statt 5 s vor einer Welle.", "Warns 15 s instead of 5 s before a wave.", "Попереджає про хвилю за 15 с замість 5 с."],
+["Erzeugt Kristalle, auch wenn du weg bist.", "Makes crystals, even while you are away.", "Виробляє кристали, навіть коли тебе немає."],
+["Trifft alle Gegner in Reichweite alle 1,4 s.", "Hits every enemy in range every 1.4 s.", "Кожні 1,4 с вражає всіх ворогів у радіусі дії."],
+["Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 8 s wieder bereit.", "Hidden. Snaps shut when an enemy comes close and is ready again after 8 s.", "Прихована. Спрацьовує, коли ворог підходить, і за 8 с знову готова."],
+["Verlangsamt alle Gegner in Reichweite.", "Slows every enemy in range.", "Сповільнює всіх ворогів у радіусі дії."],
+["Heilt deinen Blobi und die Truppen in der Basis.", "Heals your Blobi and the troops in the base.", "Лікує твого Блобі та загони на базі."],
+["Verbessert Truppen für 30 💎 × Stufe: +20 % Leben und Schaden. Wie hoch, bestimmt die Muschelburg.", "Upgrades troops for 30 💎 × level: +20 % health and damage. How high is set by the Shell Castle.", "Покращує загони за 30 💎 × рівень: +20 % здоров'я та шкоди. Як високо — визначає мушлевий замок."],
+["Ein Blitz springt alle 1,3 s auf bis zu 4 Gegner.", "A bolt jumps to up to 4 enemies every 1.3 s.", "Кожні 1,3 с блискавка перестрибує на до 4 ворогів."],
+["Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.", "Throws a spear at the strongest enemy every 2.2 s: the answer to bosses.", "Кожні 2,2 с кидає спис у найсильнішого ворога: відповідь босам."],
+["Basis-Raster", "Base grid", "Сітка бази"],
+["Höchste Gebäudestufe", "Highest building level", "Найвищий рівень будівель"],
+["Höchste Truppenstufe", "Highest troop level", "Найвищий рівень загонів"],
+["Korallen pro Stunde", "Corals per hour", "Коралів за годину"],
+["Kristalle pro Stunde", "Crystals per hour", "Кристалів за годину"],
+["Korallen-Lager", "Coral storage", "Склад коралів"],
+["Kristall-Lager", "Crystal storage", "Склад кристалів"],
+["XP-Lager", "XP storage", "Склад XP"],
+["Reichweite", "Range", "Радіус дії"],
+["Heilung pro Sekunde", "Healing per second", "Лікування за секунду"],
+["Platz für Truppen", "Room for troops", "Місць для загонів"],
+["Lebenspunkte", "Health", "Здоров'я"],
+["Neue Gebäude:", "New buildings:", "Нові будівлі:"],
+["Mehr davon erlaubt:", "More of these allowed:", "Дозволено більше таких:"],
+["Neue Truppen:", "New troops:", "Нові загони:"],
+["Nur mehr Lebenspunkte.", "Only more health.", "Лише більше здоров'я."],
 ["gratis", "free", "безкоштовно"],
 ["später", "later", "пізніше"],
 ["Einzahlen", "Deposit", "Внести"],
@@ -2228,6 +2271,7 @@ de: `<li><strong>Bewegen:</strong> WASD oder Pfeiltasten – auf Mobilgeräten e
 <li><strong>Angreifen:</strong> Automatisch – konzentriere dich ganz aufs Ausweichen!</li>
 <li><strong>Level-Ups:</strong> Sammle die Kerne besiegter Gegner und wähle neue Waffen oder Verbesserungen.</li>
 <li><strong>Perlen:</strong> Bleiben nach dem Lauf erhalten und lassen sich im Shop in dauerhafte Verbesserungen und neue Blobis investieren. Tiefere Gebiete geben viel mehr Perlen (Kelpwald ×2,5, Tiefsee-Graben ×4, Vulkanschlucht ×6). Jeder Boss lässt einen <strong>Boss-Schatz</strong> fallen – ein Lichtstrahl und ein Pfeil am Bildschirmrand zeigen, wo er liegt.</li>
+<li><strong>Glück:</strong> Jeder Punkt Glück gibt dir <strong>+10 % Perlen</strong> aus jedem Fund (Perlen-Kugeln und Schatztruhen, auch von Bossen und Champions) und <strong>+6 % Chance</strong>, dass beim Levelaufstieg eine <strong>vierte Karte</strong> zur Auswahl steht (höchstens 60 %). Mehr tut Glück nicht: es ändert weder, wie oft Gegner Perlen fallen lassen, noch die Gegner, Bosse oder deine Waffen. Glück kommt vom Glücks-Blobi (+3), vom Glücksbringer im Shop (+1 je Stufe) und von der Glück-Karte im Lauf (+1 je Stufe).</li>
 <li><strong>Shop-Stufen:</strong> Die ersten zwei Stufen jeder Verbesserung gibt es sofort. Stufe 3 öffnet sich, sobald du die Riesenkrake (Kelpwald) besiegt hast, Stufe 4 mit dem Meeresungeheuer (Tiefsee-Graben) und Stufe 5 mit dem Lava-Titan (Vulkanschlucht). Wer stärker werden will, muss also in die tieferen Gebiete.</li>
 <li><strong>Blobis:</strong> Am Anfang hast du nur den normalen Blobi. Den Turbo-Blobi schaltest du mit einem Sieg über die Riesenkrake frei, den Panzer-Blobi über das Meeresungeheuer und den Glücks-Blobi mit Level 25 in einem Lauf – danach kaufst du ihn mit Perlen in der Blobi-Auswahl.</li>
 <li><strong>Boss:</strong> Nach 5 Minuten erscheint ein mächtiger Gegner. Besiegst du ihn, kehrt nach 4 Minuten ein noch stärkerer zurück – mach dich bereit! Er wird mit deinem Level zäher, im Kampf kommen weniger gewöhnliche Gegner, und als Beute lässt er ein Herz (+40 % Leben) und den Boss-Schatz fallen.</li>
@@ -2250,6 +2294,7 @@ en: `<li><strong>Move:</strong> WASD or arrow keys – on phones and tablets jus
 <li><strong>Attack:</strong> Automatic – focus completely on dodging!</li>
 <li><strong>Level-ups:</strong> Collect the cores of defeated enemies and choose new weapons or upgrades.</li>
 <li><strong>Pearls:</strong> You keep them after the run and spend them in the shop on permanent upgrades and new Blobis. Deeper areas give many more pearls (Kelp Forest ×2.5, Deep-Sea Trench ×4, Volcano Gorge ×6). Every boss drops a <strong>Boss Treasure</strong> – a beam of light and an arrow at the edge of the screen show where it is.</li>
+<li><strong>Luck:</strong> Every point of Luck gives you <strong>+10 % pearls</strong> from every find (pearl orbs and treasure chests, also from bosses and champions) and a <strong>+6 % chance</strong> that a <strong>fourth card</strong> is offered at level-up (60 % at most). That is all Luck does: it changes neither how often enemies drop pearls nor enemies, bosses or your weapons. Luck comes from the Lucky Blobi (+3), the Lucky Charm in the shop (+1 per level) and the Luck card during a run (+1 per level).</li>
 <li><strong>Shop levels:</strong> The first two levels of every upgrade are available right away. Level 3 opens once you have defeated the Giant Kraken (Kelp Forest), level 4 with the Sea Monster (Deep-Sea Trench) and level 5 with the Lava Titan (Volcano Gorge). To get stronger, you have to go deeper.</li>
 <li><strong>Blobis:</strong> At the start you only have the normal Blobi. You unlock the Turbo Blobi by beating the Giant Kraken, the Armor Blobi by beating the Sea Monster and the Lucky Blobi by reaching level 25 in one run – then you buy it with pearls in the Blobi selection.</li>
 <li><strong>Boss:</strong> After 5 minutes a mighty enemy appears. If you defeat it, an even stronger one returns 4 minutes later – get ready! It gets tougher with your level, fewer ordinary enemies come during the fight, and it drops a heart (+40 % health) and the Boss Treasure.</li>
@@ -2272,6 +2317,7 @@ uk: `<li><strong>Рух:</strong> WASD або стрілки – на телеф
 <li><strong>Атака:</strong> Автоматична – зосередься на тому, щоб ухилятися!</li>
 <li><strong>Нові рівні:</strong> Збирай ядра переможених ворогів і обирай нову зброю або покращення.</li>
 <li><strong>Перлини:</strong> Залишаються після забігу, у крамниці їх можна витратити на постійні покращення й нових Блобі. Глибші локації дають набагато більше перлин (Ліс водоростей ×2,5, Глибоководна западина ×4, Вулканічна ущелина ×6). Кожен бос залишає <strong>скарб боса</strong> – промінь світла і стрілка на краю екрана показують, де він лежить.</li>
+<li><strong>Удача:</strong> Кожен бал удачі дає <strong>+10 % перлин</strong> з кожної знахідки (кульки перлин і скрині, також від босів і чемпіонів) та <strong>+6 % шанс</strong>, що при підвищенні рівня буде <strong>четверта картка</strong> на вибір (щонайбільше 60 %). Більше удача нічого не робить: вона не змінює, як часто вороги кидають перлини, ані ворогів, босів чи твою зброю. Удача походить від Блобі-щасливчика (+3), оберега удачі в магазині (+1 за рівень) та картки удачі під час забігу (+1 за рівень).</li>
 <li><strong>Рівні крамниці:</strong> Перші два рівні кожного покращення доступні одразу. Рівень 3 відкривається, щойно ти переможеш Гігантського кракена (Ліс водоростей), рівень 4 – Морське чудовисько (Глибоководна западина), рівень 5 – Лавового титана (Вулканічна ущелина). Хочеш стати сильнішим – пірнай глибше.</li>
 <li><strong>Блобі:</strong> На початку в тебе лише звичайний Блобі. Турбо-Блобі відкривається перемогою над Гігантським кракеном, Панцирний Блобі – над Морським чудовиськом, а Щасливий Блобі – на рівні 25 за один забіг. Потім його можна купити за перлини у виборі Блобі.</li>
 <li><strong>Бос:</strong> Через 5 хвилин з'являється могутній ворог. Переможеш його – через 4 хвилини повернеться ще сильніший, готуйся! Він міцнішає разом із твоїм рівнем, під час бою звичайних ворогів менше, а в нагороду він залишає серце (+40 % здоров'я) і скарб боса.</li>
@@ -7151,12 +7197,25 @@ function pendingAchievements() {
 function pendingAchievementPearls() {
   return pendingAchievements().reduce(function(sum, id){ return sum + (ACH_REWARDS[id] || 0); }, 0);
 }
+// Boss-Album (7.21): besiegt = Belohnung wartet; abgeholt = in save.bossClaimed
+function bossBeatenType(t) { return (save.stats.uniqueBossesDefeated || []).indexOf(t) !== -1; }
+function bossClaimedType(t) { return Array.isArray(save.bossClaimed) && save.bossClaimed.indexOf(t) !== -1; }
+function pendingBossRewards() { return Object.keys(BOSS_REWARDS).filter(function(t){ return bossBeatenType(t) && !bossClaimedType(t); }); }
+function claimBossReward(t) {
+  if (!BOSS_REWARDS[t] || !bossBeatenType(t) || bossClaimedType(t)) return 0;
+  if (!Array.isArray(save.bossClaimed)) save.bossClaimed = [];
+  save.bossClaimed.push(t); save.totalPearls += BOSS_REWARDS[t];
+  persistSave(); updateAchievementBadges();
+  return BOSS_REWARDS[t];
+}
 function achievementName(id) { const a = ACHIEVEMENTS.filter(function(x){ return x.id === id; })[0]; return a ? a.name : id; }
 
 function updateAchievementBadges() {
   const n = pendingAchievements().length;
   const b = document.getElementById('ach-badge');
   if (b) { b.style.display = n ? 'inline-block' : 'none'; b.textContent = n + ' NEU'; }
+  const ab = document.getElementById('album-badge'), an = pendingBossRewards().length;
+  if (ab) { ab.style.display = an ? 'inline-block' : 'none'; ab.textContent = an + ' NEU'; }
 }
 
 // Erfolge werden nur freigeschaltet. Die Perlen holt sich der Spieler selbst im Menü ab (claimAchievement).
@@ -12143,6 +12202,8 @@ function renderAlbum() {
   const st = save.stats, met = st.bossesMet || [], beat = st.uniqueBossesDefeated || [], crown = st.champBossTypes || [];
   const tot = albumTotal();
   if (sum) sum.textContent = 'Besiegt: ' + tot.beaten + ' von ' + tot.all;
+  const allB = document.getElementById('btn-album-claim-all'), pb = pendingBossRewards();
+  if (allB) { allB.style.display = pb.length >= 2 ? '' : 'none'; allB.textContent = tr('Alle einlösen') + ' · +' + pb.reduce(function(a, t){ return a + BOSS_REWARDS[t]; }, 0) + ' 💧'; }
   tabs.innerHTML = '';
   STAGES.forEach(function(s){
     const c = albumCount(s.id), b = document.createElement('button');
@@ -12161,6 +12222,11 @@ function renderAlbum() {
     const nm = document.createElement('span'); nm.className = 'album-name'; nm.textContent = m ? (k ? '👑 ' : '') + BOSS_TYPES[type].name : '???';
     const sv = document.createElement('span'); sv.className = 'album-state'; sv.textContent = k ? 'Als Champion-Boss besiegt' : w ? 'Besiegt' : m ? 'Getroffen' : 'Noch nicht getroffen';
     card.appendChild(nm); card.appendChild(sv);
+    if (w && BOSS_REWARDS[type]) {
+      const rw = BOSS_REWARDS[type];
+      if (bossClaimedType(type)) { const d = document.createElement('span'); d.className = 'album-state'; d.textContent = tr('✓ eingelöst'); card.appendChild(d); }
+      else { const bt = document.createElement('button'); bt.className = 'btn btn-primary album-claim'; bt.textContent = tr('Einlösen') + ' +' + rw + ' 💧'; bt.addEventListener('click', function(){ claimBossReward(type); Sfx.claim(); renderAlbum(); showToast('🎁 +' + rw + ' 💧'); }); card.appendChild(bt); }
+    }
     if (!m) { const ar = document.createElement('span'); ar.className = 'album-state'; ar.textContent = (STAGES.filter(function(x){ return x.id === albumArea; })[0] || {}).name || ''; card.appendChild(ar); }   // 7.17: Gebiet bei den ???-Karten
     grid.appendChild(card);
     albumPicture(cv, type, m);
@@ -12508,8 +12574,8 @@ function accPrivacy(add) {
 const STRAT_KEY = 'blobfischStrategyBase';
 // Massstab (7.3): eine Kachel = 144 (der Blobi hat Radius 19): Muschelburg und Brutstätte sind 3 Kacheln = 11 Blobis breit, die Basis 34–49 Blobis.
 // ST_REACH: die Reichweiten der Verteidigung, gemessen an der früheren Kachel von 48.
-const ST_FOE_DMG = 0.7, ST_BOSS_HP = 0.7, ST_BOSS_DMG = 0.5, ST_CHAMP_HP = 0.5;   // 7.8: Gegner der Strategie sind schwächer (Bosse und Champions am meisten)
-const ST_TILE = 128, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 4, ST_MAX_MB = 10, ST_ARMY_MAX = 36, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
+const ST_FOE_DMG = 0.7, ST_BOSS_HP = 0.5, ST_BOSS_DMG = 0.35, ST_CHAMP_HP = 0.5;   // 7.8: Gegner der Strategie sind schwächer (Bosse und Champions am meisten); 7.21: Boss-HP 0,7 -> 0,5, Boss-Schaden 0,5 -> 0,35
+const ST_TILE = 128, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 6, ST_MAX_MB = 10, ST_ARMY_MAX = 36, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
 const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 0 }, { grid: 11, k: 800, c: 0, t: 0 }, { grid: 11, k: 1500, c: 60, t: 180 }, { grid: 13, k: 3000, c: 150, t: 420 },
   { grid: 13, k: 5000, c: 300, t: 600 }, { grid: 15, k: 8000, c: 500, t: 1800 }, { grid: 15, k: 12000, c: 800, t: 3600 }, { grid: 17, k: 17000, c: 1200, t: 5400 }, { grid: 17, k: 25000, c: 2000, t: 7200 }];     // 7.15: Stufen 6-10 (Plan: Muschelburg-Tabelle)
 // Gebäude: Grösse (Kacheln), ab welcher Muschelburg, Grundkosten (Korallen), HP, Anzahl je Muschelburg-Stufe
@@ -12622,9 +12688,12 @@ function stHalf() { return Math.floor(stGrid() / 2); }
 function stWorld(b) { const s = ST_B[b.type].size; return { x: (b.x + s / 2) * ST_TILE, y: (b.y + s / 2) * ST_TILE, r: s * ST_TILE * 0.5 }; }
 function stBuildingsOf(type) { return Base.buildings.filter(function(b){ return b.type === type; }); }
 function stLv(type) { return stBuildingsOf(type).reduce(function(a, b){ return b.ruin ? a : a + b.lv; }, 0); }
+// 7.21: das Lager wächst mit 1,8 je Stufe (wie die Kosten der Gebäude); so passt bei jeder Muschelburg-Stufe jeder Ausbau ins Lager (Prüfung S15)
+function stLagerK(lv) { return Math.round(450 * Math.pow(1.8, lv - 1)); }
+function stLagerC(lv) { return Math.round(40 * Math.pow(1.8, lv - 1)); }
 function stCaps() {
   let k = 300, c = 30, xp = 0;
-  Base.buildings.forEach(function(b){ if (b.ruin) return; if (b.type === 'lager') { k += Math.round(400 * Math.pow(1.6, b.lv - 1)); c += Math.round(40 * Math.pow(1.6, b.lv - 1)); } if (b.type === 'perlentresor') xp += Math.round(150 * Math.pow(1.6, b.lv - 1)); });
+  Base.buildings.forEach(function(b){ if (b.ruin) return; if (b.type === 'lager') { k += stLagerK(b.lv); c += stLagerC(b.lv); } if (b.type === 'perlentresor') xp += Math.round(150 * Math.pow(1.6, b.lv - 1)); });
   return { k: k, c: c, xp: xp };
 }
 function stHatcheries() { return stBuildingsOf('brutstaette').filter(function(x){ return !x.ruin; }).sort(function(a, b){ return b.lv - a.lv; }); }
@@ -12659,7 +12728,8 @@ function stTick(secs, offline) {
   if (Base.build && Base.build <= Date.now()) Base.build = null;
   return out;
 }
-function stMaxHp(b) { return Math.round(ST_B[b.type].hp * (1 + 0.4 * (b.lv - 1))); }
+function stMaxHpAt(type, lv) { return Math.round(ST_B[type].hp * (1 + 0.4 * (lv - 1))); }
+function stMaxHp(b) { return stMaxHpAt(b.type, b.lv); }
 function stTroopLv(type) { return Base.troopLv[type] || 1; }
 function stTroopMaxHp(type) { return Math.round(ST_T[type].hp * (1 + 0.2 * (stTroopLv(type) - 1))); }
 function stTroopDmg(type) { return ST_T[type].dmg * (1 + 0.2 * (stTroopLv(type) - 1)); }
@@ -13673,6 +13743,8 @@ function stWithdraw() {                      // 7.14: Abheben: die XP aus dem Pe
   if (amt <= 0) { showToast('Der Perlentresor ist leer.'); return; }
   Base.res.xp -= amt; gainXp(amt); Sfx.pickup && Sfx.pickup(); showToast('🔵 ' + amt + ' XP abgehoben.'); stSave(); renderStratHud();
 }
+// 7.21: Einzahlen und Abheben gehen überall in der eigenen Basis, solange der Perlentresor steht (nicht in Ruinen); stNearVault bleibt für das Leuchten des Tresors
+function stVaultUsable() { return !!stBuildingsOf('perlentresor').filter(function(b){ return !b.ruin; })[0] && stInBase(player.x, player.y); }
 function stNearVault() { const v = stBuildingsOf('perlentresor').filter(function(b){ return !b.ruin; })[0]; if (!v) return false; const w = stWorld(v); return distXY(w.x, w.y, player.x, player.y) < w.r + 30; }
 
 // ---------- Eingabe: tippen (Gebäude wählen, Ziel für "Schicken"), Geist beim Bauen ----------
@@ -13711,7 +13783,7 @@ function renderStratHud() {
   stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = Math.max(0, Math.ceil(stWaveT)) + ' s';
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
-  vis('st-build', inBase); vis('st-deposit', stNearVault()); vis('st-withdraw', stNearVault()); vis('st-map', SN.on);
+  vis('st-build', inBase); vis('st-deposit', stVaultUsable()); vis('st-withdraw', stVaultUsable()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
 function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
@@ -13728,14 +13800,73 @@ function stOpenBuild() {
     const d = ST_B[type], have = stBuildingsOf(type).length, max = Base.mb >= d.from ? d.max(Base.mb) : 0, cost = stLevelCost(type, 1);
     const b = el('button', 'btn btn-secondary st-item'); b.appendChild(stLabel(type, d.name)); b.appendChild(el('span', 'btn-sub', Base.mb < d.from ? '🔒 Muschelburg ' + d.from : have + '/' + max + ' · ' + stCostText(cost)));
     b.disabled = Base.mb < d.from || have >= max || !stCanPay(cost);
-    b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); const q = stPanel(d.name, type); q.appendChild(el('p', 'acc-note', 'Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).')); });
+    b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); const q = stPanel(d.name, type); q.appendChild(el('p', 'acc-note', tr(ST_DESC[type]))); q.appendChild(el('p', 'acc-note', tr('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'))); });
     list.appendChild(b);
   });
   p.appendChild(list);
 }
+// 7.21: was ein Ausbau bringt. Je Gebäude eine kurze Beschreibung und die Werte, die mit der Stufe wachsen (Zahlen wie im Code der Verteidigung, ST_REACH schon eingerechnet)
+const ST_DESC = {
+  muschelburg: 'Das Herz der Basis. Sie bestimmt, wie hoch alles andere ausgebaut werden darf.',
+  korallenfarm: 'Erzeugt Korallen, auch wenn du weg bist.',
+  lager: 'Hier lagern deine Korallen und Kristalle. Ohne Lager passen nur 300 🪸 und 30 💎 hinein.',
+  perlentresor: 'Hier lagern deine eingezahlten XP für die Truppen.',
+  harpunenturm: 'Schiesst alle 1,2 s einen Pfeil, der bis zu 3 Gegner durchbohrt.',
+  brutstaette: 'Hier wachsen deine Truppen. Eine zweite Brutstätte bringt je Stufe nur 2 Plätze, trainiert aber doppelt so schnell.',
+  korallenmauer: 'Hält Gegner auf.',
+  leuchtturm: 'Warnt 15 s statt 5 s vor einer Welle.',
+  kristallbohrer: 'Erzeugt Kristalle, auch wenn du weg bist.',
+  blasenkanone: 'Trifft alle Gegner in Reichweite alle 1,4 s.',
+  stachelfalle: 'Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 8 s wieder bereit.',
+  tintenwerfer: 'Verlangsamt alle Gegner in Reichweite.',
+  heilquelle: 'Heilt deinen Blobi und die Truppen in der Basis.',
+  fischschule: 'Verbessert Truppen für 30 💎 × Stufe: +20 % Leben und Schaden. Wie hoch, bestimmt die Muschelburg.',
+  elektroaal: 'Ein Blitz springt alle 1,3 s auf bis zu 4 Gegner.',
+  korallenspeer: 'Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.'
+};
+function stR1(v) { return Math.round(v * 10) / 10; }
+const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
+  muschelburg: [['Basis-Raster', function(lv){ return ST_MB[lv].grid + '×' + ST_MB[lv].grid; }], ['Höchste Gebäudestufe', function(lv){ return lv; }], ['Höchste Truppenstufe', function(lv){ return lv >= 9 ? 5 : Math.min(4, lv); }]],
+  korallenfarm: [['Korallen pro Stunde', function(lv){ return stR1(60 * Math.pow(1.5, lv - 1) * ST_RING[stArea()].k); }]],
+  kristallbohrer: [['Kristalle pro Stunde', function(lv){ return stR1(6 * Math.pow(1.5, lv - 1) * ST_RING[stArea()].c); }]],
+  lager: [['Korallen-Lager', stLagerK], ['Kristall-Lager', stLagerC]],
+  perlentresor: [['XP-Lager', function(lv){ return Math.round(150 * Math.pow(1.6, lv - 1)); }]],
+  harpunenturm: [['Reichweite', function(lv){ return (420 + 30 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(18 * (1 + 0.3 * (lv - 1))); }]],
+  blasenkanone: [['Reichweite', function(lv){ return (160 + 10 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(10 * (1 + 0.3 * (lv - 1))); }]],
+  tintenwerfer: [['Reichweite', function(lv){ return (180 + 10 * lv) * ST_REACH; }]],
+  heilquelle: [['Heilung pro Sekunde', function(lv){ return 4 * lv + ' %'; }]],
+  elektroaal: [['Reichweite', function(lv){ return (260 + 20 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(22 * (1 + 0.3 * (lv - 1))); }]],
+  korallenspeer: [['Reichweite', function(lv){ return (380 + 25 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(60 * (1 + 0.3 * (lv - 1))); }]],
+  stachelfalle: [['Schaden', function(lv){ return stR1(60 * (1 + 0.3 * (lv - 1))); }]],
+  brutstaette: [['Platz für Truppen', function(lv, b){ const h = stHatcheries(); return h.length && h[0] !== b ? 2 * lv : Math.min(ST_ARMY_MAX, 2 + 4 * lv); }]]
+};
+function stStatRows(b, lv) {         // Werte von b auf Stufe lv (ohne die Lebenspunkte)
+  return (ST_STAT[b.type] || []).map(function(s){ return [s[0], s[1](lv, b)]; });
+}
+function stUnlocks(nl) {             // was die Muschelburg-Stufe nl neu erlaubt (Namen)
+  const nw = [], more = [], tr2 = [];
+  Object.keys(ST_B).forEach(function(t){ const d = ST_B[t]; if (t === 'muschelburg') return; if (d.from === nl) nw.push(d.name); else if (d.from < nl && d.max(nl) > d.max(nl - 1)) more.push(d.name); });
+  Object.keys(ST_T).forEach(function(t){ if (ST_T[t].from === nl) tr2.push(ST_T[t].name); });
+  return [['Neue Gebäude:', nw], ['Mehr davon erlaubt:', more], ['Neue Truppen:', tr2]].filter(function(e){ return e[1].length; });
+}
+function stUpInfo(p, b) {            // der Block „Das bringt der Ausbau“
+  const nl = b.lv + 1;
+  if (nl > (b.type === 'muschelburg' ? ST_MAX_MB : 10)) { p.appendChild(el('p', 'acc-note', tr('Höchste Stufe für jetzt.'))); return; }
+  const box = el('div', 'st-up');
+  box.appendChild(el('strong', null, tr('Stufe') + ' ' + b.lv + ' → ' + nl));
+  const row = function(lab, a, c){ const r = el('div', 'st-stat'); r.appendChild(el('span', null, tr(lab))); r.appendChild(el('span', 'st-val', a + ' → ' + c)); box.appendChild(r); };
+  const A = stStatRows(b, b.lv), N = stStatRows(b, nl);
+  A.forEach(function(a, i){ row(a[0], a[1], N[i][1]); });
+  if (b.type !== 'muschelburg') row('Lebenspunkte', stMaxHpAt(b.type, b.lv), stMaxHpAt(b.type, nl));
+  else { row('Lebenspunkte', stMaxHpAt(b.type, b.lv), stMaxHpAt(b.type, nl)); stUnlocks(nl).forEach(function(e){ box.appendChild(el('div', 'st-note', tr(e[0]) + ' ' + e[1].map(tr).join(', '))); }); }
+  if (!A.length) box.appendChild(el('div', 'st-note', tr('Nur mehr Lebenspunkte.')));
+  p.appendChild(box);
+}
 function stOpenInfo(b) {
   const d = ST_B[b.type], p = stPanel(d.name + ' · ' + tr('Stufe') + ' ' + b.lv, b.type);
   p.appendChild(el('p', 'acc-note', (b.ruin ? '💥 ' + tr('Ruine') + ' · ' : '') + 'HP ' + Math.max(0, Math.round(b.hp)) + '/' + stMaxHp(b) + (b.upUntil ? ' · 🏗️ ' + Math.ceil((b.upUntil - Date.now()) / 1000) + ' s' : '')));
+  if (ST_DESC[b.type]) p.appendChild(el('p', 'acc-note', tr(ST_DESC[b.type])));
+  if (!b.ruin && !b.upUntil) stUpInfo(p, b);
   const row = el('div', 'st-list');
   const add = function(label, sub, fn, off){ const x = el('button', 'btn btn-secondary st-item'); x.appendChild(el('span', null, label)); if (sub) x.appendChild(el('span', 'btn-sub', sub)); x.disabled = !!off; x.addEventListener('click', function(){ Sfx.click(); fn(); stOpenInfo(b); renderStratHud(); }); row.appendChild(x); };
   if (b.ruin) add('Reparieren', stCostText(stRepairCost(b)), function(){ stRepair(b); });
@@ -13745,7 +13876,7 @@ function stOpenInfo(b) {
     else add('Ausbauen', nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
   if (b.type !== 'muschelburg') add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; });
-  if (b.type === 'perlentresor') { add('Einzahlen', Math.floor(runXp) + ' XP', function(){ stDeposit(); }, !stNearVault()); add('Abheben', Math.floor(Base.res.xp) + ' XP', function(){ stWithdraw(); }, !stNearVault()); }
+  if (b.type === 'perlentresor') { add('Einzahlen', Math.floor(runXp) + ' XP', function(){ stDeposit(); }, !stVaultUsable()); add('Abheben', Math.floor(Base.res.xp) + ' XP', function(){ stWithdraw(); }, !stVaultUsable()); }
   if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
   if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' → ' + tr('Stufe') + ' ' + (stTroopLv(t) + 1), 30 * stTroopLv(t) + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
   p.appendChild(row);
@@ -14761,7 +14892,7 @@ function characterStatLine(ch) {
   const cs = computeCharacterStats(ch.id);
   const chips = ['HP ' + Math.round(cs.maxHp), 'Tempo ' + Math.round(cs.speed), 'Schaden \u00D7' + fmtNum(cs.damage)];
   if (Math.abs(cs.cooldownMult - 1) > 0.001) chips.push('Abklingzeit \u00D7' + fmtNum(cs.cooldownMult));
-  if (cs.luck > 0) chips.push('Gl\u00FCck +' + cs.luck);
+  if (cs.luck > 0) chips.push('Gl\u00FCck +' + cs.luck + ' (+' + cs.luck * 10 + ' % Perlen \u00B7 ' + Math.round(Math.min(0.6, cs.luck * 0.06) * 100) + ' % 4. Karte)');
   return chips.join(' \u00B7 ');
 }
 
@@ -15161,6 +15292,7 @@ function initUI() {
   document.getElementById('btn-account-back').addEventListener('click', function(){ Sfx.click(); accMode = 'home'; accMsg = ''; updateMenuPearlsLabel(); showScreen('screen-menu'); });
   document.getElementById('btn-acc-here').addEventListener('click', function(){ Sfx.click(); accClaim(); });
   document.getElementById('btn-st-away').addEventListener('click', function(){ Sfx.click(); stAwayClose(); });
+  document.getElementById('btn-album-claim-all').addEventListener('click', function(){ let g = 0; pendingBossRewards().forEach(function(t){ g += claimBossReward(t); }); if (g) { Sfx.claim(); showToast('🎁 +' + g + ' 💧'); } renderAlbum(); });
   document.getElementById('btn-album-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
   document.getElementById('btn-ach-claim-all').addEventListener('click', function(){ claimAllAchievements(); });
   document.getElementById('btn-gameover-shop').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderShop(); showScreen('screen-shop'); });
