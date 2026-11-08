@@ -82,6 +82,12 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 }
 .hud-ring { display: inline-block; margin-top: 6px; padding: 3px 10px; font-size: 12px; }
 .hud-ring.hurt { border-color: rgba(255,140,170,0.8); color: #ffd3dc; }
+.menu-goal { margin: -2px 0 0; }
+.btn.is-locked { opacity: 0.55; filter: grayscale(0.4); box-shadow: none; }
+@media (max-height: 780px) { #screen-menu .menu-goal { display: none !important; } }
+.hud-bosschip { border-color: rgba(255,120,120,0.75); color: #ffd0d0; font-variant-numeric: tabular-nums; }
+.hud-tip { position: absolute; left: 50%; top: 34vh; transform: translateX(-50%); max-width: min(420px, 86vw); padding: 9px 16px; border-radius: 14px; background: rgba(4,18,32,0.78); border: 1px solid rgba(126,182,255,0.5); color: #e6f2ff; font-weight: 800; font-size: 14px; text-align: center; opacity: 0; transition: opacity .6s; pointer-events: none; }
+.hud-tip.show { opacity: 1; }
 .hud-boss-wrap { max-width: 420px; margin: 8px auto 0; opacity: 0; transform: translateY(-6px); transition: all 0.25s ease; }
 .hud-boss-wrap.active { opacity: 1; transform: none; }
 .hud-boss-name {
@@ -250,8 +256,53 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .acc-sline { display: flex; justify-content: space-between; gap: 6px; align-items: center; font-size: 12.5px; }
 .acc-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(2,8,16,0.75); }
 .acc-overlay .panel { max-width: 360px; text-align: center; }
-#st-mapview .panel { max-height: 96vh; overflow-y: auto; }
-#st-map-list p { margin: 3px 0; font-size: 14px; }
+/* 7.18: Karte neu: gross links die Karte (Ringe als Farbbaender), rechts Chips, gewaehlter Spieler und die Liste nach Ringen; auf dem Handy untereinander */
+#st-mapview .panel { max-width: min(940px, 96vw); width: 100%; max-height: 96vh; overflow-y: auto; text-align: left; padding: 12px 16px; }
+.stm-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.stm-head h2 { font-size: 20px; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.stm-sub { flex: 1 0 auto; font-weight: 800; font-size: 13px; opacity: 0.7; white-space: nowrap; }
+.stm-x { padding: 2px 12px; font-size: 16px; line-height: 1.4; width: auto; flex: none; margin-left: auto; }
+.stm-body { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.stm-map { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+#st-map-cv { width: min(100%, calc(96vh - 200px)); height: auto; aspect-ratio: 1 / 1; display: block; cursor: pointer; touch-action: manipulation; }
+.stm-legend { display: flex; flex-wrap: wrap; gap: 3px 12px; justify-content: center; font-size: 12px; font-weight: 800; opacity: 0.85; }
+.stm-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; box-sizing: border-box; }
+.stm-side { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+#st-map-tr { display: flex; flex-wrap: wrap; gap: 6px; font-weight: 800; }
+#st-map-tr div { background: rgba(255,255,255,0.09); border-radius: 999px; padding: 3px 10px; font-size: 13px; }
+#st-map-pick { background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.22); border-radius: 12px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; font-weight: 800; font-size: 14px; }
+#st-map-pick.sel { background: rgba(255,215,106,0.1); border-color: rgba(255,215,106,0.5); }
+#st-map-pick .hint { font-weight: 700; font-size: 13px; opacity: 0.65; }
+#st-map-pick .btn { padding: 6px 12px; }
+#st-map-list { max-height: calc(96vh - 330px); min-height: 90px; overflow-y: auto; }
+.stm-gh { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.85; margin: 8px 0 3px; }
+.stm-gh:first-child { margin-top: 0; }
+.stm-gh b { margin-left: auto; font-weight: 700; opacity: 0.75; text-transform: none; letter-spacing: 0; }
+.stm-gh.me { opacity: 1; color: #ffd76a; }
+.stm-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; font-size: 14px; font-weight: 700; }
+.stm-row.pk { cursor: pointer; }
+.stm-row.pk:hover { background: rgba(255,255,255,0.08); }
+.stm-row.sel { background: rgba(255,215,106,0.16); }
+.stm-row.me { background: rgba(255,215,106,0.08); }
+.stm-row .d { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.stm-row .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stm-row .t { flex: none; font-size: 12px; opacity: 0.8; }
+.stm-row .r { flex: none; width: 24px; opacity: 0.6; text-align: right; }
+.stm-row .tr { flex: none; font-size: 13px; }
+@media (max-width: 720px) {
+  .stm-body { grid-template-columns: 1fr; gap: 8px; }
+  .stm-head { flex-wrap: wrap; row-gap: 2px; }
+  .stm-head h2 { flex: 1 1 0; }
+  .stm-sub { order: 3; flex-basis: 100%; }
+  #st-map-cv { width: min(100%, 60vh); }
+  #st-map-list { max-height: none; }
+}
+@media (max-height: 520px) and (min-width: 721px) {
+  #st-mapview .panel { padding: 8px 12px; }
+  #st-map-cv { width: min(100%, calc(96vh - 70px)); }
+  .stm-head { margin-bottom: 4px; }
+  #st-map-list { max-height: calc(96vh - 250px); }
+}
 .album-tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
 .album-tabs .btn { flex: 1 1 0; min-width: 0; padding: 7px 4px; font-size: 11.5px; line-height: 1.15; flex-direction: column; gap: 2px; }
 .album-tabs .btn .btn-sub { margin-left: 0; }
@@ -500,6 +551,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 #toast.net{top:134px}
 #toast.netlow{top:172px}
 #toast.menu{top:auto;bottom:max(16px, env(safe-area-inset-bottom))}
+body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-area-inset-bottom))}   /* over pause / level-up / game over: below the panel, not on its title */
 #screen-pause.live { background: linear-gradient(180deg, rgba(2,8,16,0) 35%, rgba(2,8,16,0.6)); align-items: flex-end; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 #screen-pause.live .panel { max-width: 420px; padding: 14px 18px; }
 #screen-pause.live h2 { font-size: 19px; margin-bottom: 6px; }
@@ -570,6 +622,21 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   #screen-menu .menu-tiles .btn { padding: 3px 6px; }
   #screen-menu .game-logo h1 { font-size: 15px; }
 }
+/* phones held sideways (about 340-440 px high): the menu becomes two columns (title + language + footer left, buttons right) so it does not scroll */
+@media (max-height: 440px) and (orientation: landscape) and (min-width: 640px) {
+  #screen-menu { padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); }
+  #screen-menu .menu-panel { max-width: 780px; max-height: none; display: grid; grid-template-columns: minmax(150px, 0.8fr) 1.6fr; column-gap: 16px; align-items: center; padding: 10px 16px; }
+  #screen-menu .lang-toggle { grid-column: 1; grid-row: 1; justify-self: center; margin: 0 0 4px; }
+  #screen-menu .game-logo { grid-column: 1; grid-row: 2; margin: 0; }
+  #screen-menu .logo-blobi { display: block; width: 44px; height: 44px; margin: 0 auto 2px; }
+  #screen-menu .game-logo h1 { font-size: 20px; }
+  #screen-menu .tagline { display: none; }
+  #screen-menu #storage-warning { grid-column: 1 / -1; grid-row: 4; margin: 4px 0 0; }
+  #screen-menu .menu-buttons { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
+  #screen-menu .menu-tiles { grid-template-columns: repeat(4, 1fr); }
+  #screen-menu .menu-tiles .btn { padding: 4px 3px; font-size: 11px; }
+  #screen-menu .menu-footer { grid-column: 1; grid-row: 3; margin-top: 6px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .btn, .pick-card, .levelup-choice, .hud-boss-wrap, .hud-bar-fill { transition: none; }
 }
@@ -593,8 +660,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
     <div class="hud-bar-wrap xp-wrap">
       <div class="hud-bar-fill xp-fill" id="hud-xp-fill"></div>
     </div>
-    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;" role="button" aria-label="Spielerliste"></div><button class="hud-mini" id="btn-chat" style="display:none;" aria-label="Kurznachricht">💬</button><button class="hud-mini hud-call" id="btn-call" style="display:none;" aria-label="Schwarmruf">📯</button><div class="hud-pill hud-ring hud-sg" id="hud-sg" style="display:none;"></div>
+    <div class="hud-pill hud-ring" id="hud-ring" style="display:none;">⭕ 10/10</div><div class="hud-pill hud-ring hud-bosschip" id="hud-bosschip" style="display:none;"></div><div class="hud-pill hud-ring hud-room" id="hud-room" style="display:none;" role="button" aria-label="Spielerliste"></div><button class="hud-mini" id="btn-chat" style="display:none;" aria-label="Kurznachricht">💬</button><button class="hud-mini hud-call" id="btn-call" style="display:none;" aria-label="Schwarmruf">📯</button><div class="hud-pill hud-ring hud-sg" id="hud-sg" style="display:none;"></div>
     <div class="hud-lf" id="hud-lf" style="display:none;"></div>
+    <div class="hud-tip" id="hud-tip"></div>
     <div class="hud-boss-wrap" id="hud-boss">
       <span class="hud-boss-name" id="hud-boss-name"></span>
       <div class="hud-bar-wrap boss-wrap"><div class="hud-bar-fill boss-fill" id="hud-boss-fill"></div><i class="boss-notch" style="left:33%"></i><i class="boss-notch" style="left:66%"></i></div>
@@ -663,6 +731,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
         <button class="btn btn-primary btn-large" id="btn-continue-run" style="display:none;">Weiterspielen</button>
         <button class="btn btn-primary" id="btn-continue-online" style="display:none;">🌐 Online weiterspielen</button>
         <button class="btn btn-primary btn-large" id="btn-goto-play">Spielen</button>
+        <div class="go-next menu-goal" id="menu-goal" style="display:none;"></div>
         <button class="btn btn-secondary" id="btn-goto-strategy">🏰 Strategie <span class="beta-tag">Test</span></button>
         <button class="btn btn-secondary" id="btn-goto-online">🌐 Online spielen <span class="beta-tag">Beta</span></button>
         <div class="menu-tiles">
@@ -833,14 +902,25 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 
   <div class="acc-overlay" id="st-mapview" style="display:none;">
     <div class="panel">
-      <h2 id="st-map-title">🗺️ Karte</h2>
-      <canvas id="st-map-cv" width="440" height="440" style="max-width:100%;max-height:36vh;"></canvas>
-      <div id="st-map-pick" style="display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:6px 0;font-weight:800;"></div>
-      <div id="st-map-tr" style="font-weight:800;margin:4px 0;"></div>
-      <div id="st-map-list" style="max-height:20vh;overflow-y:auto;"></div>
-      <div class="panel-actions">
-        <button class="btn btn-ghost" id="btn-st-top">🏆 Rangliste</button>
-        <button class="btn btn-primary" id="btn-st-map-close">Schliessen</button>
+      <div class="stm-head">
+        <h2 id="st-map-title">🗺️ Karte</h2>
+        <span class="stm-sub" id="st-map-sub"></span>
+        <button class="btn btn-ghost stm-x" id="btn-st-map-x" aria-label="Schliessen">✕</button>
+      </div>
+      <div class="stm-body">
+        <div class="stm-map">
+          <canvas id="st-map-cv" width="440" height="440"></canvas>
+          <div class="stm-legend" id="st-map-legend"></div>
+        </div>
+        <div class="stm-side">
+          <div id="st-map-tr"></div>
+          <div id="st-map-pick"></div>
+          <div id="st-map-list"></div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost" id="btn-st-top">🏆 Rangliste</button>
+            <button class="btn btn-primary" id="btn-st-map-close">Schliessen</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1217,6 +1297,7 @@ function defaultSave() {
     muted: false,
     lastCharacter: 'standard',
     lastStage: 'riff',
+    tips: { runStart: 0 },                     // 7.17: wie oft der Start-Hinweis schon kam (nur die ersten 2 Läufe)
     rewarded: [],
     stagesUnlocked: ['riff']
   };
@@ -1643,6 +1724,12 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["👋 {} ist auf der Karte", "👋 {} is on the map", "👋 {} на карті"],
 ["{} (Muschelburg {})", "{} (Shell Castle {})", "{} (Мушлевий замок {})"],
 ["Freier Platz", "Free plot", "Вільна ділянка"],
+["Du", "You", "Ти"],
+["Platz frei", "Free plot", "Вільне місце"],
+["Unterwegs", "Away", "Не вдома"],
+["{} Spieler · {} Plätze frei", "{} players · {} plots free", "{} гравців · {} вільних місць"],
+["{} von {} belegt", "{} of {} taken", "{} із {} зайнято"],
+["Tippe auf einen Spieler, um ihn herauszufordern.", "Tap a player to challenge them.", "Торкнись гравця, щоб кинути йому виклик."],
 ["Das bist du", "That is you", "Це ти"],
 ["🏰 Während du weg warst", "🏰 While you were away", "🏰 Поки тебе не було"],
 ["Weiter", "Continue", "Далі"],
@@ -2105,6 +2192,13 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["genug für", "enough for", "вистачить на"],
 ["{} Perlen", "{} pearls", "{} перлин"],
 ["noch {}", "{} more", "ще {}"],
+["Zieh oder WASD zum Schwimmen · Überlebe bis zum Boss bei 5:00", "Drag or use WASD to swim · Survive until the boss at 5:00", "Тягни або WASD, щоб плисти · Виживи до боса о 5:00"],
+["🔒 Strategie: Nach dem ersten Boss", "🔒 Strategy: After the first boss", "🔒 Стратегія: після першого боса"],
+["Nach dem ersten Boss", "After the first boss", "Після першого боса"],
+["Bisher: Level {}", "So far: level {}", "Поки що: рівень {}"],
+["Zieh zum Schwimmen · Überlebe bis zum Boss bei 5:00", "Drag to swim · Survive until the boss at 5:00", "Тягни, щоб плисти · Виживи до боса о 5:00"],
+["Boss in {}", "Boss in {}", "Бос через {}"],
+["{}: noch {} % Leben", "{}: {} % health left", "{}: ще {} % здоров'я"],
 ["🔇 Ton: aus", "🔇 Sound: off", "🔇 Звук: вимк."],
 ["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."],
 ["🖼️ Grafik: automatisch", "🖼️ Graphics: automatic", "🖼️ Графіка: авто"],
@@ -2892,7 +2986,21 @@ function startRun(charId, stageId) {
   showScreen(null);
   setHudVisible(true);
   lastTime = 0;
+  runTip = null;                                      // 7.17: Start-Hinweis in den ersten 2 Läufen (nicht in der Strategie-Basis)
+  if (!strategyMode && UI['hud-tip']) {
+    if (!save.tips || typeof save.tips !== 'object') save.tips = { runStart: 0 };
+    if ((save.tips.runStart | 0) < 2) {
+      const touch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      UI['hud-tip'].textContent = (touch ? 'Zieh zum Schwimmen' : 'Zieh oder WASD zum Schwimmen') + ' · Überlebe bis zum Boss bei 5:00';
+      UI['hud-tip'].classList.add('show');
+      runTip = { t: 0, x: player.x, y: player.y };
+      save.tips.runStart = (save.tips.runStart | 0) + 1;
+      persistSave();
+    }
+  }
+  if (!runTip && UI['hud-tip']) UI['hud-tip'].classList.remove('show');
 }
+let runTip = null;
 
 /* ============================================================
    GEGNER-SPAWNER
@@ -3174,6 +3282,7 @@ function creditKill(k) {
   runKills++;
   if (Net.on) netAddPoints(k.isBoss ? LF_POINTS.boss + (k.champ ? LF_POINTS.champ : 0) : k.champ ? LF_POINTS.champ : k.elite ? LF_POINTS.elite : LF_POINTS.enemy);
   save.stats.totalKills++;
+  if (save.stats.totalKills === 1) checkAchievements();             // 7.17: "Erster Blub" gleich beim ersten Sieg
   if (k.champ) {
     save.stats.championsDefeated = (save.stats.championsDefeated || 0) + 1;
     if (k.isBoss) save.stats.championBossesDefeated = (save.stats.championBossesDefeated || 0) + 1;
@@ -4819,8 +4928,8 @@ const BOSS_SIG = {
         const walls = en.tier >= 3 ? 2 : 1, w = bw(en, 2.2);
         for (let i = 0; i < walls; i++) bossQ(en, i * (w + 0.5), function(){
           const t = en.tg || player, ga = Math.random() * 6.283, gw = (en.tier >= 2 ? 35 : 50) * Math.PI / 180, ww = i ? bw(en, 1.6) : w;
-          pushZone({ x: t.x, y: t.y, r: 260, ga: ga, gw: gw, t: 0, warn: ww, life: 0.4, kind: 'cage', sk: 2, dmg: en.dmg * 1.2, hit: false });     // sk 2 (7.9): die Säulen sperren nicht mehr, nur wer beim Fall drin steht wird getroffen
-          if (en.tier >= 2) pushZone({ x: t.x, y: t.y, r: 150, ga: ga + Math.PI, gw: gw, t: 0, warn: ww, life: 0.4, kind: 'cage', sk: 2, dmg: en.dmg * 1.2, hit: false });
+          pushZone({ x: t.x, y: t.y, r: 260, ga: ga, gw: gw, t: 0, warn: ww, life: 0.4, kind: 'cage', sk: 2, dmg: en.dmg * 0.3, hit: false });     // sk 2 (7.9); Schaden 1,2 -> 0,3 (7.18): der Ring war zu hart: die Säulen sperren nicht mehr, nur wer beim Fall drin steht wird getroffen
+          if (en.tier >= 2) pushZone({ x: t.x, y: t.y, r: 150, ga: ga + Math.PI, gw: gw, t: 0, warn: ww, life: 0.4, kind: 'cage', sk: 2, dmg: en.dmg * 0.3, hit: false });
           if (en.tier >= 3) bossQ(en, ww * 0.6, function(){ bshot(t.x + Math.cos(ga) * 420, t.y + Math.sin(ga) * 420, ga + Math.PI, 300, { r: 9, dmg: en.dmg * 1.2, life: 2.2, color: '#ffb1a0', heavy: true, skin: 'barb' }); });
         });
         en.state = 'walk'; en.wallEnd = runTime + (walls - 1) * (w + 0.5) + w;
@@ -6969,12 +7078,14 @@ function bankRunProgress() {
   persistSave();
 }
 
+let goBoss = null;
 function endRun() {
   if (Net.on) netHandover();                          // meine Bosse und Champions übernimmt der nächste Freund
   if (currentLevelUp && currentLevelUp.bar) { currentLevelUp = null; levelUpProcessing = false; }
   chanceLeft = 0; chanceDown = false; hideChance();
   playerDown = 0; reviveProg = 0; pauseOverlay = false; hideLevelBar();
   if (Net.on) { toggleQuickWheel(false); Net.lastSend = 0; Net.urgent = true; }   // alle erfahren es sofort (auch weit weg)
+  { const B = bossEntity || (Net.on ? netHudBoss() : null); goBoss = B && !B.dead && B.maxHp > 0 ? { name: B.name, pct: Math.max(1, Math.round(B.hp / B.maxHp * 100)) } : null; }   // 7.17: Boss-Rest für die Spiel-vorbei-Zeile
   gameState = 'gameover';
   Sfx.gameover();
   bankRunProgress();
@@ -11884,7 +11995,7 @@ function render() {
 const UI = {};
 function cacheUI() {
   ['hud','hud-hp-fill','hud-hp-text','hud-xp-fill','hud-level','hud-timer','hud-pearls',
-   'hud-boss','hud-boss-fill','hud-boss-name','hud-ring',
+   'hud-boss','hud-boss-fill','hud-boss-name','hud-ring','hud-bosschip','hud-tip',
    'character-grid','stage-grid','shop-list','shop-pearls-total','achievement-list',
    'levelup-choices','gameover-stats','gameover-achievements','gameover-title',
    'menu-pearls-label','menu-best-time','btn-mute','btn-mute-pause','btn-gfx-pause','hud-room','btn-chat','btn-call','hud-sg','hud-lf'
@@ -11926,6 +12037,17 @@ function updateHud() {
   const mins = Math.floor(runTime / 60), secs = Math.floor(runTime % 60);
   hudSet('hud-timer', 'text', mins + ':' + String(secs).padStart(2, '0'));
   hudSet('hud-pearls', 'text', String(runPearls));
+  // 7.17: Boss-Chip in der letzten Minute vor dem Boss (online: Uhr des Raums, falls bekannt); Start-Hinweis blendet nach 8 s oder 50 Einheiten Bewegung aus
+  let bossIn = -1;
+  if (!bossEntity && bossWarningTimer <= 0) bossIn = (Net.on && Net.multi) ? (Net.rt && Net.rt.boss > 0 ? Net.rt.boss : -1) : nextBossTime - runTime;
+  if (bossIn > 0 && bossIn <= 60) {
+    const s = Math.ceil(bossIn);
+    hudSet('hud-bosschip', 'disp', 'inline-block');
+    hudSet('hud-bosschip', 'text', 'Boss in ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'));
+  } else hudSet('hud-bosschip', 'disp', 'none');
+  if (runTip) {
+    if (runTime - runTip.t > 8 || Math.hypot(p.x - runTip.x, p.y - runTip.y) >= 50) { runTip = null; if (UI['hud-tip']) UI['hud-tip'].classList.remove('show'); }
+  }
   const ringLvl = p.weapons.ring || 0;
   if (ringLvl >= RING_POP_LEVEL) {
     const alive = ringAliveCount();
@@ -11957,7 +12079,7 @@ function albumPicture(cv, type, met) {
   g.setTransform(DPR, 0, 0, DPR, 0, 0); g.translate(48, 52);
   const R = 30, o = { color: def.color, t: 1.3, time: 0, phase: 1, face: 1, champ: null, lookX: 0.3, lookY: 0.2, roar: 0, pose: 'walk', wk: 0, atk: 0, swim: 0.4, vv: 0 };
   try { BOSS_FX.blink = 0; BOSS_FX.lid = BOSS_LID[type] || '#333'; drawBossArt(g, type, R, o); } catch (e) { /* Zeichnung fehlt: leer lassen */ }
-  if (!met) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgba(8,20,36,0.92)'; g.fillRect(0, 0, px, px); g.globalCompositeOperation = 'source-over'; }
+  if (!met) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#27445f'; g.fillRect(0, 0, px, px); g.globalCompositeOperation = 'source-over'; }
 }
 function renderAlbum() {
   const tabs = document.getElementById('album-tabs'), grid = document.getElementById('album-grid'), sum = document.getElementById('album-summary');
@@ -11983,6 +12105,7 @@ function renderAlbum() {
     const nm = document.createElement('span'); nm.className = 'album-name'; nm.textContent = m ? (k ? '👑 ' : '') + BOSS_TYPES[type].name : '???';
     const sv = document.createElement('span'); sv.className = 'album-state'; sv.textContent = k ? 'Als Champion-Boss besiegt' : w ? 'Besiegt' : m ? 'Getroffen' : 'Noch nicht getroffen';
     card.appendChild(nm); card.appendChild(sv);
+    if (!m) { const ar = document.createElement('span'); ar.className = 'album-state'; ar.textContent = (STAGES.filter(function(x){ return x.id === albumArea; })[0] || {}).name || ''; card.appendChild(ar); }   // 7.17: Gebiet bei den ???-Karten
     grid.appendChild(card);
     albumPicture(cv, type, m);
   });
@@ -12965,27 +13088,44 @@ function duelStart(pe) {
   const now = performance.now(); if (RD || !SN.on || now < SN.duelAt) return;
   SN.duelAt = now + 4000; raidLastDef = pe.id; snSend({ t: 'raid', op: 'start', def: pe.id, duel: 1 });
 }
+// 7.18: Kartenform: der Radius wird gestaucht (Wurzel), damit der innere Ring nicht winzig neben dem Vulkanring liegt; N = Kartenbreite in Pixeln
+const SN_MAP_R = 13500, SN_MAP_BANDS = [[1800, 4500, 'riff', '#2ec4d6'], [4500, 7500, 'kelp', '#3fbf7a'], [7500, 10750, 'graben', '#5a78f0'], [10750, 13500, 'vulkan', '#ff7a45']];
+function snMapRad(r, N) {
+  const K = N / 2 - 10, f = function(v){ return Math.sqrt(Math.min(Math.max(v, 0), SN_MAP_R * 1.02) / SN_MAP_R) * K; };
+  if (r >= 3000) return f(r);
+  // 7.18: Strudelrand (1800) liegt im Kartenbild so weit vor dem innersten Ring (3000) wie dieser vor dem naechsten (6000); darunter / dazwischen linear
+  const r3 = f(3000), rs = 2 * r3 - f(6000);
+  return r < 1800 ? Math.max(r, 0) / 1800 * rs : rs + (r - 1800) / 1200 * (r3 - rs);
+}
+function snMapXY(x, y, N) { const r = Math.hypot(x, y); if (r < 1) return [N / 2, N / 2]; const q = snMapRad(r, N) / r; return [N / 2 + x * q, N / 2 + y * q]; }
 function snMapPick(ev) {                 // ein Klick auf einen Spieler (Platz oder Punkt) der Karte: Name, Schutz und das Duell-Zeichen
   const cv = ev.currentTarget, r = cv.getBoundingClientRect(); if (!r.width || !SN.pl) return;
-  const sc = cv.width / r.width, x = (ev.clientX - r.left) * sc, y = (ev.clientY - r.top) * sc, c = cv.width / 2, k = (cv.width / 2 - 24) / 12500;
-  let best = null, bd = 24 * 24;
+  const N = cv._n || 440, sc = N / r.width, x = (ev.clientX - r.left) * sc, y = (ev.clientY - r.top) * sc;
+  let best = null, bd = 22 * 22;
   SN.peers.forEach(function(pe){
     const pts = []; if (SN.pl[pe.plot]) pts.push([SN.pl[pe.plot][0], SN.pl[pe.plot][1]]); if (pe.seen) pts.push([pe.x, pe.y]);
-    pts.forEach(function(q){ const dx = c + q[0] * k - x, dy = c + q[1] * k - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = pe; } });
+    pts.forEach(function(q){ const m = snMapXY(q[0], q[1], N), dx = m[0] - x, dy = m[1] - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = pe; } });
   });
   SN.pick = best ? best.id : 0; snMapPickShow(); snMapDraw();
 }
+function snRingName(gi) { const st = STAGES.filter(function(x){ return x.id === SN_MAP_BANDS[gi][2]; })[0]; return st ? st.name : ''; }
 function snMapPickShow() {
   const el = document.getElementById('st-map-pick'); if (!el) return;
-  const pe = SN.pick ? SN.peers.get(SN.pick) : null;
-  el.textContent = ''; if (!pe) { el.style.display = 'none'; return; }
-  el.style.display = 'flex';
-  el.appendChild(Object.assign(document.createElement('span'), { textContent: pe.name + (pe.ghost ? ' 💤' : '') + ' (Muschelburg ' + pe.mb + ')' }));
-  const sh = SN.shields[pe.id]; if (sh) el.appendChild(Object.assign(document.createElement('span'), { textContent: sh === 'beginner' ? '🛡 Anfängerschutz' : '🛡 geschützt' }));
-  const b = Object.assign(document.createElement('button'), { className: 'btn btn-primary', textContent: '⚔ Duell' }); b.style.cssText = 'padding:4px 12px;';
-  b.addEventListener('click', function(){ Sfx.click(); duelStart(pe); }); el.appendChild(b);
-  const b2 = Object.assign(document.createElement('button'), { className: 'btn btn-primary', textContent: '🐟 Truppen schicken' }); b2.style.cssText = 'padding:4px 12px;';
-  b2.addEventListener('click', function(){ Sfx.click(); troopsSend(pe); }); el.appendChild(b2);
+  const pe = SN.pick ? SN.peers.get(SN.pick) : null, mk = function(tag, cls, t){ const n = document.createElement(tag); if (cls) n.className = cls; if (t != null) n.textContent = t; return n; };
+  el.textContent = ''; el.classList.toggle('sel', !!pe);
+  if (!pe) { el.appendChild(mk('div', 'hint', 'Tippe auf einen Spieler, um ihn herauszufordern.')); return; }
+  const top = mk('div', 'stm-row'); top.style.padding = '0';
+  const dot = mk('span', 'd'); dot.style.background = '#7eb6ff'; top.appendChild(dot);
+  top.appendChild(mk('span', 'n', pe.name + ' (Muschelburg ' + pe.mb + ')'));
+  el.appendChild(top);
+  const gi = SN.pl && SN.pl[pe.plot] ? SN.pl[pe.plot][2] : -1, sh = SN.shields[pe.id], info = mk('div', 't');
+  if (gi >= 0) info.appendChild(mk('span', null, snRingName(gi)));
+  if (pe.ghost) info.appendChild(mk('span', null, '💤 schläft'));
+  if (sh) info.appendChild(mk('span', null, sh === 'beginner' ? '🛡 Anfängerschutz' : '🛡 geschützt'));
+  info.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px 12px;font-weight:700;font-size:13px;opacity:0.85;';
+  el.appendChild(info);
+  const b = mk('button', 'btn btn-primary', '⚔ Duell'); b.addEventListener('click', function(){ Sfx.click(); duelStart(pe); }); el.appendChild(b);
+  const b2 = mk('button', 'btn btn-primary', '🐟 Truppen schicken'); b2.addEventListener('click', function(){ Sfx.click(); troopsSend(pe); }); el.appendChild(b2);
 }
 function raidReceive(m) {
   if (m.op === 'go') raidBegin(m);
@@ -13059,41 +13199,69 @@ function snMapOpen(on) {
   const tb = document.getElementById('btn-st-top'); if (tb) tb.textContent = '🏆 Rangliste';
   if (on) { let n = 0; snSend({ t: 'raid', op: 'top' }); snMapDraw(); SN.mapT = setInterval(function(){ snMapDraw(); if (++n % 20 === 0) snSend({ t: 'raid', op: 'top' }); }, 500); }
 }
-function stLgMapRing(g, c, k) {          // 7.15: ein goldener Ring um den Strudel, solange eine Legende ruft oder kämpft
+function stLgMapRing(g, c, rr) {         // 7.15: ein goldener Ring um den Strudel, solange eine Legende ruft oder kämpft
   if (!SN.lg) return;
-  g.save(); g.strokeStyle = 'rgba(255,215,106,' + (0.55 + 0.3 * Math.sin(performance.now() / 300)) + ')'; g.lineWidth = 2; g.beginPath(); g.arc(c, c, Math.max(8, ST_LG_R * k), 0, 6.2832); g.stroke(); g.restore();
+  g.save(); g.strokeStyle = 'rgba(255,215,106,' + (0.55 + 0.3 * Math.sin(performance.now() / 300)) + ')'; g.lineWidth = 2.5; g.beginPath(); g.arc(c, c, Math.max(8, rr), 0, 6.2832); g.stroke(); g.restore();
 }
 function snMapDraw() {
   const cv = document.getElementById('st-map-cv'), list = document.getElementById('st-map-list'); if (!cv || !cv.getContext || !SN.pl) return;
-  const g = cv.getContext('2d'), N = cv.width, c = N / 2, k = (N / 2 - 24) / 12500, o = snOrigin();
-  g.clearRect(0, 0, N, N); g.fillStyle = 'rgba(5,20,38,0.95)'; g.fillRect(0, 0, N, N);
-  stLgMapRing(g, c, k);
-  // 7.11: minimal - flache Flaeche, duenne Ringlinien, kleine Namen; das eigene Gebiet ist etwas heller
-  const bands = [[1800, 4500, 'riff'], [4500, 7500, 'kelp'], [7500, 10750, 'graben'], [10750, 13500, 'vulkan']], me = SN.ring;
-  g.font = '800 10px "Nunito", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  const lab = function(t, x, y, col){ g.lineWidth = 3; g.strokeStyle = 'rgba(2,10,20,0.85)'; g.strokeText(t, x, y); g.fillStyle = col; g.fillText(t, x, y); };
-  bands.forEach(function(bd){
-    const st = STAGES.filter(function(x){ return x.id === bd[2]; })[0], r1 = Math.min(bd[1] * k, c - 2);
-    g.strokeStyle = bd[2] === me ? 'rgba(126,224,255,0.55)' : 'rgba(126,224,255,0.16)'; g.lineWidth = 1; g.beginPath(); g.arc(c, c, r1, 0, 6.2832); g.stroke();
-    lab(st.name, c, c - r1 + 9, bd[2] === me ? '#fff' : 'rgba(210,235,255,0.45)');
-  });
-  g.strokeStyle = 'rgba(170,150,255,0.4)'; g.lineWidth = 1; g.beginPath(); g.arc(c, c, 1800 * k, 0, 6.2832); g.stroke();   // Grosser Strudel: neutral, keine Plaetze
-  tr('Großer Strudel').split(' ').forEach(function(w, i, ar){ lab(w, c, c + (i - (ar.length - 1) / 2) * 11, 'rgba(216,204,255,0.7)'); });
+  const rc = cv.getBoundingClientRect(), N = Math.max(200, Math.round(rc.width) || 440), dpr = Math.min(2, window.devicePixelRatio || 1), P = Math.round(N * dpr);
+  if (cv.width !== P) { cv.width = P; cv.height = P; }
+  cv._n = N;
+  const g = cv.getContext('2d'), c = N / 2, o = snOrigin(), me = SN.ring, at = function(x, y){ return snMapXY(x, y, N); }, TAU = 6.2832;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, N, N);
+  // 7.18 (ruhig): flache dunkle Scheibe, eine dünne Linie je Ring durch die Plätze (die Ringnamen stehen in der Liste), alle fremden Basen in einer Farbe, nur der Strudel als Kreis
+  const R = c - 6;
+  g.fillStyle = 'rgba(6,20,38,0.96)'; g.beginPath(); g.arc(c, c, R, 0, TAU); g.fill();
+  g.strokeStyle = 'rgba(160,200,235,0.2)'; g.lineWidth = 1;                    // eine dünne Linie je Ring, genau dort, wo die Basen sitzen (Radius 3000 / 6000 / 9000 / 12500)
+  [3000, 6000, 9000, 12500].forEach(function(rr){ g.beginPath(); g.arc(c, c, snMapRad(rr, N), 0, TAU); g.stroke(); });
+  const rs = snMapRad(1800, N);
+  g.strokeStyle = 'rgba(190,170,255,0.45)'; g.lineWidth = 1.2; g.beginPath(); g.arc(c, c, rs, 0, TAU); g.stroke();
+  stLgMapRing(g, c, rs + 3);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  const txt = function(t, x, y, col, font){       // Text mit dunklem Rand statt Schild; liefert das Rechteck (für die Kollisionsprüfung)
+    g.font = font || '800 10px "Nunito", sans-serif'; const w = g.measureText(t).width;
+    g.lineJoin = 'round'; g.lineWidth = 3; g.strokeStyle = 'rgba(4,14,28,0.9)'; g.strokeText(t, x, y); g.fillStyle = col; g.fillText(t, x, y);
+    return [x - w / 2 - 2, y - 7, w + 4, 14];
+  };
+  tr('Großer Strudel').split(' ').forEach(function(w, i, ar){ txt(w, c, c + (i - (ar.length - 1) / 2) * 12, 'rgba(210,198,255,0.8)', '700 11px "Nunito", sans-serif'); });
   const owner = {}; SN.peers.forEach(function(pe){ owner[pe.plot] = pe; });
+  const boxes = [], hit = function(r){ for (let i = 0; i < boxes.length; i++) { const q = boxes[i]; if (r[0] < q[0] + q[2] && r[0] + r[2] > q[0] && r[1] < q[1] + q[3] && r[1] + r[3] > q[1]) return true; } return false; };
+  const lab = [], pts = SN.pl.map(function(q){ return at(q[0], q[1]); });
   for (let i = 0; i < SN.pl.length; i++) {
-    const x = c + SN.pl[i][0] * k, y = c + SN.pl[i][1] * k, pe = owner[i], mine = i === SN.plot, sz = mine ? 9 : 7;
-    g.beginPath(); g.rect(x - sz, y - sz, sz * 2, sz * 2);
-    if (mine) { g.fillStyle = '#ffd76a'; g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, 14, 0, 6.2832); g.stroke(); }
-    else if (pe) { g.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; g.fill(); g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 1.5; g.stroke(); }
-    else { g.strokeStyle = 'rgba(255,255,255,0.35)'; g.setLineDash([3, 3]); g.lineWidth = 1.5; g.stroke(); g.setLineDash([]); }
-    if (mine || pe) { g.font = '800 9px "Nunito", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#10202c'; g.fillText(String(mine ? Base.mb : pe.mb), x, y + 0.5); }
-    if (pe) lab(pe.name, x, y + 17, '#fff');
-    if (pe && SN.shields[pe.id]) { g.font = '12px sans-serif'; g.fillStyle = '#fff'; g.fillText('🛡', x + 11, y - 11); }
-    if (pe && pe.ghost) { g.font = '11px sans-serif'; g.fillStyle = '#fff'; g.fillText('💤', x - 11, y - 11); }
-    if (pe && SN.pick === pe.id) { g.strokeStyle = '#ffd76a'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 15, 0, 6.2832); g.stroke(); g.font = '13px sans-serif'; g.fillStyle = '#fff'; g.fillText('⚔', x - 12, y - 14); }     // Duell-Zeichen am gewählten Spieler
+    const x = pts[i][0], y = pts[i][1], pe = owner[i], mine = i === SN.plot, sel = pe && SN.pick === pe.id, rad = mine ? 11 : 9;
+    if (!mine && !pe) { g.fillStyle = 'rgba(255,255,255,0.28)'; g.beginPath(); g.arc(x, y, 2.5, 0, TAU); g.fill(); continue; }
+    g.globalAlpha = pe && pe.ghost ? 0.45 : 1;
+    g.fillStyle = mine ? '#ffd76a' : '#7eb6ff'; g.beginPath(); g.arc(x, y, rad, 0, TAU); g.fill();
+    g.strokeStyle = mine ? '#fff' : 'rgba(0,0,0,0.5)'; g.lineWidth = mine ? 2 : 1.2; g.stroke();
+    g.font = '800 10px "Nunito", sans-serif'; g.fillStyle = '#10202c'; g.fillText(String(mine ? Base.mb : pe.mb), x, y + 0.5);
+    g.globalAlpha = 1;
+    if (sel) { g.strokeStyle = '#ffd76a'; g.lineWidth = 2.2; g.beginPath(); g.arc(x, y, rad + 4, 0, TAU); g.stroke(); }
+    if (pe && SN.shields[pe.id]) { g.font = '10px sans-serif'; g.fillStyle = '#fff'; g.fillText('🛡', x + rad, y - rad); }
+    lab.push({ x: x, y: y, rad: rad, t: mine ? tr('Du') : (pe.name.length > 11 ? pe.name.slice(0, 10) + '…' : pe.name), pr: mine ? 0 : sel ? 1 : 2, col: mine ? '#ffd76a' : 'rgba(255,255,255,0.92)' });
   }
-  SN.peers.forEach(function(pe){ if (!pe.seen) return; g.fillStyle = '#fff'; g.beginPath(); g.arc(c + pe.x * k, c + pe.y * k, 2.5, 0, 6.2832); g.fill(); });
-  g.fillStyle = '#fff'; g.beginPath(); g.arc(c + (player.x + o.x) * k, c + (player.y + o.y) * k, 3, 0, 6.2832); g.fill();
+  lab.sort(function(a, b){ return a.pr - b.pr; });             // Namen: der eigene und der gewaehlte zuerst; was sich ueberdeckt, bleibt weg
+  lab.forEach(function(L){
+    g.font = '800 10px "Nunito", sans-serif'; const w = g.measureText(L.t).width + 4;
+    for (const dy of [L.rad + 8, -L.rad - 8]) { const r = [L.x - w / 2, L.y + dy - 7, w, 14]; if (!hit(r) && r[0] > 0 && r[0] + w < N) { boxes.push(txt(L.t, L.x, L.y + dy, L.col)); return; } }
+  });
+  // Live-Positionen: nur wer von seinem Platz weg ist (Überfall, Strudel, unterwegs) bekommt einen Punkt mit dünner Linie nach Hause
+  const live = function(x, y, pi, col){
+    const m = at(x, y), h = pts[pi]; if (h && Math.hypot(m[0] - h[0], m[1] - h[1]) < 16) return;
+    if (h) { g.strokeStyle = col; g.globalAlpha = 0.4; g.lineWidth = 1; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(h[0], h[1]); g.lineTo(m[0], m[1]); g.stroke(); g.setLineDash([]); g.globalAlpha = 1; }
+    g.fillStyle = col; g.strokeStyle = 'rgba(4,14,28,0.95)'; g.lineWidth = 2; g.beginPath(); g.arc(m[0], m[1], 4, 0, TAU); g.stroke(); g.fill();
+  };
+  SN.peers.forEach(function(pe){ if (pe.seen && !pe.ghost && isFinite(pe.x) && isFinite(pe.y)) live(pe.x, pe.y, pe.plot, '#7eb6ff'); });
+  live(player.x + o.x, player.y + o.y, SN.plot, '#ffd76a');
+  // Unterzeile, Legende, Chips
+  const taken = 1 + SN.peers.size, sub = document.getElementById('st-map-sub'), subT = taken + ' Spieler · ' + Math.max(0, SN.pl.length - taken) + ' Plätze frei';
+  if (sub && sub.dataset.k !== subT) { sub.dataset.k = subT; sub.textContent = subT; }
+  const lg = document.getElementById('st-map-legend');
+  if (lg && !lg.firstChild) {
+    [['#ffd76a', 'Du'], ['#7eb6ff', 'Spieler'], ['rgba(255,255,255,0.35)', 'Platz frei'], ['#7eb6ff', 'Unterwegs'], ['', '🛡 geschützt'], ['rgba(126,182,255,0.4)', '💤 schläft']].forEach(function(e){
+      const sp = document.createElement('span'); if (e[0]) { const i = document.createElement('i'); i.style.background = e[0]; if (e[2]) i.style.border = e[2]; sp.appendChild(i); } sp.appendChild(document.createTextNode(e[1])); lg.appendChild(sp);
+    });
+  }
   const mtr = document.getElementById('st-map-tr');
   if (mtr) {                                                      // Trophäen, Platz und eigener Schutz
     const T = SN.top, key = !T ? '' : !T.acc ? 'a' : T.tr + '/' + T.place + '/' + (T.sh > 0 ? Math.ceil(T.sh / 3600000) : T.sh);
@@ -13105,14 +13273,35 @@ function snMapDraw() {
     }
   }
   if (list) {
+    const keep = list.scrollTop, mk = function(tag, cls, t){ const n = document.createElement(tag); n.className = cls; if (t != null) n.textContent = t; return n; };
     list.textContent = '';
     if (SN.showTop) {
-      list.appendChild(Object.assign(document.createElement('p'), { textContent: '🏆 Die besten 50' }));
-      ((SN.top && SN.top.top) || []).forEach(function(e, i){ list.appendChild(Object.assign(document.createElement('p'), { textContent: (i + 1) + '. ' + e.n + ' · ' + e.tr + ' 🏆' })); });
+      list.appendChild(mk('div', 'stm-gh', '🏆 Die besten 50'));
+      const mine = onlineName();
+      ((SN.top && SN.top.top) || []).forEach(function(e, i){
+        const r = mk('div', 'stm-row' + (e.n === mine ? ' me' : '')); r.appendChild(mk('span', 'r', String(i + 1))); r.appendChild(mk('span', 'n', e.n)); r.appendChild(mk('span', 'tr', e.tr + ' 🏆')); list.appendChild(r);
+      });
     } else {
-      list.appendChild(Object.assign(document.createElement('p'), { textContent: onlineName() + ' (Muschelburg ' + Base.mb + ')' }));
-      SN.peers.forEach(function(pe){ list.appendChild(Object.assign(document.createElement('p'), { textContent: pe.name + (pe.ghost ? ' 💤' : '') + ' (Muschelburg ' + pe.mb + ')' })); });
+      const byRing = SN_MAP_BANDS.map(function(){ return []; }), ringN = SN_MAP_BANDS.map(function(){ return 0; }), myGi = SN.pl[SN.plot] ? SN.pl[SN.plot][2] : -1;
+      SN.pl.forEach(function(q){ if (ringN[q[2]] != null) ringN[q[2]]++; });
+      if (myGi >= 0) byRing[myGi].push({ me: true });
+      SN.peers.forEach(function(pe){ const gi = SN.pl[pe.plot] ? SN.pl[pe.plot][2] : -1; if (gi >= 0) byRing[gi].push({ pe: pe }); });
+      SN_MAP_BANDS.forEach(function(bd, gi){
+        if (!ringN[gi]) return;
+        const h = mk('div', 'stm-gh' + (gi === myGi ? ' me' : ''));
+        h.appendChild(mk('span', '', snRingName(gi))); h.appendChild(mk('b', '', byRing[gi].length + ' von ' + ringN[gi] + ' belegt')); list.appendChild(h);
+        byRing[gi].sort(function(a, b){ return a.me ? -1 : b.me ? 1 : a.pe.name.localeCompare(b.pe.name); }).forEach(function(e){
+          const pe = e.pe, r = mk('div', 'stm-row' + (e.me ? ' me' : ' pk' + (SN.pick === pe.id ? ' sel' : ''))), d = mk('span', 'd');
+          d.style.background = e.me ? '#ffd76a' : '#7eb6ff'; r.appendChild(d);
+          r.appendChild(mk('span', 'n', e.me ? onlineName() + ' (Muschelburg ' + Base.mb + ')' : pe.name + ' (Muschelburg ' + pe.mb + ')'));
+          const tg = []; if (e.me) tg.push(tr('Du')); if (pe && pe.ghost) tg.push('💤'); if (pe && SN.shields[pe.id]) tg.push('🛡');
+          if (tg.length) r.appendChild(mk('span', 't', tg.join(' ')));
+          if (pe) r.addEventListener('click', function(){ SN.pick = SN.pick === pe.id ? 0 : pe.id; snMapPickShow(); snMapDraw(); });
+          list.appendChild(r);
+        });
+      });
     }
+    list.scrollTop = keep;
   }
   const t = document.getElementById('st-map-title'); if (t) t.textContent = SN.title ? '🗺️ ' + SN.title : '🗺️ Karte';
 }
@@ -13586,7 +13775,7 @@ function stBitmap(key, wU, hU, pad, fn) {        // kleines Bild im Cache; fn ma
 }
 function stBlit(g, spr, wx, wy) {                // Bild mit linker oberer Ecke bei (wx, wy) in Welt-Einheiten als Pixel-Kopie (1:1, wenn der Massstab des Bildes zum Bildschirm passt)
   const m = g.getTransform(), s = m.a, f = s / spr.k;
-  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(spr.c, Math.round(m.e + wx * s), Math.round(m.f + wy * s), Math.round(spr.c.width * f), Math.round(spr.c.height * f)); g.restore();
+  g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(spr.c, Math.round(m.e + wx * s), Math.round(m.f + wy * s), Math.round(spr.c.width * f), Math.round(spr.c.height * f)); g.setTransform(m);   // 7.18: ohne save/restore (weniger Befehle)
 }
 function stSprite(type, lv, state, conn) {
   const S = ST_B[type].size * ST_TILE, u = S / 100;
@@ -13814,27 +14003,55 @@ function drawStrategyTroops() {
     }
   }
 }
-function stDrawOther(g, type, sx, sy, r, face, wob, fl, col, hpr) {   // 7.13: fremde Truppe (Heimwache oder Truppe eines Mitspielers): Farbe des Besitzers, Fähnchen statt Ring
-  stShadow(g, sx, sy + r * 1.1, r * 1.3, r * 0.4, 0.35);
-  g.save(); g.translate(sx, sy + Math.sin(wob * 0.5) * r * 0.08); g.scale(face || 1, 1); g.rotate(Math.sin(wob) * 0.07);
-  stTroopBody(g, type, r, fl, col, wob);
-  g.restore();
-  g.save(); g.strokeStyle = 'rgba(12,24,36,0.85)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(sx, sy - r * 1.1); g.lineTo(sx, sy - r * 1.1 - 14); g.stroke();
-  g.fillStyle = col; g.beginPath(); g.moveTo(sx, sy - r * 1.1 - 14); g.lineTo(sx + 10, sy - r * 1.1 - 10); g.lineTo(sx, sy - r * 1.1 - 6); g.closePath(); g.fill(); g.stroke();
-  if (hpr < 1) { const w = 26, y = sy + r * 1.15 + 7; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(sx - w / 2 - 1, y - 1, w + 2, 5); g.fillStyle = '#ff6b6b'; g.fillRect(sx - w / 2, y, w * Math.max(0, hpr), 3); }
-  g.restore();
+// 7.18: Truppenbilder einmal malen (Körper in 8 Schwanz-Phasen, Schatten, Marke), danach nur noch kopieren: ein Körper kostete ~40 Zeichenbefehle pro Bild und 36 Truppen liessen die Befehlswarteschlange überlaufen (Ruckler)
+let stTrSpr = {}, stTrK = 0, stTrN = 0;
+function stTrBake(key, hw, hh, fn) {
+  const k = stSprScale();
+  if (k !== stTrK) { stTrSpr = {}; stTrK = k; stTrN = 0; }
+  let s = stTrSpr[key];
+  if (s) return s;
+  if (stTrN >= 700) { stTrSpr = {}; stTrN = 0; }
+  const c = document.createElement('canvas'); c.width = Math.ceil(2 * hw * k); c.height = Math.ceil(2 * hh * k);
+  const q = c.getContext('2d'); q.scale(c.width / (2 * hw), c.height / (2 * hh)); q.translate(hw, hh);
+  fn(q);
+  s = stTrSpr[key] = { c: c, hw: hw, hh: hh }; stTrN++;
+  return s;
 }
-function stDrawTroop(g, t, sx, sy, col) {
-  const r = t.r, f = t.face || 1;
-  stShadow(g, sx, sy + r * 1.1, r * 1.3, r * 0.4, 0.35);
-  g.save(); g.translate(sx, sy + Math.sin(t.wob * 0.5) * r * 0.08); g.scale(f, 1); g.rotate(Math.sin(t.wob) * 0.07);
-  stTroopBody(g, t.type, r, t.hitFlash > 0, col, t.wob);
-  g.restore();
-  g.save(); g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 1.8; g.beginPath(); g.arc(sx, sy, r * 1.15 + 2.5, 0, 6.2832); g.stroke();      // eigene Truppe: weisser Ring
-  g.fillStyle = '#ffffff'; g.strokeStyle = 'rgba(12,24,36,0.8)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(sx - 5, sy - r * 1.15 - 11); g.lineTo(sx, sy - r * 1.15 - 5); g.lineTo(sx + 5, sy - r * 1.15 - 11); g.closePath(); g.fill(); g.stroke();   // Winkel
-  if (t.hp < t.maxHp) { const w = 26, y = sy + r * 1.15 + 7; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(sx - w / 2 - 1, y - 1, w + 2, 5); g.fillStyle = '#5ef2c0'; g.fillRect(sx - w / 2, y, w * Math.max(0, t.hp / t.maxHp), 3); }
-  g.restore();
+// Bild mit Mitte bei (x, y) in Welt-Einheiten, gedreht um a und gespiegelt um f: ein setTransform + ein drawImage statt save/translate/scale/rotate/restore (m = Welt-Matrix, nur Massstab + Verschiebung)
+function stTrAt(g, s, m, x, y, f, a) {
+  const k = m.a, c = Math.cos(a), n = Math.sin(a);
+  g.setTransform(k * f * c, k * n, -k * f * n, k * c, m.e + k * x, m.f + k * y);
+  g.drawImage(s.c, -s.hw, -s.hh, 2 * s.hw, 2 * s.hh);
 }
+// Schwanzphase auf 8 Stufen gerundet (stTroopBody braucht w nur für sin(w * 1.3))
+function stTrBody(type, r, col, w) {
+  const ph = Math.floor((((w * 1.3) % 6.2832) + 6.2832) % 6.2832 / 6.2832 * 8) & 7, wq = (ph + 0.5) / 8 * 6.2832 / 1.3;
+  return stTrBake('b|' + type + '|' + r + '|' + col + '|' + ph, r * 2.6 + 4, r * 1.9 + 4, function(q){ stTroopBody(q, type, r, false, col, wq); });
+}
+// eine Truppe: own = eigene (weisser Ring + Winkel), sonst Fähnchen in der Farbe des Besitzers; hpr = Anteil Leben (Balken nur wenn verletzt)
+function stTroopDraw(g, type, sx, sy, r, face, wob, fl, col, hpr, own) {
+  const m = g.getTransform();
+  stTrAt(g, stTrBake('s|' + r, r * 1.3, r * 0.4, function(q){ stShadow(q, 0, 0, r * 1.3, r * 0.4, 0.35); }), m, sx, sy + r * 1.1, 1, 0);
+  if (fl) {
+    g.setTransform(m); g.save(); g.translate(sx, sy + Math.sin(wob * 0.5) * r * 0.08); g.scale(face || 1, 1); g.rotate(Math.sin(wob) * 0.07);
+    stTroopBody(g, type, r, true, col, wob); g.restore();
+  } else stTrAt(g, stTrBody(type, r, col, wob), m, sx, sy + Math.sin(wob * 0.5) * r * 0.08, face || 1, Math.sin(wob) * 0.07);
+  if (own) {
+    stTrAt(g, stTrBake('m|' + r, r * 1.15 + 14, r * 1.15 + 14, function(q){
+      q.strokeStyle = 'rgba(255,255,255,0.85)'; q.lineWidth = 1.8; q.beginPath(); q.arc(0, 0, r * 1.15 + 2.5, 0, 6.2832); q.stroke();      // eigene Truppe: weisser Ring
+      q.fillStyle = '#ffffff'; q.strokeStyle = 'rgba(12,24,36,0.8)'; q.lineWidth = 1.2; q.beginPath(); q.moveTo(-5, -r * 1.15 - 11); q.lineTo(0, -r * 1.15 - 5); q.lineTo(5, -r * 1.15 - 11); q.closePath(); q.fill(); q.stroke();   // Winkel
+    }), m, sx, sy, 1, 0);
+  } else {
+    stTrAt(g, stTrBake('f|' + r + '|' + col, 14, r * 1.1 + 16, function(q){
+      q.strokeStyle = 'rgba(12,24,36,0.85)'; q.lineWidth = 1.4; q.beginPath(); q.moveTo(0, -r * 1.1); q.lineTo(0, -r * 1.1 - 14); q.stroke();
+      q.fillStyle = col; q.beginPath(); q.moveTo(0, -r * 1.1 - 14); q.lineTo(10, -r * 1.1 - 10); q.lineTo(0, -r * 1.1 - 6); q.closePath(); q.fill(); q.stroke();
+    }), m, sx + 0, sy - (r * 1.1 + 16) + (r * 1.1 + 16), 1, 0);
+  }
+  g.setTransform(m);
+  if (hpr < 1) { const w = 26, y = sy + r * 1.15 + 7; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(sx - w / 2 - 1, y - 1, w + 2, 5); g.fillStyle = own ? '#5ef2c0' : '#ff6b6b'; g.fillRect(sx - w / 2, y, w * Math.max(0, hpr), 3); }
+}
+function stDrawOther(g, type, sx, sy, r, face, wob, fl, col, hpr) { stTroopDraw(g, type, sx, sy, r, face, wob, fl, col, hpr, false); }   // 7.13: fremde Truppe (Heimwache oder Truppe eines Mitspielers)
+function stDrawTroop(g, t, sx, sy, col) { stTroopDraw(g, t.type, sx, sy, t.r, t.face || 1, t.wob, t.hitFlash > 0, col, t.hp / t.maxHp, true); }
 function stTroopBody(g, type, r, fl, col, w) {   // Blick nach rechts (der Aufrufer spiegelt); fl = Treffer-Blitz
   const d = ST_T[type], base = fl ? '#ffffff' : d.col, hi = fl ? '#ffffff' : stLit(d.col, 0.5), lo = fl ? '#dbe6ec' : stDrk(d.col, 0.3), wag = Math.sin(w * 1.3), L = Math.max(1.1, r * 0.13), ol = 'rgba(12,24,36,0.88)';
   g.lineJoin = 'round'; g.lineCap = 'round'; g.lineWidth = L; g.strokeStyle = ol;
@@ -14434,7 +14651,20 @@ ST_ANIM.korallenspeer = function(g, b, tm) {
 };
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 
+// 7.17: Strategie öffnet sich nach dem ersten besiegten Gebiets-Boss; wer schon eine Basis hat (lokal oder im Konto), behält sie offen
+function stratUnlocked() { return areasBeatenCount() >= 1 || stValid(Storage.get(STRAT_KEY, null)) || (accOn() && stValid(save.strategyBase)); }
+let stratLockShown = null;
+function updateStrategyLock() {
+  const b = document.getElementById('btn-goto-strategy'); if (!b) return;
+  const open = stratUnlocked();
+  if (stratLockShown === open) return;
+  stratLockShown = open;
+  b.classList.toggle('is-locked', !open);
+  b.innerHTML = open ? '🏰 Strategie <span class="beta-tag">Test</span>' : '🔒 Strategie <span class="btn-sub">Nach dem ersten Boss</span>';
+}
 function updateMenuPearlsLabel() {
+  updateStrategyLock();
+  renderMenuGoal();
   const sw = document.getElementById('storage-warning'); if (sw) sw.style.display = storageAvailable ? 'none' : 'block';
   if (UI['menu-pearls-label']) UI['menu-pearls-label'].textContent = save.totalPearls + ' \uD83D\uDCA7';
   { const lb = document.getElementById('logo-blobi'), sp = CHARACTER_SPRITES[selectedCharacterId] || CHARACTER_SPRITES.standard; if (lb && sp && lb.getAttribute('src') !== sp) lb.src = sp; }
@@ -14496,6 +14726,7 @@ function renderCharacterGrid() {
       '<span class="pick-name">'+ch.name+(fresh ? '<span class="new-tag">NEU</span>' : '')+'</span>' +
       '<span class="pick-stats">'+characterStatLine(ch)+'</span>' +
       '<span class="pick-desc">'+desc+'</span>' +
+      (!unlocked && ch.unlockLevel && (save.stats.bestLevel || 0) > 0 ? '<span class="pick-desc">Bisher: Level ' + save.stats.bestLevel + '</span>' : '') +
       (unlocked && !owned ? '<button class="pick-buy' + (buyConfirm === ch.id ? ' confirm' : '') + '"' + (save.totalPearls < ch.price ? ' disabled' : '') + '>' +
         (buyConfirm === ch.id ? 'Wirklich kaufen? \uD83D\uDCA7 ' + ch.price : (save.totalPearls < ch.price ? 'Noch ' + (ch.price - save.totalPearls) + ' \uD83D\uDCA7 fehlen' : 'Kaufen \u00B7 \uD83D\uDCA7 ' + ch.price)) + '</button>' : '');
     if (owned) {
@@ -14684,8 +14915,18 @@ function achProgressText(id) {
 // das nächste erreichbare Ziel: der gesperrte Erfolg, dem du am nächsten bist
 function achNextGoal() {
   let best = null, br = -1;
-  ACHIEVEMENTS.forEach(function(a){ if (achUnlocked(a.id)) return; const r = achRatio(a.id); if (r < 1 && r > br) { br = r; best = a; } });
+  ACHIEVEMENTS.forEach(function(a){ if (achUnlocked(a.id)) return; const r = achRatio(a.id); if (a.id === 'all_characters' && r <= 0.25) return; if (r < 1 && r > br) { br = r; best = a; } });
   return best;
+}
+function goalChipHtml(goal) {
+  return '\uD83C\uDFAF N\u00E4chstes Ziel: <b>' + goal.name + '</b> \u2013 ' + goal.desc +
+    '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (achRatio(goal.id) * 100).toFixed(1) + '%"></i></span><span class="ach-prog-n">' + achProgressText(goal.id) + '</span></span>';
+}
+function renderMenuGoal() {
+  const el = document.getElementById('menu-goal'); if (!el) return;
+  const goal = achNextGoal();
+  el.style.display = goal ? '' : 'none';
+  if (goal) el.innerHTML = goalChipHtml(goal);
 }
 function renderAchievements(flashIds, fromPearls) {
   flashIds = flashIds || [];
@@ -14805,9 +15046,9 @@ function renderGameOverScreen() {
   let extra = '';
   const goal = achNextGoal(), buy = pend.length ? null : shopAffordable();
   if (buy) extra = '<div class="go-next">💧 Du hast jetzt <b>' + save.totalPearls + ' Perlen</b> – genug für <b>' + buy.u.name + '</b> (' + buy.cost + ' 💧).</div>';
-  else if (goal && !newly.length) extra = '<div class="go-next">🎯 Nächstes Ziel: <b>' + goal.name + '</b> – ' + goal.desc +
-    '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (achRatio(goal.id) * 100).toFixed(1) + '%"></i></span><span class="ach-prog-n">' + achProgressText(goal.id) + '</span></span></div>';
+  else if (goal && !newly.length) extra = '<div class="go-next">' + goalChipHtml(goal) + '</div>';
   if (extra) achWrap.insertAdjacentHTML('beforeend', extra);
+  if (goBoss) achWrap.insertAdjacentHTML('afterbegin', '<div class="go-next">\uD83D\uDC51 <span>' + goBoss.name + ': noch ' + goBoss.pct + ' % Leben</span></div>');
   const goShop = document.getElementById('btn-gameover-shop');
   if (goShop) goShop.style.display = buy ? '' : 'none';
   const goAch = document.getElementById('btn-gameover-achievements');
@@ -14842,11 +15083,16 @@ function initUI() {
   document.getElementById('btn-goto-shop').addEventListener('click', function(){ Sfx.click(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-goto-achievements').addEventListener('click', function(){ Sfx.click(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-album').addEventListener('click', function(){ Sfx.click(); renderAlbum(); showScreen('screen-album'); });
-  document.getElementById('btn-goto-strategy').addEventListener('click', function(){ Sfx.click(); renderStratMenu(); showScreen('screen-strat'); });
+  document.getElementById('btn-goto-strategy').addEventListener('click', function(){
+    Sfx.click();
+    if (!stratUnlocked()) { showToast('🔒 Strategie: Nach dem ersten Boss'); return; }      // 7.17: gesperrt bis zum ersten Boss (Online bleibt offen)
+    renderStratMenu(); showScreen('screen-strat');
+  });
   document.getElementById('btn-strat-solo').addEventListener('click', function(){ Sfx.click(); startStrategy(selectedCharacterId); });
   document.getElementById('btn-strat-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
   document.getElementById('st-map').addEventListener('click', function(){ Sfx.click(); snMapOpen(true); });
   document.getElementById('btn-st-map-close').addEventListener('click', function(){ Sfx.click(); snMapOpen(false); });
+  document.getElementById('btn-st-map-x').addEventListener('click', function(){ Sfx.click(); snMapOpen(false); });
   document.getElementById('btn-st-top').addEventListener('click', function(){ Sfx.click(); SN.showTop = !SN.showTop; this.textContent = SN.showTop ? '👥 Spieler' : '🏆 Rangliste'; snMapDraw(); });
   document.getElementById('st-map-cv').addEventListener('click', snMapPick);
   tapButton(document.getElementById('st-build'), function(){ Sfx.click(); stOpenBuild(); });
