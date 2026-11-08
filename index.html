@@ -137,6 +137,11 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .menu-tiles .btn { flex-direction: column; gap: 3px; padding: 11px 8px; font-size: 14px; min-width: 0; text-align: center; }
 .menu-tiles .btn .btn-sub { margin-left: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .btn-mini { width: auto; padding: 9px 16px; font-size: 13px; border-radius: 999px; }
+/* "App laden": Mint wie die Sprachwahl, Download-Symbol und ein paar sanfte Leucht-Pulse beim Öffnen des Menüs, damit man ihn bemerkt */
+.btn-getapp { gap: 6px; color: #04241a; background: linear-gradient(135deg, #5ef2c0, #2fc493); border: 0; box-shadow: 0 4px 14px rgba(94,242,192,0.35); animation: getappGlow 2.6s ease-in-out 0.8s 3; }
+.getapp-ic { width: 15px; height: 15px; flex-shrink: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304241a' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5v11.5m0 0-4.8-4.8M12 15l4.8-4.8M4.5 20h15'/%3E%3C/svg%3E") center/contain no-repeat; }
+@keyframes getappGlow { 0%, 100% { box-shadow: 0 4px 14px rgba(94,242,192,0.35); } 50% { box-shadow: 0 4px 14px rgba(94,242,192,0.35), 0 0 0 6px rgba(94,242,192,0.22), 0 0 26px rgba(94,242,192,0.55); } }
+@media (prefers-reduced-motion: reduce) { .btn-getapp { animation: none; } }
 /* Scrollbalken in Fenstern und Menüs: schmal und in den Farben des Spiels (statt grauem Standardbalken) */
 .screen, .panel, .shop-list, .achievement-list, .album-grid { scrollbar-width: thin; scrollbar-color: rgba(126,224,255,0.35) transparent; }
 .screen::-webkit-scrollbar, .panel::-webkit-scrollbar, .shop-list::-webkit-scrollbar, .achievement-list::-webkit-scrollbar, .album-grid::-webkit-scrollbar { width: 8px; }
@@ -162,7 +167,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .game-logo h1 { font-size: 30px; line-height: 1.05; letter-spacing: 0.5px; margin-top: 6px; }
 .logo-accent { color: var(--bioluma); text-shadow: 0 0 18px rgba(94,242,192,0.5); }
 .tagline { color: var(--foam-dim); margin: 10px 0 22px; font-weight: 600; font-size: 14px; }
-.menu-footer { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
+.menu-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
 .icon-btn {
   width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(126,224,255,0.3);
   background: rgba(126,224,255,0.1); color: var(--foam); cursor: pointer; font-size: 17px;
@@ -749,6 +754,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
       <div class="menu-footer">
         <button class="icon-btn" id="btn-mute" aria-label="Ton umschalten">🔊</button>
         <button class="btn btn-ghost btn-mini" id="btn-goto-instructions">Anleitung</button>
+        <button class="btn btn-mini btn-getapp" id="btn-get-app" style="display:none;"><span class="getapp-ic" aria-hidden="true"></span><span>App laden</span></button>
         <span class="best-time-label" id="menu-best-time"></span>
       </div>
     </div>
@@ -1373,6 +1379,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Verbesserungen","Upgrades","Покращення"],
 ["Erfolge","Achievements","Досягнення"],
 ["Anleitung","How to play","Як грати"],
+["App laden","Get the app","Завантажити застосунок"],
 ["Wähle deinen Blobi","Choose your Blobi","Обери свого Блобі"],
 ["Zurück","Back","Назад"],
 ["Weiter","Next","Далі"],
@@ -2346,6 +2353,34 @@ uk: `<li><strong>Рух:</strong> WASD або стрілки – на телеф
    {1}, {2} … für eine andere Reihenfolge). Was dort fehlt, versucht tr() in Teilen: Listen mit " · ", ein Zeichen davor oder
    danach ("🔒 Kelpwald"), eine Bezeichnung mit Zahl ("Schaden 12 → 15").
    ============================================================ */
+// App-Download (Plan app-downloads.md): Knopf "App laden" nur in Windows- und Android-Browsern, nie in der Tray-App (Electron) oder im APK (Capacitor).
+// Er öffnet die Download-Seite der Website in einem neuen Tab; dort Auswahl, Download und Anleitung. Nur Sprache und Plattform gehen in die Adresse.
+const APP_PAGE_URL = 'https://robotik0.github.io/blobfisch-survivors/app.html';
+function appPlatform(ua, isCapacitor) {
+  ua = ua || '';
+  if (isCapacitor || /Electron\//.test(ua)) return '';
+  if (/Android/.test(ua)) return 'android';
+  if (/Windows NT/.test(ua)) return 'win';
+  return '';
+}
+function initGetAppButton() {
+  const b = document.getElementById('btn-get-app'); if (!b) return;
+  const plat = appPlatform(navigator.userAgent, !!window.Capacitor);
+  if (!plat) return;
+  b.style.display = '';
+  // lokal (file://, z. B. aus dem Site-Ordner) die app.html daneben, damit man vor dem Hochladen alles durchklicken kann
+  const base = location.protocol === 'file:' ? new URL('app.html', location.href).href : APP_PAGE_URL;
+  b.addEventListener('click', function(){ Sfx.click(); window.open(base + '?lang=' + encodeURIComponent(LANG) + '&p=' + plat, '_blank', 'noopener'); });
+}
+// Sprache mit der Download-Seite abgleichen: ?lang=de|en|uk in der Adresse (Link "Zurück zum Spiel") und live, wenn app.html
+// auf derselben Website die Sprache wechselt (sie schreibt localStorage 'blobfischSurvivorsLang'; umgekehrt liest sie save.lang).
+function initLangSync() {
+  let q = null;
+  try { q = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  if (q === 'ua') q = 'uk';
+  if (q && LANGS.indexOf(q) !== -1 && q !== LANG) setLang(q);
+  window.addEventListener('storage', function(e){ if (e.key === 'blobfischSurvivorsLang' && LANGS.indexOf(e.newValue) !== -1 && e.newValue !== LANG) setLang(e.newValue); });
+}
 const LANGS = ['de', 'en', 'uk'], LANG_LABELS = { de: 'DE', en: 'EN', uk: 'UA' };
 function detectLang() {
   let n = 'de';
@@ -15298,6 +15333,8 @@ function initUI() {
   document.getElementById('btn-gameover-shop').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderShop(); showScreen('screen-shop'); });
   document.getElementById('btn-gameover-achievements').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-instructions').addEventListener('click', function(){ Sfx.click(); showScreen('screen-instructions'); });
+  initGetAppButton();
+  initLangSync();
 
   document.getElementById('btn-character-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
   document.getElementById('btn-character-next').addEventListener('click', function(){ Sfx.click(); renderStageGrid(); showScreen('screen-stage'); });
