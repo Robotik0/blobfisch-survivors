@@ -1107,8 +1107,10 @@ const ENEMY_TYPES = {
   muraene:     { name: 'Muräne',       hp: 13, speed: 128, dmg: 9,  r: 12, color: '#5a9147', xp: 3, behavior: 'erratic',    accessory: 'fin' },
   tinte:       { name: 'Tintenfisch',  hp: 19, speed: 58,  dmg: 6,  r: 16, color: '#c65da8', xp: 3, behavior: 'inker',      accessory: 'tentacles' },
   piranha:     { name: 'Piranha',      hp: 6,  speed: 135, dmg: 5,  r: 10, color: '#ff5c5c', xp: 1, behavior: 'swarm',      accessory: 'fin' },
-  riesenkrebs: { name: 'Riesenkrebs',  hp: 70, speed: 46,  dmg: 15, r: 24, color: '#e8622c', xp: 9, behavior: 'chase',      accessory: 'pincers' }
+  riesenkrebs: { name: 'Riesenkrebs',  hp: 70, speed: 46,  dmg: 15, r: 24, color: '#e8622c', xp: 9, behavior: 'chase',      accessory: 'pincers' },
+  schatzfisch: { name: 'Schatzfisch',  hp: 14, speed: 120, dmg: 0,  r: 13, color: '#ffd23f', xp: 2, behavior: 'flee',       accessory: 'fin' }   // 7.19: einmal pro Lauf bei 2:00, greift nie an
 };
+const SCHATZ_AT = 120, SCHATZ_FLEE = 15;     // Schatzfisch: Zeitpunkt im Lauf (s), so lange schwimmt er sicher weg
 
 // ---------- Bosse ----------
 // area: Gebiet des Bosses (jeder Boss eines Gebiets öffnet das nächste, 7.2). Neue Bosse (7.2) haben eigene Angriffe (BOSS_KIT).
@@ -1234,10 +1236,10 @@ const PASSIVE_DEFS = {
 // 2 = Meeresungeheuer (Tiefsee-Graben) besiegt, 3 = Lava-Titan (Vulkanschlucht) besiegt. So geht es nur in den anderen Gebieten richtig weiter.
 const SHOP_GATE_BOSS = [null, 'kraken', 'seeungeheuer', 'lavatitan'];
 const SHOP_UPGRADES = [
-  { id: 'shop_hp',     name: 'Grösserer Lebensvorrat', desc: '+10 Start-HP pro Stufe.',      maxLevel: 5, costs: [40, 110, 380, 900, 2000],  gates: [0, 0, 1, 2, 3] },
-  { id: 'shop_speed',  name: 'Bessere Flossen',        desc: '+3% Start-Tempo pro Stufe.',    maxLevel: 5, costs: [35, 95, 330, 800, 1800],   gates: [0, 0, 1, 2, 3] },
-  { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, costs: [55, 150, 500, 1200, 2600], gates: [0, 0, 1, 2, 3] },
-  { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, costs: [30, 80, 280, 700, 1500],   gates: [0, 0, 1, 2, 3] },
+  { id: 'shop_hp',     name: 'Grösserer Lebensvorrat', desc: '+10 Start-HP pro Stufe.',      maxLevel: 5, costs: [25, 110, 380, 900, 2000],  gates: [0, 0, 1, 2, 3] },
+  { id: 'shop_speed',  name: 'Bessere Flossen',        desc: '+3% Start-Tempo pro Stufe.',    maxLevel: 5, costs: [20, 95, 330, 800, 1800],   gates: [0, 0, 1, 2, 3] },
+  { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, costs: [30, 150, 500, 1200, 2600], gates: [0, 0, 1, 2, 3] },
+  { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, costs: [15, 80, 280, 700, 1500],   gates: [0, 0, 1, 2, 3] },
   { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück: mehr Perlen und öfter eine vierte Upgrade-Karte.', maxLevel: 3, costs: [250, 1200, 3000], gates: [0, 2, 3] },
   { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Einmal pro Lauf: Wirst du besiegt, kannst du per Knopfdruck mit halber Gesundheit weitermachen.', maxLevel: 1, costs: [1200], gates: [1] }
 ];
@@ -1962,6 +1964,8 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Besiege alle sechs Bosse in der Vulkanschlucht.", "Defeat all six bosses in the Volcano Gorge.", "Перемож усіх шістьох босів у Вулканічній ущелині."],
 ["Besiege alle 24 Bosse.", "Defeat all 24 bosses.", "Перемож усіх 24 босів."],
 ["👑 Champion erschienen: {}","👑 A champion appeared: {}","👑 З'явився чемпіон: {}"],
+["⚠ Ein Champion kommt!","⚠ A champion is coming!","⚠ Іде чемпіон!"],
+["✨ Ein Schatzfisch! Fang ihn!","✨ A treasure fish! Catch it!","✨ Скарбова рибка! Спіймай її!"],
 ["🏆 Neuer Erfolg: {} – im Menü einlösen!","🏆 New achievement: {} – claim it in the menu!","🏆 Нове досягнення: {} – забери в меню!"],
 ["🗺️ Neues Gebiet: {}","🗺️ New area: {}","🗺️ Нова локація: {}"],
 ["🐡 Neuer Blobi zu kaufen: {}","🐡 New Blobi to buy: {}","🐡 Новий Блобі для покупки: {}"],
@@ -2757,7 +2761,7 @@ let nextBossTime = 300, bossEncounterCount = 0, bossEntity = null, bossWarningTi
 let reviveAvailable = false, invulnTimer = 0, reviveFlashTimer = 0, pearlFrac = 0;
 let pendingLevelUps = 0, pendingFreeCards = 0;
 let zones = [], shockwaves = [], hazardTimer = 7, ringTime = 120, eliteTime = 180, currentLevelUp = null, runNewAch = [], playerInKelp = false;
-let champTime = CHAMPION_START, enemySeq = 0;
+let champTime = CHAMPION_START, enemySeq = 0, champWarnAt = -1, schatzDone = false;
 let playerDown = 0, reviveProg = 0, pauseOverlay = false, runSlot = 'solo';   // online: ohnmächtig (s bis zum Ende), Rettung (s), Pause ohne Anhalten, Speicherplatz des Laufs
 let lateWarned = false, chanceLeft = 0, chanceDown = false, resumeCount = 0;  // Flut-Meldung; Zweite Chance: Bedenkzeit (s), online mit Freunden: als ohnmächtig; Countdown nach dem Neuladen
 let lastTime = 0, rafId = null;
@@ -2964,7 +2968,7 @@ function startRun(charId, stageId) {
   orbitAngle = 0; minionEntities = []; minionSafe = false;
   const riffRun = stageId === 'riff';                // Korallenriff (7.2): Elite und Piranha-Ring eine Minute später
   lightDim = { mul: 1, t: 0 };
-  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; ringTime = riffRun ? RIFF_RING_START : 120; eliteTime = riffRun ? RIFF_ELITE_START : 180; champTime = CHAMPION_START; resetHudCache();
+  zones = []; shockwaves = []; hazardTimer = 7; runNewAch = []; ringTime = riffRun ? RIFF_RING_START : 120; eliteTime = riffRun ? RIFF_ELITE_START : 180; champTime = CHAMPION_START; champWarnAt = -1; schatzDone = false; resetHudCache();
   bossBag = { first: null, left: [] }; bossPending = null; Net.wbType = -1;
   runTime = 0; runLevel = 1; runXp = 0; runXpToNext = xpForLevel(1);
   runKills = 0; runPearls = 0;
@@ -3075,6 +3079,13 @@ const SPAWN_TABLE_BY_STAGE = {
   vulkan: ['tinte', 'muraene', 'krebs', 'piranha', 'angler', 'seeigel', 'riesenkrebs']
 };
 
+function spawnSchatzfisch() {
+  const e = spawnEnemy('schatzfisch', false), a = Math.random() * Math.PI * 2, d = Math.min(W, H) * 0.4 + 40;
+  e.x = player.x + Math.cos(a) * d; e.y = player.y + Math.sin(a) * d;       // sichtbar, nicht am Rand ausserhalb
+  e.hp = e.maxHp = ENEMY_TYPES.schatzfisch.hp; e.noContact = true; e.fleeT = 0;
+  showToast('✨ Ein Schatzfisch! Fang ihn!');
+  return e;
+}
 function updateSpawner(dt) {
   if (strategyMode) { stratUpdate(dt); return; }      // Strategie: Wellen statt Dauer-Spawner
   if (!lateWarned && runTime >= LATE_START) { lateWarned = true; showToast('🌊 Die Flut steigt! Ab jetzt werden die Gegner jede Minute stärker.'); Sfx.boss(); }
@@ -3120,6 +3131,13 @@ function updateSpawner(dt) {
       e.x = player.x + Math.cos(a) * rd; e.y = player.y + Math.sin(a) * rd;
     }
     showToast('\uD83D\uDC1F Piranha-Ring!');
+  }
+  if (!schatzDone && runTime >= SCHATZ_AT) {          // 7.19: ein Schatzfisch pro Lauf (nicht, wenn man beim Laden schon weiter ist)
+    schatzDone = true;
+    if (runTime < SCHATZ_AT + 20 && !(Net.on && netPvp()) && freeEnemySlot()) spawnSchatzfisch();
+  }
+  if (!room && champWarnAt !== champTime && runTime >= champTime - 10 && runTime < champTime && !bossEntity && bossWarningTimer <= 0 && championCount() < (runTime >= CHAMPION_LATE ? 2 : 1)) {
+    champWarnAt = champTime; showToast('⚠ Ein Champion kommt!');       // 7.19: 10 s vorher
   }
   if (!room && runTime >= champTime && !bossEntity && bossWarningTimer <= 0) {   // Champions: ab 4:00, nie w\u00E4hrend eines Boss-Kampfs
     if (championCount() < (runTime >= CHAMPION_LATE ? 2 : 1) && spawnChampion()) {
@@ -3301,6 +3319,10 @@ function dropLoot(k) {
   if (strategyMode) { stratLoot(k); return; }         // Strategie: XP und Korallen, keine Perlen
   const st = stageOf(), g = k.grp || 1;
   spawnXpOrb(k.x, k.y, k.xp * g);
+  if (k.type === 'schatzfisch') {                  // 7.19: 5-8 Perlen (Wert des Gebiets)
+    for (let i = 5 + Math.floor(Math.random() * 4); i > 0; i--) spawnPearl(k.x + (Math.random() - 0.5) * 44, k.y + (Math.random() - 0.5) * 44, st.pearlValue);
+    return;
+  }
   if (k.isBoss) {                                  // Boss: ein Herz (+40 % Leben) und der Boss-Schatz (Champion-Boss: doppelt + Gratis-Verbesserung)
     const n = 1 + (Net.on ? netNearbyPeers(k.x, k.y).length : 0), each = n > 1;
     const amt = bossTreasure(k.enc, k.champ, k.type);
@@ -3800,6 +3822,11 @@ function updateEnemies(dt) {
         en.inkTimer = 3.2;
         pushEnemyShot({ x: en.x, y: en.y, vx: (dx/d)*130, vy: (dy/d)*130, r: 9, dmg: en.dmg * 0.6 * hitMult, life: 3, color: '#c65da8', isInk: true });
       }
+    } else if (en.behavior === 'flee') {               // Schatzfisch: schwimmt mit Schlenkern vor dem Blobi davon; nach 15 s verschwindet er, sobald er ausser Bild ist
+      en.fleeT = (en.fleeT || 0) + dt; en.jitter += dt * 2.2;
+      const ax = -dx / d, ay = -dy / d, sw = Math.sin(en.jitter) * 0.9;
+      moveX = ax - ay * sw; moveY = ay + ax * sw; const fm = Math.hypot(moveX, moveY) || 1; moveX /= fm; moveY /= fm;
+      if (en.fleeT > SCHATZ_FLEE && d > Math.hypot(W, H) / 2 + 60) { en.dead = true; continue; }
     } else if (en.behavior === 'stationary') {
       moveX = 0; moveY = 0;
     } else if (en.behavior === 'march') {             // Formation des Hummer-Generals: geradeaus über den Bildschirm
@@ -11202,6 +11229,13 @@ function enemyArtWhite(spr) {
 }
 function drawEnemyFancy(en, sx, sy) {
   const type = en.type, rate = ENEMY_ANIM_RATE[type];
+  if (type === 'schatzfisch') {                    // goldener Schein und drei kreisende Funken
+    const t = (en.wobble || 0) * 0.5;
+    ctx.save(); ctx.globalAlpha = 0.35 + Math.sin(t * 2) * 0.1; ctx.fillStyle = '#ffe58a'; ctx.beginPath(); ctx.arc(sx, sy, en.r * 2.1, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff6c9';
+    for (let i = 0; i < 3; i++) { const a = t + i * 2.094; ctx.beginPath(); ctx.arc(sx + Math.cos(a) * en.r * 1.9, sy + Math.sin(a) * en.r * 1.9, 2.2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
   if (!en.champ || !rate || en.isBoss) { drawEnemySprite(sx, sy, en.r, en.hitFlash > 0 ? '#ffffff' : (en.state === 'tired' ? '#e0d890' : en.color), en.accessory, en.wobble); return; }
   const ph = ((en.wobble || 0) * rate / (Math.PI * 2)) % 1, fr = Math.min((ENEMY_N[type] || ENEMY_FRAMES) - 1, Math.floor((ph < 0 ? ph + 1 : ph) * (ENEMY_N[type] || ENEMY_FRAMES)));
   const spr = enemyArtSprite(type, en.r, en.color, fr), s = en.r / spr.r;
@@ -15407,7 +15441,7 @@ const NET_ASLEEP = 3500;            // ms ohne Nachricht: der Mitspieler "schlä
 const NET_COLORS = ['#5ef2c0', '#ffd76a', '#ff7ab8', '#7eb6ff', '#ff9a3c', '#b98cff', '#c8ff6a', '#ffffff', '#ff6b6b', '#6bffef', '#ffb3f0', '#a3a3ff'];
 const NET_STATES = ['walk', 'windup', 'dash', 'tired', 'roar', 'sog', 'puff', 'rise', 'dive', 'hide', 'circle', 'cast', 'tether', 'curl'];   // 7.2: Zustände der neuen Bosse
 const NET_CST = ['walk', 'flash', 'dash'];
-const NET_TYPES = Object.keys(ENEMY_TYPES).concat(Object.keys(BOSS_TYPES));
+const NET_TYPES = Object.keys(ENEMY_TYPES).filter(function(k){ return k !== 'schatzfisch'; }).concat(Object.keys(BOSS_TYPES), ['schatzfisch']);   // 7.19: neue Art ganz hinten, die alten Nummern bleiben (Protokoll 12)
 const NET_TYPE_IDX = {}; NET_TYPES.forEach(function(k, i){ NET_TYPE_IDX[k] = i; });
 const NF_PAUSED = 1, NF_DEAD = 2, NF_DOWN = 4, NF_SHIELD = 8, NF_HAFEN = 16;    // Merkmale eines Spielers in seinen Nachrichten
 const NF_RIDE = 32, NF_IDLE = 64;   // reitet gerade (Strömungsritt); seit einer Minute nichts gedrückt (zählt nicht als aktiv für die Krone)
