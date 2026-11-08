@@ -1247,6 +1247,17 @@ function shopCost(u, level) { return u.costs[Math.min(level, u.costs.length - 1)
 // 7.2: ein Gebiet gilt als geschafft, sobald irgendein Boss des Gebiets besiegt ist; Tore, die einen Boss nennen, meinen sein Gebiet
 function areaBeaten(area) { return save.stats.uniqueBossesDefeated.some(function(t){ return BOSS_TYPES[t] && BOSS_TYPES[t].area === area; }); }
 function areasBeatenCount() { return STAGES.filter(function(s){ return areaBeaten(s.id); }).length; }
+// 7.20: Fortschritt P (0-4) = besiegte Gebiete + Bruchteil (beste Zeit im ersten offenen Gebiet / 300 s). Nur lokal, wird nie gesendet.
+const PROG_PARTIAL_S = 300;
+function progressP() {
+  const n = areasBeatenCount();
+  if (n >= STAGES.length) return n;
+  const open = STAGES.filter(function(s){ return !areaBeaten(s.id); })[0];
+  const sb = save.stats.stageBest || {};
+  let best = open ? (sb[open.id] || 0) : 0;
+  if (n === 0 && !best) best = save.stats.bestTime || 0;      // alter Spielstand ohne stageBest
+  return n + Math.min(1, best / PROG_PARTIAL_S);
+}
 function bossBeaten(type) { if (!type) return true; const b = BOSS_TYPES[type]; return b ? areaBeaten(b.area) : save.stats.uniqueBossesDefeated.indexOf(type) !== -1; }
 function shopTierOpen(t) { return t <= 0 || bossBeaten(SHOP_GATE_BOSS[t]); }
 // höchste Gebiets-Stufe, bis zu der alle Bosse besiegt sind (0 = nur der Anfang)
@@ -1320,6 +1331,7 @@ let save = defaultSave();
     save.v = 5;
     save.stats = Object.assign({ totalKills: 0, totalPearlsEarned: 0, bestTime: 0, bestLevel: 0, bossesDefeated: 0, uniqueBossesDefeated: [], championsDefeated: 0, championBossesDefeated: 0 }, loaded.stats || {});
     if (!Array.isArray(save.stats.uniqueBossesDefeated)) save.stats.uniqueBossesDefeated = [];
+    if (!save.stats.stageBest || typeof save.stats.stageBest !== 'object') save.stats.stageBest = {};
     save.stagesUnlocked = Array.isArray(loaded.stagesUnlocked) ? loaded.stagesUnlocked : ((save.stats.totalKills > 0 || save.stats.bestTime > 0) ? ['riff', 'kelp', 'graben', 'vulkan'] : ['riff']);
     if (save.stagesUnlocked.indexOf('riff') === -1) save.stagesUnlocked.unshift('riff');
   }
@@ -2652,6 +2664,8 @@ const Sfx = {
   revive: function(){ if (!sfxReady('revive', 200)) return; [392, 523, 659, 784].forEach(function(f, i){ sv({ f: f, d: 0.35, v: 0.06, t: i * 0.09, a: 0.03, rv: 0.4 }); }); sn({ hp: 4000, d: 0.5, v: 0.015, t: 0.15, a: 0.1, rv: 0.4 }); },
   // Champion erscheint: Fanfare mit Pauke
   champion: function(){ if (!sfxReady('champion', 250)) return; [392, 523, 784].forEach(function(f, i){ sv({ w: 'triangle', f: f, d: i === 2 ? 0.45 : 0.16, v: 0.065, t: i * 0.11, a: 0.008, vib: i === 2 ? 6 : 0, rv: 0.35 }); }); sv({ f: 110, f2: 70, d: 0.25, v: 0.09 }); sn({ lp: 500, d: 0.2, v: 0.05, rv: 0.3 }); },
+  // 7.20: ein Freund geht k.o.: zwei sinkende Töne, weich (kein Alarm)
+  mateDown: function(){ if (!sfxReady('mateDown', 600)) return; [659, 494].forEach(function(f, i){ sv({ w: 'triangle', f: f, f2: f * 0.96, d: 0.3, v: 0.06, t: i * 0.16, a: 0.01, rv: 0.4 }); }); },
   // PvP: einen Spieler besiegt – harter Schlag und zwei Töne nach oben
   ko: function(){ if (!sfxReady('ko', 250)) return; sv({ f: 160, f2: 45, d: 0.3, v: 0.15, rv: 0.25 }); sn({ bp: 900, f2: 200, d: 0.2, v: 0.08 }); sv({ w: 'square', f: 523, d: 0.1, v: 0.03, t: 0.08, lp: 2200, rv: 0.3 }); sv({ w: 'square', f: 784, d: 0.22, v: 0.03, t: 0.17, lp: 2200, rv: 0.4 }); },
   // Truhe: Perlen klimpern heraus
@@ -3065,7 +3079,7 @@ function spawnEnemy(typeKey, isBoss) {
   if (Net.on) {                                   // online: +50 % HP pro weiterem Spieler in der Nähe (stärker statt mehr), nie im Hafen
     if (netPvp()) e.xp *= PVP_ENEMY_XP;  // PvP: wenige Gegner, dafür mehr XP
     const n = netNearbyPeers(player.x, player.y).length;
-    if (n) { e.grp = 1 + NET_GROUP_HP * n; e.hp *= e.grp; e.maxHp = e.hp; }   // ... und genauso mehr Beute (XP, Perlen-Chance)
+    if (n) { e.grpR = netGroupRate(); e.grp = 1 + e.grpR * n; e.hp *= e.grp; e.maxHp = e.hp; }   // ... und genauso mehr Beute (XP, Perlen-Chance)
     hafenKeepOut(e);
   }
   enemies.push(e);
@@ -3103,6 +3117,9 @@ function updateSpawner(dt) {
     const pvp = Net.on && netPvp();                  // PvP: es geht um die anderen Spieler – viel weniger Gegner
     let n = duel ? Math.max(1, Math.ceil(Math.min(batch, cap) / 2)) : Math.min(batch, cap);
     if (pvp) n = Math.max(1, Math.round(n * PVP_BATCH));
+    else if (Net.on && netNearbyPeers(player.x, player.y).length) {       // 7.20: Co-op mit Freund in der Nähe: kleinere Wellen für Neulinge (Rest wird mitgezählt)
+      netWaveFrac += n * netWaveMul(); n = Math.floor(netWaveFrac + 1e-9); netWaveFrac -= n;
+    }
     for (let i = 0; i < n; i++) {
       const avail = Math.min(table.length, 1 + Math.floor(runTime / 25));
       const key = table[Math.floor(Math.random() * avail)];
@@ -7098,6 +7115,11 @@ function checkStageUnlocks() {
 let bgGrad = null, bgGradKey = '';
 
 function bankRunProgress() {
+  if (!strategyMode && runTime > 0) {                  // 7.20: beste Zeit pro Gebiet (für den Fortschritt P)
+    if (!save.stats.stageBest) save.stats.stageBest = {};
+    const sid = stageOf().id;
+    if (runTime > (save.stats.stageBest[sid] || 0)) save.stats.stageBest[sid] = Math.floor(runTime);
+  }
   save.totalPearls += runPearls;
   save.stats.totalPearlsEarned += runPearls;
   checkCharacterUnlocks(runLevel);
@@ -15448,7 +15470,13 @@ const NF_RIDE = 32, NF_IDLE = 64;   // reitet gerade (Strömungsritt); seit eine
 const NET_NAME_RE = /^[A-Za-z0-9ÄÖÜäöüßÀÂÇÈÉÊËÎÏÔÙÛàâçèéêëîïôùû _-]{3,13}$/;
 const NET_CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ]{4}$/;
 const NET_GROUP_HP = 0.5;           // online: neue Gegner (auch Champions) +50 % HP pro weiterem Spieler in der Nähe
-const WORLD_BOSS_HP = 0.6;          // Weltboss: +60 % HP pro weiterem Spieler in der Nähe
+// 7.20: weicher für Neulinge. Die HP-Rate pro Freund folgt dem Fortschritt P des Erzeugers (0 Gebiete 0.20, 4 Gebiete 0.50 = früher),
+// die Co-op-Wellengrösse mit einem Freund in der Nähe von 0.6 (P 0) bis 1.0 (P 4). Weltboss und PvP bleiben wie sie waren.
+const NET_GROUP_HP_MIN = 0.1, NET_WAVE_MIN = 0.4;
+function netGroupRate() { return NET_GROUP_HP_MIN + (NET_GROUP_HP - NET_GROUP_HP_MIN) * Math.min(4, progressP()) / 4; }
+function netWaveMul() { return NET_WAVE_MIN + (1 - NET_WAVE_MIN) * Math.min(4, progressP()) / 4; }
+let netWaveFrac = 0;
+const WORLD_BOSS_HP = 0.6;         // Weltboss: +60 % HP pro weiterem Spieler in der Nähe
 const WORLD_BOSS_GAP = 240;         // s: nach einem Weltboss kommt der nächste nach 4 Minuten (der erste nach 5, wie allein)
 const HAFEN_R = 250;                // Hafen: sichere Zone in der Raummitte (Radius)
 const HAFEN_PROTECT = 5;            // s Schutz am Anfang eines Online-Laufs
@@ -16656,6 +16684,7 @@ function netSgUpdate(now) {
 function netPeerFlags(pe, fl, now) {
   const was = !!(pe.fl & NF_RIDE), riding = !!(fl & NF_RIDE);
   if (riding && !was) pe.rideAt = now;
+  if ((fl & NF_DOWN) && !(pe.fl & NF_DOWN) && !(fl & NF_DEAD) && pe.seen && netMate(pe) && gameState === 'playing') Sfx.mateDown();   // 7.20
   pe.fl = fl;
   if (!riding && was) {
     if (netRideValid(pe, now)) pe.landAt = now;
@@ -16768,9 +16797,10 @@ function netGrowBosses() {
     const en = enemies[i];
     if (en.dead || !(en.isBoss || en.champ)) continue;
     const n = netNearbyPeers(en.x, en.y).length;
-    const was = en.isBoss ? (en.nearN || 0) : Math.round(((en.grp || 1) - 1) / NET_GROUP_HP);
+    const rate = en.isBoss ? WORLD_BOSS_HP : (en.grpR || NET_GROUP_HP);     // 7.20: Champions behalten die Rate ihres Erzeugers
+    const was = en.isBoss ? (en.nearN || 0) : Math.round(((en.grp || 1) - 1) / rate);
     if (n <= was) continue;
-    const rate = en.isBoss ? WORLD_BOSS_HP : NET_GROUP_HP, f0 = 1 + rate * was, f1 = 1 + rate * n;
+    const f0 = 1 + rate * was, f1 = 1 + rate * n;
     const frac = en.maxHp > 0 ? Math.max(0, en.hp) / en.maxHp : 1;
     en.maxHp = en.maxHp / f0 * f1; en.hp = frac * en.maxHp;
     if (en.isBoss) en.nearN = n; else en.grp = f1;
@@ -17622,7 +17652,7 @@ function drawPeerArrows() {
     const d = Math.round(distXY(pe.x, pe.y, player.x, player.y) / 10) + ' m';
     if (pe.id === callee) { edgeArrow(pe.x, pe.y, '255,215,106', 1 + Math.sin(runTime * 9) * 0.15, '📯 ' + pe.name + ' · ' + d); return; }
     if ((pe.fl & NF_DOWN) && netMate(pe)) {
-      edgeArrow(pe.x, pe.y, '255,92,114', 0.95 + Math.sin(runTime * 8) * 0.18, '💔 ' + pe.name + ' · ' + d);
+      edgeArrow(pe.x, pe.y, '255,130,190', 0.95 + Math.sin(runTime * 8) * 0.18, '💔 ' + pe.name + ' · ' + d);   // 7.20: rosa statt rot (Bossrot ist Gefahr)
       return;
     }
     if (netIsLeader(pe.id)) { edgeArrow(pe.x, pe.y, netPeerRgb(pe), 0.9, '👑 ' + pe.name + ' · ' + d); return; }   // der Leitfisch: immer
