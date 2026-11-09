@@ -88,6 +88,9 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .hud-bosschip { border-color: rgba(255,120,120,0.75); color: #ffd0d0; font-variant-numeric: tabular-nums; }
 .hud-tip { position: absolute; left: 50%; top: 34vh; transform: translateX(-50%); max-width: min(420px, 86vw); padding: 9px 16px; border-radius: 14px; background: rgba(4,18,32,0.78); border: 1px solid rgba(126,182,255,0.5); color: #e6f2ff; font-weight: 800; font-size: 14px; text-align: center; opacity: 0; transition: opacity .6s; pointer-events: none; }
 .hud-tip.show { opacity: 1; }
+body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) .hud-tip { visibility: hidden; }   /* 7.23: schien durch die Karten */
+#screen-levelup, #screen-gameover, #screen-pause:not(.live) { background: radial-gradient(ellipse at center, rgba(2,10,20,0.55), rgba(2,8,16,0.85)); }
+#screen-levelup .panel, #screen-gameover .panel, #screen-pause:not(.live) .panel { background: linear-gradient(180deg, #10304b, #071a2c); }
 .hud-boss-wrap { max-width: 420px; margin: 8px auto 0; opacity: 0; transform: translateY(-6px); transition: all 0.25s ease; }
 .hud-boss-wrap.active { opacity: 1; transform: none; }
 .hud-boss-name {
@@ -206,7 +209,11 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
   font-weight: 800; border: none; border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
 }
 .shop-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
-.shop-buy-btn .shop-miss { display: block; font-size: 10px; font-weight: 800; opacity: 0.9; }
+.shop-buy-btn .shop-miss { display: block; font-size: 10px; font-weight: 800; color: #ffc2ae; margin-top: 1px; }
+.shop-buy-btn.short { position: relative; overflow: hidden; padding-bottom: 10px; }
+.shop-buy-btn.short:disabled { opacity: 1; filter: none; background: rgba(126,224,255,0.1); color: var(--foam); box-shadow: inset 0 0 0 1px rgba(126,224,255,0.3); }
+.shop-buy-btn .shop-have { position: absolute; left: 6px; right: 6px; bottom: 4px; height: 3px; border-radius: 99px; background: rgba(255,255,255,0.12); }
+.shop-buy-btn .shop-have::before { content: ''; display: block; height: 100%; width: var(--w, 0); border-radius: 99px; background: var(--bioluma); }
 .shop-note { font-size: 12px; color: var(--foam-dim); font-weight: 700; margin: -4px 0 6px; }
 .shop-tiers { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
 .tier-chip { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.2); color: var(--foam-dim); }
@@ -231,12 +238,50 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 #strat-ui .st-res { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 58px); z-index: 12; background: rgba(5,15,28,0.72); border: 1px solid rgba(126,224,255,0.25); border-radius: 999px; padding: 5px 12px; font: 800 12.5px 'Nunito', sans-serif; color: var(--foam); white-space: pre; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
 #strat-ui .st-btns { position: fixed; right: calc(env(safe-area-inset-right) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 12; display: flex; flex-direction: column; gap: 6px; width: 132px; }
 #strat-ui .st-btns .btn { padding: 9px 8px; font-size: 13px; }
-#strat-ui .st-cmd.active { background: rgba(94,242,192,0.28); border-color: var(--bioluma); }
+#strat-ui .st-b { display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; line-height: 1.1; }
+#strat-ui .st-b i { font-style: normal; font-size: 16px; width: 20px; text-align: center; flex: none; }
+#strat-ui .st-cmds { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; padding-top: 4px; border-top: 1px solid rgba(126,224,255,0.22); }
+#strat-ui .st-cmds-h { font: 800 10.5px 'Nunito', sans-serif; color: rgba(214,240,255,0.7); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+#strat-ui .st-cmd.active { background: rgba(94,242,192,0.28); border-color: var(--bioluma); box-shadow: inset 0 0 0 1px var(--bioluma); }
+@media (max-width: 520px), (max-height: 520px) {
+  #strat-ui .st-btns { width: 54px; gap: 4px; right: calc(env(safe-area-inset-right) + 6px); bottom: calc(env(safe-area-inset-bottom) + 6px); }
+  #strat-ui .st-btns .btn.st-b { flex-direction: column; justify-content: center; gap: 1px; padding: 5px 2px 4px; font-size: 9.5px; text-align: center; border-radius: 12px; }
+  #strat-ui .st-b i { font-size: 17px; width: auto; line-height: 1.05; }
+  #strat-ui .st-b span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #strat-ui .st-cmds { gap: 4px; padding-top: 4px; }
+  #strat-ui .st-cmds-h { display: none; }
+  #strat-ui .st-panel { width: min(330px, calc(100vw - 84px)); }
+}
 #strat-ui .st-panel { position: fixed; left: calc(env(safe-area-inset-left) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 13; width: min(330px, calc(100vw - 170px)); max-height: 62vh; overflow-y: auto; background: rgba(8,22,38,0.94); border: 1px solid rgba(126,224,255,0.3); border-radius: 14px; padding: 10px; }
 .st-head { display: flex; justify-content: space-between; align-items: center; color: var(--foam); margin-bottom: 6px; }
 .st-list { display: flex; flex-direction: column; gap: 5px; }
 .st-item { display: flex; flex-direction: column; align-items: flex-start; padding: 7px 9px; font-size: 13px; text-align: left; }
 .st-item .btn-sub { margin-left: 0; }
+#strat-ui .st-panel.st-wide { width: min(430px, calc(100vw - 166px)); }
+/* 7.23: panels never cover the Blobi (the camera keeps it in the middle): upright screens keep them in the lower part, wide screens left of the middle */
+@media (orientation: portrait) { #strat-ui .st-panel { max-height: calc(50vh - 50px); } }
+@media (orientation: landscape) { #strat-ui .st-panel, #strat-ui .st-panel.st-wide { width: min(430px, calc(50vw - 40px)); max-height: calc(100vh - 130px); } }
+@media (max-width: 520px) { .st-cards { gap: 5px; } .st-card { padding: 5px 6px; gap: 2px; font-size: 11px; } .st-card-top { gap: 5px; } .st-card-top .st-ico { width: 24px !important; height: 24px !important; } .st-card-name { font-size: 11.5px; } .st-card-meta, .st-card-why { font-size: 10.5px; } }
+.st-group { font: 800 11px 'Nunito', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--foam-dim); margin: 10px 2px 5px; }
+.st-busy + .st-group, .st-head + .st-group { margin-top: 2px; }
+.st-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.st-card { display: flex; flex-direction: column; align-items: stretch; gap: 3px; text-align: left; padding: 7px 8px; border-radius: 11px; border: 1px solid rgba(126,224,255,0.22); background: rgba(126,224,255,0.07); color: var(--foam); font: 700 12px 'Nunito', sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.st-card:not(:disabled):hover { background: rgba(126,224,255,0.16); border-color: rgba(126,224,255,0.5); }
+.st-card:not(:disabled):active { transform: scale(0.97); }
+.st-card:disabled { cursor: default; }
+.st-card.locked, .st-card.full { opacity: 0.5; }
+.st-card:disabled:not(.locked):not(.full) { opacity: 0.8; }
+.st-card-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.st-card-top .st-ico { margin-right: 0; }
+.st-card-name { font-weight: 800; font-size: 12.5px; line-height: 1.15; overflow-wrap: break-word; hyphens: auto; min-width: 0; }
+.st-card-cost { font-weight: 800; color: #ffd76a; }
+.st-card-cost.poor { color: #ff8a8a; }
+.st-card-meta, .st-card-why { color: var(--foam-dim); font-size: 11.5px; }
+.st-busy { display: flex; flex-direction: column; gap: 2px; background: rgba(255,215,106,0.1); border: 1px solid rgba(255,215,106,0.35); border-radius: 10px; padding: 6px 9px; color: #ffe7a6; font: 800 12.5px 'Nunito', sans-serif; margin-bottom: 4px; }
+.st-busy .st-note { font-weight: 600; font-size: 11.5px; margin-top: 0; }
+.st-bar { height: 8px; border-radius: 99px; background: rgba(0,0,0,0.3); overflow: hidden; margin: 5px 0 2px; }
+.st-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ffb84d, #ffd76a); }
+.st-bstat { color: #ffe7a6; }
 .st-up { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 6px 9px; margin: 6px 0; font-size: 12.5px; color: var(--foam); }
 .st-stat { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
 .st-val { font-weight: 600; white-space: nowrap; }
@@ -245,7 +290,7 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .st-ico { flex: none; border-radius: 7px; background: rgba(0,0,0,0.2); vertical-align: middle; margin-right: 8px; }
 .st-lab .st-ico { margin-right: 0; }
 #strat-ui .st-res { display: flex; align-items: center; gap: 12px; }
-.st-stat { display: inline-flex; align-items: center; gap: 4px; }
+#strat-ui .st-res .st-stat { display: inline-flex; align-items: center; gap: 4px; margin-top: 0; }
 .st-i { flex: none; }
 @media (max-width: 520px) { #strat-ui .st-res { gap: 7px; padding: 5px 9px; font-size: 11.5px; } }
 .acc-body { display: flex; flex-direction: column; gap: 8px; text-align: left; }
@@ -384,6 +429,40 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 .instructions-list { text-align: left; padding-left: 0; list-style: none; margin: 0 0 8px; display: flex; flex-direction: column; gap: 10px; }
 .instructions-list li { font-size: 13.5px; line-height: 1.5; color: var(--foam-dim); background: rgba(126,224,255,0.06); border-radius: 12px; padding: 10px 12px; }
 .instructions-list strong { color: var(--foam); }
+.strat-sec { font: 800 10.5px 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.07em; color: var(--foam-dim); text-align: left; margin: 12px 2px 6px; }
+.strat-rings { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.strat-card { --rc: #7eb6ff; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 14px; cursor: pointer; color: var(--foam);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rc) 22%, transparent), rgba(8,26,44,0.6)); border: 1px solid color-mix(in srgb, var(--rc) 55%, transparent); font-family: 'Nunito', sans-serif; transition: transform 0.12s, border-color 0.12s; }
+.strat-card:not(:disabled):hover { transform: translateY(-1px); border-color: var(--rc); }
+.strat-card:disabled { cursor: not-allowed; filter: grayscale(0.7); opacity: 0.55; }
+.strat-card .sc-ic { font-style: normal; font-size: 26px; width: 34px; text-align: center; flex: none; }
+.strat-card .sc-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.strat-card .sc-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.strat-card .sc-name { font-size: 15px; font-weight: 800; }
+.strat-card .sc-tag { font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 99px; background: rgba(255,215,106,0.22); color: #ffe39a; }
+.strat-card .sc-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.strat-card .sc-chip { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 99px; background: rgba(255,255,255,0.1); white-space: nowrap; }
+.strat-card .sc-chip.hard { background: rgba(255,120,120,0.18); color: #ffc4c4; }
+.strat-card .sc-chip.good { background: rgba(94,242,192,0.16); color: #b6ffe4; }
+.strat-card .sc-line { font-size: 11.5px; font-weight: 700; color: var(--foam-dim); }
+.strat-solo { --rc: #9fb3c8; }
+#screen-strat .panel { max-width: 640px; }
+@media (max-height: 760px) { #screen-strat .panel > p { display: none; } #screen-strat .panel h2 { margin-bottom: 4px; } }
+@media (max-width: 520px) { .strat-rings { gap: 6px; } .strat-card { padding: 8px 10px; gap: 8px; } .strat-card .sc-ic { font-size: 22px; width: 28px; } .strat-card .sc-main { gap: 3px; } }
+@media (max-height: 520px) and (orientation: landscape) { .strat-card { padding: 6px 10px; } .strat-card .sc-ic { font-size: 22px; } .strat-sec { margin: 6px 2px 4px; } }
+.howto-tabs { display: flex; gap: 4px; margin: 0 0 10px; }
+.howto-tab { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 3px 6px; border-radius: 12px; border: 1px solid rgba(126,224,255,0.2); background: rgba(126,224,255,0.06); color: var(--foam-dim); font: 800 11px 'Nunito', sans-serif; line-height: 1.15; cursor: pointer; }
+.howto-tab i { font-style: normal; font-size: 18px; }
+.howto-tab.on { background: rgba(94,242,192,0.18); border-color: var(--bioluma); color: var(--foam); }
+.instructions-list:has(.howto-item) { gap: 6px; }
+.instructions-list li:has(.howto-item) { padding: 9px 12px; }
+.howto-item summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 9px; font-size: 14.5px; color: var(--foam); }
+.howto-item summary::-webkit-details-marker { display: none; }
+.howto-item summary::after { content: '▾'; margin-left: auto; opacity: 0.55; transition: transform 0.15s; }
+.howto-item[open] summary::after { transform: rotate(180deg); }
+.howto-item summary i { font-style: normal; font-size: 18px; width: 24px; text-align: center; flex: none; }
+.howto-body { margin-top: 6px; }
+@media (max-width: 400px) { .howto-tabs { gap: 3px; } .howto-tab { font-size: 10px; padding: 6px 1px 5px; letter-spacing: -0.01em; } }
 
 /* ---------- Online ---------- */
 .beta-tag { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font: 900 11px 'Nunito', sans-serif; letter-spacing: 0.6px; background: linear-gradient(135deg, #7eb6ff, #5ef2c0); color: #04241a; }
@@ -564,6 +643,24 @@ h1, h2 { font-family: 'Baloo 2', 'Nunito', sans-serif; margin: 0; }
 body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-area-inset-bottom))}   /* over pause / level-up / game over: below the panel, not on its title */
 #screen-pause.live { background: linear-gradient(180deg, rgba(2,8,16,0) 35%, rgba(2,8,16,0.6)); align-items: flex-end; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 #screen-pause.live .panel { max-width: 420px; padding: 14px 18px; }
+#screen-pause.live .pause-run { display: none; }
+.pause-run { text-align: left; margin: 0 0 12px; }
+.pr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 5px; }
+.pr-stat { background: rgba(126,224,255,0.07); border-radius: 10px; padding: 6px 4px 5px; text-align: center; }
+.pr-stat b { display: block; font-size: 15px; color: var(--foam); white-space: nowrap; }
+.pr-stat span { display: block; font-size: 10px; color: var(--foam-dim); font-weight: 700; line-height: 1.2; }
+.pr-h { font: 800 10.5px 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; color: var(--foam-dim); margin: 10px 0 5px; }
+.pr-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.pr-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 4px 3px 7px; border-radius: 99px; background: rgba(126,224,255,0.08); border: 1px solid rgba(126,224,255,0.18); font-size: 12px; font-weight: 700; color: var(--foam); }
+.pr-chip i { font-style: normal; font-size: 14px; }
+.pr-chip b { font-size: 11px; background: rgba(126,224,255,0.2); border-radius: 99px; padding: 0 6px; min-width: 18px; text-align: center; }
+.pr-chip.max b { background: linear-gradient(135deg, #ffd76a, #ffb347); color: #3a2400; }
+@media (min-width: 760px), (min-width: 600px) and (orientation: landscape) {
+  #screen-pause:not(.live) .panel { max-width: 700px; }
+  #screen-pause:not(.live) .pause-body { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 18px; align-items: start; }
+  #screen-pause:not(.live) .pause-run { margin: 0; }
+}
+@media (max-height: 520px) and (orientation: landscape) { .pr-chip .pr-n { display: none; } .pr-h { margin-top: 6px; } }
 #screen-pause.live h2 { font-size: 19px; margin-bottom: 6px; }
 #screen-pause.live .menu-buttons { flex-direction: row; flex-wrap: wrap; }
 #screen-pause.live .menu-buttons .btn { flex: 1 1 40%; padding: 10px 12px; font-size: 14px; }
@@ -593,7 +690,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
   .pick-card .pick-desc { display: none; }
   .panel-actions { margin-top: 10px; }
   .shop-list, .achievement-list { max-height: 40vh; }
-  .panel > .panel-actions, #screen-gameover .menu-buttons { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: rgba(6,22,38,0.97); }   /* long panels scroll, the buttons stay in sight */   /* the long Anleitung scrolls, the back button stays in sight */
+  .panel > .panel-actions, #screen-gameover .menu-buttons { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: #061626; z-index: 3; box-shadow: 0 -10px 12px -4px #061626; }   /* long panels scroll, the buttons stay in sight */   /* the long Anleitung scrolls, the back button stays in sight */
 }
 /* very small windows (the tray app at 640x400 and down to 560x350) */
 @media (max-height: 440px) and (orientation: landscape) {
@@ -620,8 +717,8 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
   .gameover-stat-value { font-size: 16px; }
   .online-panel .online-label { margin: 3px 0 2px; }
   .online-panel .online-note { margin-bottom: 2px; }
-  #strat-ui .st-btns { width: 96px; gap: 3px; right: 6px; bottom: 6px; }
-  #strat-ui .st-btns .btn { padding: 4px 6px; font-size: 11px; }
+  #strat-ui .st-btns .btn.st-b { padding: 3px 2px; }
+  #strat-ui .st-b i { font-size: 15px; }
   #strat-ui .st-res { top: 48px; padding: 3px 9px; font-size: 11px; gap: 8px; }
   #strat-ui .st-panel { max-height: 72vh; width: min(260px, calc(100vw - 120px)); left: 6px; bottom: 6px; }
   #st-raid { top: 78px !important; font-size: 11px !important; padding: 3px 10px !important; }
@@ -684,13 +781,15 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
     <div id="st-legend" style="display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 136px);z-index:12;background:rgba(90,60,10,0.85);border:1px solid rgba(255,215,106,0.6);border-radius:14px;padding:6px 14px;font-weight:800;font-size:13px;text-align:center;max-width:92vw;"></div>
     <div id="st-raid" style="display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 102px);z-index:12;background:rgba(120,20,30,0.82);border:1px solid rgba(255,140,140,0.5);border-radius:14px;padding:6px 14px;font-weight:800;font-size:13px;text-align:center;"></div>
     <div class="st-btns">
-      <button class="btn btn-secondary" id="st-build">🔨 Bauen</button>
-      <button class="btn btn-primary" id="st-deposit">🟢 Einzahlen</button>
-      <button class="btn btn-secondary" id="st-withdraw">🔵 Abheben</button>
-      <button class="btn btn-secondary st-cmd" id="st-follow">Folgen</button>
-      <button class="btn btn-secondary st-cmd" id="st-hold">Halten</button>
-      <button class="btn btn-secondary st-cmd" id="st-send">Schicken</button>
-      <button class="btn btn-secondary" id="st-map" style="display:none;">🗺️ Karte</button>
+      <button class="btn btn-secondary st-b" id="st-build"><i>🔨</i><span>Bauen</span></button>
+      <button class="btn btn-primary st-b" id="st-deposit"><i>🟢</i><span>Einzahlen</span></button>
+      <button class="btn btn-secondary st-b" id="st-withdraw"><i>🔵</i><span>Abheben</span></button>
+      <div class="st-cmds"><small class="st-cmds-h">Truppen</small>
+      <button class="btn btn-secondary st-b st-cmd" id="st-follow"><i>👣</i><span>Folgen</span></button>
+      <button class="btn btn-secondary st-b st-cmd" id="st-hold"><i>🛡️</i><span>Halten</span></button>
+      <button class="btn btn-secondary st-b st-cmd" id="st-send"><i>🚩</i><span>Schicken</span></button>
+      </div>
+      <button class="btn btn-secondary st-b" id="st-map" style="display:none;"><i>🗺️</i><span>Karte</span></button>
     </div>
     <div class="st-panel" id="strat-panel" style="display:none;"></div>
   </div>
@@ -940,9 +1039,11 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
     <div class="panel">
       <h2>🏰 Strategie</h2>
       <p>Spiele allein oder auf einer Karte mit bis zu 24 Spielern. Wähle, in welchem Ring deine Basis steht.</p>
-      <div class="panel-actions" id="strat-rings" style="flex-direction:column;"></div>
+      <div class="strat-sec">Auf der Karte</div>
+      <div class="strat-rings" id="strat-rings"></div>
+      <div class="strat-sec">Ohne Karte</div>
+      <button class="strat-card strat-solo" id="btn-strat-solo"><i class="sc-ic">🏠</i><span class="sc-main"><b class="sc-name">Allein in meiner Basis</b><small class="sc-line">Nur Wellen – niemand kann dich überfallen.</small></span></button>
       <div class="panel-actions">
-        <button class="btn btn-secondary" id="btn-strat-solo">Allein in meiner Basis</button>
         <button class="btn btn-ghost" id="btn-strat-back">Zurück</button>
       </div>
     </div>
@@ -985,6 +1086,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
   <div class="screen" id="screen-instructions">
     <div class="panel">
       <h2>Anleitung</h2>
+      <div class="howto-tabs" id="howto-tabs" role="tablist"></div>
       <ul class="instructions-list" id="instructions-list"></ul>
       <div class="panel-actions">
         <button class="btn btn-ghost" id="btn-instructions-back">Zurück</button>
@@ -1004,12 +1106,15 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
     <div class="panel">
       <h2>Pause</h2>
       <p class="pause-room" id="pause-room" style="display:none;"></p>
+      <div class="pause-body">
+      <div class="pause-run" id="pause-run"></div>
       <div class="menu-buttons">
         <button class="btn btn-primary" id="btn-resume">Fortsetzen</button>
         <button class="btn btn-secondary" id="btn-mute-pause">Ton umschalten</button>
         <button class="btn btn-secondary" id="btn-gfx-pause">Grafik umschalten</button>
         <button class="btn btn-secondary" id="btn-restart-pause">Neustart</button>
         <button class="btn btn-ghost" id="btn-quit-pause">Zum Menü</button>
+      </div>
       </div>
     </div>
   </div>
@@ -1484,7 +1589,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Wirklich neu starten?","Really restart?","Справді почати знову?"],
 ["Wirklich zum Menü?","Really go to the menu?","Справді до меню?"],
 ["Wirklich kaufen? 💧 {}","Really buy? 💧 {}","Справді купити? 💧 {}"],
-["Noch {} 💧 fehlen","{} 💧 missing","Бракує {} 💧"],
+["{} 💧 fehlen","{} 💧 missing","Бракує {} 💧"],
 ["Kaufen · 💧 {}","Buy · 💧 {}","Купити · 💧 {}"],
 ["🐡 {} gehört jetzt dir!","🐡 {} is yours now!","🐡 {} тепер твій!"],
 ["🔒 {} Danach kaufbar für {} 💧.","🔒 {} Then you can buy it for {} 💧.","🔒 {} Потім можна купити за {} 💧."],
@@ -1663,6 +1768,22 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Halten", "Hold", "Тримати"],
 ["Schicken", "Send", "Відправити"],
 ["Bauen", "Build", "Будувати"],
+["Auf der Karte", "On the map", "На карті"],
+["Ohne Karte", "Without a map", "Без карти"],
+["Nur Wellen – niemand kann dich überfallen.", "Only waves – nobody can raid you.", "Лише хвилі – ніхто не може на тебе напасти."],
+["Zuletzt hier", "Last time here", "Минулого разу тут"],
+["🌊 Wellen ×{}", "🌊 Waves ×{}", "🌊 Хвилі ×{}"],
+["🪸 Korallen +{} %", "🪸 Coral +{} %", "🪸 Корали +{} %"],
+["💎 Kristalle +{} %", "💎 Crystals +{} %", "💎 Кристали +{} %"],
+["{} Plätze · Muschelburg {}–{}", "{} plots · Shell Castle {}–{}", "{} ділянок · Мушлевий замок {}–{}"],
+["Waffen", "Weapons", "Зброя"],
+["Grundlagen", "Basics", "Основи"],
+["Perlen & Shop", "Pearls & shop", "Крамниця"],
+["Bosse & Gebiete", "Bosses & areas", "Боси й локації"],
+["Online", "Online", "Онлайн"],
+["Strategie", "Strategy", "Стратегія"],
+["Truppen", "Troops", "Загони"],
+["Karte", "Map", "Карта"],
 ["Muschelburg", "Shell Castle", "Мушлевий замок"],
 ["Korallenfarm", "Coral Farm", "Коралова ферма"],
 ["Lager", "Storehouse", "Склад"],
@@ -1806,6 +1927,18 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🔧 {} liegt in Ruinen.", "🔧 {} lies in ruins.", "🔧 {} лежить у руїнах."],
 ["🏰 Während du weg warst: +{} 🪸 · +{} 💎", "🏰 While you were away: +{} 🪸 · +{} 💎", "🏰 Поки тебе не було: +{} 🪸 · +{} 💎"],
 ["🏗️ Fertig: {}", "🏗️ Done: {}", "🏗️ Готово: {}"],
+["Wirtschaft", "Economy", "Економіка"],
+["Verteidigung", "Defence", "Оборона"],
+["Truppen und Hilfe", "Troops and support", "Війська та підтримка"],
+["Immer nur ein Bau auf einmal – Mauern gehen sofort.", "Only one build at a time – walls are instant.", "Лише одне будівництво за раз – стіни миттєво."],
+["Wird gebaut", "Under construction", "Будується"],
+["Schritt {} · Profil", "Step {} · Profile", "Крок {} · Профіль"],
+["Schritt {} · Spielart", "Step {} · Game type", "Крок {} · Тип гри"],
+["Schritt {} · PvP-Art", "Step {} · PvP type", "Крок {} · Тип PvP"],
+["Schritt {} · Mit wem", "Step {} · With whom", "Крок {} · З ким"],
+["Schritt {} · Gebiet", "Step {} · Area", "Крок {} · Зона"],
+["Schritt {} · Code", "Step {} · Code", "Крок {} · Код"],
+["⚡ sofort · {}", "⚡ instant · {}", "⚡ миттєво · {}"],
 ["🌊 Eine Welle kommt in {} s!", "🌊 A wave is coming in {} s!", "🌊 Хвиля прийде за {} с!"],
 ["⚠ Boss-Welle: {}!", "⚠ Boss wave: {}!", "⚠ Хвиля з босом: {}!"],
 ["🌊 Welle {} greift deine Basis an!", "🌊 Wave {} attacks your base!", "🌊 Хвиля {} атакує твою базу!"],
@@ -1817,6 +1950,28 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Nicht genug Kristalle.", "Not enough crystals.", "Замало кристалів."],
 ["Mehr Stufen kommen in einem späteren Schritt.", "More levels come in a later step.", "Більше рівнів буде пізніше."],
 ["Es wird schon gebaut – immer nur eins auf einmal.", "Something is already being built – only one at a time.", "Уже щось будується – лише одне за раз."],
+["Beide Baumeister sind beschäftigt.", "Both builders are busy.", "Обидва будівельники зайняті."],
+["Zwei Baumeister: zwei Bauten auf einmal – Mauern gehen sofort.", "Two builders: two builds at a time – walls are instant.", "Два будівельники: два будівництва одночасно – стіни миттєво."],
+["Zweiten Baumeister anheuern", "Hire a second builder", "Найняти другого будівельника"],
+["Ein zweiter Baumeister lässt dich zwei Dinge auf einmal bauen.", "A second builder lets you build two things at a time.", "Другий будівельник дозволяє будувати дві речі одночасно."],
+["Zwei Baumeister arbeiten für dich.", "Two builders work for you.", "На тебе працюють два будівельники."],
+["👷 Ein zweiter Baumeister hilft jetzt mit – zwei Bauten auf einmal.", "👷 A second builder now helps – two builds at a time.", "👷 Тепер допомагає другий будівельник – два будівництва одночасно."],
+["Nicht genug Kristalle.", "Not enough crystals.", "Недостатньо кристалів."],
+["Krabbenwerkstatt", "Crab Workshop", "Крабова майстерня"],
+["Repariert beschädigte Gebäude in der Nähe, eins nach dem anderen, und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.", "Repairs damaged buildings nearby, one after another, and rebuilds ruins for free. Works while you are away too.", "Ремонтує пошкоджені будівлі поруч, одну за одною, і безкоштовно відбудовує руїни. Працює й коли тебе немає."],
+["Reparatur pro Sekunde", "Repair per second", "Ремонт за секунду"],
+["Reichweite (Felder)", "Reach (tiles)", "Дальність (клітинки)"],
+["🔧 {} ist wieder aufgebaut.", "🔧 {} is rebuilt.", "🔧 {} знову відбудовано."],
+["🔧 Wird repariert: {} %", "🔧 Being repaired: {} %", "🔧 Ремонтується: {} %"],
+["Ausbauen auf Stufe {}", "Upgrade to level {}", "Покращити до рівня {}"],
+["Höchste Stufe", "Top level", "Найвищий рівень"],
+["XP einzahlen", "Deposit XP", "Внести XP"],
+["XP abheben", "Withdraw XP", "Зняти XP"],
+["{} XP vom Blobi", "{} XP from your Blobi", "{} XP від Блобі"],
+["{} XP im Tresor", "{} XP in the vault", "{} XP у сховищі"],
+["{} verbessern", "Improve {}", "Покращити: {}"],
+["Stufe {} → {} · {} 💎", "Level {} → {} · {} 💎", "Рівень {} → {} · {} 💎"],
+["Ganz reparieren", "Repair fully", "Повністю полагодити"],
 ["🏰 Muschelburg Stufe {}!", "🏰 Shell Castle level {}!", "🏰 Мушлевий замок, рівень {}!"],
 ["Zuerst die Muschelburg ausbauen.", "Upgrade the Shell Castle first.", "Спершу покращ мушлевий замок."],
 ["Deine Armee ist voll – baue die Brutstätte aus.", "Your army is full – upgrade the Hatchery.", "Твоя армія повна – покращ інкубатор."],
@@ -1829,9 +1984,9 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["⏳ Im Strudel müssen mindestens 3 Spieler sein, sonst schläft die Legende.", "⏳ At least 3 players must be in the Maelstrom, otherwise the legend sleeps.", "⏳ У вирі має бути щонайменше 3 гравці, інакше легенда спить."],
 ["🏆 Belohnung vom Großen Strudel: {} 💎 und {} XP.", "🏆 Reward from the Great Maelstrom: {} 💎 and {} XP.", "🏆 Нагорода з Великого виру: {} 💎 і {} XP."],
 ["Das Lager ist voll – nicht alle Kristalle passen hinein.", "The storehouse is full – not all the crystals fit.", "Склад повний – не всі кристали влізли."],
-["🌟 {} erwacht im Großen Strudel – noch {} s", "🌟 {} awakens in the Great Maelstrom – {} s left", "🌟 {} прокидається у Великому вирі – ще {} с"],
+["🌟 {} erwacht im Großen Strudel in {} s", "🌟 {} awakens in the Great Maelstrom in {} s", "🌟 {} прокинеться у Великому вирі за {} с"],
 ["⚔ {} im Großen Strudel: mindestens 3 Spieler nötig (jetzt {})", "⚔ {} in the Great Maelstrom: at least 3 players needed (now {})", "⚔ {} у Великому вирі: потрібно щонайменше 3 гравці (зараз {})"],
-["⚔ {} im Großen Strudel: noch {} % Leben, {} Spieler drin", "⚔ {} in the Great Maelstrom: {} % health left, {} players inside", "⚔ {} у Великому вирі: лишилось {} % здоров'я, {} гравців усередині"],
+["⚔ {} im Großen Strudel: {} % Leben übrig, {} Spieler drin", "⚔ {} in the Great Maelstrom: {} % health left, {} players inside", "⚔ {} у Великому вирі: лишилось {} % здоров'я, {} гравців усередині"],
 ["Höchste Stufe für jetzt.", "Highest level for now.", "Найвищий рівень наразі."],
 ["Der Perlentresor ist voll – baue ihn aus.", "The Pearl Vault is full – upgrade it.", "Перлове сховище повне – покращ його."],
 ["Dein XP-Balken ist leer.", "Your XP bar is empty.", "Твоя смуга XP порожня."],
@@ -2037,7 +2192,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🌐 {} · {} Spieler – deine Gegner warten, bis du weiterspielst.","🌐 {} · {} players – your enemies wait until you play on.","🌐 {} · гравців: {} – твої вороги чекають, поки ти продовжиш."],
 ["⚠ Ein Weltboss nähert sich! ⚠","⚠ A world boss is coming! ⚠","⚠ Наближається світовий бос! ⚠"],
 ["⚠ Ein Boss nähert sich! ⚠","⚠ A boss is coming! ⚠","⚠ Наближається бос! ⚠"],
-["💔 Ohnmächtig – noch {} s","💔 Knocked out – {} s left","💔 Знепритомнів – ще {} с"],
+["💔 Ohnmächtig – zurück in {} s","💔 Knocked out – back in {} s","💔 Знепритомнів – повернешся за {} с"],
 ["Zweite Chance unten antippen – oder ein Freund rettet dich.","Tap Second Chance below – or a friend rescues you.","Торкнись «Другий шанс» унизу – або друг тебе врятує."],
 ["Rettung läuft … bleib ruhig!","Rescue in progress … stay calm!","Рятування триває … не рухайся!"],
 ["Ein Freund muss 3 s neben dir bleiben, um dich zu retten.","A friend has to stay next to you for 3 s to rescue you.","Друг має пробути поруч 3 с, щоб тебе врятувати."],
@@ -2224,7 +2379,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Schritt {} von {}", "Step {} of {}", "Крок {} з {}"],
 ["Team-PvP", "Team PvP", "Командне PvP"],
 ["🟢 {} spielen gerade – spring dazu!", "🟢 {} playing right now – jump in!", "🟢 {} грають зараз – приєднуйся!"],
-["{} – wartet noch {} Min. auf dich, dann ist er weg", "{} – waits {} more min. for you, then it's gone", "{} – чекає на тебе ще {} хв, потім зникне"],
+["{} – wartet {} Min. auf dich, dann ist er weg", "{} – waits {} more min. for you, then it's gone", "{} – чекає на тебе ще {} хв, потім зникне"],
 ["Du landest im Raum, in dem dort schon die meisten spielen (bis 24).", "You land in the room where most people already play there (up to 24).", "Потрапиш у кімнату, де там уже грає найбільше гравців (до 24)."],
 ["Euer privater Raum für bis zu 8. Danach siehst du den Code für deine Freunde.", "Your private room for up to 8. Then you see the code for your friends.", "Ваша приватна кімната до 8 гравців. Потім побачиш код для друзів."],
 ["Los geht’s! · {} warten", "Let’s go! · {} waiting", "Поїхали! · {} чекають"],
@@ -2257,14 +2412,14 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Du hast jetzt", "You now have", "Тепер у тебе"],
 ["genug für", "enough for", "вистачить на"],
 ["{} Perlen", "{} pearls", "{} перлин"],
-["noch {}", "{} more", "ще {}"],
+["{} fehlen", "{} missing", "бракує {}"],
 ["Zieh oder WASD zum Schwimmen · Überlebe bis zum Boss bei 5:00", "Drag or use WASD to swim · Survive until the boss at 5:00", "Тягни або WASD, щоб плисти · Виживи до боса о 5:00"],
 ["🔒 Strategie: Nach dem ersten Boss", "🔒 Strategy: After the first boss", "🔒 Стратегія: після першого боса"],
 ["Nach dem ersten Boss", "After the first boss", "Після першого боса"],
 ["Bisher: Level {}", "So far: level {}", "Поки що: рівень {}"],
 ["Zieh zum Schwimmen · Überlebe bis zum Boss bei 5:00", "Drag to swim · Survive until the boss at 5:00", "Тягни, щоб плисти · Виживи до боса о 5:00"],
 ["Boss in {}", "Boss in {}", "Бос через {}"],
-["{}: noch {} % Leben", "{}: {} % health left", "{}: ще {} % здоров'я"],
+["{}: {} % Leben übrig", "{}: {} % health left", "{}: ще {} % здоров'я"],
 ["🔇 Ton: aus", "🔇 Sound: off", "🔇 Звук: вимк."],
 ["🔊 Ton: an", "🔊 Sound: on", "🔊 Звук: увімк."],
 ["🖼️ Grafik: automatisch", "🖼️ Graphics: automatic", "🖼️ Графіка: авто"],
@@ -2296,7 +2451,14 @@ de: `<li><strong>Bewegen:</strong> WASD oder Pfeiltasten – auf Mobilgeräten e
 <li><strong>Leitfisch & Schwarmruf:</strong> Online sammelst du <strong>Schwarmpunkte</strong> (Gegner 1, Elite 3, Champion 20, Boss 50, einen Freund retten 15, im PvP einen Spieler besiegen 30). Der beste aktive Spieler des Raums (im PvP: jedes Teams) trägt die Krone 👑 und ist der <strong>Leitfisch</strong>. Er kann alle 3 Minuten mit 📯 (Taste R) seinen Schwarm rufen: Wer „Folgen“ antippt (oder F drückt), reitet in höchstens 3 Sekunden auf einer Strömung zu ihm, landet mit einer Welle, die Gegner wegstösst, und bekommt 30 Sekunden lang den <strong>Schwarmgeist</strong>: +15 % Schaden in seiner Nähe. Wer schon nah ist, bekommt den Bonus gleich. Im PvP ist ein besiegter Leitfisch 60 Punkte wert. Bei „Jeder gegen jeden“ gibt es keinen Schwarmruf: Der Beste trägt nur die Krone – und alle jagen ihn.</li>
 <li><strong>Erfolge:</strong> Jeder Erfolg gibt einmalig Perlen. Neue Erfolge sind mit NEU markiert – hol dir die Belohnung im Menü unter Erfolge mit „Einlösen“ ab.</li>
 <li><strong>Pause:</strong> ESC-Taste oder der Pause-Knopf oben rechts. „Neustart“ fragt zur Sicherheit nach; „Zum Menü“ speichert deinen Lauf.</li>
-<li><strong>Sprache:</strong> Oben im Hauptmenü wählst du Deutsch, Englisch oder Ukrainisch (DE · EN · UA).</li>`,
+<li><strong>Sprache:</strong> Oben im Hauptmenü wählst du Deutsch, Englisch oder Ukrainisch (DE · EN · UA).</li>
+<li><strong>Strategie-Basis:</strong> Unter „🏰 Strategie“ (offen nach deinem ersten Boss) baust du rund um die <strong>Muschelburg</strong> eine eigene Basis. Dein Blobi kämpft wie gewohnt und behält Level und Waffen. Etwa alle 2,5 Minuten greift eine Welle die Basis an – Türme, Mauern und Truppen halten sie auf.</li>
+<li><strong>Bauen:</strong> In deiner Basis öffnet „🔨 Bauen“ die Gebäude: wähle eins und tippe auf einen freien Platz. Tippst du ein Gebäude an, kannst du es ausbauen, verschieben oder reparieren. Bauen braucht Zeit (die Uhr läuft auch, wenn das Spiel zu ist), und es wird immer nur eins auf einmal gebaut – ab Muschelburg 5 heuerst du einen zweiten Baumeister an. Kein Gebäude kann eine höhere Stufe haben als die Muschelburg.</li>
+<li><strong>Rohstoffe & XP:</strong> Korallenfarmen bringen Korallen 🪸, Kristallbohrer Kristalle 💎, und das Lager bestimmt, wie viel du davon halten kannst. „🟢 Einzahlen“ legt die XP aus deinem Balken in den Perlentresor, „🔵 Abheben“ holt sie zurück.</li>
+<li><strong>Truppen:</strong> Die Brutstätte trainiert mit XP aus dem Tresor Truppen. Unten rechts sagst du ihnen, was sie tun: <strong>Folgen</strong> (sie schwimmen mit dir), <strong>Halten</strong> (sie bewachen die Stelle, an der du gerade bist) oder <strong>Schicken</strong> (tippe danach auf das Ziel). Schwer verletzte Truppen erholen sich an der Heilquelle.</li>
+<li><strong>Reparieren:</strong> Zerstörte Gebäude werden zu Ruinen; sie zu reparieren kostet 30 % ihrer Stufe. Beschädigte Gebäude machst du mit „Ganz reparieren“ wieder heil – oder die Krabbenwerkstatt flickt die Gebäude in ihrer Nähe von selbst.</li>
+<li><strong>Strategiekarte:</strong> Wählst du einen Ring statt „Allein“, liegt deine Basis auf einer gemeinsamen Karte mit bis zu 24 Spielern. Schwimmst du in eine fremde Basis, beginnt ein Überfall (höchstens 3 Minuten): Für zerstörte Gebäude gibt es Beute – und andere können dich genauso überfallen. Neue Basen sind 3 Tage lang oder bis Muschelburg 3 geschützt. „🗺️ Karte“ (Taste M) zeigt alle Basen.</li>
+`,
 en: `<li><strong>Move:</strong> WASD or arrow keys – on phones and tablets just drag on the screen.</li>
 <li><strong>Attack:</strong> Automatic – focus completely on dodging!</li>
 <li><strong>Level-ups:</strong> Collect the cores of defeated enemies and choose new weapons or upgrades.</li>
@@ -2319,7 +2481,14 @@ en: `<li><strong>Move:</strong> WASD or arrow keys – on phones and tablets jus
 <li><strong>Lead Fish & Swarm Call:</strong> Online you collect <strong>swarm points</strong> (enemy 1, elite 3, champion 20, boss 50, rescuing a friend 15, in PvP defeating a player 30). The best active player in the room (in PvP: in each team) wears the crown 👑 and is the <strong>Lead Fish</strong>. Every 3 minutes they can call their swarm with 📯 (key R): whoever taps “Follow” (or presses F) rides a current to them in at most 3 seconds, lands with a wave that pushes enemies away and gets the <strong>Swarm Spirit</strong> for 30 seconds: +15 % damage near the Lead Fish. Anyone who is already close gets the bonus right away. In PvP a defeated Lead Fish is worth 60 points. In “Free-for-all” there is no Swarm Call: the best player only wears the crown – and everyone hunts him.</li>
 <li><strong>Achievements:</strong> Every achievement gives pearls once. New achievements are marked NEW – collect the reward in the menu under Achievements with “Claim”.</li>
 <li><strong>Pause:</strong> The ESC key or the pause button at the top right. “Restart” asks to be sure; “Menu” saves your run.</li>
-<li><strong>Language:</strong> At the top of the main menu you choose German, English or Ukrainian (DE · EN · UA).</li>`,
+<li><strong>Language:</strong> At the top of the main menu you choose German, English or Ukrainian (DE · EN · UA).</li>
+<li><strong>Strategy base:</strong> Under “🏰 Strategy” (open after your first boss) you build your own base around the <strong>Shell Castle</strong>. Your Blobi fights as usual and keeps its level and weapons. About every 2.5 minutes a wave attacks the base – towers, walls and troops hold it back.</li>
+<li><strong>Building:</strong> Inside your base, “🔨 Build” lists the buildings: pick one and tap a free spot. Tap a building to upgrade, move or repair it. Building takes time (the clock runs even while the game is closed), and only one thing is built at a time – from Shell Castle 5 you can hire a second builder. No building can have a higher level than the Shell Castle.</li>
+<li><strong>Resources & XP:</strong> Coral Farms make coral 🪸, Crystal Drills make crystals 💎, and the Storehouse decides how much of it you can hold. “🟢 Deposit” puts the XP from your bar into the Pearl Vault, “🔵 Withdraw” takes it back.</li>
+<li><strong>Troops:</strong> The Hatchery trains troops with XP from the vault. At the bottom right you tell them what to do: <strong>Follow</strong> (they swim with you), <strong>Hold</strong> (they guard the spot where you are) or <strong>Send</strong> (then tap the target). Badly hurt troops recover at the Healing Spring.</li>
+<li><strong>Repairing:</strong> Destroyed buildings become ruins; repairing one costs 30 % of its level. Damaged buildings are fixed with “Repair fully” – or the Crab Workshop mends the buildings near it by itself.</li>
+<li><strong>Strategy map:</strong> If you choose a ring instead of “Alone”, your base lies on a shared map with up to 24 players. Swim into someone else's base and a raid begins (3 minutes at most): destroyed buildings give loot – and others can raid you the same way. New bases are protected for 3 days or until Shell Castle 3. “🗺️ Map” (key M) shows all bases.</li>
+`,
 uk: `<li><strong>Рух:</strong> WASD або стрілки – на телефоні чи планшеті просто веди пальцем по екрану.</li>
 <li><strong>Атака:</strong> Автоматична – зосередься на тому, щоб ухилятися!</li>
 <li><strong>Нові рівні:</strong> Збирай ядра переможених ворогів і обирай нову зброю або покращення.</li>
@@ -2342,7 +2511,14 @@ uk: `<li><strong>Рух:</strong> WASD або стрілки – на телеф
 <li><strong>Вожак і поклик зграї:</strong> Онлайн ти збираєш <strong>очки зграї</strong> (ворог 1, еліта 3, чемпіон 20, бос 50, порятунок друга 15, у PvP перемога над гравцем 30). Найкращий активний гравець кімнати (у PvP – кожної команди) носить корону 👑 і є <strong>вожаком</strong>. Кожні 3 хвилини він може покликати зграю кнопкою 📯 (клавіша R): хто торкнеться «За ним» (або натисне F), за 3 секунди максимум допливає до нього на течії, приземляється з хвилею, що відштовхує ворогів, і на 30 секунд отримує <strong>дух зграї</strong>: +15 % шкоди поруч із вожаком. Хто вже поруч, отримує бонус одразу. У PvP переможений вожак коштує 60 очок. У режимі «Кожен сам за себе» поклику зграї немає: найкращий лише носить корону – і всі на нього полюють.</li>
 <li><strong>Досягнення:</strong> Кожне досягнення один раз дає перлини. Нові позначені як НОВЕ – забери нагороду в меню в розділі «Досягнення» кнопкою «Забрати».</li>
 <li><strong>Пауза:</strong> Клавіша ESC або кнопка паузи вгорі праворуч. «Почати знову» перепитує для певності; «До меню» зберігає забіг.</li>
-<li><strong>Мова:</strong> Угорі головного меню обираєш німецьку, англійську або українську (DE · EN · UA).</li>`
+<li><strong>Мова:</strong> Угорі головного меню обираєш німецьку, англійську або українську (DE · EN · UA).</li>
+<li><strong>Стратегічна база:</strong> У «🏰 Стратегія» (відкривається після твого першого боса) ти будуєш власну базу навколо <strong>Мушлевого замку</strong>. Твій Блобі б'ється як завжди і зберігає рівень та зброю. Приблизно кожні 2,5 хвилини на базу нападає хвиля – вежі, стіни й загони її стримують.</li>
+<li><strong>Будівництво:</strong> На своїй базі натисни «🔨 Будувати»: вибери будівлю й торкнися вільного місця. Торкнись будівлі, щоб покращити, перенести чи полагодити її. Будівництво потребує часу (годинник іде, навіть коли гру закрито), і водночас будується лише щось одне – з Мушлевого замку 5 можна найняти другого будівельника. Жодна будівля не може мати вищий рівень, ніж Мушлевий замок.</li>
+<li><strong>Ресурси й XP:</strong> Коралові ферми дають корали 🪸, кристальні бури – кристали 💎, а склад визначає, скільки ти можеш зберігати. «🟢 Внести» кладе XP з твоєї смуги в Перлове сховище, «🔵 Зняти» забирає їх назад.</li>
+<li><strong>Загони:</strong> Інкубатор тренує загони за XP зі сховища. Унизу праворуч ти кажеш їм, що робити: <strong>За ним</strong> (пливуть із тобою), <strong>Тримати</strong> (охороняють місце, де ти зараз) або <strong>Відправити</strong> (потім торкнись цілі). Тяжко поранені загони відновлюються біля Цілющого джерела.</li>
+<li><strong>Ремонт:</strong> Зруйновані будівлі стають руїнами; ремонт коштує 30 % їхнього рівня. Пошкоджені будівлі лагодить кнопка «Повністю полагодити» – або Крабова майстерня сама латає будівлі поруч.</li>
+<li><strong>Стратегічна карта:</strong> Якщо вибрати кільце замість «Сам», твоя база лежить на спільній карті з до 24 гравців. Запливи на чужу базу – і почнеться набіг (щонайбільше 3 хвилини): за зруйновані будівлі є здобич – і інші так само можуть напасти на тебе. Нові бази захищені 3 дні або до Мушлевого замку 3. «🗺️ Карта» (клавіша M) показує всі бази.</li>
+`
 };
 
 /* ============================================================
@@ -2533,9 +2709,39 @@ function renderLangToggle() {
   if (!wrap) return;
   wrap.querySelectorAll('.lang-opt').forEach(function(b){ const on = b.getAttribute('data-lang') === LANG; b.classList.toggle('selected', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
 }
+// 7.23: die Anleitung in fünf Themen (Reiter); jeder Punkt ist eine Zeile mit Symbol und Titel, die sich zum Lesen aufklappt (der erste ist offen)
+const HOWTO_TABS = [
+  ['🎮', 'Grundlagen', [0, 1, 2, 10, 11, 16, 21, 22]],
+  ['💧', 'Perlen & Shop', [3, 4, 5, 6, 12, 20]],
+  ['👑', 'Bosse & Gebiete', [7, 8, 15, 9, 13, 14]],
+  ['🌐', 'Online', [17, 18, 19]],
+  ['🏰', 'Strategie', [23, 24, 25, 26, 27, 28]],
+];
+const HOWTO_ICONS = ['🕹️', '⚔️', '⬆️', '💧', '🍀', '🛒', '🐡', '👑', '💥', '🌊', '🫧', '💚', '💖', '🔓', '🗺️', '🏆', '▶️', '🌐', '🤝', '📯', '🏅', '⏸️', '🌍', '🏰', '🔨', '🪸', '🐟', '🔧', '🧭'];
+let howtoTab = 0;
 function renderInstructions() {
-  const ul = document.getElementById('instructions-list');
-  if (ul) ul.innerHTML = INSTRUCTIONS[LANG] || INSTRUCTIONS.de;
+  const ul = document.getElementById('instructions-list'), tabs = document.getElementById('howto-tabs');
+  if (!ul || !tabs) return;
+  const tmp = document.createElement('ul'); tmp.innerHTML = INSTRUCTIONS[LANG] || INSTRUCTIONS.de;
+  const items = Array.prototype.slice.call(tmp.children);
+  tabs.textContent = '';
+  HOWTO_TABS.forEach(function(t, i){
+    const b = el('button', 'howto-tab' + (i === howtoTab ? ' on' : '')); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === howtoTab ? 'true' : 'false');
+    b.appendChild(el('i', null, t[0])); b.appendChild(el('span', null, t[1]));
+    b.addEventListener('click', function(){ Sfx.click(); howtoTab = i; renderInstructions(); ul.scrollIntoView({ block: 'nearest' }); });
+    tabs.appendChild(b);
+  });
+  ul.textContent = '';
+  HOWTO_TABS[howtoTab][2].forEach(function(n, k){
+    const li = items[n]; if (!li) return;
+    const st = li.querySelector('strong'), title = st ? st.textContent.replace(/:\s*$/, '') : '';
+    if (st) st.remove();
+    const d = el('details', 'howto-item'); if (k === 0) d.open = true;
+    const sm = el('summary'); sm.appendChild(el('i', null, HOWTO_ICONS[n] || '•')); sm.appendChild(el('b', null, title));
+    const body = el('div', 'howto-body'); body.innerHTML = li.innerHTML.replace(/^\s+/, '');
+    d.appendChild(sm); d.appendChild(body);
+    const w = el('li'); w.appendChild(d); ul.appendChild(w);
+  });
 }
 
 /* ============================================================
@@ -4055,6 +4261,7 @@ function updateProjectiles(dt) {
       }
     }
 
+    if (!remove && strategyMode && stShotHit(pr)) remove = true;
     if (!remove && distXY(pr.x, pr.y, player.x, player.y) < pr.r + player.r && invulnTimer <= 0) {
       damagePlayer(pr.remote ? netCapHit(pr.dmg) : pr.dmg);
       if (pr.isInk) player.slowTimer = 2.2;
@@ -7352,9 +7559,35 @@ function hardPause() {
   if (gameState !== 'playing') return;
   pauseOverlay = false; gameState = 'paused'; clearInput(); showScreen('screen-pause'); pauseRoomText();
 }
+// 7.23: die Pause zeigt den Lauf: Zeit, Level, Besiegte, Perlen, dazu Waffen und Verbesserungen mit ihrer Stufe (nicht im Online-Streifen, der das Spiel offen lässt)
+function pauseRunInfo() {
+  const box = document.getElementById('pause-run'); if (!box || !player) return;
+  box.textContent = '';
+  const st = el('div', 'pr-stats');
+  const add = function(ic, v, l){ const c = el('div', 'pr-stat'); c.appendChild(el('b', null, ic + ' ' + v)); c.appendChild(el('span', null, l)); st.appendChild(c); };
+  add('\u23F1', Math.floor(runTime / 60) + ':' + String(Math.floor(runTime % 60)).padStart(2, '0'), '\u00DCberlebt');
+  add('\u2B50', runLevel, 'Level erreicht');
+  add('\uD83D\uDC80', runKills, 'Gegner besiegt');
+  if (!strategyMode) add('\uD83D\uDCA7', runPearls, 'Perlen gesammelt');
+  box.appendChild(st);
+  const grp = function(title, defs, have){
+    const ids = Object.keys(defs).filter(function(id){ return (have[id] || 0) > 0; }); if (!ids.length) return;
+    box.appendChild(el('div', 'pr-h', title));
+    const row = el('div', 'pr-chips');
+    ids.forEach(function(id){
+      const lv = have[id], max = defs[id].maxLevel, c = el('div', 'pr-chip' + (lv >= max ? ' max' : ''));
+      c.appendChild(el('i', null, LEVELUP_ICONS[id] || '\u2728')); c.appendChild(el('span', 'pr-n', defs[id].name)); c.appendChild(el('b', null, lv >= max ? 'Max' : String(lv)));
+      row.appendChild(c);
+    });
+    box.appendChild(row);
+  };
+  grp('Waffen', WEAPON_DEFS, player.weapons || {});
+  grp('Verbesserungen', PASSIVE_DEFS, player.passives || {});
+}
 function pauseRoomText() {
   const sp = document.getElementById('screen-pause');
   if (sp) sp.classList.toggle('live', !!pauseOverlay);
+  pauseRunInfo();
   const pr = document.getElementById('pause-room');
   if (!pr) return;
   pr.style.display = Net.on ? '' : 'none';
@@ -11780,7 +12013,7 @@ function drawDownBanner() {
   ctx.save();
   ctx.textAlign = 'center';
   ctx.fillStyle = '#ff8a9a'; ctx.shadowColor = '#ff5c72'; ctx.shadowBlur = 14;
-  const t1 = '\uD83D\uDC94 Ohnm\u00E4chtig \u2013 noch ' + Math.max(0, Math.ceil(playerDown)) + ' s';
+  const t1 = '\uD83D\uDC94 Ohnm\u00E4chtig \u2013 zur\u00FCck in ' + Math.max(0, Math.ceil(playerDown)) + ' s';
   let size = 26;
   ctx.font = '700 ' + size + 'px "Baloo 2", sans-serif';
   const w = ctx.measureText(t1).width;
@@ -12611,8 +12844,8 @@ const STRAT_KEY = 'blobfischStrategyBase';
 // ST_REACH: die Reichweiten der Verteidigung, gemessen an der früheren Kachel von 48.
 const ST_FOE_DMG = 0.7, ST_BOSS_HP = 0.5, ST_BOSS_DMG = 0.35, ST_CHAMP_HP = 0.5;   // 7.8: Gegner der Strategie sind schwächer (Bosse und Champions am meisten); 7.21: Boss-HP 0,7 -> 0,5, Boss-Schaden 0,5 -> 0,35
 const ST_TILE = 128, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 6, ST_MAX_MB = 10, ST_ARMY_MAX = 36, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
-const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 0 }, { grid: 11, k: 800, c: 0, t: 0 }, { grid: 11, k: 1500, c: 60, t: 180 }, { grid: 13, k: 3000, c: 150, t: 420 },
-  { grid: 13, k: 5000, c: 300, t: 600 }, { grid: 15, k: 8000, c: 500, t: 1800 }, { grid: 15, k: 12000, c: 800, t: 3600 }, { grid: 17, k: 17000, c: 1200, t: 5400 }, { grid: 17, k: 25000, c: 2000, t: 7200 }];     // 7.15: Stufen 6-10 (Plan: Muschelburg-Tabelle)
+const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 60 }, { grid: 11, k: 800, c: 0, t: 120 }, { grid: 11, k: 1500, c: 60, t: 300 }, { grid: 13, k: 3000, c: 150, t: 600 },
+  { grid: 13, k: 5000, c: 300, t: 900 }, { grid: 15, k: 8000, c: 500, t: 2700 }, { grid: 15, k: 12000, c: 800, t: 5400 }, { grid: 17, k: 17000, c: 1200, t: 7200 }, { grid: 17, k: 25000, c: 2000, t: 10800 }];     // 7.15: Stufen 6-10 (Plan: Muschelburg-Tabelle); 7.23: Bauzeiten ×1,5, Stufe 2 und 3 brauchen jetzt auch Zeit
 // Gebäude: Grösse (Kacheln), ab welcher Muschelburg, Grundkosten (Korallen), HP, Anzahl je Muschelburg-Stufe
 const ST_B = {
   muschelburg:    { name: 'Muschelburg',     icon: '🏰', size: 3, from: 1, hp: 1500, k: 0,   col: '#e8c27a', max: function(){ return 1; } },
@@ -12630,7 +12863,8 @@ const ST_B = {
   heilquelle:     { name: 'Heilquelle',      icon: '⛲', size: 2, from: 4, hp: 300,  k: 240, col: '#9effc9', max: function(){ return 1; } },
   fischschule:    { name: 'Fischschule',     icon: '🏫', size: 2, from: 4, hp: 300,  k: 300, col: '#ffd76a', max: function(){ return 1; } },
   elektroaal:     { name: 'Elektroaal-Turm', icon: '⚡', size: 2, from: 5, hp: 350,  k: 400, col: '#5ef2c0', max: function(m){ return m >= 8 ? 2 : 1; } },
-  korallenspeer:  { name: 'Korallenspeer-Turm', icon: '🔱', size: 2, from: 7, hp: 450, k: 520, col: '#ffb38a', max: function(m){ return m >= 8 ? 2 : 1; } }
+  korallenspeer:  { name: 'Korallenspeer-Turm', icon: '🔱', size: 2, from: 7, hp: 450, k: 520, col: '#ffb38a', max: function(m){ return m >= 8 ? 2 : 1; } },
+  krabbenwerkstatt: { name: 'Krabbenwerkstatt', icon: '🔧', size: 2, from: 3, hp: 350, k: 180, col: '#ffb070', max: function(m){ return m >= 7 ? 2 : 1; } }      // 7.23: repariert Gebäude in Reichweite
 };
 // Truppen: ab Muschelburg, Kosten (eingezahlte XP), Trainingszeit (s), HP, Schaden, Tempo, Reichweite, Takt
 const ST_T = {
@@ -12645,7 +12879,23 @@ let strategyMode = false, Base = null, stTroops = [], stCmd = 'follow', stHold =
 let stWaveT = 0, stSaveT = 0, stBuilt = null, stAnchor = null, stTrickleT = 0;
 function stLevelCost(type, lv) {      // Kosten der Stufe lv (1 = bauen)
   const d = ST_B[type], k = Math.round(d.k * Math.pow(1.8, lv - 1)), c = lv >= 3 ? Math.round(d.k * 0.08 * Math.pow(1.8, lv - 3)) : 0;
-  return { k: k, c: c, t: lv <= 3 ? 0 : lv === 4 ? 120 : 300 };
+  return { k: k, c: c, t: stBuildTime(type, lv) };
+}
+// 7.23: Bauzeiten in s. Auch ein neues Gebäude (Stufe 1) und die Stufen 2 und 3 brauchen jetzt Zeit; teure Gebäude länger (Faktor aus den Grundkosten).
+// Mauern bauen sich sofort (es gibt viele davon) und brauchen erst ab Stufe 4 Zeit; Stachelfallen stehen nach 10 s.
+const ST_BT = [0, 0, 45, 120, 300, 600, 900, 1500, 2400, 3600, 5400];
+function stBuildTime(type, lv) {
+  if (type === 'muschelburg') return (ST_MB[lv] && ST_MB[lv].t) || 0;
+  if (type === 'korallenmauer') return lv <= 3 ? 0 : lv === 4 ? 150 : 375;
+  const d = ST_B[type];
+  if (lv === 1) return type === 'stachelfalle' ? 10 : Math.round((15 + d.k * 0.25) / 5) * 5;
+  return Math.round(ST_BT[Math.min(lv, 10)] * Math.max(0.6, Math.min(1.5, 0.5 + d.k / 400)) / 5) * 5;
+}
+function stDur(s) {                    // 45 s · 3 min · 2 min 30 s · 1 h 30 min
+  s = Math.max(0, Math.ceil(s));
+  if (s < 60) return s + ' s';
+  if (s < 3600) { const m = Math.floor(s / 60), r = s % 60; return m + ' min' + (r ? ' ' + r + ' s' : ''); }
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60); return h + ' h' + (m ? ' ' + m + ' min' : '');
 }
 function stDay() { return Math.floor(Date.now() / 86400000); }
 function stNewBase() {
@@ -12759,8 +13009,8 @@ function stTick(secs, offline) {
     if (offline) Base.troops.push({ type: q.type, hp: stTroopMaxHp(q.type) }); else stSpawnTroop(q.type);
     out.troops++;
   }
-  Base.buildings.forEach(function(b){ if (b.upUntil && b.upUntil <= Date.now()) { b.lv++; b.hp = stMaxHp(b); delete b.upUntil; out.built = ST_B[b.type].name; if (b.type === 'muschelburg') Base.mb = b.lv; } });
-  if (Base.build && Base.build <= Date.now()) Base.build = null;
+  Base.buildings.forEach(function(b){ if (b.upUntil && b.upUntil <= Date.now()) { if (b.nb) delete b.nb; else b.lv++; b.hp = stMaxHp(b); delete b.upUntil; out.built = ST_B[b.type].name; if (b.type === 'muschelburg') { const n0 = stGrid(); Base.mb = b.lv; if (!offline && stGrid() !== n0) stGridAnim = { n0: n0, at: Date.now() }; } if (!offline) stDoneAt.set(b, Date.now()); } });
+  stWorkshops(secs, offline);
   return out;
 }
 function stMaxHpAt(type, lv) { return Math.round(ST_B[type].hp * (1 + 0.4 * (lv - 1))); }
@@ -13026,9 +13276,9 @@ function stLegendText() {                  // die Zeile für das Banner ('' = ke
   const lg = SN.lg;
   if (!lg || RD || !strategyMode) return '';
   const left = Math.max(0, Math.ceil(lg.s - (performance.now() - lg.at) / 1000)), name = BOSS_TYPES[lg.ty].name;
-  return lg.st === 'call' ? '🌟 ' + name + ' erwacht im Großen Strudel – noch ' + left + ' s'
+  return lg.st === 'call' ? '🌟 ' + name + ' erwacht im Großen Strudel in ' + left + ' s'
     : lg.n < 3 ? '⚔ ' + name + ' im Großen Strudel: mindestens 3 Spieler nötig (jetzt ' + lg.n + ')'
-    : '⚔ ' + name + ' im Großen Strudel: noch ' + Math.round(lg.f * 100) + ' % Leben, ' + lg.n + ' Spieler drin';
+    : '⚔ ' + name + ' im Großen Strudel: ' + Math.round(lg.f * 100) + ' % Leben übrig, ' + lg.n + ' Spieler drin';
 }
 function stLegendBanner() {
   const e = document.getElementById('st-legend'); if (!e) return;
@@ -13309,7 +13559,7 @@ function raidResult(m) {
   const cp = stCaps(), share = Math.max(0, Math.min(RAID_SHARE_FULL, +m.share || 0)), take = {};
   ['k', 'c', 'xp'].forEach(function(r){ const free = Math.max(0, Base.res[r] - RAID_PROTECT * cp[r]); take[r] = Math.floor(free * share); Base.res[r] -= take[r]; });
   let ruined = 0;
-  (m.ruin || []).forEach(function(e){ const b = Base.buildings.filter(function(x){ return x.type === e[0] && x.x === e[1] && x.y === e[2]; })[0]; if (b && !b.ruin && b.type !== 'muschelburg') { b.ruin = true; b.hp = 0; delete b.upUntil; ruined++; } });
+  (m.ruin || []).forEach(function(e){ const b = Base.buildings.filter(function(x){ return x.type === e[0] && x.x === e[1] && x.y === e[2]; })[0]; if (b && !b.ruin && b.type !== 'muschelburg') { b.ruin = true; b.hp = 0; delete b.upUntil; delete b.nb; ruined++; } });
   const lost = stGuardLoss(m.kill);
   stSave(); renderStratHud();
   snSend({ t: 'raid', op: 'loot', n: m.n, k: take.k, c: take.c, xp: take.xp });
@@ -13336,7 +13586,7 @@ function raidAway(m) {                      // 7.12: während du weg warst, wurd
     const t = e.take || {};
     ['k', 'c', 'xp'].forEach(function(r){ const free = Math.max(0, Base.res[r] - RAID_PROTECT * cp[r]), v = Math.min(Math.max(0, +t[r] || 0), free); Base.res[r] -= v; lost[r] += v; });
     lostT += stGuardLoss(e.kill);
-    (e.ruin || []).forEach(function(q){ const b = Base.buildings.filter(function(x){ return x.type === q[0] && x.x === q[1] && x.y === q[2]; })[0]; if (b && !b.ruin && b.type !== 'muschelburg') { b.ruin = true; b.hp = 0; delete b.upUntil; ruined++; } });
+    (e.ruin || []).forEach(function(q){ const b = Base.buildings.filter(function(x){ return x.type === q[0] && x.x === q[1] && x.y === q[2]; })[0]; if (b && !b.ruin && b.type !== 'muschelburg') { b.ruin = true; b.hp = 0; delete b.upUntil; delete b.nb; ruined++; } });
   });
   stSave(); renderStratHud();
   showToast('🌙 Während du weg warst, wurdest du ' + m.list.length + ' Mal überfallen');
@@ -13466,14 +13716,30 @@ function snMapDraw() {
   }
   const t = document.getElementById('st-map-title'); if (t) t.textContent = SN.title ? '🗺️ ' + SN.title : '🗺️ Karte';
 }
+// 7.23: die Ringe als Karten: Gebiet, wie stark die Wellen sind, was es mehr gibt, Plätze und für welche Muschelburg; "Allein" ist eine eigene Karte darunter
+const ST_RING_LOOK = { riff: ['🪸', '#2ec4d6', 8], kelp: ['🌿', '#3fbf7a', 6], graben: ['🌑', '#5a78f0', 6], vulkan: ['🌋', '#ff7a45', 4] };
 function renderStratMenu() {
   const box = document.getElementById('strat-rings'); if (!box) return;
   box.textContent = '';
-  const mb = (stLoad() || {}).mb || 1;
+  const sv = stLoad() || {}, mb = sv.mb || 1;
   ST_RINGS.forEach(function(r){
-    const b = el('button', 'btn btn-primary'); b.appendChild(document.createTextNode(r.name));
-    if (mb < r.from) { b.disabled = true; b.appendChild(el('span', 'btn-sub', '🔒 Muschelburg ' + r.from)); }
-    else if (mb > r.to) { b.disabled = true; b.appendChild(el('span', 'btn-sub', 'Basis zu gross')); }
+    const lk = ST_RING_LOOK[r.id], rb = ST_RING[r.id], b = el('button', 'strat-card');
+    b.style.setProperty('--rc', lk[1]);
+    b.appendChild(el('i', 'sc-ic', lk[0]));
+    const m = el('span', 'sc-main'), top = el('span', 'sc-top');
+    top.appendChild(el('b', 'sc-name', r.name));
+    if (sv.ring === r.id && mb >= r.from && mb <= r.to) top.appendChild(el('span', 'sc-tag', 'Zuletzt hier'));
+    m.appendChild(top);
+    const ch = el('span', 'sc-chips');
+    ch.appendChild(el('span', 'sc-chip' + (rb.f > 1 ? ' hard' : ''), '🌊 Wellen ×' + String(rb.f).replace('.', ',')));
+    if (rb.k > 1) ch.appendChild(el('span', 'sc-chip good', '🪸 Korallen +' + Math.round((rb.k - 1) * 100) + ' %'));
+    if (rb.c > 1) ch.appendChild(el('span', 'sc-chip good', '💎 Kristalle +' + Math.round((rb.c - 1) * 100) + ' %'));
+    m.appendChild(ch);
+    let line = lk[2] + ' Plätze · Muschelburg ' + r.from + '–' + r.to;
+    if (mb < r.from) { b.disabled = true; line = '🔒 Muschelburg ' + r.from; }
+    else if (mb > r.to) { b.disabled = true; line = 'Basis zu gross'; }
+    m.appendChild(el('small', 'sc-line', line));
+    b.appendChild(m);
     b.addEventListener('click', function(){ Sfx.click(); startStrategy(selectedCharacterId, false, r.id); });
     box.appendChild(b);
   });
@@ -13492,6 +13758,7 @@ function stratUpdate(dt) {
   if (stWaveT <= warnAt && stWaveT + dt > warnAt) showToast('🌊 Eine Welle kommt in ' + Math.ceil(stWaveT) + ' s!');
   if (stWaveT <= 0) { stWaveT = ST_WAVE_GAP; stWave(); }
   stTrickleT -= dt; if (stTrickleT <= 0) { stTrickleT = ST_TRICKLE_GAP * (0.7 + Math.random() * 0.6); stTrickle(); }
+  stFoeLoad.clear(); for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (!e.dead && e.stTg && e.stTg !== player) stFoeLoad.set(e.stTg, (stFoeLoad.get(e.stTg) || 0) + 1); }
   stTrackFoes(dt);
   stLegendUpdate(dt);
   stTroopsUpdate(dt);
@@ -13573,16 +13840,41 @@ function stratDeath() {
   showToast('💔 Dein Blobi wurde besiegt – zurück in der Muschelburg, wieder Level 1.');
   stSave();
 }
-// Ziel eines Gegners: das Nächste von dir, deinen Truppen und deinen Gebäuden (Mauern zuletzt)
+// Ziel eines Gegners: das Nächste von dir, deinen Truppen und deinen Gebäuden (Mauern zuletzt).
+// 7.23: alle 0,4-0,7 s neu gewählt; ein neues Ziel muss deutlich näher sein (kein Hin und Her); wo schon 4+ Gegner sind, zählt ein Ziel als weiter weg (sie verteilen sich)
+const stFoeLoad = new Map();
+function stTgOk(t) { return t === player ? playerDown <= 0 : t.troop ? !t.dead : !!(t.building && !t.building.ruin); }
+function stTgScore(en, t) {
+  if (t === player) return playerDown > 0 ? 1e9 : distXY(en.x, en.y, player.x, player.y);
+  const n = Math.max(0, (stFoeLoad.get(t) || 0) - 3) * 45;
+  if (t.troop) return distXY(en.x, en.y, t.x, t.y) + n;
+  const b = t.building, w = stWorld(b); t.x = w.x; t.y = w.y;
+  return distXY(en.x, en.y, w.x, w.y) - w.r * 0.6 + (b.type === 'korallenmauer' ? ST_TILE * 2.5 : 0) + n;
+}
 function stratTargetOf(en) {
-  let best = player, bd = playerDown > 0 ? 1e9 : distXY(en.x, en.y, player.x, player.y);
-  for (let i = 0; i < stTroops.length; i++) { const t = stTroops[i]; if (t.dead) continue; const d = distXY(en.x, en.y, t.x, t.y); if (d < bd) { bd = d; best = t; } }
+  const cur = en.stTg && stTgOk(en.stTg) ? en.stTg : null;
+  if (cur && en.stTgT > runTime) { if (cur.building) { const w = stWorld(cur.building); cur.x = w.x; cur.y = w.y; } return cur; }
+  let best = player, bd = stTgScore(en, player);
+  for (let i = 0; i < stTroops.length; i++) { const t = stTroops[i]; if (t.dead) continue; const d = stTgScore(en, t); if (d < bd) { bd = d; best = t; } }
   if (Base) for (let i = 0; i < Base.buildings.length; i++) {
     const b = Base.buildings[i]; if (b.ruin || (b.type === 'stachelfalle')) continue;
-    const w = stWorld(b), d = distXY(en.x, en.y, w.x, w.y) - w.r * 0.6 + (b.type === 'korallenmauer' ? ST_TILE * 2.5 : 0);
-    if (d < bd) { bd = d; best = stTarget(b, w); }
+    const t = stTarget(b, stWorld(b)), d = stTgScore(en, t);
+    if (d < bd) { bd = d; best = t; }
   }
+  if (cur && best !== cur && stTgScore(en, cur) < bd * 1.2 + 40) best = cur;
+  en.stTg = best; en.stTgT = runTime + 0.4 + Math.random() * 0.3;
   return best;
+}
+// 7.23: Schüsse der Gegner treffen im Strategie-Modus auch deine Truppen und Gebäude (vorher flogen sie hindurch; Fernkämpfer konnten nichts beschädigen)
+function stShotHit(pr) {
+  if (pr.remote || !Base) return false;
+  for (let i = 0; i < stTroops.length; i++) { const t = stTroops[i]; if (!t.dead && distXY(pr.x, pr.y, t.x, t.y) < pr.r + t.r) { t.hp -= pr.dmg; t.hitFlash = 0.15; if (t.hp <= 0) stTroopDie(t); spawnBurst(pr.x, pr.y, pr.color || '#c9a6ff', 4); return true; } }
+  if (!stInBase(pr.x, pr.y)) return false;
+  for (let i = 0; i < Base.buildings.length; i++) {
+    const b = Base.buildings[i]; if (b.ruin || b.type === 'stachelfalle') continue;
+    const w = stWorld(b), lim = w.r * 0.85; if (Math.abs(pr.x - w.x) < lim && Math.abs(pr.y - w.y) < lim) { stHurt(b, pr.dmg); spawnBurst(pr.x, pr.y, pr.color || '#c9a6ff', 4); return true; }
+  }
+  return false;
 }
 // Ziel-Objekt eines Gebäudes: nicht im Gebäude selbst gespeichert (es zeigt zurück aufs Gebäude, das ginge nicht in JSON)
 const stTgts = new WeakMap();
@@ -13600,7 +13892,9 @@ function stratContact(en, dt) {
     const b = Base.buildings[i]; if (b.type !== 'korallenmauer' || b.ruin) continue;
     const w = stWorld(b), dx = en.x - w.x, dy = en.y - w.y, lim = w.r + en.r * 0.8;
     if (Math.abs(dx) < lim && Math.abs(dy) < lim) {
-      if (Math.abs(dx) > Math.abs(dy)) en.x = w.x + Math.sign(dx || 1) * lim; else en.y = w.y + Math.sign(dy || 1) * lim;
+      const sl = (en.speed || 60) * 0.7 * (en.contactTimer > 0 ? 1 : 0.5) * dt;       // 7.23: an der Mauer entlang zum Ziel gleiten (findet Lücken), statt nur dagegen zu drücken
+      if (Math.abs(dx) > Math.abs(dy)) { en.x = w.x + Math.sign(dx || 1) * lim; if (tg && tg.building !== b) en.y += Math.max(-sl, Math.min(sl, tg.y - en.y)); }
+      else { en.y = w.y + Math.sign(dy || 1) * lim; if (tg && tg.building !== b) en.x += Math.max(-sl, Math.min(sl, tg.x - en.x)); }
       if (en.contactTimer <= 0) { en.contactTimer = 0.8; stHurt(b, en.dmg); }
     }
   }
@@ -13623,9 +13917,11 @@ function stSpawnTroop(type) {
   return t;
 }
 function stTroopDie(t) { t.dead = true; spawnBurst(t.x, t.y, ST_T[t.type].col, 12); }
+const stTroopLoad = new Map();
 function stTroopsUpdate(dt) {
-  const list = allEnemies();
+  const list = allEnemies(), spring = RD ? null : stBuildingsOf('heilquelle').filter(function(b){ return !b.ruin && !b.upUntil; })[0];
   stAnchorUpdate(dt);
+  stTroopLoad.clear(); for (let i = 0; i < stTroops.length; i++) { const f = stTroops[i].foe; if (f && !stTroops[i].dead) stTroopLoad.set(f, (stTroopLoad.get(f) || 0) + 1); }
   for (let i = stTroops.length - 1; i >= 0; i--) {
     const t = stTroops[i], d = ST_T[t.type];
     if (t.dead) { stTroops.splice(i, 1); continue; }
@@ -13634,14 +13930,35 @@ function stTroopsUpdate(dt) {
     if (stInBase(t.x, t.y)) stHeal(t, dt);
     const home = stCmd === 'follow' ? player : stCmd === 'hold' ? stHold : stSend, aggro = d.raider && RD ? 1500 : 300;
     let foe = null, fd = 1e9, fsc = 1e12, hurt = null;
+    // 7.23: schwer verletzt (unter 30 %) und es gibt eine Heilquelle: zurück zu ihr, bis 85 % (nicht bei einem Überfall)
+    if (spring && !d.heal && t.hp < t.maxHp * 0.3) t.retreat = 1;
+    if (t.retreat && (!spring || t.hp >= t.maxHp * 0.85)) t.retreat = 0;
     if (d.heal) hurt = stMedic(t, stTroops, d.heal, stTroopDmg(t.type), dt);      // 7.15: die Heilqualle kämpft nicht, sie heilt
-    else for (let j = 0; j < list.length; j++) { const e = list[j]; if (e.dead || e.isPlayer || noTarget(e)) continue; const de = distXY(e.x, e.y, t.x, t.y), dh = home ? distXY(e.x, e.y, home.x, home.y) : 0; if (dh < aggro + 80) { const sc = de - (d.raider && e.raidB && ST_LOOT_FIRST.indexOf(e.raidB.type) !== -1 ? 1e6 : 0); if (sc < fsc) { fsc = sc; fd = de; foe = e; } } }      // der Mini-Hai nimmt zuerst Erzeuger und Lager
+    else if (!t.retreat) {
+      // 7.23: Wer deine Gebäude, Truppen oder den Blobi angreift, kommt zuerst; beim Ziel bleiben; Nahkämpfer verteilen sich (ab 3 auf einem Gegner); der Kugelfisch sucht Gruppen
+      const cur = t.foe && !t.foe.dead ? t.foe : null, dmg = stTroopDmg(t.type);
+      for (let j = 0; j < list.length; j++) {
+        const e = list[j]; if (e.dead || e.isPlayer || noTarget(e)) continue;
+        const de = distXY(e.x, e.y, t.x, t.y), dh = home ? distXY(e.x, e.y, home.x, home.y) : 0; if (dh >= aggro + 80) continue;
+        let sc = de - (d.raider && e.raidB && ST_LOOT_FIRST.indexOf(e.raidB.type) !== -1 ? 1e6 : 0);      // der Mini-Hai nimmt zuerst Erzeuger und Lager
+        if (e.tg && (e.tg.building || e.tg.troop)) sc -= 140; else if (e.tg === player) sc -= 70;
+        if (e === cur) sc -= 90;
+        if (!d.range && t.type !== 'kugelfisch') { const ld = (stTroopLoad.get(e) || 0) - (e === cur ? 1 : 0); if (ld >= 3) sc += 70 * (ld - 2); if (e.hp > 0 && e.hp <= dmg * 2) sc -= 50; }
+        if (t.type === 'kugelfisch' && de < 600) { let nb = 0; for (let k = 0; k < list.length && nb < 6; k++) { const o = list[k]; if (o !== e && !o.dead && !o.isPlayer && distXY(o.x, o.y, e.x, e.y) < 110) nb++; } sc -= nb * 60 + (e.isBoss || e.champ ? 200 : 0); }
+        if (sc < fsc) { fsc = sc; fd = de; foe = e; }
+      }
+    }
+    t.foe = foe;
     let gx, gy, sp = d.speed;
-    if (hurt) { gx = hurt.x; gy = hurt.y; if (distXY(hurt.x, hurt.y, t.x, t.y) < 70) { gx = t.x; gy = t.y; } }
+    if (t.retreat) { const w = stWorld(spring), a = i * 2.4; gx = w.x + Math.cos(a) * w.r * 0.9; gy = w.y + w.r * 0.6 + Math.sin(a) * w.r * 0.5; }
+    else if (hurt) { gx = hurt.x; gy = hurt.y; if (distXY(hurt.x, hurt.y, t.x, t.y) < 70) { gx = t.x; gy = t.y; } }
     else if (foe) {
       const reach = d.range || (t.r + foe.r + 4);
-      if (fd > reach * 0.9) { gx = foe.x; gy = foe.y; } else { gx = t.x; gy = t.y; }
-      if (fd <= reach && t.cd <= 0) {
+      if (fd > reach * 0.9) { gx = foe.x; gy = foe.y; } else if (d.range && fd < reach * 0.45) { gx = t.x - (foe.x - t.x) / (fd || 1) * 90; gy = t.y - (foe.y - t.y) / (fd || 1) * 90; } else { gx = t.x; gy = t.y; }      // 7.23: Pfeilfische halten Abstand
+      if (t.type === 'kugelfisch') { if (fd <= reach) t.wait = (t.wait || 0) + dt; else t.wait = 0; }
+      let go = fd <= reach && t.cd <= 0;
+      if (go && t.type === 'kugelfisch' && !(foe.isBoss || foe.champ) && t.wait < 2) { let nb = 0; for (let k = 0; k < list.length; k++) { const o = list[k]; if (!o.dead && !o.isPlayer && distXY(o.x, o.y, t.x, t.y) < 110) nb++; } go = nb >= 3; }      // 7.23: platzt erst bei 3+ Gegnern (oder einem Boss, oder nach 2 s)
+      if (go) {
         if (t.type === 'kugelfisch') {                // platzt: Flächenschaden, der Kugelfisch ist weg
           for (let j = 0; j < list.length; j++) { const e = list[j]; if (!e.dead && !e.isPlayer && distXY(e.x, e.y, t.x, t.y) < 110) applyDamageToEnemy(e, stTroopDmg(t.type)); }
           spawnBurst(t.x, t.y, '#ffd76a', 22); Sfx.crack(); stTroopDie(t); continue;
@@ -13659,6 +13976,13 @@ function stTroopsUpdate(dt) {
     t.vx = (t.vx || 0) + ((want ? dx / dd * want : 0) - (t.vx || 0)) * ease; t.vy = (t.vy || 0) + ((want ? dy / dd * want : 0) - (t.vy || 0)) * ease;
     const vm = Math.hypot(t.vx, t.vy);
     t.x += t.vx * dt; t.y += t.vy * dt;
+    for (let j = 0; j < stTroops.length; j++) {        // 7.23: nicht übereinander stapeln
+      const o = stTroops[j]; if (o === t || o.dead) continue;
+      const ox = t.x - o.x, oy = t.y - o.y, md = t.r + o.r + 4; if (Math.abs(ox) > md || Math.abs(oy) > md) continue;
+      const od = Math.hypot(ox, oy); if (od >= md) continue;
+      const push = (md - od) * Math.min(1, dt * 6) * 0.5, ux = od > 0.01 ? ox / od : Math.cos(i), uy = od > 0.01 ? oy / od : Math.sin(i);
+      t.x += ux * push; t.y += uy * push;
+    }
     if (vm > 8) { if (Math.abs(t.vx) > 6) t.face = t.vx >= 0 ? 1 : -1; t.mv = { x: t.vx / vm, y: t.vy / vm, mag: 1 }; } else t.mv = { x: 0, y: 0, mag: 0 };
   }
 }
@@ -13735,8 +14059,12 @@ function stPlace(type, x, y) {
   const cost = stLevelCost(type, 1);
   if (!stCanPay(cost)) { showToast('Nicht genug Korallen.'); return false; }
   if (!stFree(type, x, y)) return false;
+  const t = stBuildTime(type, 1);
+  if (t && !stBuildFree()) { stBusyToast(); return false; }
   stPay(cost);
-  Base.buildings.push({ id: Base.nextId++, type: type, lv: 1, x: x, y: y, hp: ST_B[type].hp });
+  const nb = { id: Base.nextId++, type: type, lv: 1, x: x, y: y, hp: ST_B[type].hp };
+  if (t) { nb.upUntil = Date.now() + t * 1000; nb.nb = 1; }      // 7.23: nb = Neubau (wird fertig auf Stufe 1, nicht 2)
+  Base.buildings.push(nb);
   Sfx.click(); stSave(); return true;
 }
 function stUpgrade(b) {
@@ -13744,20 +14072,61 @@ function stUpgrade(b) {
   if (b.type === 'muschelburg') {
     if (nl > ST_MAX_MB) { showToast('Mehr Stufen kommen in einem späteren Schritt.'); return; }
     const c = ST_MB[nl]; if (!stCanPay(c)) { showToast('Nicht genug Rohstoffe.'); return; }
-    if (Base.build) { showToast('Es wird schon gebaut – immer nur eins auf einmal.'); return; }
-    stPay(c); if (c.t) { b.upUntil = Date.now() + c.t * 1000; Base.build = b.upUntil; } else { b.lv = nl; Base.mb = nl; b.hp = stMaxHp(b); showToast('🏰 Muschelburg Stufe ' + nl + '!'); }
+    if (c.t && !stBuildFree()) { stBusyToast(); return; }
+    stPay(c); if (c.t) { b.upUntil = Date.now() + c.t * 1000; } else { b.lv = nl; Base.mb = nl; b.hp = stMaxHp(b); showToast('🏰 Muschelburg Stufe ' + nl + '!'); }
     stSave(); return;
   }
   if (nl > Base.mb) { showToast('Zuerst die Muschelburg ausbauen.'); return; }
   const c = stLevelCost(b.type, nl);
   if (!stCanPay(c)) { showToast('Nicht genug Rohstoffe.'); return; }
-  if (c.t && Base.build) { showToast('Es wird schon gebaut – immer nur eins auf einmal.'); return; }
+  if (c.t && !stBuildFree()) { stBusyToast(); return; }
   stPay(c);
-  if (c.t) { b.upUntil = Date.now() + c.t * 1000; Base.build = b.upUntil; } else { b.lv = nl; b.hp = stMaxHp(b); }
+  if (c.t) { b.upUntil = Date.now() + c.t * 1000; } else { b.lv = nl; b.hp = stMaxHp(b); }
   stSave();
 }
-function stRepairCost(b) { const c = stLevelCost(b.type, b.lv); return { k: Math.round(c.k * 0.3), c: Math.round(c.c * 0.3) }; }
-function stRepair(b) { const c = stRepairCost(b); if (!stCanPay(c)) { showToast('Nicht genug Rohstoffe.'); return; } stPay(c); b.ruin = false; b.hp = stMaxHp(b); stSave(); }
+// Reparieren: eine Ruine kostet 30 % der Stufe, ein beschädigtes Gebäude den fehlenden Anteil davon (7.23; was die Krabbenwerkstatt schon geflickt hat, ist abgezogen)
+function stRepairCost(b) { const c = stLevelCost(b.type, b.lv), f = 0.3 * Math.max(0, 1 - (b.hp || 0) / stMaxHp(b)); return { k: Math.ceil(c.k * f), c: Math.ceil(c.c * f) }; }
+function stRepair(b) { const c = stRepairCost(b); if (!stCanPay(c)) { showToast('Nicht genug Rohstoffe.'); return; } stPay(c); b.ruin = false; b.hp = stMaxHp(b); stDoneAt.set(b, Date.now()); stSave(); }
+// 7.23: zweiter Baumeister (ab Muschelburg 5, einmal 100 Kristalle): zwei Bauten mit Bauzeit gleichzeitig. Die Sperre zählt die laufenden Bauten (b.upUntil).
+const ST_HIRE_C = 100;
+function stBuilders() { return Base.builder2 && Base.mb >= 5 ? 2 : 1; }
+function stBuilds() { return Base.buildings.filter(function(b){ return b.upUntil; }).sort(function(a, b){ return a.upUntil - b.upUntil; }); }
+function stBuildFree() { return stBuilds().length < stBuilders(); }
+function stBusyToast() { showToast(stBuilders() > 1 ? 'Beide Baumeister sind beschäftigt.' : 'Es wird schon gebaut – immer nur eins auf einmal.'); }
+function stHire() {
+  if (Base.builder2 || Base.mb < 5) return;
+  if (!stCanPay({ k: 0, c: ST_HIRE_C })) { showToast('Nicht genug Kristalle.'); return; }
+  stPay({ k: 0, c: ST_HIRE_C }); Base.builder2 = 1; showToast('👷 Ein zweiter Baumeister hilft jetzt mit – zwei Bauten auf einmal.'); stSave();
+}
+// 7.23: Krabbenwerkstatt. Flickt das am stärksten beschädigte Gebäude in Reichweite (3 % seiner Lebenspunkte pro s, +25 % je Stufe), danach Ruinen (halb so schnell, gratis).
+// Läuft in stTick, also auch in der Pause und für die Zeit, in der du weg warst.
+function stRepRate(lv) { return 0.03 * (1 + 0.25 * (lv - 1)); }
+function stRepReach(lv) { return 4 + 0.5 * lv; }
+function stWorkshops(secs, offline) {
+  Base.buildings.forEach(function(ws){
+    if (ws.type !== 'krabbenwerkstatt' || ws.ruin || ws.upUntil || !(secs > 0)) return;
+    const w = stWorld(ws), R = stRepReach(ws.lv) * ST_TILE, fx = offline ? null : stFxOf(ws);
+    let left = secs;
+    for (let guard = 0; guard < 40 && left > 1e-6; guard++) {
+      let best = null, bq = 9;
+      for (let i = 0; i < Base.buildings.length; i++) {
+        const b = Base.buildings[i]; if (b === ws || b.upUntil) continue;
+        const m = stMaxHp(b), hp = b.hp || 0; if (!b.ruin && hp >= m) continue;
+        const v = stWorld(b); if (distXY(v.x, v.y, w.x, w.y) > R) continue;
+        const q = (b.ruin ? 2 : 0) + hp / m;                 // erst Schäden, dann Ruinen
+        if (q < bq) { bq = q; best = b; }
+      }
+      if (!best) break;
+      const m = stMaxHp(best), rate = m * stRepRate(ws.lv) * (best.ruin ? 0.5 : 1), use = Math.min(left, (m - (best.hp || 0)) / rate);
+      best.hp = Math.min(m, (best.hp || 0) + rate * use); left -= use;
+      if (best.hp >= m - 1e-6) { best.hp = m; if (best.ruin) { best.ruin = false; if (!offline) { stDoneAt.set(best, Date.now()); showToast('🔧 ' + ST_B[best.type].name + ' ist wieder aufgebaut.'); } } }
+      if (fx) {
+        fx.rep = best; fx.repT = runTime; fx.pt = (fx.pt || 0) - secs;
+        if (fx.pt <= 0) { fx.pt = 0.9; const v = stWorld(best); particles.push({ x: v.x + (Math.random() - 0.5) * v.r, y: v.y - v.r * 0.3, vx: 0, vy: -28, life: 0.9, maxLife: 0.9, isText: true, text: '🔧', color: '#ffe9a0' }); }
+      }
+    }
+  });
+}
 function stTrain(type) {
   const d = ST_T[type];
   if (Base.mb < d.from) return;
@@ -13816,6 +14185,7 @@ function renderStratHud() {
   if (!stHudEls || !h.firstChild) stHudBuild(h);
   stHudEls.k.textContent = Math.floor(Base.res.k) + '/' + cp.k; stHudEls.c.textContent = Math.floor(Base.res.c) + '/' + cp.c; stHudEls.xp.textContent = Math.floor(Base.res.xp) + '/' + cp.xp;
   stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = Math.max(0, Math.ceil(stWaveT)) + ' s';
+  const bl = stBuilds(); stHudEls.buildBox.style.display = bl.length ? '' : 'none'; if (bl.length) stHudEls.build.textContent = bl.map(function(x){ return stDur((x.upUntil - Date.now()) / 1000); }).join(' · ');
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
   vis('st-build', inBase); vis('st-deposit', stVaultUsable()); vis('st-withdraw', stVaultUsable()); vis('st-map', SN.on);
@@ -13827,18 +14197,43 @@ function stPanel(title, type) {
   const head = el('div', 'st-head'), ti = el('strong'); if (type) ti.appendChild(stIcon(type, 30)); ti.appendChild(document.createTextNode(title)); head.appendChild(ti); const x = el('button', 'icon-btn', '✕'); x.addEventListener('click', function(){ Sfx.click(); stClosePanel(); }); head.appendChild(x); p.appendChild(head);
   return p;
 }
-function stCostText(c) { return (c.k ? c.k + ' 🪸' : '') + (c.c ? (c.k ? ' + ' : '') + c.c + ' 💎' : '') + (c.t ? ' · ' + Math.round(c.t / 60) + ' min' : '') || 'gratis'; }
+function stCostText(c) { return (c.k ? c.k + ' 🪸' : '') + (c.c ? (c.k ? ' + ' : '') + c.c + ' 💎' : '') + (c.t ? ' · ⏱ ' + stDur(c.t) : '') || 'gratis'; }
+// 7.23: Bau-Menü als Karten in drei Gruppen: Symbol, Name, Kosten, Bauzeit, wie viele schon stehen; der Grund, wenn es nicht geht, steht auf der Karte
+const ST_GROUPS = [['Wirtschaft', ['korallenfarm', 'kristallbohrer', 'lager', 'perlentresor']],
+  ['Verteidigung', ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'korallenspeer', 'stachelfalle', 'korallenmauer', 'leuchtturm']],
+  ['Truppen und Hilfe', ['brutstaette', 'fischschule', 'heilquelle', 'krabbenwerkstatt']]];
+function stBuildBusy() { const l = stBuilds(); return l.length < stBuilders() ? 0 : Math.max(0, (l[0].upUntil - Date.now()) / 1000); }      // s, bis ein Baumeister frei wird (0 = einer ist frei)
 function stOpenBuild() {
-  const p = stPanel('Bauen'), list = el('div', 'st-list');
-  Object.keys(ST_B).forEach(function(type){
-    if (type === 'muschelburg') return;
-    const d = ST_B[type], have = stBuildingsOf(type).length, max = Base.mb >= d.from ? d.max(Base.mb) : 0, cost = stLevelCost(type, 1);
-    const b = el('button', 'btn btn-secondary st-item'); b.appendChild(stLabel(type, d.name)); b.appendChild(el('span', 'btn-sub', Base.mb < d.from ? '🔒 Muschelburg ' + d.from : have + '/' + max + ' · ' + stCostText(cost)));
-    b.disabled = Base.mb < d.from || have >= max || !stCanPay(cost);
-    b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); const q = stPanel(d.name, type); q.appendChild(el('p', 'acc-note', tr(ST_DESC[type]))); q.appendChild(el('p', 'acc-note', tr('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'))); });
-    list.appendChild(b);
+  const p = stPanel('Bauen'); p.classList.add('st-wide');
+  const busy = stBuildBusy();
+  const running = stBuilds();
+  if (running.length) {
+    const n = el('div', 'st-busy');
+    running.forEach(function(bn){ n.appendChild(el('span', null, '🏗️ ' + ST_B[bn.type].name + ' · ' + stDur((bn.upUntil - Date.now()) / 1000))); });
+    n.appendChild(el('span', 'st-note', tr(stBuilders() > 1 ? 'Zwei Baumeister: zwei Bauten auf einmal – Mauern gehen sofort.' : 'Immer nur ein Bau auf einmal – Mauern gehen sofort.')));
+    if (stBuilders() < 2 && Base.mb >= 5) n.appendChild(el('span', 'st-note', tr('Ein zweiter Baumeister lässt dich zwei Dinge auf einmal bauen.')));
+    p.appendChild(n);
+  }
+  ST_GROUPS.forEach(function(gr){
+    p.appendChild(el('div', 'st-group', tr(gr[0])));
+    const grid = el('div', 'st-cards');
+    gr[1].forEach(function(type){
+      const d = ST_B[type], have = stBuildingsOf(type).length, max = Base.mb >= d.from ? d.max(Base.mb) : 0, cost = stLevelCost(type, 1), t = stBuildTime(type, 1);
+      const locked = Base.mb < d.from, full = !locked && have >= max, poor = !stCanPay(cost), wait = t > 0 && busy > 0;
+      const b = el('button', 'st-card' + (locked ? ' locked' : full ? ' full' : ''));
+      const top = el('span', 'st-card-top'); top.appendChild(stIcon(type, 34)); top.appendChild(el('span', 'st-card-name', d.name)); b.appendChild(top);
+      if (locked) b.appendChild(el('span', 'st-card-why', '🔒 Muschelburg ' + d.from));
+      else if (full) b.appendChild(el('span', 'st-card-why', '✓ ' + have + '/' + max));
+      else {
+        b.appendChild(el('span', 'st-card-cost' + (poor ? ' poor' : ''), stCostText({ k: cost.k, c: cost.c })));
+        b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
+      }
+      b.disabled = locked || full || poor || wait;
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); const q = stPanel(d.name, type); q.appendChild(el('p', 'acc-note', tr(ST_DESC[type]))); if (t) q.appendChild(el('p', 'acc-note', '⏱ ' + stDur(t))); q.appendChild(el('p', 'acc-note', tr('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'))); });
+      grid.appendChild(b);
+    });
+    p.appendChild(grid);
   });
-  p.appendChild(list);
 }
 // 7.21: was ein Ausbau bringt. Je Gebäude eine kurze Beschreibung und die Werte, die mit der Stufe wachsen (Zahlen wie im Code der Verteidigung, ST_REACH schon eingerechnet)
 const ST_DESC = {
@@ -13857,7 +14252,8 @@ const ST_DESC = {
   heilquelle: 'Heilt deinen Blobi und die Truppen in der Basis.',
   fischschule: 'Verbessert Truppen für 30 💎 × Stufe: +20 % Leben und Schaden. Wie hoch, bestimmt die Muschelburg.',
   elektroaal: 'Ein Blitz springt alle 1,3 s auf bis zu 4 Gegner.',
-  korallenspeer: 'Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.'
+  korallenspeer: 'Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.',
+  krabbenwerkstatt: 'Repariert beschädigte Gebäude in der Nähe, eins nach dem anderen, und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.'
 };
 function stR1(v) { return Math.round(v * 10) / 10; }
 const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
@@ -13870,6 +14266,7 @@ const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
   blasenkanone: [['Reichweite', function(lv){ return (160 + 10 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(10 * (1 + 0.3 * (lv - 1))); }]],
   tintenwerfer: [['Reichweite', function(lv){ return (180 + 10 * lv) * ST_REACH; }]],
   heilquelle: [['Heilung pro Sekunde', function(lv){ return 4 * lv + ' %'; }]],
+  krabbenwerkstatt: [['Reparatur pro Sekunde', function(lv){ return stR1(stRepRate(lv) * 100) + ' %'; }], ['Reichweite (Felder)', stRepReach]],
   elektroaal: [['Reichweite', function(lv){ return (260 + 20 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(22 * (1 + 0.3 * (lv - 1))); }]],
   korallenspeer: [['Reichweite', function(lv){ return (380 + 25 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(60 * (1 + 0.3 * (lv - 1))); }]],
   stachelfalle: [['Schaden', function(lv){ return stR1(60 * (1 + 0.3 * (lv - 1))); }]],
@@ -13899,21 +14296,31 @@ function stUpInfo(p, b) {            // der Block „Das bringt der Ausbau“
 }
 function stOpenInfo(b) {
   const d = ST_B[b.type], p = stPanel(d.name + ' · ' + tr('Stufe') + ' ' + b.lv, b.type);
-  p.appendChild(el('p', 'acc-note', (b.ruin ? '💥 ' + tr('Ruine') + ' · ' : '') + 'HP ' + Math.max(0, Math.round(b.hp)) + '/' + stMaxHp(b) + (b.upUntil ? ' · 🏗️ ' + Math.ceil((b.upUntil - Date.now()) / 1000) + ' s' : '')));
+  p.appendChild(el('p', 'acc-note', (b.ruin ? '💥 ' + tr('Ruine') + ' · ' : '') + 'HP ' + Math.max(0, Math.round(b.hp)) + '/' + stMaxHp(b)));
+  if (b.upUntil) {                    // 7.23: Baufortschritt als Balken
+    const box = el('div', 'st-up st-prog'), bar = el('div', 'st-bar'), fill = el('i');
+    box.appendChild(el('strong', null, b.nb ? tr('Wird gebaut') : tr('Stufe') + ' ' + b.lv + ' → ' + (b.lv + 1)));
+    fill.style.width = Math.round(stBuildProg(b) * 100) + '%'; bar.appendChild(fill); box.appendChild(bar);
+    box.appendChild(el('div', 'st-note', '⏱ ' + stDur((b.upUntil - Date.now()) / 1000))); p.appendChild(box);
+  }
+  if (b.ruin && b.hp > 0) p.appendChild(el('p', 'acc-note', '🔧 Wird repariert: ' + Math.floor(b.hp / stMaxHp(b) * 100) + ' %'));
   if (ST_DESC[b.type]) p.appendChild(el('p', 'acc-note', tr(ST_DESC[b.type])));
   if (!b.ruin && !b.upUntil) stUpInfo(p, b);
   const row = el('div', 'st-list');
   const add = function(label, sub, fn, off){ const x = el('button', 'btn btn-secondary st-item'); x.appendChild(el('span', null, label)); if (sub) x.appendChild(el('span', 'btn-sub', sub)); x.disabled = !!off; x.addEventListener('click', function(){ Sfx.click(); fn(); stOpenInfo(b); renderStratHud(); }); row.appendChild(x); };
   if (b.ruin) add('Reparieren', stCostText(stRepairCost(b)), function(){ stRepair(b); });
   else if (!b.upUntil) {
-    const nl = b.lv + 1;
-    if (b.type === 'muschelburg') add('Ausbauen', nl > ST_MAX_MB ? 'später' : stCostText(ST_MB[nl]), function(){ stUpgrade(b); }, nl > ST_MAX_MB);
-    else add('Ausbauen', nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
+    const nl = b.lv + 1, top = nl > (b.type === 'muschelburg' ? ST_MAX_MB : 10);
+    if (b.hp < stMaxHp(b) - 0.5 && b.type !== 'muschelburg') add('Ganz reparieren', stCostText(stRepairCost(b)), function(){ stRepair(b); });
+    if (top) add('Höchste Stufe', null, function(){}, true);
+    else if (b.type === 'muschelburg') add('Ausbauen auf Stufe ' + nl, stCostText(ST_MB[nl]), function(){ stUpgrade(b); });
+    else add('Ausbauen auf Stufe ' + nl, nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
+  if (b.type === 'muschelburg') { if (Base.builder2) p.appendChild(el('p', 'acc-note', tr('Zwei Baumeister arbeiten für dich.'))); else add('Zweiten Baumeister anheuern', Base.mb < 5 ? '🔒 Muschelburg 5' : ST_HIRE_C + ' 💎', function(){ stHire(); }, Base.mb < 5); }
   if (b.type !== 'muschelburg') add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; });
-  if (b.type === 'perlentresor') { add('Einzahlen', Math.floor(runXp) + ' XP', function(){ stDeposit(); }, !stVaultUsable()); add('Abheben', Math.floor(Base.res.xp) + ' XP', function(){ stWithdraw(); }, !stVaultUsable()); }
+  if (b.type === 'perlentresor') { add('XP einzahlen', Math.floor(runXp) + ' XP vom Blobi', function(){ stDeposit(); }, !stVaultUsable()); add('XP abheben', Math.floor(Base.res.xp) + ' XP im Tresor', function(){ stWithdraw(); }, !stVaultUsable()); }
   if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
-  if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' → ' + tr('Stufe') + ' ' + (stTroopLv(t) + 1), 30 * stTroopLv(t) + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
+  if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t], tl = stTroopLv(t); add(tr('{} verbessern').replace('{}', tr(q.name)), Base.mb < q.from ? '🔒 Muschelburg ' + q.from : tl >= stTroopCap() ? tr('Höchste Stufe') : 'Stufe ' + tl + ' → ' + (tl + 1) + ' · ' + 30 * tl + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
   p.appendChild(row);
 }
 
@@ -14033,15 +14440,100 @@ function stArtRuin(g, type) {                    // Trümmer statt Gebäude
   g.lineCap = 'round';
   for (let i = 0; i < 4; i++) { const x = 20 + bhash(sd + i + 120) * 60; g.strokeStyle = i % 2 ? '#2f7d5a' : '#3c9a68'; g.lineWidth = g.ow * 1.1; g.beginPath(); g.moveTo(x, 86); g.quadraticCurveTo(x + 5, 72, x - 2, 60 - bhash(sd + i) * 8); g.stroke(); }   // Algen
 }
-function stBuildTotal(b) { return (b.type === 'muschelburg' ? (ST_MB[b.lv + 1] && ST_MB[b.lv + 1].t) : stLevelCost(b.type, b.lv + 1).t) || 60; }
-function stScaffold(g, b, tm) {                  // Gerüst, Hammer und Balken, solange gebaut wird
-  const prog = Math.max(0, Math.min(1, 1 - Math.max(0, b.upUntil - Date.now()) / 1000 / stBuildTotal(b)));
-  g.save(); g.lineCap = 'round'; g.strokeStyle = '#8a6a44';
-  g.lineWidth = g.ow * 1.9; for (const x of [10, 36, 64, 90]) { g.beginPath(); g.moveTo(x, 94); g.lineTo(x, 10); g.stroke(); }
-  g.lineWidth = g.ow * 1.4; for (const y of [26, 50, 74]) { g.beginPath(); g.moveTo(8, y); g.lineTo(92, y); g.stroke(); }
-  g.strokeStyle = '#b08c5c'; g.lineWidth = g.ow * 0.9; g.beginPath(); g.moveTo(10, 74); g.lineTo(36, 50); g.moveTo(36, 74); g.lineTo(64, 50); g.moveTo(64, 74); g.lineTo(90, 50); g.moveTo(10, 50); g.lineTo(36, 26); g.moveTo(64, 50); g.lineTo(90, 26); g.stroke();
-  g.save(); g.translate(78, 42); g.rotate(-0.5 + Math.sin(tm * 9) * 0.55); stRect(g, -1.2, -2, 2.4, 16, 1, '#c79c5e', 0.7); stRect(g, -5, -6, 10, 6, 1.5, '#8a96a2', 0.8); g.restore();
-  stRect(g, 22, 86, 56, 7, 3.5, 'rgba(6,20,32,0.75)', 0); stRect(g, 23.5, 87.5, 53 * prog, 4, 2, '#ffd76a', 0);
+function stBuildTotal(b) { return stBuildTime(b.type, b.nb ? 1 : b.lv + 1) || 60; }
+function stBuildProg(b) { return Math.max(0, Math.min(1, 1 - Math.max(0, b.upUntil - Date.now()) / 1000 / stBuildTotal(b))); }
+const stDoneAt = new Map();             // 7.23: Gebäude -> Zeit, zu der es fertig wurde (für das Aufploppen; wird nicht gespeichert)
+// 7.23: Bau-Animation. Das Gebäude wächst von unten nach oben aus seinem Bauplan (Neubau) bzw. die neue Stufe wächst über die alte (Ausbau).
+// An der Baukante leuchtet eine Linie, ein Bau-Krebs hämmert hin und her, Funken und Blasen steigen auf; das Gerüst wächst mit; unten Balken und Restzeit.
+function stBuildLine(p, u) { return 100 - (100 + ST_PAD / u) * p; }            // Höhe der Baukante in Einheiten (0 = oben; bei p = 1 ganz oben im Bild)
+function stRevealBlit(g, spr, x, y, S, u, p) {   // nur den Teil unterhalb der Baukante zeigen
+  const top = y + stBuildLine(p, u) * u;
+  g.save(); g.beginPath(); g.rect(x - ST_PAD, top, S + 2 * ST_PAD, y + S + ST_PAD - top); g.clip(); stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.restore();
+}
+function stBuildCrab(g, cx, cy, tm) {             // kleiner Bau-Krebs mit Helm und Hammer
+  const bob = Math.abs(Math.sin(tm * 9)) * 1.6;
+  g.save(); g.translate(cx, cy - bob);
+  g.strokeStyle = '#c4462c'; g.lineWidth = g.ow * 0.9; g.lineCap = 'round';
+  for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(sx * 4, 1 + i * 1.6); g.lineTo(sx * (8 + i), 4 + i * 2 + bob); g.stroke(); }
+  g.beginPath(); g.ellipse(0, 0, 7, 5, 0, 0, 6.2832); g.fillStyle = '#ff7a4d'; g.fill(); g.lineWidth = g.ow * 0.6; g.strokeStyle = '#8a2a18'; g.stroke();
+  g.fillStyle = '#ffd76a'; g.beginPath(); g.ellipse(0, -3.6, 5.2, 3, 0, 3.1416, 6.2832); g.fill(); g.fillRect(-6, -3.8, 12, 1.2);     // Helm
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(-2.2, -0.6, 1.5, 0, 6.2832); g.arc(2.2, -0.6, 1.5, 0, 6.2832); g.fill();
+  g.fillStyle = '#10202c'; g.beginPath(); g.arc(-2, -0.4, 0.8, 0, 6.2832); g.arc(2.4, -0.4, 0.8, 0, 6.2832); g.fill();
+  g.save(); g.translate(6, -1); g.rotate(-1.1 + Math.max(0, Math.sin(tm * 9)) * 1.5);                     // Hammer-Arm
+  g.strokeStyle = '#c79c5e'; g.lineWidth = g.ow * 1; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -9); g.stroke();
+  g.fillStyle = '#8a96a2'; g.fillRect(-3, -12, 6, 3.6); g.restore();
+  g.restore();
+}
+function stScaffold(g, b, tm, p) {               // Gerüst bis knapp über die Baukante, Funken, Krebs, Balken + Restzeit (in Einheiten 0..100)
+  const ly = stBuildLine(p, ST_B[b.type].size * ST_TILE / 100), sd = (b.id || 1) * 7, top = Math.max(-6, ly - 6);
+  g.save(); g.lineCap = 'round';
+  g.strokeStyle = '#8a6a44'; g.lineWidth = g.ow * 1.6;
+  for (const x of [6, 94]) { g.beginPath(); g.moveTo(x, 97); g.lineTo(x, top); g.stroke(); }
+  g.strokeStyle = '#b08c5c'; g.lineWidth = g.ow * 0.9;
+  for (let yy = 92; yy > top + 4; yy -= 18) { g.beginPath(); g.moveTo(4, yy); g.lineTo(96, yy); g.stroke(); g.beginPath(); g.moveTo(6, yy); g.lineTo(14, yy - 9); g.moveTo(94, yy); g.lineTo(86, yy - 9); g.stroke(); }
+  const pulse = 0.55 + 0.45 * Math.sin(tm * 5);
+  g.globalCompositeOperation = 'lighter';
+  const lg = g.createLinearGradient(4, 0, 96, 0); lg.addColorStop(0, 'rgba(255,215,106,0)'); lg.addColorStop(0.5, 'rgba(255,225,140,' + (0.55 + 0.35 * pulse) + ')'); lg.addColorStop(1, 'rgba(255,215,106,0)');
+  g.fillStyle = lg; g.fillRect(4, ly - 1.6, 92, 3.2);
+  for (let i = 0; i < 7; i++) {                   // Funken und Blasen steigen von der Kante auf
+    const ph = (tm * (0.7 + bhash(sd + i) * 0.5) + bhash(sd + i + 3)) % 1, px = 12 + bhash(sd + i + 5) * 76 + Math.sin(tm * 2 + i) * 3, py = ly - ph * 26;
+    g.fillStyle = i % 3 ? 'rgba(190,240,255,' + (0.7 * (1 - ph)) + ')' : 'rgba(255,220,120,' + (0.9 * (1 - ph)) + ')';
+    g.beginPath(); g.arc(px, py, (i % 3 ? 1.6 : 1.1) * (1 - ph * 0.4), 0, 6.2832); g.fill();
+  }
+  g.globalCompositeOperation = 'source-over';
+  const cx = 50 + Math.sin(tm * 0.9 + (b.id || 1)) * 30;
+  stBuildCrab(g, cx, Math.min(90, ly + 1), tm);
+  const hit = Math.max(0, Math.sin(tm * 9)); if (hit > 0.92) { g.fillStyle = 'rgba(255,240,190,0.9)'; for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(cx + 13 + k * 2.5, ly - 3 - k * 2, 0.9, 0, 6.2832); g.fill(); } }
+  const left = Math.max(0, (b.upUntil - Date.now()) / 1000), txt = left < 60 ? Math.ceil(left) + ' s' : left < 3600 ? Math.floor(left / 60) + ':' + String(Math.floor(left % 60)).padStart(2, '0') : Math.floor(left / 3600) + ' h ' + Math.floor((left % 3600) / 60) + ' m';
+  const uu = ST_B[b.type].size * ST_TILE / 100, fs = 23 / uu, bw = Math.min(80, 165 / uu), bx = 50 - bw / 2, by = 100 - fs - 6 / uu * 2.5;
+  stRect(g, bx - 3, by - 2, bw + 6, fs + 5, (fs + 5) / 2, 'rgba(6,20,32,0.82)', 0);
+  stRect(g, bx, by + fs - 1, bw * p, 2.4, 1.2, '#ffd76a', 0);
+  g.font = '900 ' + fs + 'px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffe7a6';
+  g.fillText(txt, 50, by + fs * 0.45);
+  g.restore();
+}
+// 7.23: fertig gebaut / ausgebaut: ein ruhiger Ring am Fuss und ein kleiner Effekt, der zum Gebäude passt (t = 0..1, 0,9 s; kein Blitz, kein Wackeln)
+//   [Form, Farbe, Bewegung]: rise = steigt auf, swirl = kreist hinaus, dust = Staub am Boden, beam = ein Lichtband läuft den Turm hinauf, light = der Leuchtturm streicht einmal
+const ST_DONE_FX = {
+  harpunenturm: ['star', '#bff6ff', 'beam'], blasenkanone: ['dot', '#bfeaff', 'beam'], elektroaal: ['spark', '#fff38a', 'beam'], tintenwerfer: ['dot', '#c9a8ff', 'beam'], korallenspeer: ['star', '#ffb3a0', 'beam'],
+  leuchtturm: ['star', '#fff1b0', 'light'], korallenfarm: ['coral', '#ff8fa8', 'rise'], kristallbohrer: ['diamond', '#8ff0ff', 'rise'], lager: ['dot', '#ffe39a', 'rise'], perlentresor: ['pearl', '#ffffff', 'rise'],
+  brutstaette: ['fish', '#ffb070', 'swirl'], fischschule: ['fish', '#8fd8ff', 'swirl'], heilquelle: ['plus', '#8affc0', 'rise'], korallenmauer: ['puff', '#efe3c6', 'dust'], stachelfalle: ['puff', '#efe3c6', 'dust'],
+  krabbenwerkstatt: ['spark', '#ffc070', 'rise'], muschelburg: ['star', '#ffd76a', 'swirl'] };
+function stDoneShape(g, sh, x, y, r, col, ang) {
+  g.fillStyle = col; g.strokeStyle = col;
+  if (sh === 'star') { stStar(g, x, y, r * 1.3, col, 0.5); return; }
+  if (sh === 'diamond') { g.beginPath(); g.moveTo(x, y - r * 1.5); g.lineTo(x + r, y); g.lineTo(x, y + r * 1.5); g.lineTo(x - r, y); g.closePath(); g.fill(); return; }
+  if (sh === 'plus') { g.fillRect(x - r * 1.2, y - r * 0.4, r * 2.4, r * 0.8); g.fillRect(x - r * 0.4, y - r * 1.2, r * 0.8, r * 2.4); return; }
+  if (sh === 'spark') { g.lineWidth = r * 0.7; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y); g.lineTo(x - Math.cos(ang) * r * 2.4, y - Math.sin(ang) * r * 2.4); g.stroke(); return; }
+  if (sh === 'fish') { g.save(); g.translate(x, y); g.rotate(ang); g.beginPath(); g.ellipse(0, 0, r * 1.6, r * 0.9, 0, 0, 6.2832); g.fill(); g.beginPath(); g.moveTo(-r * 1.3, 0); g.lineTo(-r * 2.5, -r * 0.9); g.lineTo(-r * 2.5, r * 0.9); g.closePath(); g.fill(); g.restore(); return; }
+  if (sh === 'coral') { g.lineWidth = r * 0.6; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y + r * 1.4); g.lineTo(x, y - r * 0.6); g.moveTo(x, y + r * 0.3); g.lineTo(x - r, y - r * 0.9); g.moveTo(x, y); g.lineTo(x + r, y - r * 1.1); g.stroke(); return; }
+  if (sh === 'puff') { g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); return; }
+  g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+  if (sh === 'pearl') { g.fillStyle = 'rgba(190,220,255,0.9)'; g.beginPath(); g.arc(x + r * 0.25, y + r * 0.3, r * 0.55, 0, 6.2832); g.fill(); }
+}
+function stDonePop(g, t, type) {
+  const fx = ST_DONE_FX[type] || ST_DONE_FX.muschelburg, e = 1 - t, ease = 1 - e * e * e, fade = Math.sin(Math.PI * Math.min(1, t * 1.15)), N = 7;
+  g.save();
+  g.strokeStyle = 'rgba(255,236,170,' + (0.45 * e) + ')'; g.lineWidth = g.ow * 1.5 * e + 0.2; const rr = 24 + ease * 30; g.beginPath(); g.ellipse(50, 88, rr, rr * 0.3, 0, 0, 6.2832); g.stroke();
+  if (fx[2] === 'beam') {                         // ein weiches Lichtband läuft hinauf
+    const y = 88 - ease * 76, q = g.createRadialGradient(0, 0, 0, 0, 0, 16);
+    q.addColorStop(0, 'rgba(210,245,255,' + (0.4 * fade) + ')'); q.addColorStop(1, 'rgba(210,245,255,0)');
+    g.save(); g.translate(50, y); g.scale(2.1, 0.8); g.fillStyle = q; g.beginPath(); g.arc(0, 0, 16, 0, 6.2832); g.fill(); g.restore();
+  }
+  if (fx[2] === 'light') {                        // der Leuchtturm streicht einmal mit seinem Licht über das Wasser
+    const a = -2.4 + ease * 1.6, q = g.createRadialGradient(50, 14, 2, 50, 14, 90);
+    q.addColorStop(0, 'rgba(255,244,190,' + (0.42 * fade) + ')'); q.addColorStop(1, 'rgba(255,244,190,0)');
+    g.fillStyle = q; g.beginPath(); g.moveTo(50, 14); g.arc(50, 14, 90, a - 0.22, a + 0.22); g.closePath(); g.fill();
+  }
+  g.globalAlpha *= 0.85 * fade;
+  for (let i = 0; i < N; i++) {
+    const p1 = bhash(i * 7.31 + 1), p2 = bhash(i * 3.17 + 2), d = Math.min(1, Math.max(0, (t - i * 0.03) / 0.85)), de = 1 - (1 - d) * (1 - d);
+    let x, y, r = 2.6 + p2 * 1.4, ang = -Math.PI / 2;
+    if (fx[2] === 'swirl') { const a0 = i / N * 6.2832 + p1, a = a0 + de * 1.9, R = 16 + de * 36; x = 50 + Math.cos(a) * R; y = 56 + Math.sin(a) * R * 0.55; ang = a + Math.PI / 2; }
+    else if (fx[2] === 'dust') { const sd = i % 2 ? 1 : -1; x = 50 + sd * (8 + p1 * 18 + de * 22); y = 90 - p2 * 8 - de * 5; r = 3 + de * 6; g.globalAlpha = 0.5 * (1 - d) * fade; }
+    else { const top = fx[2] === 'beam' || fx[2] === 'light' ? 34 : 74; x = 50 + (p1 - 0.5) * 54 + Math.sin(d * 5 + i) * 3; y = top - de * (26 + p2 * 22); ang = -Math.PI / 2 + (p1 - 0.5) * 0.8; }
+    stDoneShape(g, fx[0], x, y, r * (1 - 0.35 * d), fx[1], ang);
+  }
   g.restore();
 }
 function stCracks(g, sev, id) {                  // Risse, wenn ein Gebäude viel abbekommen hat
@@ -14061,14 +14553,24 @@ function stDrawBuilding(g, b, x, y, tm, conn) {
   if (stUi.mode === 'move' && stUi.move === b) a = 0.35;
   if (b.type === 'stachelfalle' && !b.sprung && !b.ruin) a *= 0.6;
   g.save(); g.globalAlpha = a;
-  stBlit(g, spr, x - ST_PAD, y - ST_PAD);
+  const bp = b.upUntil && !b.ruin ? stBuildProg(b) : -1, da = stDoneAt.size ? stDoneAt.get(b) : 0, dt = da ? (Date.now() - da) / 900 : 1;
+  if (da && dt >= 1) stDoneAt.delete(b);
+  if (dt < 1) { const k = 1 + 0.08 * Math.sin(dt * Math.PI) * (1 - dt), cx = x + S / 2, cy = y + S; g.translate(cx, cy); g.scale(k, k); g.translate(-cx, -cy); }   // aufploppen (7.23: ruhiger, war 0,14)
+  if (bp >= 0 && b.nb) {                         // 7.23: Neubau: blasser Bauplan, das Gebäude wächst von unten
+    g.globalAlpha = a * 0.22; stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.globalAlpha = a;
+    stRevealBlit(g, spr, x, y, S, u, bp);
+  } else {
+    stBlit(g, spr, x - ST_PAD, y - ST_PAD);
+    if (bp >= 0) stRevealBlit(g, stSprite(b.type, b.lv + 1, 'ok', conn || 0), x, y, S, u, bp);      // Ausbau: die neue Stufe wächst über die alte
+  }
   const ht = b.hitT ? runTime - b.hitT : -1, fl = ht >= 0 && ht < 0.18 ? 1 - ht / 0.18 : 0;     // 7.9: ein gespeichertes hitT aus einer früheren Sitzung (runTime war höher) liess alles weiss aufleuchten
   if (fl > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * fl * 0.5; stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.globalCompositeOperation = 'source-over'; g.globalAlpha = a; }
   if (!b.ruin) {
     g.translate(x, y); g.scale(u, u); g.ow = 2.6 / u;
-    const f = ST_ANIM[b.type]; if (f) f(g, b, tm, u);
+    const f = ST_ANIM[b.type]; if (f && !(bp >= 0 && b.nb)) f(g, b, tm, u);
     const q = b.hp / stMaxHp(b); if (q < 0.66) stCracks(g, q < 0.33 ? 2 : 1, b.id || 1);
-    if (b.upUntil) stScaffold(g, b, tm);
+    if (bp >= 0) stScaffold(g, b, tm, bp);
+    if (dt < 1) stDonePop(g, dt, b.type);
   }
   g.restore();
 }
@@ -14080,7 +14582,7 @@ function stDrawBars(g, b, x, y, S) {             // Leben, Stufe, Auswahl
   if (ST_B[b.type].size > 1 && !b.upUntil) {
     const n = Math.min(5, b.lv), pw = n * 13 + 8, px = x + (S - pw) / 2, py = y + S - 18;
     stRectC(g, px, py, pw, 15, 'rgba(6,20,32,0.7)');
-    g.save(); g.ow = 1.2; for (let i = 0; i < n; i++) stStar(g, px + 10 + i * 13, py + 7.8, 5.2, '#ffd76a', 0.5); g.restore();
+    g.save(); g.ow = 1.2; for (let i = 0; i < n; i++) stStar(g, px + 10 + i * 13, py + 7.8, 5.2, i < b.lv - 5 ? '#ff7ab0' : '#ffd76a', 0.5); g.restore();      // 7.23: ab Stufe 6 rosa Sterne
   }
 }
 function stRectC(g, x, y, w, h, fill) { g.fillStyle = fill; g.beginPath(); roundRect(g, x, y, w, h, h / 2); g.fill(); }
@@ -14171,17 +14673,23 @@ function stDrawGhost(g, ox, oy, tm) {
   if (!ok) { g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(gx + S * 0.38, gy + S * 0.38); g.lineTo(gx + S * 0.62, gy + S * 0.62); g.moveTo(gx + S * 0.62, gy + S * 0.38); g.lineTo(gx + S * 0.38, gy + S * 0.62); g.stroke(); }
   g.restore();
 }
+let stGridAnim = null;                          // 7.23: { n0, at }: der Bauplatz wird grösser, der Rand gleitet 1,1 s lang hinaus
+function stPlotView(n, T) {                      // gezeichnete Grösse des Bauplatzes (Welt-Einheiten) und linke obere Ecke um die Mitte T/2
+  let sz = n * T;
+  if (stGridAnim) { const p = (Date.now() - stGridAnim.at) / 1100; if (p >= 1 || p < 0) stGridAnim = null; else { const e = 1 - Math.pow(1 - p, 3); sz = (stGridAnim.n0 + (n - stGridAnim.n0) * e) * T; } }
+  return { sz: sz, c: T / 2 - sz / 2 };
+}
 function drawStrategyBase() {
   if (!Base) return;
   const g = ctx, ox = camera.x - W / 2, oy = camera.y - H / 2, h = stHalf(), T = ST_TILE, n = stGrid(), tm = runTime;
-  const x0 = -h * T - ox, y0 = -h * T - oy, sz = n * T;
-  stDrawFloor(g, x0, y0, sz);
+  const x0 = -h * T - ox, y0 = -h * T - oy, sz = n * T, pv = stPlotView(n, T), px0 = pv.c - ox, py0 = pv.c - oy, pT = pv.sz / n;
+  stDrawFloor(g, px0, py0, pv.sz);
   if (stUi.mode === 'place' || stUi.mode === 'move') {          // Raster nur beim Bauen
     g.save(); g.strokeStyle = 'rgba(255,255,255,0.2)'; g.lineWidth = 2; g.setLineDash([10, 12]); g.beginPath();
     for (let i = 1; i < n; i++) { g.moveTo(x0 + i * T, y0); g.lineTo(x0 + i * T, y0 + sz); g.moveTo(x0, y0 + i * T); g.lineTo(x0 + sz, y0 + i * T); }
     g.stroke(); g.restore();
   }
-  stDrawRim(g, x0, y0, n, T, false);
+  stDrawRim(g, px0, py0, n, pT, false);
   stWalls = {}; for (let i = 0; i < Base.buildings.length; i++) { const w = Base.buildings[i]; if (w.type === 'korallenmauer') stWalls[w.x + ',' + w.y] = 1; }
   const list = Base.buildings.slice().sort(function(a, b){ return (a.y + ST_B[a.type].size) - (b.y + ST_B[b.type].size); });
   for (let i = 0; i < list.length; i++) {
@@ -14190,7 +14698,7 @@ function drawStrategyBase() {
     stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
     stDrawBars(g, b, x, y, S);
   }
-  stDrawRim(g, x0, y0, n, T, true);
+  stDrawRim(g, px0, py0, n, pT, true);
   if ((stUi.mode === 'place' || stUi.mode === 'move') && stUi.ghost) stDrawGhost(g, ox, oy, tm);
   if (stCmd === 'send' && stSend) stMarker(g, stSend.x - ox, stSend.y - oy, '#ffd76a', tm, true);
   if (stCmd === 'hold' && stHold) stMarker(g, stHold.x - ox, stHold.y - oy, '#7ee0ff', tm, false);
@@ -14603,40 +15111,53 @@ ST_ANIM.harpunenturm = function(g, b, tm) {
 };
 
 // ---------- Korallenmauer (1 x 1): Mauerstück, verbindet sich mit Nachbarstücken ----------
+// 7.23: jede Stufe sieht anders aus: Stein je zwei Stufen (Sandstein, Granit, Meerstein, Korallenmarmor, Obsidian), Punkte oben auf dem Deckstein
+// zeigen die Stufe (1-5 gold, ab 6 werden sie der Reihe nach rosa, wie die Sterne der grossen Gebäude). Vorderseiten in jeder Verbindung gleich.
+const ST_WALL_MAT = [
+  { cap: ['#efe6d6', '#b9ab98'], top: ['#e0d6c4', '#a89b88'], arm: '#cbc0ac', front: ['#a39484', '#54463f'] },
+  { cap: ['#e6eaee', '#9ca6b0'], top: ['#d4dae0', '#8c96a0'], arm: '#bac2ca', front: ['#8e98a2', '#4a525a'] },
+  { cap: ['#d8eef2', '#80b2c0'], top: ['#c4e2e8', '#6c9cac'], arm: '#a8ccd6', front: ['#6f9aa8', '#36586a'] },
+  { cap: ['#ffe6de', '#e09c8e'], top: ['#f6d4ca', '#cc887a'], arm: '#eab6aa', front: ['#c27c6e', '#6a3a34'] },
+  { cap: ['#6e687c', '#34303e'], top: ['#5e586c', '#2c2834'], arm: '#4e485c', front: ['#423e4e', '#1c1a24'] }];
+function stLvMarks(g, lv, cx, cy, sp, r) {      // Stufe als 5 Punkte: gold bis 5, ab 6 die ersten (lv - 5) rosa
+  const n = Math.min(5, lv), pink = Math.max(0, lv - 5);
+  for (let i = 0; i < n; i++) stCirc(g, cx + (i - (n - 1) / 2) * sp, cy, r, i < pink ? '#ff7ab0' : '#ffd76a', 0.45);
+}
 ST_ART.korallenmauer = function(g, lv, conn) {
-  const N = conn & 1, E = conn & 2, Sd = conn & 4, Wd = conn & 8, hgt = 13 + Math.min(lv, 5) * 1.6, top = [[24, 26, 52, 44]], arms = [];
+  const N = conn & 1, E = conn & 2, Sd = conn & 4, Wd = conn & 8, hgt = 13 + Math.min(lv, 5) * 1.6 + Math.max(0, lv - 5) * 0.6, top = [[24, 26, 52, 44]], arms = [], M = ST_WALL_MAT[Math.min(4, Math.floor((lv - 1) / 2))];
   if (N) arms.push([33, -6, 34, 36, 'v']); if (Sd) arms.push([33, 66, 34, 40, 'v']); if (E) arms.push([70, 36, 36, 28, 'h']); if (Wd) arms.push([-6, 36, 36, 28, 'h']);   // 7.9: Arme ragen 6 Einheiten ins Nachbarfeld, ohne Umriss an den Enden
   stShadow(g, 50, 72 + hgt * 0.4, 50, 12, 0.5);
   const front = function(x, y, w, arm) {
-    if (arm) { stRect(g, x, y - 3, w, hgt + 3, 0, stLG(g, 0, y, 0, y + hgt, '#a39484', '#54463f'), 0); g.save(); g.lineCap = 'butt'; g.lineWidth = g.ow; g.strokeStyle = 'rgba(12,24,36,0.9)'; g.beginPath(); g.moveTo(x, y + hgt); g.lineTo(x + w, y + hgt); g.stroke(); g.restore(); }
-    else stRect(g, x, y - 3, w, hgt + 3, 3, stLG(g, 0, y, 0, y + hgt, '#a39484', '#54463f'), 1);
+    if (arm) { stRect(g, x, y - 3, w, hgt + 3, 0, stLG(g, 0, y, 0, y + hgt, M.front[0], M.front[1]), 0); g.save(); g.lineCap = 'butt'; g.lineWidth = g.ow; g.strokeStyle = 'rgba(12,24,36,0.9)'; g.beginPath(); g.moveTo(x, y + hgt); g.lineTo(x + w, y + hgt); g.stroke(); g.restore(); }
+    else stRect(g, x, y - 3, w, hgt + 3, 3, stLG(g, 0, y, 0, y + hgt, M.front[0], M.front[1]), 1);
     g.save(); g.beginPath(); roundRect(g, x, y - 3, w, hgt + 3, arm ? 0 : 3); g.clip(); g.strokeStyle = 'rgba(30,18,14,0.42)'; g.lineWidth = g.ow * 0.5; g.beginPath();
     g.moveTo(x, y + hgt * 0.5); g.lineTo(x + w, y + hgt * 0.5);
     for (let xx = x + 7; xx < x + w; xx += 12) { g.moveTo(xx, y - 3); g.lineTo(xx, y + hgt * 0.5); g.moveTo(xx + 6, y + hgt * 0.5); g.lineTo(xx + 6, y + hgt); }
     g.stroke(); g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(x, y - 3, w, 2.5); g.restore();
   };
-  if (!Sd) { front(24, 70, 52); if (E) front(70, 64, 36, 1); if (Wd) front(-6, 64, 36, 1); }
+  front(24, 70, 52); if (E) front(70, 64, 36, 1); if (Wd) front(-6, 64, 36, 1);       // 7.23: auch mit einer Mauer im Süden (deren Arm deckt die Mitte ab), sonst fehlten an Ecken und T-Stücken Stücke
   g.lineJoin = 'round'; g.lineCap = 'round';
   top.forEach(function(r){ g.beginPath(); roundRect(g, r[0], r[1], r[2], r[3], 5); g.fillStyle = '#2a201a'; g.fill(); g.lineWidth = g.ow * 2; g.strokeStyle = 'rgba(12,24,36,0.92)'; g.stroke(); });
   arms.forEach(function(r){ g.fillStyle = '#2a201a'; g.fillRect(r[0], r[1], r[2], r[3]); g.save(); g.lineCap = 'butt'; g.lineWidth = g.ow * 2; g.strokeStyle = 'rgba(12,24,36,0.92)'; g.beginPath();
     if (r[4] === 'v') { g.moveTo(r[0], r[1]); g.lineTo(r[0], r[1] + r[3]); g.moveTo(r[0] + r[2], r[1]); g.lineTo(r[0] + r[2], r[1] + r[3]); } else { g.moveTo(r[0], r[1]); g.lineTo(r[0] + r[2], r[1]); g.moveTo(r[0], r[1] + r[3]); g.lineTo(r[0] + r[2], r[1] + r[3]); }
     g.stroke(); g.restore(); });
-  top.forEach(function(r){ stRect(g, r[0], r[1], r[2], r[3], 5, stLG(g, 0, r[1], 0, r[1] + r[3], '#e0d6c4', '#a89b88'), 0); });
-  arms.forEach(function(r){ g.fillStyle = r[4] === 'v' ? '#cbc0ac' : stLG(g, 0, r[1], 0, r[1] + r[3], '#e0d6c4', '#a89b88'); g.fillRect(r[0], r[1], r[2], r[3]); });
+  top.forEach(function(r){ stRect(g, r[0], r[1], r[2], r[3], 5, stLG(g, 0, r[1], 0, r[1] + r[3], M.top[0], M.top[1]), 0); });
+  arms.forEach(function(r){ g.fillStyle = r[4] === 'v' ? M.arm : stLG(g, 0, r[1], 0, r[1] + r[3], M.top[0], M.top[1]); g.fillRect(r[0], r[1], r[2], r[3]); });
   g.strokeStyle = 'rgba(70,56,44,0.38)'; g.lineWidth = g.ow * 0.55; g.beginPath();
   if (N) { g.moveTo(35, 8); g.lineTo(65, 8); g.moveTo(35, 18); g.lineTo(65, 18); g.moveTo(50, -2); g.lineTo(50, 8); g.moveTo(42, 8); g.lineTo(42, 18); g.moveTo(58, 8); g.lineTo(58, 18); g.moveTo(50, 18); g.lineTo(50, 28); }
   if (Sd) { g.moveTo(35, 80); g.lineTo(65, 80); g.moveTo(35, 90); g.lineTo(65, 90); g.moveTo(42, 70); g.lineTo(42, 80); g.moveTo(58, 70); g.lineTo(58, 80); g.moveTo(50, 80); g.lineTo(50, 90); g.moveTo(50, 90); g.lineTo(50, 102); }
   if (E) { g.moveTo(74, 50); g.lineTo(106, 50); g.moveTo(84, 38); g.lineTo(84, 50); g.moveTo(96, 50); g.lineTo(96, 62); g.moveTo(90, 38); g.lineTo(90, 50); }
   if (Wd) { g.moveTo(-6, 50); g.lineTo(26, 50); g.moveTo(16, 38); g.lineTo(16, 50); g.moveTo(4, 50); g.lineTo(4, 62); g.moveTo(10, 38); g.lineTo(10, 50); }
   g.stroke();
-  stRect(g, 31, 33, 38, 30, 6, stLG(g, 0, 33, 0, 63, '#efe6d6', '#b9ab98'), 0.8);
+  stRect(g, 31, 33, 38, 30, 6, stLG(g, 0, 33, 0, 63, M.cap[0], M.cap[1]), 0.8);
   g.strokeStyle = 'rgba(70,56,44,0.3)'; g.lineWidth = g.ow * 0.5; g.beginPath(); g.moveTo(50, 34); g.lineTo(50, 62); g.moveTo(32, 48); g.lineTo(68, 48); g.stroke();
   g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(34, 34.5, 32, 2);
   if (lv === 1) { g.fillStyle = '#4f9a62'; for (const p of [[34, 60], [64, 58], [47, 36]]) { g.beginPath(); g.ellipse(p[0], p[1], 4, 1.8, 0, 0, 6.2832); g.fill(); } }
-  if (lv >= 2) { stCoral(g, 42, 54, 13, '#ff6a4d', 4.1, 3.6); stCoral(g, 60, 55, 10, '#ff9a5c', 8.3, 3.2); }
-  if (lv >= 3) for (const p of [[35, 38], [65, 38], [35, 60], [65, 60]]) stCirc(g, p[0], p[1], 2, lv >= 5 ? '#ffd76a' : '#9aa8b4', 0.6);
+  if (lv >= 2) { stCoral(g, 40, 62, 6, '#ff6a4d', 4.1, 2.8); stCoral(g, 61, 62, 5, '#ff9a5c', 8.3, 2.5); }
+  if (lv >= 3) for (const p of [[35, 60], [65, 60]]) stCirc(g, p[0], p[1], 2, lv >= 5 ? '#ffd76a' : '#9aa8b4', 0.6);
   if (lv >= 4) { g.strokeStyle = '#ffd76a'; g.lineWidth = g.ow * 1.2; g.beginPath(); roundRect(g, 31, 33, 38, 30, 6); g.stroke(); }
-  if (lv >= 5) stPearl(g, 50, 48, 3.4, '#ffe9b0');
+  if (lv >= 5) stPearl(g, 50, 52, 3, '#ffe9b0');
+  stRect(g, 33.5, 35, 33, 10, 5, 'rgba(26,18,12,0.78)', 0); stLvMarks(g, lv, 50, 40, 6.3, 2.6);
 };
 
 // ---------- Leuchtturm (1 x 1): gestreifter Turm, die Lampe dreht einen Lichtstrahl ----------
@@ -14789,6 +15310,31 @@ ST_ANIM.heilquelle = function(g, b, tm) {
   for (let i = 0; i < 3; i++) { const ph = (tm * 0.55 + i / 3) % 1; g.save(); g.globalAlpha = (1 - ph) * 0.7; g.strokeStyle = '#eafff6'; g.lineWidth = g.ow * 0.6; g.beginPath(); g.ellipse(50 + (i - 1) * 14, 66 + (i % 2) * 3, 3 + ph * 11, (3 + ph * 11) * 0.45, 0, 0, 6.2832); g.stroke(); g.restore(); }
   for (let i = 0; i < 6; i++) { const ph = (tm * 0.4 + i * 0.19) % 1; g.save(); g.globalAlpha = Math.sin(ph * Math.PI); stStar(g, 20 + i * 12 + Math.sin(tm + i) * 3, 64 - ph * 40, 1.6, '#caffd8', 0.3); g.restore(); }
   stGlow(g, 50, 60, 50, '94,242,192', 0.12 + 0.05 * Math.sin(tm * 2));
+};
+
+// ---------- Krabbenwerkstatt (2 x 2, 7.23): Bretterschuppen unter einem Muscheldach, Amboss, Werkzeug; der Krebs hämmert, solange er repariert ----------
+ST_ART.krabbenwerkstatt = function(g, lv) {
+  const gold = lv >= 4;
+  stShadow(g, 50, 91, 46, 6, 0.45);
+  stRect(g, 16, 46, 68, 42, 3, stLG(g, 0, 46, 0, 88, '#d0a26a', '#7a5430'), 1);                                       // Bretterwand
+  g.strokeStyle = 'rgba(60,34,14,0.35)'; g.lineWidth = g.ow * 0.5; g.beginPath(); for (let x = 24; x < 84; x += 8) { g.moveTo(x, 47); g.lineTo(x, 87); } g.stroke();
+  stArch(g, 38, 60, 20, 28, stLG(g, 0, 60, 0, 88, '#3a2414', '#1c1008'), 1);                                          // Tor
+  g.save(); g.beginPath(); g.ellipse(50, 50, 44, 32, 0, Math.PI, 6.2832); g.closePath(); stDo(g, stLG(g, 0, 18, 0, 50, '#ffe2cc', '#e0896a'), 1); g.clip();   // Muscheldach
+  g.strokeStyle = 'rgba(150,60,40,0.4)'; g.lineWidth = g.ow * 0.7; g.beginPath(); for (let i = 1; i < 9; i++) { const a = Math.PI + i / 9 * Math.PI; g.moveTo(50, 52); g.lineTo(50 + Math.cos(a) * 50, 52 + Math.sin(a) * 40); } g.stroke(); g.restore();
+  if (gold) { g.strokeStyle = '#ffd76a'; g.lineWidth = g.ow * 1.6; g.beginPath(); g.ellipse(50, 50, 44, 32, 0, Math.PI, 6.2832); g.stroke(); }
+  stCirc(g, 50, 34, 8.5, stRG(g, 48, 32, 1, 9, '#fff6e6', '#c8a070'), 1);                                              // Schild mit Schraubenschlüssel
+  g.save(); g.translate(50, 34); g.rotate(-0.75); stRect(g, -1.5, -3, 3, 9.5, 1, '#5a646e', 0); g.beginPath(); g.arc(0, -4.5, 3.4, 0, 6.2832); g.fillStyle = '#5a646e'; g.fill(); g.fillStyle = '#f2e2c8'; g.fillRect(-1.1, -8.2, 2.2, 3.6); g.restore();
+  for (const [x, c] of [[66, '#8a96a2'], [72, '#c79c5e']]) { stLine(g, x, 86, x + 3, 62, 'rgba(20,12,6,0.8)', g.ow * 2.2); stLine(g, x, 86, x + 3, 62, c, g.ow * 1.3); }   // Werkzeug an der Wand
+  stRect(g, 63.4, 60, 7, 3.6, 0.8, '#8a96a2', 0.6); stCirc(g, 75, 61.5, 2.4, '#8a96a2', 0.6);
+  stRect(g, 66, 84, 14, 6, 1, '#4a525a', 0.9);                                                                          // Amboss
+  stPoly(g, [[60, 76], [86, 76], [83, 82], [63, 82]], stLG(g, 0, 76, 0, 82, '#d2dce6', '#6a7682'), 0.9); stPoly(g, [[60, 76], [53, 78.5], [60, 80.5]], '#a8b2bc', 0.6);
+  if (lv >= 3) { g.save(); g.translate(24, 40); stCirc(g, 0, 0, 6, '#9aa6b2', 0.8); g.fillStyle = '#9aa6b2'; for (let i = 0; i < 8; i++) { g.save(); g.rotate(i / 8 * 6.2832); g.fillRect(-1.4, -8, 2.8, 3); g.restore(); } stCirc(g, 0, 0, 2.2, '#5a646e', 0.5); g.restore(); }   // Zahnrad
+  if (lv >= 6) { stPearl(g, 14, 84, 2.8, '#ffe9c8'); stPearl(g, 86, 86, 2.8, '#ffe9c8'); }
+};
+ST_ANIM.krabbenwerkstatt = function(g, b, tm) {
+  const fx = stFxOf(b), busy = fx.repT !== undefined && runTime - fx.repT < 0.5;
+  stBuildCrab(g, 70, 70, busy ? tm : 0.17);                                                                              // hämmert nur, wenn er gerade etwas repariert
+  if (busy) { const ph = (tm * 1.5) % 1; if (ph < 0.25) { g.save(); g.globalAlpha = 1 - ph * 4; for (let i = 0; i < 3; i++) stStar(g, 78 + i * 3, 74 - i * 2.5 - ph * 8, 1.2, '#ffe9a0', 0); g.restore(); } }
 };
 
 // ---------- Fischschule (2 x 2): Schulhaus mit Glocke, Tafel und Bullaugen ----------
@@ -14950,7 +15496,7 @@ function renderCharacterGrid() {
       '<span class="pick-desc">'+desc+'</span>' +
       (!unlocked && ch.unlockLevel && (save.stats.bestLevel || 0) > 0 ? '<span class="pick-desc">Bisher: Level ' + save.stats.bestLevel + '</span>' : '') +
       (unlocked && !owned ? '<button class="pick-buy' + (buyConfirm === ch.id ? ' confirm' : '') + '"' + (save.totalPearls < ch.price ? ' disabled' : '') + '>' +
-        (buyConfirm === ch.id ? 'Wirklich kaufen? \uD83D\uDCA7 ' + ch.price : (save.totalPearls < ch.price ? 'Noch ' + (ch.price - save.totalPearls) + ' \uD83D\uDCA7 fehlen' : 'Kaufen \u00B7 \uD83D\uDCA7 ' + ch.price)) + '</button>' : '');
+        (buyConfirm === ch.id ? 'Wirklich kaufen? \uD83D\uDCA7 ' + ch.price : (save.totalPearls < ch.price ? (ch.price - save.totalPearls) + ' \uD83D\uDCA7 fehlen' : 'Kaufen \u00B7 \uD83D\uDCA7 ' + ch.price)) + '</button>' : '');
     if (owned) {
       div.addEventListener('click', function(){
         selectedCharacterId = ch.id;
@@ -15040,6 +15586,7 @@ function stHudBuild(h) {                         // die Leiste einmal bauen: Sym
   [['k', 'coral'], ['c', 'crystal'], ['xp', 'xp'], ['army', 'fish'], ['wave', 'wave']].forEach(function(p){
     const s = el('span', 'st-stat'), v = el('span', 'st-val'); s.appendChild(stHudIcon(p[1], 17)); s.appendChild(v); h.appendChild(s); stHudEls[p[0]] = v;
   });
+  const bs = el('span', 'st-stat st-bstat'), bv = el('span', 'st-val'); bs.appendChild(el('span', null, '🏗️')); bs.appendChild(bv); h.appendChild(bs); stHudEls.build = bv; stHudEls.buildBox = bs;     // 7.23: laufender Bau
 }
 function renderStageGrid() {
   const grid = UI['stage-grid'];
@@ -15088,7 +15635,7 @@ function renderShop() {
       '<span class="shop-item-desc">'+u.desc+'</span>' +
       '<span class="shop-item-level"><span class="pips">' + pips.join('') + '</span> Stufe '+level+' / '+u.maxLevel +
       (!maxed && !open ? '<span class="shop-gate">\uD83D\uDD12 N\u00E4chste Stufe: besiege ' + gateName(gate) + '</span>' : '') + '</span></div>' +
-      '<button class="shop-buy-btn" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '' : '<small class="shop-miss">noch ' + (cost - save.totalPearls) + '</small>')))+'</button>';
+      '<button class="shop-buy-btn' + (!maxed && open && !canAfford ? ' short' : '') + '" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '' : '<small class="shop-miss">' + (cost - save.totalPearls) + ' fehlen</small><i class="shop-have" style="--w:' + Math.round(100 * Math.min(1, save.totalPearls / cost)) + '%"></i>')))+'</button>';
     if (!maxed && open) {
       div.querySelector('.shop-buy-btn').addEventListener('click', function(){
         if (accBuyGuard(function(){ renderShop(); updateMenuPearlsLabel(); })) return;
@@ -15270,7 +15817,7 @@ function renderGameOverScreen() {
   if (buy) extra = '<div class="go-next">💧 Du hast jetzt <b>' + save.totalPearls + ' Perlen</b> – genug für <b>' + buy.u.name + '</b> (' + buy.cost + ' 💧).</div>';
   else if (goal && !newly.length) extra = '<div class="go-next">' + goalChipHtml(goal) + '</div>';
   if (extra) achWrap.insertAdjacentHTML('beforeend', extra);
-  if (goBoss) achWrap.insertAdjacentHTML('afterbegin', '<div class="go-next">\uD83D\uDC51 <span>' + goBoss.name + ': noch ' + goBoss.pct + ' % Leben</span></div>');
+  if (goBoss) achWrap.insertAdjacentHTML('afterbegin', '<div class="go-next">\uD83D\uDC51 <span>' + goBoss.name + ': ' + goBoss.pct + ' % Leben übrig</span></div>');
   const goShop = document.getElementById('btn-gameover-shop');
   if (goShop) goShop.style.display = buy ? '' : 'none';
   const goAch = document.getElementById('btn-gameover-achievements');
@@ -15404,6 +15951,7 @@ const ONLINE_STATUS_IDS = ['online-status', 'online-status-mode', 'online-status
 const ONLINE_ACTION_IDS = ['btn-online-next', 'btn-mode-resume', 'btn-kind-coop', 'btn-kind-pvp', 'btn-kind-team', 'btn-kind-ffa', 'btn-mode-quick', 'btn-mode-create', 'btn-mode-join', 'btn-area-go', 'btn-online-join'];
 const ONLINE_STEP_OF = { 'screen-online': 'profile', 'screen-online-mode': 'mode', 'screen-online-pvp': 'pvp', 'screen-online-with': 'with', 'screen-online-area': 'area', 'screen-online-code': 'code' };
 const ONLINE_MODE_LABEL = { coop: '🤝 COOP', pvp: '⚔️ Team-PvP', ffa: '🗡️ Jeder gegen jeden' };
+const ONLINE_STEP_NAME = { profile: 'Profil', mode: 'Spielart', pvp: 'PvP-Art', with: 'Mit wem', area: 'Gebiet', code: 'Code' };
 function onlineModeIsPvp(m) { return m === 'pvp' || m === 'ffa'; }
 // Fortschritt oben: der erste Schritt (Profil) ist schon erledigt, sobald du weiter bist
 function renderOnlineSteps(screenId) {
@@ -15411,7 +15959,7 @@ function renderOnlineSteps(screenId) {
   if (!at) return;
   const flow = at === 'code' ? ['profile', 'mode', 'code'] : ['profile', 'mode'].concat(onlineModeIsPvp(onlineMode()) || at === 'pvp' ? ['pvp'] : [], ['with', 'area']);
   const k = Math.max(0, flow.indexOf(at));
-  const html = flow.map(function(f, i){ return '<i class="' + (i < k ? 'done' : i === k ? 'cur' : '') + '"></i>'; }).join('') + '<span>Schritt ' + (k + 1) + ' von ' + flow.length + '</span>';
+  const html = flow.map(function(f, i){ return '<i class="' + (i < k ? 'done' : i === k ? 'cur' : '') + '"></i>'; }).join('') + '<span>Schritt ' + (k + 1) + ' · ' + ONLINE_STEP_NAME[at] + '</span>';     // 7.23: der Name des Schritts statt „von N“ (N sprang von 4 auf 5, wenn du PvP gewählt hast)
   const el = document.getElementById(screenId), box = el && el.querySelector('.osteps');
   if (box) box.innerHTML = html;
 }
@@ -15465,7 +16013,7 @@ function renderOnlineMode() {
     const sub = document.getElementById('mode-resume-sub');
     if (snap && sub) {
       const left = Math.max(1, Math.ceil((ONLINE_SNAP_TTL - (Date.now() - (snap.savedAt || 0))) / 60000));
-      sub.textContent = onlineSnapLabel(snap) + ' – wartet noch ' + left + ' Min. auf dich, dann ist er weg';
+      sub.textContent = onlineSnapLabel(snap) + ' – wartet ' + left + ' Min. auf dich, dann ist er weg';
     }
   }
   renderOnlineCounts();
