@@ -137,7 +137,8 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .panel-actions { display: flex; gap: 10px; margin-top: 18px; }
 /* Hauptmenü: Verbesserungen, Erfolge, Boss-Album, Konto als vier Kacheln (kein Scrollbalken mehr); Anleitung klein neben dem Ton-Knopf */
 .menu-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.menu-tiles .btn { flex-direction: column; gap: 3px; padding: 11px 8px; font-size: 14px; min-width: 0; text-align: center; }
+.menu-tiles .btn { flex-direction: column; gap: 3px; padding: 11px 8px; font-size: 14px; min-width: 0; text-align: center; white-space: nowrap; }
+@media (max-width: 400px) { .menu-tiles .btn { font-size: 13px; padding-left: 4px; padding-right: 4px; } .pr-chip { font-size: 10.5px; gap: 3px; padding-left: 5px; } .pr-chip i { font-size: 12px; } .pr-chip b { font-size: 10px; padding: 0 4px; } }
 .menu-tiles .btn .btn-sub { margin-left: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .btn-mini { width: auto; padding: 9px 16px; font-size: 13px; border-radius: 999px; }
 /* "App laden": Mint wie die Sprachwahl, Download-Symbol und ein paar sanfte Leucht-Pulse beim Öffnen des Menüs, damit man ihn bemerkt */
@@ -171,6 +172,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .logo-accent { color: var(--bioluma); text-shadow: 0 0 18px rgba(94,242,192,0.5); }
 .tagline { color: var(--foam-dim); margin: 10px 0 22px; font-weight: 600; font-size: 14px; }
 .menu-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
+.menu-footer .btn-mini { width: 128px; justify-content: center; }   /* 7.24: both footer buttons one width */
 .icon-btn {
   width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(126,224,255,0.3);
   background: rgba(126,224,255,0.1); color: var(--foam); cursor: pointer; font-size: 17px;
@@ -185,6 +187,15 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
   border-radius: 16px; padding: 14px 10px; cursor: pointer; text-align: center;
   transition: all 0.15s ease;
 }
+/* 7.24: every card in a row has the same parts at the same height (name, stats, text, footer line up; no gaps under short texts) */
+.card-grid { row-gap: 10px; }
+.pick-card { display: grid; grid-template-rows: subgrid; row-gap: 4px; align-content: start; }
+#character-grid .pick-card { grid-row: span 5; }
+#stage-grid .pick-card { grid-row: span 4; }
+.pick-card > * { margin-top: 0 !important; min-width: 0; }
+.pick-card > .pick-swatch, .pick-card > canvas, .pick-card > img { justify-self: center; align-self: start; }
+.pick-card > .pick-foot, .pick-card > .pick-buy { align-self: end; }
+@supports not (grid-template-rows: subgrid) { .pick-card { display: flex; flex-direction: column; } .pick-card > .pick-desc { flex: 1; } }
 .pick-card.selected { border-color: var(--bioluma); background: rgba(94,242,192,0.12); box-shadow: 0 0 0 3px rgba(94,242,192,0.18); }
 .pick-card.locked { opacity: 0.5; cursor: not-allowed; }
 .pick-card .pick-swatch { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -203,11 +214,18 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .shop-item-info, .achievement-item-info { flex: 1; min-width: 0; }
 .shop-item-name, .achievement-item-name { font-weight: 800; font-size: 13.5px; display: block; }
 .shop-item-desc, .achievement-item-desc { font-size: 11.5px; color: var(--foam-dim); display: block; margin-top: 2px; }
+.achievement-item-desc { line-height: 1.3; }
+.ach-rew { font-size: 11px; font-weight: 800; color: var(--pearl); white-space: nowrap; }
+.achievement-item.claimed .ach-rew { color: var(--bioluma); }
 .shop-item-level { font-size: 11px; color: var(--bioluma); font-weight: 700; margin-top: 3px; display: block; }
 .shop-buy-btn {
   flex-shrink: 0; background: linear-gradient(135deg, var(--bioluma), #38c99a); color: #04241a;
   font-weight: 800; border: none; border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
 }
+/* 7.24: one button size in every row; the price on top, what is missing (or Kaufen) below */
+.shop-buy-btn { width: 78px; height: 48px; box-sizing: border-box; padding-left: 4px; padding-right: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.shop-buy-btn .shop-miss.ok { color: inherit; opacity: 0.8; }
+.shop-item-desc { line-height: 1.3; min-height: 2.6em; }
 .shop-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
 .shop-buy-btn .shop-miss { display: block; font-size: 10px; font-weight: 800; color: #ffc2ae; margin-top: 1px; }
 .shop-buy-btn.short { position: relative; overflow: hidden; padding-bottom: 10px; }
@@ -216,14 +234,17 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .shop-buy-btn .shop-have::before { content: ''; display: block; height: 100%; width: var(--w, 0); border-radius: 99px; background: var(--bioluma); }
 .shop-note { font-size: 12px; color: var(--foam-dim); font-weight: 700; margin: -4px 0 6px; }
 .shop-tiers { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
-.tier-chip { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.2); color: var(--foam-dim); }
+.tier-chip { flex: 0 1 150px; display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(126,224,255,0.07); border: 1px solid rgba(126,224,255,0.2); color: var(--foam-dim); }
 .tier-chip.ok { color: #04241a; background: linear-gradient(135deg, var(--bioluma), #38c99a); border-color: transparent; }
 .pips { display: inline-flex; gap: 3px; margin-right: 5px; vertical-align: -1px; }
 .pip { width: 8px; height: 8px; border-radius: 50%; background: rgba(126,224,255,0.16); border: 1px solid rgba(126,224,255,0.35); display: inline-block; }
 .pip.on { background: var(--bioluma); border-color: var(--bioluma); }
 .pip.lock:not(.on) { border-style: dashed; opacity: 0.6; }
-.shop-gate { display: block; margin-top: 3px; color: #ffcf8a; font-weight: 800; }
+.shop-gate { color: #ffcf8a; font-weight: 800; white-space: nowrap; }   /* 7.24: on the level line, so a locked row is no taller */
 .shop-item.gated { border-style: dashed; }
+.pick-foot { display: block; width: 100%; box-sizing: border-box; font: 900 12px 'Nunito', sans-serif; border-radius: 10px; padding: 7px 8px; background: rgba(126,224,255,0.1); color: var(--foam-dim); }
+.pick-card.selected .pick-foot { background: rgba(94,242,192,0.22); color: var(--foam); }
+.pick-card.locked .pick-foot { background: rgba(255,255,255,0.06); }
 .pick-buy { margin-top: 7px; width: 100%; background: linear-gradient(135deg, #ffd76a, #ff9a3c); color: #2a1400; font: 900 12px 'Nunito', sans-serif; border: none; border-radius: 10px; padding: 7px 8px; cursor: pointer; }
 .pick-buy:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.5); }
 .pick-buy.confirm { background: linear-gradient(135deg, #5ef2c0, #38c99a); color: #04241a; }
@@ -360,6 +381,9 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .album-tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
 .album-tabs .btn { flex: 1 1 0; min-width: 0; padding: 7px 4px; font-size: 11.5px; line-height: 1.15; flex-direction: column; gap: 2px; }
 .album-tabs .btn .btn-sub { margin-left: 0; }
+.album-tabs { display: grid; grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 520px) { .album-tabs { grid-template-columns: repeat(2, 1fr); } .album-tabs .btn .at-n { min-height: 0 !important; } }
+.album-tabs .btn .at-n { min-height: 2.3em; display: flex; align-items: center; justify-content: center; }
 .album-tabs .btn.active { background: rgba(94,242,192,0.22); border-color: var(--bioluma); }
 .album-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .album-card { border-radius: 12px; padding: 6px 4px 8px; text-align: center; background: rgba(126,224,255,0.07); border: 2px solid rgba(126,224,255,0.18); }
@@ -435,24 +459,25 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
   background: linear-gradient(135deg, color-mix(in srgb, var(--rc) 22%, transparent), rgba(8,26,44,0.6)); border: 1px solid color-mix(in srgb, var(--rc) 55%, transparent); font-family: 'Nunito', sans-serif; transition: transform 0.12s, border-color 0.12s; }
 .strat-card:not(:disabled):hover { transform: translateY(-1px); border-color: var(--rc); }
 .strat-card:disabled { cursor: not-allowed; filter: grayscale(0.7); opacity: 0.55; }
-.strat-card .sc-ic { font-style: normal; font-size: 26px; width: 34px; text-align: center; flex: none; }
+.strat-card .sc-ic { font-style: normal; font-size: 26px; width: 38px; text-align: center; flex: none; }
 .strat-card .sc-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .strat-card .sc-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .strat-card .sc-name { font-size: 15px; font-weight: 800; }
 .strat-card .sc-tag { font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 99px; background: rgba(255,215,106,0.22); color: #ffe39a; }
 .strat-card .sc-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-.strat-card .sc-chip { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 99px; background: rgba(255,255,255,0.1); white-space: nowrap; }
+.strat-card .sc-chip { min-width: 124px; box-sizing: border-box; text-align: center; font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 99px; background: rgba(255,255,255,0.1); white-space: nowrap; }
 .strat-card .sc-chip.hard { background: rgba(255,120,120,0.18); color: #ffc4c4; }
 .strat-card .sc-chip.good { background: rgba(94,242,192,0.16); color: #b6ffe4; }
 .strat-card .sc-line { font-size: 11.5px; font-weight: 700; color: var(--foam-dim); }
 .strat-solo { --rc: #9fb3c8; }
 #screen-strat .panel { max-width: 640px; }
 @media (max-height: 760px) { #screen-strat .panel > p { display: none; } #screen-strat .panel h2 { margin-bottom: 4px; } }
-@media (max-width: 520px) { .strat-rings { gap: 6px; } .strat-card { padding: 8px 10px; gap: 8px; } .strat-card .sc-ic { font-size: 22px; width: 28px; } .strat-card .sc-main { gap: 3px; } }
+@media (max-width: 520px) { .strat-rings { gap: 6px; } .strat-card { padding: 8px 10px; gap: 8px; } .strat-card .sc-ic { font-size: 22px; width: 32px; } .strat-card .sc-main { gap: 3px; } }
 @media (max-height: 520px) and (orientation: landscape) { .strat-card { padding: 6px 10px; } .strat-card .sc-ic { font-size: 22px; } .strat-sec { margin: 6px 2px 4px; } }
 .howto-tabs { display: flex; gap: 4px; margin: 0 0 10px; }
 .howto-tab { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 3px 6px; border-radius: 12px; border: 1px solid rgba(126,224,255,0.2); background: rgba(126,224,255,0.06); color: var(--foam-dim); font: 800 11px 'Nunito', sans-serif; line-height: 1.15; cursor: pointer; }
 .howto-tab i { font-style: normal; font-size: 18px; }
+.howto-tab span { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .howto-tab.on { background: rgba(94,242,192,0.18); border-color: var(--bioluma); color: var(--foam); }
 .instructions-list:has(.howto-item) { gap: 6px; }
 .instructions-list li:has(.howto-item) { padding: 9px 12px; }
@@ -462,7 +487,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .howto-item[open] summary::after { transform: rotate(180deg); }
 .howto-item summary i { font-style: normal; font-size: 18px; width: 24px; text-align: center; flex: none; }
 .howto-body { margin-top: 6px; }
-@media (max-width: 400px) { .howto-tabs { gap: 3px; } .howto-tab { font-size: 10px; padding: 6px 1px 5px; letter-spacing: -0.01em; } }
+@media (max-width: 400px) { .howto-tabs { gap: 3px; } .howto-tab { font-size: 9.5px; padding: 6px 1px 5px; letter-spacing: -0.01em; } }
 
 /* ---------- Online ---------- */
 .beta-tag { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font: 900 11px 'Nunito', sans-serif; letter-spacing: 0.6px; background: linear-gradient(135deg, #7eb6ff, #5ef2c0); color: #04241a; }
@@ -476,6 +501,8 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .online-input:focus { border-color: var(--bioluma); }
 .online-input.code { text-transform: uppercase; letter-spacing: 6px; text-align: center; font-family: 'Baloo 2', 'Nunito', sans-serif; }
 .online-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+#online-chars { display: grid; grid-template-columns: repeat(2, 1fr); }
+#online-chars .online-chip { min-width: 0; }
 .online-chip { flex: 1 1 0; min-width: 84px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 12px; border: 2px solid rgba(126,224,255,0.18); background: rgba(126,224,255,0.06); color: var(--foam); font: 800 12px 'Nunito', sans-serif; cursor: pointer; text-align: left; }
 #online-areas { display: grid; grid-template-columns: 1fr 1fr; }
 .online-chip.selected { border-color: var(--bioluma); background: rgba(94,242,192,0.12); }
@@ -646,13 +673,15 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
 #screen-pause.live .pause-run { display: none; }
 .pause-run { text-align: left; margin: 0 0 12px; }
 .pr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 5px; }
-.pr-stat { background: rgba(126,224,255,0.07); border-radius: 10px; padding: 6px 4px 5px; text-align: center; }
+.pr-stat { background: rgba(126,224,255,0.07); border-radius: 10px; padding: 6px 2px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
 .pr-stat b { display: block; font-size: 15px; color: var(--foam); white-space: nowrap; }
 .pr-stat span { display: block; font-size: 10px; color: var(--foam-dim); font-weight: 700; line-height: 1.2; }
 .pr-h { font: 800 10.5px 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; color: var(--foam-dim); margin: 10px 0 5px; }
-.pr-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.pr-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 4px 3px 7px; border-radius: 99px; background: rgba(126,224,255,0.08); border: 1px solid rgba(126,224,255,0.18); font-size: 12px; font-weight: 700; color: var(--foam); }
+.pr-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 5px; }
+@media (max-width: 520px) { .pr-chips { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
+.pr-chip { min-width: 0; border-radius: 12px !important; display: flex; align-items: center; gap: 5px; padding: 3px 4px 3px 7px; border-radius: 99px; background: rgba(126,224,255,0.08); border: 1px solid rgba(126,224,255,0.18); font-size: 12px; font-weight: 700; color: var(--foam); }
 .pr-chip i { font-style: normal; font-size: 14px; }
+.pr-chip .pr-n { flex: 1; min-width: 0; line-height: 1.15; min-height: 2.3em; display: flex; align-items: center; }
 .pr-chip b { font-size: 11px; background: rgba(126,224,255,0.2); border-radius: 99px; padding: 0 6px; min-width: 18px; text-align: center; }
 .pr-chip.max b { background: linear-gradient(135deg, #ffd76a, #ffb347); color: #3a2400; }
 @media (min-width: 760px), (min-width: 600px) and (orientation: landscape) {
@@ -743,6 +772,82 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
   #screen-menu .menu-tiles { grid-template-columns: repeat(4, 1fr); }
   #screen-menu .menu-tiles .btn { padding: 4px 3px; font-size: 11px; }
   #screen-menu .menu-footer { grid-column: 1; grid-row: 3; margin-top: 6px; }
+}
+/* 7.24 compact pass: less scrolling on every screen size (measured with lite/webtest/layout_audit.js --scroll) */
+.panel { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+#screen-shop .panel, #screen-achievements .panel { display: flex; flex-direction: column; }   /* the list takes all the room the panel has */
+#screen-shop .panel > *, #screen-achievements .panel > * { flex: none; }
+#screen-shop .shop-list, #screen-achievements .achievement-list { flex: 1 1 auto; min-height: 110px; max-height: none; }
+.shop-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.tier-chip { padding: 3px 4px; font-size: 10.5px; line-height: 1.2; }
+.shop-note { font-size: 11px; margin-bottom: 5px; }
+@media (min-width: 700px) {   /* tablets, computers, the tray window: two columns */
+  #screen-shop .panel, #screen-achievements .panel { max-width: 780px; }
+  .shop-list, .achievement-list { display: grid; grid-template-columns: 1fr 1fr; align-content: start; }
+  #screen-instructions .panel, #screen-album .panel { max-width: 640px; }   /* longer lines, fewer of them */
+}
+@media (max-height: 560px) and (orientation: landscape) { .album-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }   /* short windows: the six bosses in one row */
+@media (max-width: 520px) {   /* phones upright */
+  .screen { padding: 10px; }
+  .panel { padding: 18px 14px; }
+  .panel h2 { font-size: 21px; margin-bottom: 10px; }
+  .card-grid { margin: 10px 0; }
+  .pick-card { padding: 10px 7px; }
+  .pick-card .pick-swatch { width: 44px; height: 44px; margin-bottom: 2px; }
+  .shop-list, .achievement-list { gap: 6px; }
+  .shop-item, .achievement-item { padding: 8px 10px; gap: 8px; }
+  .instructions-list:has(.howto-item) { gap: 5px; }
+  .instructions-list li:has(.howto-item) { padding: 8px 11px; }
+  .pearls-total { margin-bottom: 6px; }
+}
+@media (max-width: 520px) and (max-height: 700px) {   /* small phones */
+  .panel { padding: 14px 12px; }
+  .panel h2 { font-size: 19px; margin-bottom: 8px; }
+  .pick-card .pick-swatch { width: 38px; height: 38px; }
+  .card-grid { gap: 7px; margin: 8px 0; }
+  .panel-actions { margin-top: 8px; }
+}
+/* 7.25 even gaps: one spacing scale for every panel (checked with lite/webtest/layout_audit.js, gap rules).
+   --pad: room above the title, below the title and below the last part; --act: gap before the button row at the end. */
+:root { --pad: 22px; --act: 16px; }
+@media (max-width: 520px) { :root { --pad: 16px; --act: 12px; } }
+@media (max-width: 520px) and (max-height: 700px) { :root { --pad: 12px; --act: 10px; } }
+@media (max-height: 560px) and (orientation: landscape) { :root { --pad: 12px; --act: 10px; } }
+@media (max-height: 440px) and (orientation: landscape) { :root { --pad: 8px; --act: 6px; } }
+.panel { padding-top: var(--pad); padding-bottom: var(--pad); }
+.panel h2 { line-height: 1.2; margin-bottom: calc(var(--pad) - 2px); }
+#game-container .panel > h2 + * { margin-top: 0; }                       /* in flex panels the margins add up instead of overlapping */
+#game-container .panel > .panel-actions { margin-top: var(--act); }
+#game-container .panel > :has(+ .panel-actions) { margin-bottom: 0; }
+.online-who:empty, .online-note:empty, .osteps:empty, .online-status:empty { display: none; }   /* an empty line would leave a hole */
+.osteps { margin: 0 0 var(--pad); }
+#st-away-lines p { margin: 0 0 6px; } #st-away-lines p:last-child { margin-bottom: 0; }
+#st-away .panel > #st-away-lines + .btn { margin-top: var(--act); }
+@media (max-height: 760px) { #screen-strat .panel h2 { margin-bottom: calc(var(--pad) - 2px); } #screen-strat .panel > p + .strat-sec { margin-top: 0; } }
+.shop-item-desc { display: flex; align-items: center; }                 /* a one-line text sits in the middle of its two-line room: same gap above and below */
+.tier-chip .tc-i { margin-right: 4px; }
+/* strategy panels: the phone width rule came before the base rule and lost (panels were 190 px on a 360 px phone) */
+@media (max-width: 520px) and (orientation: portrait) { #strat-ui .st-panel, #strat-ui .st-panel.st-wide { width: min(430px, calc(100vw - 84px)); } }
+.st-head strong { display: flex; align-items: center; gap: 6px; min-width: 0; line-height: 1.2; }
+.st-head strong .st-ico { flex: none; margin-right: 0; }
+.stm-side > .panel-actions { margin-top: calc(var(--act) - 13px); }   /* the column gap is 8 px, the last list row adds 5 px of its own */
+/* main menu: one gap (--mg) between language switch, logo, tagline, buttons and footer; the goal box sits like the other buttons */
+:root { --mg: 14px; }
+@media (max-height: 900px) { :root { --mg: 10px; } }
+@media (max-height: 640px) { :root { --mg: 6px; } }
+#screen-menu .lang-toggle { margin-bottom: var(--mg); }
+#screen-menu .game-logo { margin-bottom: 0; }
+#screen-menu .tagline { margin: calc(var(--mg) - 4px) 0 calc(var(--mg) - 3px); }
+#screen-menu .menu-buttons { margin-top: 0; }
+#screen-menu .menu-footer { margin-top: var(--mg); }
+#screen-menu #menu-goal { margin-top: 0; }
+.st-card { display: grid; grid-template-rows: subgrid; grid-row: span 3; align-items: center; } .st-card > .st-card-top { align-self: stretch; }   /* name, cost and state line up with the card beside it */
+@media (max-width: 400px) {   /* small phones: the lock / tick becomes a badge on the corner, so every boss name fits one line */
+  .tier-chip { position: relative; }
+  .tier-chip .tc-i { position: absolute; top: -6px; left: -3px; margin: 0; font-size: 9px; line-height: 1; padding: 1px 2px; border-radius: 99px; background: #0b2a40; color: var(--foam); }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  .panel > .panel-actions, #screen-gameover .menu-buttons { bottom: calc(-1 * var(--pad)); margin-bottom: calc(-1 * var(--pad)); padding-bottom: var(--pad); }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn, .pick-card, .levelup-choice, .hud-boss-wrap, .hud-bar-fill { transition: none; }
@@ -844,8 +949,8 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <button class="btn btn-secondary" id="btn-goto-strategy">🏰 Strategie <span class="beta-tag">Test</span></button>
         <button class="btn btn-secondary" id="btn-goto-online">🌐 Online spielen <span class="beta-tag">Beta</span></button>
         <div class="menu-tiles">
-          <button class="btn btn-secondary" id="btn-goto-shop">Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
-          <button class="btn btn-secondary" id="btn-goto-achievements">Erfolge <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
+          <button class="btn btn-secondary" id="btn-goto-shop">🛒 Verbesserungen <span class="btn-sub" id="menu-pearls-label">0 💧</span></button>
+          <button class="btn btn-secondary" id="btn-goto-achievements">🏆 Erfolge <span class="btn-sub" id="ach-count"></span> <span class="menu-badge" id="ach-badge" style="display:none;"></span></button>
           <button class="btn btn-secondary" id="btn-goto-album">📖 Boss-Album <span class="btn-sub" id="album-count"></span> <span class="menu-badge" id="album-badge" style="display:none;"></span></button>
           <button class="btn btn-secondary" id="btn-goto-account">👤 Konto <span class="btn-sub" id="acc-badge">Gast</span></button>
         </div>
@@ -1357,8 +1462,8 @@ const SHOP_UPGRADES = [
   { id: 'shop_speed',  name: 'Bessere Flossen',        desc: '+3% Start-Tempo pro Stufe.',    maxLevel: 5, costs: [20, 95, 330, 800, 1800],   gates: [0, 0, 1, 2, 3] },
   { id: 'shop_damage', name: 'Schärfere Stacheln',     desc: '+4% Schaden pro Stufe.',         maxLevel: 5, costs: [30, 150, 500, 1200, 2600], gates: [0, 0, 1, 2, 3] },
   { id: 'shop_magnet', name: 'Perlen-Magnet',          desc: '+Aufsammel-Radius pro Stufe.',   maxLevel: 5, costs: [15, 80, 280, 700, 1500],   gates: [0, 0, 1, 2, 3] },
-  { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück: +10 % Perlen aus jedem Fund (Kugeln und Truhen) und +6 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg (höchstens 60 %).', maxLevel: 3, costs: [250, 1200, 3000], gates: [0, 2, 3] },
-  { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Einmal pro Lauf: Wirst du besiegt, kannst du per Knopfdruck mit halber Gesundheit weitermachen.', maxLevel: 1, costs: [1200], gates: [1] }
+  { id: 'shop_luck',   name: 'Glücksbringer',          desc: '+1 Glück pro Stufe: +10 % Perlen und +6 % Chance auf eine 4. Karte.', maxLevel: 3, costs: [250, 1200, 3000], gates: [0, 2, 3] },
+  { id: 'shop_revive', name: 'Zweite Chance',          desc: 'Einmal pro Lauf mit halber Gesundheit weitermachen.', maxLevel: 1, costs: [1200], gates: [1] }
 ];
 function shopCost(u, level) { return u.costs[Math.min(level, u.costs.length - 1)]; }
 // 7.2: ein Gebiet gilt als geschafft, sobald irgendein Boss des Gebiets besiegt ist; Tore, die einen Boss nennen, meinen sein Gebiet
@@ -1407,7 +1512,7 @@ const ACHIEVEMENTS = [
   { id: 'album_graben',   name: 'Graben-Album komplett', desc: 'Besiege alle sechs Bosse im Tiefsee-Graben.' },
   { id: 'album_vulkan',   name: 'Vulkan-Album komplett', desc: 'Besiege alle sechs Bosse in der Vulkanschlucht.' },
   { id: 'bestiarium',     name: 'Bestiarium',            desc: 'Besiege alle 24 Bosse.' },
-  { id: 'legend_1',       name: 'Legendenjäger',         desc: 'Besiege eine Legende (Online, mit mindestens 6 Spielern).' },
+  { id: 'legend_1',       name: 'Legendenjäger',         desc: 'Besiege eine Legende (online, ab 6 Spielern).' },
   { id: 'legend_all',     name: 'Legendär',              desc: 'Besiege alle vier Legenden.' }
 ];
 
@@ -1483,6 +1588,12 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Beta","Beta","Бета"],
 ["Verbesserungen","Upgrades","Покращення"],
 ["Erfolge","Achievements","Досягнення"],
+["🛒 Verbesserungen","🛒 Upgrades","🛒 Покращення"],
+["🏆 Erfolge","🏆 Achievements","🏆 Досягнення"],
+["✔ Gewählt","✔ Selected","✔ Обрано"],
+["Wählen","Choose","Обрати"],
+["Zeit","Time","Час"],
+["Level","Level","Рівень"],
 ["Anleitung","How to play","Як грати"],
 ["App laden","Get the app","Завантажити застосунок"],
 ["Wähle deinen Blobi","Choose your Blobi","Обери свого Блобі"],
@@ -1577,9 +1688,9 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["1–{} oder antippen · {} s","1–{} or tap · {} s","1–{} або торкнись · {} с"],
 ["{} s","{} s","{} с"],
 ["Überlebt","Survived","Протримався"],
-["Level erreicht","Level reached","Досягнутий рівень"],
-["Gegner besiegt","Enemies defeated","Переможено ворогів"],
-["Perlen gesammelt","Pearls collected","Зібрано перлин"],
+["Level erreicht","Level reached","Рівень"],
+["Gegner besiegt","Enemies defeated","Переможено"],
+["Perlen gesammelt","Pearls collected","Перлини"],
 ["Neue Erfolge:","New achievements:","Нові досягнення:"],
 ["🎁 Hol dir deine Belohnung (+{} 💧) im Menü unter „Erfolge“ ab.","🎁 Collect your reward (+{} 💧) in the menu under “Achievements”.","🎁 Забери нагороду (+{} 💧) у меню в розділі «Досягнення»."],
 ["🎁 {} Belohnung wartet im Menü unter „Erfolge“ auf dich.","🎁 {} reward is waiting for you in the menu under “Achievements”.","🎁 {} нагорода чекає на тебе в меню в розділі «Досягнення»."],
@@ -1591,6 +1702,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Wirklich kaufen? 💧 {}","Really buy? 💧 {}","Справді купити? 💧 {}"],
 ["{} 💧 fehlen","{} 💧 missing","Бракує {} 💧"],
 ["Kaufen · 💧 {}","Buy · 💧 {}","Купити · 💧 {}"],
+["Kaufen","Buy","Купити"],
 ["🐡 {} gehört jetzt dir!","🐡 {} is yours now!","🐡 {} тепер твій!"],
 ["🔒 {} Danach kaufbar für {} 💧.","🔒 {} Then you can buy it for {} 💧.","🔒 {} Потім можна купити за {} 💧."],
 ["✔ Freigeschaltet! {}","✔ Unlocked! {}","✔ Відкрито! {}"],
@@ -1694,9 +1806,9 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["+4% Schaden pro Stufe.","+4% damage per level.","+4% шкоди за рівень."],
 ["Perlen-Magnet","Pearl Magnet","Перлинний магніт"],
 ["Glücksbringer","Lucky Charm","Талісман удачі"],
-["+1 Glück: +10 % Perlen aus jedem Fund (Kugeln und Truhen) und +6 % Chance auf eine vierte Upgrade-Karte bei jedem Levelaufstieg (höchstens 60 %).","+1 Luck: +10 % pearls from every find (orbs and chests) and +6 % chance of a fourth upgrade card at every level-up (60 % at most).","+1 удачі: +10 % перлин з кожної знахідки (кульки й скрині) та +6 % шанс на четверту картку покращення при кожному рівні (щонайбільше 60 %)."],
+["+1 Glück pro Stufe: +10 % Perlen und +6 % Chance auf eine 4. Karte.","+1 luck per level: +10 % pearls and +6 % chance of a 4th card.","+1 удачі за рівень: +10 % перлин і +6 % шанс на 4-ту картку."],
 ["Zweite Chance","Second Chance","Другий шанс"],
-["Einmal pro Lauf: Wirst du besiegt, kannst du per Knopfdruck mit halber Gesundheit weitermachen.","Once per run: when you are defeated, one button press lets you go on with half your health.","Раз за забіг: якщо тебе переможуть, одним натиском кнопки продовжиш із половиною здоров'я."],
+["Einmal pro Lauf mit halber Gesundheit weitermachen.","Once per run: carry on with half your health.","Раз за забіг: продовжуй із половиною здоровʼя."],
 ["Erster Blubb","First Blub","Перший бульк"],
 ["Besiege deinen ersten Gegner.","Defeat your first enemy.","Перемож свого першого ворога."],
 ["Blasen-Profi","Bubble Pro","Профі бульбашок"],
@@ -1778,6 +1890,8 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["{} Plätze · Muschelburg {}–{}", "{} plots · Shell Castle {}–{}", "{} ділянок · Мушлевий замок {}–{}"],
 ["Waffen", "Weapons", "Зброя"],
 ["Grundlagen", "Basics", "Основи"],
+["Start", "Start", "Старт"],
+["Bosse", "Bosses", "Боси"],
 ["Perlen & Shop", "Pearls & shop", "Крамниця"],
 ["Bosse & Gebiete", "Bosses & areas", "Боси й локації"],
 ["Online", "Online", "Онлайн"],
@@ -2114,7 +2228,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🌟 Eine Legende erwacht: {} s", "🌟 A legend awakens: {} s", "🌟 Прокидається легенда: {} с"],
 ["Legendenjäger", "Legend hunter", "Мисливець на легенди"],
 ["Legendär", "Legendary", "Легендарний"],
-["Besiege eine Legende (Online, mit mindestens 6 Spielern).", "Defeat a legend (online, with at least 6 players).", "Перемож легенду (онлайн, щонайменше 6 гравців)."],
+["Besiege eine Legende (online, ab 6 Spielern).", "Defeat a legend (online, 6+ players).", "Перемож легенду (онлайн, від 6 гравців)."],
 ["Besiege alle vier Legenden.", "Defeat all four legends.", "Перемож усі чотири легенди."],
 ["Vulkanschildkröte", "Volcano Turtle", "Вулканічна черепаха"],
 ["Schwefel-Rochen", "Sulfur Ray", "Сірчаний скат"],
@@ -2711,9 +2825,9 @@ function renderLangToggle() {
 }
 // 7.23: die Anleitung in fünf Themen (Reiter); jeder Punkt ist eine Zeile mit Symbol und Titel, die sich zum Lesen aufklappt (der erste ist offen)
 const HOWTO_TABS = [
-  ['🎮', 'Grundlagen', [0, 1, 2, 10, 11, 16, 21, 22]],
-  ['💧', 'Perlen & Shop', [3, 4, 5, 6, 12, 20]],
-  ['👑', 'Bosse & Gebiete', [7, 8, 15, 9, 13, 14]],
+  ['🎮', 'Start', [0, 1, 2, 10, 11, 16, 21, 22]],
+  ['💧', 'Perlen', [3, 4, 5, 6, 12, 20]],
+  ['👑', 'Bosse', [7, 8, 15, 9, 13, 14]],
   ['🌐', 'Online', [17, 18, 19]],
   ['🏰', 'Strategie', [23, 24, 25, 26, 27, 28]],
 ];
@@ -7456,6 +7570,7 @@ function updateAchievementBadges() {
   const n = pendingAchievements().length;
   const b = document.getElementById('ach-badge');
   if (b) { b.style.display = n ? 'inline-block' : 'none'; b.textContent = n + ' NEU'; }
+  const ac = document.getElementById('ach-count'); if (ac) ac.textContent = ACHIEVEMENTS.filter(function(a){ return achUnlocked(a.id); }).length + '/' + ACHIEVEMENTS.length;
   const ab = document.getElementById('album-badge'), an = pendingBossRewards().length;
   if (ab) { ab.style.display = an ? 'inline-block' : 'none'; ab.textContent = an + ' NEU'; }
 }
@@ -7565,10 +7680,10 @@ function pauseRunInfo() {
   box.textContent = '';
   const st = el('div', 'pr-stats');
   const add = function(ic, v, l){ const c = el('div', 'pr-stat'); c.appendChild(el('b', null, ic + ' ' + v)); c.appendChild(el('span', null, l)); st.appendChild(c); };
-  add('\u23F1', Math.floor(runTime / 60) + ':' + String(Math.floor(runTime % 60)).padStart(2, '0'), '\u00DCberlebt');
-  add('\u2B50', runLevel, 'Level erreicht');
-  add('\uD83D\uDC80', runKills, 'Gegner besiegt');
-  if (!strategyMode) add('\uD83D\uDCA7', runPearls, 'Perlen gesammelt');
+  add('\u23F1', Math.floor(runTime / 60) + ':' + String(Math.floor(runTime % 60)).padStart(2, '0'), 'Zeit');   // 7.24: one-word labels, so all tiles keep one line
+  add('\u2B50', runLevel, 'Level');
+  add('\uD83D\uDC80', runKills, 'Besiegt');
+  if (!strategyMode) add('\uD83D\uDCA7', runPearls, 'Perlen');
   box.appendChild(st);
   const grp = function(title, defs, have){
     const ids = Object.keys(defs).filter(function(id){ return (have[id] || 0) > 0; }); if (!ids.length) return;
@@ -12476,7 +12591,7 @@ function renderAlbum() {
   STAGES.forEach(function(s){
     const c = albumCount(s.id), b = document.createElement('button');
     b.className = 'btn btn-secondary' + (s.id === albumArea ? ' active' : '');
-    b.innerHTML = s.name + ' <span class="btn-sub">' + c.beaten + '/' + c.all + '</span>';
+    b.innerHTML = '<span class="at-n">' + s.name + '</span><span class="btn-sub">' + c.beaten + '/' + c.all + '</span>';
     b.addEventListener('click', function(){ Sfx.click(); albumArea = s.id; renderAlbum(); });
     tabs.appendChild(b);
   });
@@ -13734,6 +13849,7 @@ function renderStratMenu() {
     ch.appendChild(el('span', 'sc-chip' + (rb.f > 1 ? ' hard' : ''), '🌊 Wellen ×' + String(rb.f).replace('.', ',')));
     if (rb.k > 1) ch.appendChild(el('span', 'sc-chip good', '🪸 Korallen +' + Math.round((rb.k - 1) * 100) + ' %'));
     if (rb.c > 1) ch.appendChild(el('span', 'sc-chip good', '💎 Kristalle +' + Math.round((rb.c - 1) * 100) + ' %'));
+    if (rb.k <= 1 && rb.c <= 1) ch.appendChild(el('span', 'sc-chip', '🪸 Korallen +0 %'));   // 7.24: every ring card shows two chips, so the cards match
     m.appendChild(ch);
     let line = lk[2] + ' Plätze · Muschelburg ' + r.from + '–' + r.to;
     if (mb < r.from) { b.disabled = true; line = '🔒 Muschelburg ' + r.from; }
@@ -14222,9 +14338,10 @@ function stOpenBuild() {
       const locked = Base.mb < d.from, full = !locked && have >= max, poor = !stCanPay(cost), wait = t > 0 && busy > 0;
       const b = el('button', 'st-card' + (locked ? ' locked' : full ? ' full' : ''));
       const top = el('span', 'st-card-top'); top.appendChild(stIcon(type, 34)); top.appendChild(el('span', 'st-card-name', d.name)); b.appendChild(top);
-      if (locked) b.appendChild(el('span', 'st-card-why', '🔒 Muschelburg ' + d.from));
-      else if (full) b.appendChild(el('span', 'st-card-why', '✓ ' + have + '/' + max));
-      else {
+      if (locked || full) {           // 7.25: every card has the same three lines (name, cost, state), so no card has a hole
+        b.appendChild(el('span', 'st-card-cost', stCostText({ k: cost.k, c: cost.c })));
+        b.appendChild(el('span', 'st-card-why', locked ? '🔒 Muschelburg ' + d.from : '✓ ' + have + '/' + max));
+      } else {
         b.appendChild(el('span', 'st-card-cost' + (poor ? ' poor' : ''), stCostText({ k: cost.k, c: cost.c })));
         b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
       }
@@ -15472,8 +15589,8 @@ function fmtNum(n) { return String(Math.round(n * 100) / 100); }
 function characterStatLine(ch) {
   const cs = computeCharacterStats(ch.id);
   const chips = ['HP ' + Math.round(cs.maxHp), 'Tempo ' + Math.round(cs.speed), 'Schaden \u00D7' + fmtNum(cs.damage)];
-  if (Math.abs(cs.cooldownMult - 1) > 0.001) chips.push('Abklingzeit \u00D7' + fmtNum(cs.cooldownMult));
-  if (cs.luck > 0) chips.push('Gl\u00FCck +' + cs.luck + ' (+' + cs.luck * 10 + ' % Perlen \u00B7 ' + Math.round(Math.min(0.6, cs.luck * 0.06) * 100) + ' % 4. Karte)');
+  chips.push('Abklingzeit \u00D7' + fmtNum(cs.cooldownMult));          // 7.24: every card lists the same five values, so the lines match
+  chips.push('Gl\u00FCck +' + cs.luck + ' (+' + cs.luck * 10 + ' % Perlen \u00B7 ' + Math.round(Math.min(0.6, cs.luck * 0.06) * 100) + ' % 4. Karte)');   // 7.25: luck details back, on every card
   return chips.join(' \u00B7 ');
 }
 
@@ -15488,13 +15605,14 @@ function renderCharacterGrid() {
     const div = document.createElement('div');
     div.className = 'pick-card' + (ch.id===selectedCharacterId?' selected':'') + (!unlocked?' locked':'') + (unlocked && !owned ? ' buyable' : '');
     let desc = ch.desc;
-    if (!unlocked) desc = '\uD83D\uDD12 ' + ch.unlockDesc + ' Danach kaufbar f\u00FCr ' + ch.price + ' \uD83D\uDCA7.';
+    if (!unlocked) desc = ch.unlockDesc + (ch.unlockLevel && (save.stats.bestLevel || 0) > 0 ? '<br>Bisher: Level ' + save.stats.bestLevel : '');
     else if (!owned) desc = '\u2714 Freigeschaltet! ' + ch.desc;
     div.innerHTML = '<div class="pick-swatch" style="background:'+ch.color+'"><img src="'+(CHARACTER_SPRITES[ch.id]||'')+'" alt=""></div>' +
       '<span class="pick-name">'+ch.name+(fresh ? '<span class="new-tag">NEU</span>' : '')+'</span>' +
       '<span class="pick-stats">'+characterStatLine(ch)+'</span>' +
       '<span class="pick-desc">'+desc+'</span>' +
-      (!unlocked && ch.unlockLevel && (save.stats.bestLevel || 0) > 0 ? '<span class="pick-desc">Bisher: Level ' + save.stats.bestLevel + '</span>' : '') +
+      (owned ? '<span class="pick-foot">' + (ch.id === selectedCharacterId ? '✔ Gewählt' : 'Wählen') + '</span>' : '') +   // 7.24: every card ends in one footer line
+      (!unlocked ? '<span class="pick-foot">🔒 ' + ch.price + ' 💧</span>' : '') +
       (unlocked && !owned ? '<button class="pick-buy' + (buyConfirm === ch.id ? ' confirm' : '') + '"' + (save.totalPearls < ch.price ? ' disabled' : '') + '>' +
         (buyConfirm === ch.id ? 'Wirklich kaufen? \uD83D\uDCA7 ' + ch.price : (save.totalPearls < ch.price ? (ch.price - save.totalPearls) + ' \uD83D\uDCA7 fehlen' : 'Kaufen \u00B7 \uD83D\uDCA7 ' + ch.price)) + '</button>' : '');
     if (owned) {
@@ -15616,7 +15734,7 @@ function renderShop() {
   const tiers = document.getElementById('shop-tiers');
   if (tiers) tiers.innerHTML = SHOP_GATE_BOSS.slice(1).map(function(b, i){
     const ok = shopTierOpen(i + 1);
-    return '<span class="tier-chip' + (ok ? ' ok' : '') + '" title="' + gateName(i + 1) + '">' + (ok ? '\u2714' : '\uD83D\uDD12') + ' ' + BOSS_TYPES[b].name + '</span>';
+    return '<span class="tier-chip' + (ok ? ' ok' : '') + '" title="' + gateName(i + 1) + '">' + '<span class="tc-i">' + (ok ? '\u2714' : '\ud83d\udd12') + '</span>' + BOSS_TYPES[b].name + '</span>';   // 7.25: lock sign back on bosses not beaten yet
   }).join('');
   const list = UI['shop-list'];
   list.innerHTML = '';
@@ -15634,8 +15752,8 @@ function renderShop() {
       '<span class="shop-item-name">'+u.name+'</span>' +
       '<span class="shop-item-desc">'+u.desc+'</span>' +
       '<span class="shop-item-level"><span class="pips">' + pips.join('') + '</span> Stufe '+level+' / '+u.maxLevel +
-      (!maxed && !open ? '<span class="shop-gate">\uD83D\uDD12 N\u00E4chste Stufe: besiege ' + gateName(gate) + '</span>' : '') + '</span></div>' +
-      '<button class="shop-buy-btn' + (!maxed && open && !canAfford ? ' short' : '') + '" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '' : '<small class="shop-miss">' + (cost - save.totalPearls) + ' fehlen</small><i class="shop-have" style="--w:' + Math.round(100 * Math.min(1, save.totalPearls / cost)) + '%"></i>')))+'</button>';
+      (!maxed && !open ? ' · <span class="shop-gate">\uD83D\uDD12 ' + BOSS_TYPES[SHOP_GATE_BOSS[gate]].name + '</span>' : '') + '</span></div>' +
+      '<button class="shop-buy-btn' + (!maxed && open && !canAfford ? ' short' : '') + '" '+((maxed||!canAfford||!open)?'disabled':'')+'>'+(maxed?'Max':(!open ? '\uD83D\uDD12' : '\uD83D\uDCA7 '+cost + (canAfford ? '<small class="shop-miss ok">Kaufen</small>' : '<small class="shop-miss">' + (cost - save.totalPearls) + ' fehlen</small><i class="shop-have" style="--w:' + Math.round(100 * Math.min(1, save.totalPearls / cost)) + '%"></i>')))+'</button>';
     if (!maxed && open) {
       div.querySelector('.shop-buy-btn').addEventListener('click', function(){
         if (accBuyGuard(function(){ renderShop(); updateMenuPearlsLabel(); })) return;
@@ -15726,8 +15844,8 @@ function renderAchievements(flashIds, fromPearls) {
     div.className = 'achievement-item ' + (claimable ? 'claimable' : (unlocked ? 'unlocked claimed' : 'locked')) + (flashIds.indexOf(a.id) !== -1 ? ' flash' : '');
     div.innerHTML = '<span class="achievement-icon">' + (claimable ? '🎁' : (unlocked ? '🏆' : '🔒')) + '</span>' +
       '<div class="achievement-item-info"><span class="achievement-item-name">' + a.name + (claimable ? '<span class="new-tag">NEU</span>' : '') + '</span>' +
-      '<span class="achievement-item-desc">' + a.desc + ' · ' + (claimed ? '✓ eingelöst' : '+' + reward + ' 💧') + '</span>' +
-      (!unlocked && achProgress(a.id) ? '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (achRatio(a.id) * 100).toFixed(1) + '%"></i></span><span class="ach-prog-n">' + achProgressText(a.id) + '</span></span>' : '') + '</div>' +
+      '<span class="achievement-item-desc">' + a.desc + '</span>' +   // 7.24: every row has the same three lines: name, text, bar with the reward
+      '<span class="ach-prog"><span class="ach-bar"><i style="width:' + (unlocked ? 100 : achRatio(a.id) * 100).toFixed(1) + '%"></i></span>' + (!unlocked && achProgress(a.id) ? '<span class="ach-prog-n">' + achProgressText(a.id) + '</span>' : '') + '<span class="ach-rew">' + (claimed ? '✓ eingelöst' : '+' + reward + ' 💧') + '</span></span></div>' +
       (claimable ? '<button class="ach-claim-btn">Einlösen<br>+' + reward + ' 💧</button>' : '');
     if (flashIds.indexOf(a.id) !== -1) {
       const f = document.createElement('span');
