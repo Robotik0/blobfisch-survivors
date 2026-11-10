@@ -15080,7 +15080,7 @@ const ST_PODS = (function(){                         // 24 Nischen links und rec
   for (let r = 0; r < 4; r++) for (let k = 0; k < 6; k++) out.push({ x: order[k], y: ys[r] });
   return out;
 })();
-function stArmyCapAt(lv) { return 2 + 4 * lv; }
+function stArmyCapAt(lv) { return Math.min(ST_PODS.length, 2 + 4 * lv); }   // only the drawing uses it: a Brutstätte of level 6+ would ask for pod 25+ of the 24 and throw
 ST_ART.brutstaette = function(g, lv) {
   const gold = lv >= 4;
   stShadow(g, 50, 93, 48, 6, 0.5);
