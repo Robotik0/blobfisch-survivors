@@ -173,6 +173,18 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .tagline { color: var(--foam-dim); margin: 10px 0 22px; font-weight: 600; font-size: 14px; }
 .menu-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
 .menu-footer .btn-mini { width: 128px; justify-content: center; }   /* 7.24: both footer buttons one width */
+/* 7.27: Datenschutz-Link unter dem Menü, Leiste mit Hinweis / Frage zur Statistik */
+.menu-legal { margin-top: 4px; }
+.link-btn { background: none; border: 0; padding: 6px 12px; font: inherit; font-size: 12px; font-weight: 700; color: var(--foam-dim); text-decoration: underline; cursor: pointer; }
+.link-btn:hover { color: var(--foam); }
+.link-btn:focus-visible { outline: 3px solid var(--bioluma); outline-offset: 2px; border-radius: 6px; }
+.stats-bar { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: calc(100% - 24px); max-width: 520px; z-index: 30;
+  background: rgba(6,22,38,0.97); border: 1px solid rgba(126,224,255,0.35); border-radius: 14px; padding: 10px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+.stats-bar p { font-size: 12.5px; line-height: 1.35; color: var(--foam); margin: 0 0 8px; }
+.stats-bar-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.stats-bar .btn-mini { min-width: 84px; justify-content: center; }
+.priv-body .acc-check { margin-top: 4px; }
+.priv-body h3 { margin-top: 10px; }
 .icon-btn {
   width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(126,224,255,0.3);
   background: rgba(126,224,255,0.1); color: var(--foam); cursor: pointer; font-size: 17px;
@@ -965,6 +977,25 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <button class="btn btn-mini btn-getapp" id="btn-get-app" style="display:none;"><span class="getapp-ic" aria-hidden="true"></span><span>App laden</span></button>
         <span class="best-time-label" id="menu-best-time"></span>
       </div>
+      <div class="menu-legal"><button class="link-btn" id="btn-goto-privacy">Datenschutz</button></div>
+    </div>
+    <div class="stats-bar" id="stats-bar" style="display:none;">
+      <p id="stats-bar-text"></p>
+      <div class="stats-bar-btns">
+        <button class="btn btn-primary btn-mini" id="btn-stats-yes">Ja</button>
+        <button class="btn btn-ghost btn-mini" id="btn-stats-no">Nein</button>
+        <button class="btn btn-ghost btn-mini" id="btn-stats-more">Datenschutz</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-privacy">
+    <div class="panel">
+      <h2>🔒 Datenschutz</h2>
+      <div class="acc-body priv-body" id="priv-body"></div>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-privacy-back">Zurück</button>
+      </div>
     </div>
   </div>
 
@@ -1273,6 +1304,335 @@ const Storage = {
     }
   }
 };
+
+/* ============================================================
+   STATISTIK (7.27, Plan docs/plans/analytics.md; das Format der Meldung steht dort in Abschnitt 3a)
+   Zählt anonym mit, wer wie spielt: eine Sitzung pro Laden der Seite, je ein Ereignis für Laufbeginn und Laufende.
+   Gesendet wird sparsam an POST {Server}/ev: kurz nach dem Start, nach jedem Laufende und wenn der Tab in den Hintergrund
+   geht (sendBeacon). Was nicht ankommt, wartet in localStorage auf den nächsten Start (nur mit Einwilligung, höchstens
+   STATS_Q_MAX Zeichen). Einwilligung: ausserhalb von EU / EWR / UK ein Hinweis und ein Schalter; dort eine Frage – bis zum
+   Ja ohne Geräte-Kennung ("c": "eu"). Schalter aus = "out", Signal des Browsers (Global Privacy Control / Do Not Track) = "gpc".
+   Nie gesendet wird von file://, localhost, *.test, mit navigator.webdriver (alle Browser-Tests) und in Node (sp_regression):
+   dort bleibt Stats.live false und jeder Haken kehrt sofort um. Der einzige Schalter für Tests: ?stats=test ZUSAMMEN mit
+   ?server=http://localhost:PORT (netServerBase nimmt nur localhost an) – dann geht alles an diesen lokalen Server.
+   Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
+   ============================================================ */
+const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
+const GAME_VERSION = '7.27';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const STATS_STORE = 'blobfischSurvivorsStats';
+const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
+const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
+const STATS_OLD_MAX = 3;             // liegen gebliebene Pakete früherer Sitzungen (der Server nimmt 4 Pakete pro Meldung)
+const STATS_LEAN = 6, STATS_GAP = 300;   // nach 6 Meldungen in einer Sitzung höchstens noch eine alle 300 s
+const STATS_BOOK = ['ask', 'co', 'cons', 'out', 'note', 'dev'];   // Buchhaltung der Einwilligung: das Einzige, was ohne Einwilligung in localStorage steht
+const STATS_SLUG = /^[a-z][a-z0-9_]{0,23}$/;
+const Stats = { live: false, test: false, dead: false, down: false, st: null, ses: null, old: [], run: null, sends: 0, lastSend: 0, busy: false, helloAt: 0,
+  fresh: false, ref: null, playMs: 0, vis0: 0, fps: { tok: 0, list: [] } };
+
+function statsRand(n) {              // n Zeichen aus [A-Za-z0-9_-]; nie Math.random: der Zufall des Spiels bleibt unberührt
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-', b = new Uint8Array(n);
+  crypto.getRandomValues(b);
+  let s = ''; for (let i = 0; i < n; i++) s += A[b[i] & 63];
+  return s;
+}
+function statsBook() {               // der gespeicherte Stand: { ask, co, cons, out, note, dev, id, first, q }
+  if (Stats.st) return Stats.st;
+  let o = null;
+  try { o = JSON.parse(localStorage.getItem(STATS_STORE)); } catch (e) {}
+  Stats.st = o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+  return Stats.st;
+}
+function statsSignal() {             // Global Privacy Control oder Do Not Track
+  try { return navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1'; } catch (e) { return false; }
+}
+// 'id' = mit Geräte-Kennung · 'gpc' / 'out' / 'eu' = ohne (der Grund geht als "c" mit) · '' = noch unbekannt, ob hier gefragt werden muss
+function statsMode() {
+  const s = statsBook();
+  if (statsSignal() && s.cons !== 'yes') return 'gpc';   // "Nicht verfolgen": ohne Kennung, ausser der Spieler sagt selbst Ja (Frage in der EU oder der Schalter)
+  if (s.out) return 'out';
+  if (s.ask === undefined) return '';
+  if (s.ask && s.cons !== 'yes') return 'eu';
+  return 'id';
+}
+function statsUrl(path) { return (Stats.test ? netServerBase() : ONLINE_SERVER.replace(/\/+$/, '')) + path; }
+function statsLive() {
+  if (!STATS_ON) return false;
+  try {
+    if (typeof location === 'undefined' || typeof navigator === 'undefined' || typeof crypto === 'undefined' || !crypto.getRandomValues || typeof fetch !== 'function') return false;
+    if (/[?&]stats=test(&|$)/.test(location.search || '') && netServerBase() !== ONLINE_SERVER.replace(/\/+$/, '')) { Stats.test = true; return true; }   // nur Tests, nur an localhost
+    const h = location.hostname || '';
+    if (location.protocol !== 'https:' || navigator.webdriver || h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || /\.(localhost|test)$/.test(h)) return false;
+    return true;
+  } catch (e) { return false; }
+}
+// ?stats=dev markiert dieses Gerät einmal als Entwickler-Gerät ("dev": 1 in jedem Paket), ?stats=nodev nimmt es zurück;
+// ?ref=name (Kurzlink) geht mit dem Sitzungsbeginn mit. Beides verschwindet danach aus der Adresszeile.
+function statsAddress() {
+  if (typeof location === 'undefined' || typeof URL === 'undefined') return;
+  try {
+    const u = new URL(location.href), q = u.searchParams, sv = q.get('stats'), ref = q.get('ref'), s = statsBook();
+    let ch = false;
+    if (sv === 'dev') { s.dev = 1; q.delete('stats'); ch = true; statsStore(); }
+    else if (sv === 'nodev') { delete s.dev; q.delete('stats'); ch = true; statsStore(); }
+    if (ref !== null) { if (/^[A-Za-z0-9_-]{1,24}$/.test(ref)) Stats.ref = ref; q.delete('ref'); ch = true; }
+    if (ch && window.history && history.replaceState) { const rest = q.toString(); history.replaceState(null, '', u.pathname + (rest ? '?' + rest : '') + u.hash); }
+  } catch (e) {}
+}
+function statsNewSession() {
+  Stats.ses = { sid: statsRand(16), t0ms: Date.now(), ev: [], runs: 0, sent: false, tried: false, mode: '', sentPlay: 0, sentRuns: 0 };
+  Stats.playMs = 0; Stats.vis0 = document.hidden ? 0 : Date.now();
+}
+function statsAt() { return Math.max(0, Math.round((Date.now() - Stats.ses.t0ms) / 1000)); }                        // Sekunden seit Sitzungsbeginn
+function statsPlay() { return Math.round((Stats.playMs + (Stats.vis0 ? Date.now() - Stats.vis0 : 0)) / 1000); }     // Sekunden mit sichtbarer Seite
+function statsStartEvent(full) {     // full: mit Einwilligung auch die feineren Angaben (ohne: nur das Grobe)
+  const e = { t: 'session_start', at: 0 }, n = navigator, s = Stats.st;
+  try {
+    const mm = function(q){ return !!(window.matchMedia && window.matchMedia(q).matches); };
+    const coarse = mm('(any-pointer: coarse)') || n.maxTouchPoints > 0, fine = mm('(any-pointer: fine)');
+    e.sw = screen.width; e.sh = screen.height;
+    e.ori = window.innerWidth >= window.innerHeight ? 'l' : 'p';
+    e.touch = coarse ? (fine ? 2 : 1) : 0;
+    e.gfx = Math.max(0, Math.min(9, GFX.ql | 0));
+    e.acc = accOn() ? 1 : 0;
+    if (Stats.ref) e.ref = Stats.ref;
+    if (full) {
+      e.vw = window.innerWidth; e.vh = window.innerHeight; e.dpr = window.devicePixelRatio || 1;
+      if (n.hardwareConcurrency) e.cores = n.hardwareConcurrency;
+      if (n.deviceMemory) e.mem = n.deviceMemory;
+      if (n.connection && n.connection.effectiveType) e.conn = n.connection.effectiveType;
+      if (n.language) e.bl = n.language;
+      e.new = Stats.fresh ? 1 : 0;
+      e.days = s.first ? Math.max(0, Math.floor(Date.now() / 86400000) - s.first) : 0;
+      const rh = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : '';
+      if (rh && rh !== location.hostname) e.rh = rh;
+    }
+  } catch (err) {}
+  return e;
+}
+// Das Paket der laufenden Sitzung. forStore: die Fassung für localStorage – ein offener Lauf bekommt darin vorsorglich
+// das Ende "closed" (kommt die Seite nie wieder, geht es mit dem nächsten Start hinaus; kommt sie wieder, wird es ersetzt).
+function statsBatch(forStore) {
+  const S = Stats.ses, s = Stats.st, mode = S.sent ? S.mode : statsMode(), b = { sid: S.sid };
+  if (mode === 'id') {
+    if (!s.id) { s.id = statsRand(22); s.first = Math.floor(Date.now() / 86400000); Stats.fresh = true; }
+    b.id = s.id;
+  } else b.c = mode;
+  if (s.dev) b.dev = 1;
+  if (window.Capacitor) b.cap = 1;
+  b.gv = GAME_VERSION; b.lang = LANG; b.t0 = Math.floor(S.t0ms / 1000); b.tzo = new Date().getTimezoneOffset(); b.play = statsPlay(); b.runs = S.runs;
+  let ev = S.ev;
+  if (forStore && Stats.run) ev = ev.concat([statsEndEvent(Stats.run, 'closed')]);
+  if (ev.length > STATS_EV_MAX - 1) ev = ev.slice(ev.length - (STATS_EV_MAX - 1));
+  b.ev = (S.sent ? [] : [statsStartEvent(mode === 'id')]).concat(ev);
+  return b;
+}
+// localStorage: immer die Buchhaltung der Einwilligung und (falls vorhanden) die Kennung; die Warteschlange nur mit Einwilligung
+function statsStore() {
+  try {
+    const s = statsBook(), o = {};
+    let q = [];
+    if (Stats.live && statsMode() === 'id') {
+      const S = Stats.ses;
+      if (S && (S.ev.length || Stats.run || (S.tried && !S.sent))) q.push(statsBatch(true));
+      q = q.concat(Stats.old).slice(0, STATS_OLD_MAX + 1);
+      while (q.length && JSON.stringify(q).length > STATS_Q_MAX) q.pop();            // harte Grenze: das Älteste fällt weg
+    }
+    STATS_BOOK.forEach(function(k){ if (s[k] !== undefined) o[k] = s[k]; });
+    if (s.id) { o.id = s.id; o.first = s.first; }
+    if (q.length) o.q = q;
+    localStorage.setItem(STATS_STORE, JSON.stringify(o));
+  } catch (e) {}
+}
+// Senden. why: 'start' (kurz nach dem Laden, nach einer Antwort), 'run' (Laufende), 'hide' (Tab im Hintergrund), 'bye' (Seite geht mitten im Lauf zu)
+function statsFlush(why) {
+  if (!Stats.live || Stats.dead) return;
+  try {
+    const S = Stats.ses, s = Stats.st, beacon = why === 'hide' || why === 'bye', now = Date.now();
+    if (!S) return;
+    const mode = statsMode();
+    if (mode === '') { if (!beacon) statsHello(); return; }                           // erst erfahren, ob hier gefragt werden muss: vorher geht nichts hinaus
+    if (why === 'start' && mode === 'eu' && s.cons === undefined) return;             // die Frage ist offen: die erste Meldung wartet auf die Antwort (oder auf Laufende / Tab-Wechsel)
+    const play = statsPlay();
+    if (S.sent && !S.ev.length && !Stats.old.length && S.runs === S.sentRuns && play - S.sentPlay < 60) return;   // nichts Neues
+    if (why !== 'bye' && Stats.sends >= STATS_LEAN && now - Stats.lastSend < STATS_GAP * 1000) return;           // sparsam: der Rest wartet in der Schlange
+    if (Stats.busy && !beacon) return;
+    // sendBeacon meldet auch ohne Netz Erfolg: Kam die letzte Meldung nicht an, bleibt alles in der Schlange (nächster Start)
+    if (beacon && (Stats.down || navigator.onLine === false)) { statsStore(); return; }
+    if (!S.sent) S.mode = mode;
+    const hadId = !!s.id, cur = statsBatch(false), sentEv = S.ev.slice();
+    if (!hadId && s.id) statsStore();                  // eine neue Kennung steht sofort im Speicher (sonst liesse sie sich nach einem Absturz nicht mehr löschen)
+    let list = [cur].concat(Stats.old), text = JSON.stringify({ v: 1, b: list });
+    while (list.length > 1 && text.length > 15000) { list.pop(); text = JSON.stringify({ v: 1, b: list }); }
+    if (text.length > 15000) { S.ev = []; return; }
+    Stats.sends++; Stats.lastSend = now; S.tried = true;
+    const ok = function(){ S.sent = true; S.sentPlay = play; S.sentRuns = cur.runs; S.ev = S.ev.filter(function(e){ return sentEv.indexOf(e) === -1; }); Stats.old = []; };
+    if (beacon) {                                      // die Antwort ist nicht lesbar: angenommen = gesendet
+      let queued = false;
+      try { queued = !!(navigator.sendBeacon && navigator.sendBeacon(statsUrl('/ev'), text)); } catch (e) {}
+      if (queued) ok();
+      statsStore();
+      return;
+    }
+    Stats.busy = true;
+    // Der Körper ist ein blosser Text (text/plain): eine "einfache" Anfrage ohne Preflight
+    fetch(statsUrl('/ev'), { method: 'POST', body: text, keepalive: true, credentials: 'omit', cache: 'no-store' }).then(function(r){
+      if (r.status === 200) return r.json().then(function(j){ return [200, j]; }, function(){ return [200, null]; });
+      return [r.status, null];
+    }, function(){ return [0, null]; }).then(function(x){
+      Stats.busy = false; Stats.down = x[0] === 0 || x[0] === 429 || x[0] >= 500;
+      if (x[0] === 200 || x[0] === 400 || x[0] === 413) ok();                         // angekommen – oder so falsch, dass ein zweiter Versuch nichts bringt
+      else if (x[0] === 403 || x[0] === 404 || x[0] === 405) Stats.dead = true;       // diese Seite darf nicht senden: Ruhe bis zum nächsten Laden
+      // 429, 503, kein Netz: alles bleibt für das nächste Mal
+      if (x[1]) statsAnswer(x[1]);
+      statsStore();
+    }).catch(function(){ Stats.busy = false; });
+  } catch (e) {}
+}
+// Die allererste Anfrage ist leer ("hello"): Der Server sagt nur, in welchem Land er uns sieht und ob dort gefragt werden muss.
+function statsHello() {
+  const now = Date.now();
+  if (Stats.busy || (Stats.helloAt && now - Stats.helloAt < 60000)) return;
+  Stats.helloAt = now; Stats.busy = true; Stats.sends++;
+  fetch(statsUrl('/ev'), { method: 'POST', body: '{"v":1,"b":[]}', credentials: 'omit', cache: 'no-store' }).then(function(r){
+    if (r.status === 403 || r.status === 404 || r.status === 405) Stats.dead = true;
+    return r.status === 200 ? r.json() : null;
+  }).then(function(j){
+    Stats.busy = false;
+    if (j && typeof j.ask === 'boolean') { statsAnswer(j); statsBar(); statsFlush('start'); }
+  }, function(){ Stats.busy = false; });
+}
+function statsAnswer(j) {            // jede Antwort nennt das Land und ob dort gefragt werden muss
+  if (!j || typeof j.ask !== 'boolean') return;
+  const s = Stats.st, ask = j.ask ? 1 : 0, was = statsMode();
+  if (typeof j.c === 'string' && /^[A-Z]{2}$/.test(j.c)) s.co = j.c;
+  if (s.ask === ask) return;
+  s.ask = ask;
+  if (was !== '' && statsMode() !== was) statsConsent(); else statsStore();
+}
+// Nach jeder Änderung der Einwilligung (Schalter, Antwort auf die Frage, anderes Land): Sie gilt sofort. Ging von der Sitzung
+// schon etwas hinaus, beginnt eine neue (Plan 3a); was von der alten noch nicht gesendet war, verfällt.
+function statsConsent() {
+  try {
+    const S = Stats.ses, mode = statsMode();
+    if (Stats.live && S && S.sent && S.mode !== mode) { Stats.run = null; Stats.fps.tok++; statsNewSession(); }
+    if (mode !== 'id') Stats.old = [];
+    statsStore(); statsBar();
+    statsFlush('start');
+  } catch (e) {}
+}
+// "Meine Statistik löschen": alle Zeilen dieser Kennung auf dem Server, dann vergisst das Gerät die Kennung.  done('ok' | 'fail' | 'none')
+function statsDelete(done) {
+  const s = statsBook(), id = s.id;
+  const forget = function(){
+    delete s.id; delete s.first; Stats.old = []; Stats.fresh = false;
+    if (Stats.live && Stats.ses) { Stats.run = null; Stats.fps.tok++; statsNewSession(); }
+    statsStore();
+  };
+  if (!id) { done('none'); return; }
+  if (!Stats.live || Stats.dead) { forget(); done('ok'); return; }                    // von hier wurde nie gesendet: nur vergessen
+  try {
+    fetch(statsUrl('/ev/delete'), { method: 'POST', body: JSON.stringify({ v: 1, id: id }), credentials: 'omit', cache: 'no-store' })
+      .then(function(r){ if (r.status === 200) { forget(); done('ok'); } else done('fail'); }, function(){ done('fail'); });
+  } catch (e) { done('fail'); }
+}
+// ---------- Läufe ----------
+function statsWatch() {              // einmal pro Sekunde (und am Ende): Grösse der Gruppe, letzter Boss und sein Rest
+  const R = Stats.run; if (!R) return;
+  if (Net.on) R.party = Math.max(R.party, Math.min(8, 1 + Net.peers.size));
+  const B = bossEntity || (Net.on && player ? netHudBoss() : null);
+  if (B && typeof B.type === 'string') { R.boss = B.type; R.bossMine = B === bossEntity; R.bossHp = B.dead || !(B.maxHp > 0) ? 0 : Math.max(0, Math.min(1, B.hp / B.maxHp)); }
+  else if (R.boss && R.bossMine) R.bossHp = 0;                                        // mein Boss ist weg: besiegt
+}
+function statsRunInfo(R) { return { mode: R.mode, map: R.map, ch: R.ch, party: R.party, online: R.online, acc: R.acc, res: R.res ? 1 : undefined }; }   // res: fortgesetzter Lauf
+function statsEndEvent(R, end) {
+  const at = statsAt(), clamp = function(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); };
+  // dur, kills und pearls zählen ab dem Beginn dieses Abschnitts (ein fortgesetzter Lauf ist für die Statistik ein neuer Lauf)
+  const dur = clamp(Math.round(runTime - R.rt0), 0, Math.min(21600, at - R.at + 5));
+  const e = Object.assign({ t: 'run_end', at: at, rid: R.rid }, statsRunInfo(R));
+  e.dur = dur; e.end = end;
+  e.lvl = clamp(runLevel | 0, 0, 500);
+  e.kills = clamp(Math.round(runKills - R.k0), 0, Math.min(2000000, dur * 200 + 500));
+  e.pearls = clamp(Math.floor(runPearls - R.p0), 0, 40000);
+  if (R.boss && STATS_SLUG.test(R.boss)) { e.boss = R.boss; if (typeof R.bossHp === 'number') e.bossHp = Math.round(R.bossHp * 100) / 100; }
+  const names = function(o){ return Object.keys(o || {}).filter(function(k){ return STATS_SLUG.test(k); }).slice(0, 12); };
+  if (player) { e.w = names(player.weapons); e.p = names(player.passives); }
+  const L = Stats.fps.list;
+  if (L.length >= 5) {                                 // Bilder pro Sekunde: Mittel und das schwächste Prozent der Sekunden
+    const sorted = L.slice().sort(function(a, b){ return a - b; });
+    let sum = 0; for (let i = 0; i < L.length; i++) sum += L[i];
+    e.fps = clamp(Math.round(sum / L.length), 1, 360); e.fpsLow = sorted[Math.floor(sorted.length * 0.01)];
+  }
+  if (R.online && Net.lat != null) e.ping = clamp(Math.round(Net.lat), 0, 5000);
+  return e;
+}
+function statsFps() {                // eigener Zähler neben der Spielschleife, nur solange ein Lauf offen ist
+  const F = Stats.fps, tok = ++F.tok;
+  F.list = [];
+  if (typeof requestAnimationFrame !== 'function') return;
+  let t0 = 0, n = 0;
+  const step = function(ts){
+    if (tok !== F.tok || !Stats.run) return;
+    n++;
+    if (!t0 || ts - t0 > 3000) { t0 = ts; n = 0; }     // Anfang, oder der Tab war im Hintergrund
+    else if (ts - t0 >= 1000) {
+      const fps = Math.round(n * 1000 / (ts - t0)); t0 = ts; n = 0;
+      try { statsWatch(); } catch (e) {}
+      if (gameState === 'playing' && fps >= 1 && fps <= 360 && F.list.length < 7200) F.list.push(fps);
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+// Haken im Spiel: Laufbeginn (startRun, startStrategy, resumeRunSnapshot, resumeOnlineRun) und Laufende (endRun = 'died', quitToMenu und Neustart = 'quit')
+function statsRunStart(res) {        // res: 1 = ein fortgesetzter Lauf ("Weiterspielen", auch online)
+  if (!Stats.live) return;
+  try {
+    const S = Stats.ses; if (!S) return;
+    const on = Net.on ? 1 : 0;
+    const R = { rid: statsRand(12), at: statsAt(), party: 1, acc: accOn() ? 1 : 0, res: res ? 1 : 0, rt0: runTime, k0: runKills, p0: runPearls, boss: null, bossMine: false,
+      mode: strategyMode ? 'strat' : !on ? 'single' : (Net.mode === 'pvp' || Net.mode === 'ffa') ? Net.mode : 'coop',
+      map: strategyMode ? ((Base && Base.ring) || 'riff') : selectedStageId, ch: selectedCharacterId,
+      online: strategyMode ? (SN.want ? 1 : 0) : on };
+    if (!STATS_SLUG.test(R.map) || !STATS_SLUG.test(R.ch)) return;
+    Stats.run = R;
+    statsWatch();
+    S.runs++;
+    S.ev.push(Object.assign({ t: 'run_start', at: R.at, rid: R.rid }, statsRunInfo(R)));
+    statsFps(); statsStore();
+  } catch (e) {}
+}
+function statsRunEnd(end) {
+  if (!Stats.live) return;
+  try {
+    const R = Stats.run, S = Stats.ses; if (!R || !S) return;
+    statsWatch();
+    S.ev.push(statsEndEvent(R, end));
+    Stats.run = null; Stats.fps.tok++;
+    if (S.ev.length > STATS_EV_MAX - 1) S.ev.splice(0, S.ev.length - (STATS_EV_MAX - 1));
+    statsStore(); statsFlush(end === 'closed' ? 'bye' : 'run');
+  } catch (e) {}
+}
+function statsInit() {               // einmal nach dem Laden der Seite (nie in Node: dort ruft niemand DOMContentLoaded)
+  try {
+    statsAddress();
+    Stats.live = statsLive();
+    if (!Stats.live) return;
+    const s = statsBook(), lim = Math.floor(Date.now() / 1000) - 7 * 86400;
+    if (statsMode() === 'id' && Array.isArray(s.q)) Stats.old = s.q.filter(function(b){ return b && typeof b === 'object' && typeof b.sid === 'string' && b.id === s.id && b.t0 > lim && Array.isArray(b.ev); }).slice(0, STATS_OLD_MAX);
+    delete s.q;
+    statsNewSession();
+    document.addEventListener('visibilitychange', function(){
+      try {
+        if (document.hidden) { if (Stats.vis0) { Stats.playMs += Date.now() - Stats.vis0; Stats.vis0 = 0; } statsFlush('hide'); }
+        else Stats.vis0 = Date.now();
+        statsStore();
+      } catch (e) {}
+    });
+    window.addEventListener('pagehide', function(){ statsRunEnd('closed'); });       // die Seite geht mitten im Lauf zu
+    statsStore(); statsBar();
+    setTimeout(function(){ statsFlush('start'); }, Stats.test ? 30 : 2500);
+  } catch (e) { Stats.live = false; }
+}
 
 // Freischalt-Schwellen (Level innerhalb eines Laufs)
 const GLUECKS_LEVEL = 25, ENTWICKELT_LEVEL = 30;
@@ -2205,7 +2565,34 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Abgemeldet. Wer jetzt spielt, ist Gast.", "Logged out. Whoever plays now is a guest.", "Ти вийшов. Хто грає тепер – гість."],
 ["Gespeichert wird nur, was das Spiel braucht: dein Login-Name, dein Anzeigename, dein Spielstand, die Liste deiner angemeldeten Geräte (Browser-Art und letzter Tag) und die Zahl falscher Anmeldeversuche.", "Only what the game needs is stored: your login name, your display name, your save, the list of your logged-in devices (browser type and last day) and the number of wrong login attempts.", "Зберігається лише потрібне грі: логін, ім'я для показу, збереження, список пристроїв (тип браузера й останній день) і кількість невдалих спроб входу."],
 ["Dein Passwort und dein Wiederherstellungscode werden nur verschlüsselt (als Hash) gespeichert – niemand kann sie lesen.", "Your password and recovery code are stored only scrambled (as a hash) – nobody can read them.", "Пароль і код відновлення зберігаються лише у вигляді хешу – ніхто не може їх прочитати."],
-["Keine E-Mail, kein echter Name, kein Alter, kein Ort. Netzadressen nur kurz, um zu viele Anmeldeversuche zu bremsen.", "No email, no real name, no age, no location. Network addresses only briefly, to slow down too many login attempts.", "Жодної пошти, справжнього імені, віку чи місця. Мережеві адреси – лише ненадовго, щоб стримувати забагато спроб входу."],
+["Keine E-Mail, kein echter Name, kein Alter. Ein Konto speichert keinen Ort; die Spielstatistik kennt nur das Land. Netzadressen nur kurz, um zu viele Anmeldeversuche zu bremsen.", "No email, no real name, no age. An account stores no location; the game statistics only know the country. Network addresses only briefly, to slow down too many login attempts.", "Жодної пошти, справжнього імені чи віку. Акаунт не зберігає місце; статистика гри знає лише країну. Мережеві адреси – лише ненадовго, щоб стримати забагато спроб входу."],
+["Konto (freiwillig)", "Account (optional)", "Акаунт (за бажанням)"],
+["Spielstatistik", "Game statistics", "Статистика гри"],
+["Damit wir das Spiel besser machen können, zählt es anonym mit: wann und wie lange gespielt wird, Modus, Gebiet und Blobi, wie ein Lauf endet (Zeit, Level, Besiegte, Perlen, Waffen), Sprache, Spielversion und grobe Angaben zum Gerät (Geräteart, Betriebssystem, Browser, Bildschirmgrösse).", "So that we can make the game better, it counts anonymously: when and how long people play, mode, area and Blobi, how a run ends (time, level, defeated enemies, pearls, weapons), language, game version and rough facts about the device (kind of device, operating system, browser, screen size).", "Щоб ми могли покращувати гру, вона анонімно рахує: коли і як довго грають, режим, зону та Блобі, як закінчується забіг (час, рівень, переможені, перлини, зброя), мову, версію гри та приблизні дані про пристрій (тип пристрою, операційна система, браузер, розмір екрана)."],
+["Das Land erkennt unser Server (bei Cloudflare) an der Netzadresse. Die Netzadresse selbst wird nicht gespeichert.", "Our server (at Cloudflare) recognises the country from the network address. The network address itself is not stored.", "Країну наш сервер (у Cloudflare) визначає за мережевою адресою. Сама мережева адреса не зберігається."],
+["Dein Gerät bekommt eine zufällige Kennung, damit wir sehen, ob jemand wiederkommt. Sie gehört zu keinem Namen und zu keinem Konto. In der EU, im EWR und in Grossbritannien gibt es sie nur, wenn du Ja sagst.", "Your device gets a random ID so that we can see whether someone comes back. It belongs to no name and to no account. In the EU, the EEA and the United Kingdom it exists only if you say yes.", "Твій пристрій отримує випадковий ідентифікатор, щоб ми бачили, чи хтось повертається. Він не пов’язаний ні з іменем, ні з акаунтом. У ЄС, ЄЕЗ та Великій Британії він з’являється, лише якщо ти скажеш «так»."],
+["Keine Werbung, keine Profile, kein Verkauf von Daten, keine Cookies und keine fremden Dienste, die mitlesen.", "No ads, no profiles, no selling of data, no cookies and no outside services reading along.", "Жодної реклами, жодних профілів, жодного продажу даних, жодних cookies і жодних сторонніх сервісів, що підглядають."],
+["Statistik mit Geräte-Kennung senden", "Send statistics with the device ID", "Надсилати статистику з ідентифікатором пристрою"],
+["Dein Browser sendet das Signal „Nicht verfolgen“ (Global Privacy Control oder Do Not Track). Darum senden wir nur Zählungen ohne Kennung – ausser du schaltest die Statistik hier selbst ein.", "Your browser sends the “do not track” signal (Global Privacy Control or Do Not Track). So we only send counts without an ID – unless you switch statistics on here yourself.", "Твій браузер надсилає сигнал «не відстежувати» (Global Privacy Control або Do Not Track). Тому ми надсилаємо лише підрахунки без ідентифікатора – хіба що ти власноруч увімкнеш статистику тут."],
+["Mit eingeschalteter Statistik zusätzlich: Fenstergrösse, Bildschärfe, Prozessorkerne, Arbeitsspeicher, Verbindungsart, Browsersprache, seit wie vielen Tagen du spielst und von welcher Website du kommst.", "With statistics switched on, also: window size, screen sharpness, processor cores, memory, connection type, browser language, how many days you have been playing and which website you came from.", "Якщо статистику ввімкнено, ще: розмір вікна, чіткість екрана, ядра процесора, оперативна пам’ять, тип з’єднання, мова браузера, скільки днів ти вже граєш і сайт, з якого був перехід."],
+["Eingeschaltet – danke, das hilft uns!", "Switched on – thank you, that helps us!", "Увімкнено – дякуємо, це нам допомагає!"],
+["Ausgeschaltet: Gesendet werden nur noch Zählungen ohne Kennung (zum Beispiel „ein Lauf im Korallenriff“).", "Switched off: only counts without an ID are sent (for example “one run in the Coral Reef”).", "Вимкнено: надсилаються лише підрахунки без ідентифікатора (наприклад, «один забіг у Кораловому рифі»)."],
+["Meine Statistik löschen", "Delete my statistics", "Видалити мою статистику"],
+["Wirklich deine Statistik löschen?", "Really delete your statistics?", "Справді видалити твою статистику?"],
+["Deine Statistik wurde gelöscht.", "Your statistics were deleted.", "Твою статистику видалено."],
+["Zu diesem Gerät ist keine Kennung gespeichert – es gibt nichts zu löschen.", "No ID is stored for this device – there is nothing to delete.", "Для цього пристрою не збережено ідентифікатора – видаляти нічого."],
+["Das hat gerade nicht geklappt. Versuch es später noch einmal.", "That did not work just now. Try again later.", "Зараз не вийшло. Спробуй пізніше ще раз."],
+["Löscht auf dem Server alles, was zur Kennung dieses Geräts gehört, und vergisst die Kennung. Zählungen ohne Kennung lassen sich niemandem zuordnen und bleiben.", "Deletes everything on the server that belongs to this device’s ID and forgets the ID. Counts without an ID cannot be linked to anyone and stay.", "Видаляє на сервері все, що належить до ідентифікатора цього пристрою, і забуває ідентифікатор. Підрахунки без ідентифікатора ні з ким не пов’язати, тому вони лишаються."],
+["Wie lange?", "For how long?", "Як довго?"],
+["Einzelne Sitzungen und Läufe löschen wir nach 90 Tagen. Danach bleiben nur Summen ohne Kennung (zum Beispiel Läufe pro Tag).", "We delete single sessions and runs after 90 days. After that only totals without an ID remain (for example runs per day).", "Окремі сеанси та забіги ми видаляємо через 90 днів. Після цього лишаються тільки суми без ідентифікатора (наприклад, забіги за день)."],
+["Auf diesem Gerät", "On this device", "На цьому пристрої"],
+["Spielstand, Einstellungen, deine Auswahl hier und – mit eingeschalteter Statistik – die Kennung und noch nicht gesendete Zählungen liegen im Speicher deines Browsers. Cookies gibt es keine.", "Your save, settings, your choice here and – with statistics switched on – the ID and counts not sent yet are kept in your browser’s storage. There are no cookies.", "Збереження, налаштування, твій вибір тут і – якщо статистику ввімкнено – ідентифікатор та ще не надіслані підрахунки лежать у пам’яті твого браузера. Cookies немає."],
+["Kontakt", "Contact", "Контакт"],
+["Verantwortlich: Blobigames. Fragen, Auskunft oder Löschung: help.blobigames@outlook.com", "Responsible: Blobigames. Questions, information or deletion: help.blobigames@outlook.com", "Відповідальний: Blobigames. Запитання, довідка або видалення: help.blobigames@outlook.com"],
+["Anonyme Statistik erlauben? Sie hilft uns, das Spiel besser zu machen – ohne Namen, ohne Werbung.", "Allow anonymous statistics? They help us make the game better – no names, no ads.", "Дозволити анонімну статистику? Вона допомагає нам покращувати гру – без імен і без реклами."],
+["Das Spiel zählt anonym mit, wie gespielt wird – ohne Namen, ohne Werbung. Ausschalten kannst du das unter „Datenschutz“.", "The game counts anonymously how it is played – no names, no ads. You can switch this off under “Privacy”.", "Гра анонімно рахує, як у неї грають, – без імен і без реклами. Вимкнути це можна в розділі «Конфіденційність»."],
+["Ja", "Yes", "Так"],
+["OK", "OK", "OK"],
 ["Mit „Konto löschen“ wird alles entfernt.", "“Delete account” removes everything.", "«Видалити акаунт» прибирає все."],
 ["Atollon, der Riffkoloss", "Atollon, the Reef Colossus", "Атолон, рифовий колос"],
 ["Die Tangmutter", "The Kelp Mother", "Мати водоростей"],
@@ -3334,6 +3721,7 @@ function resumeRunSnapshot(snap) {
     gameState = 'resume'; resumeCount = RESUME_COUNT;               // kurzer Countdown: alles steht still, bis es weitergeht
     showScreen(null);
   }
+  statsRunStart(1);                                   // Statistik (7.27): ein fortgesetzter Lauf zählt als neuer Lauf (mit res = 1)
 }
 const RESUME_COUNT = 3;
 // Szene aus einem Snapshot zurückholen. Version 1 (ohne Szene): freies Wasser, 1,5 s Schutz, der Boss kommt neu.
@@ -3362,6 +3750,7 @@ function restoreScene(snap) {
 
 function startRun(charId, stageId) {
   if (accOn() && Acc.active === false) { accClaim().then(function(){ startRun(charId, stageId); }); return; }   // Konto: das zuletzt spielende Gerät ist aktiv
+  statsRunEnd('quit');                                // Statistik (7.27): ein noch offener Lauf endet hier (Neustart)
   ensureAudio();
   bankOldRun();
   selectedCharacterId = charId;
@@ -3422,6 +3811,7 @@ function startRun(charId, stageId) {
     }
   }
   if (!runTip && UI['hud-tip']) UI['hud-tip'].classList.remove('show');
+  if (!strategyMode) statsRunStart();                 // Statistik (7.27); die Strategie meldet sich am Ende von startStrategy
 }
 let runTip = null;
 
@@ -7536,6 +7926,7 @@ function bankRunProgress() {
 
 let goBoss = null;
 function endRun() {
+  statsRunEnd('died');                                // Statistik (7.27), liest nur
   if (Net.on) netHandover();                          // meine Bosse und Champions übernimmt der nächste Freund
   if (currentLevelUp && currentLevelUp.bar) { currentLevelUp = null; levelUpProcessing = false; }
   chanceLeft = 0; chanceDown = false; hideChance();
@@ -7637,6 +8028,7 @@ const CONFIRM_AFTER = 3;          // Neustart fragt immer nach (ausser in den er
 // Zum Menü: der Lauf wird gespeichert (online im Online-Platz, mit dem Raum) und geht im Menü mit "Weiterspielen" weiter.
 // Online verlässt du dabei den Raum: deine Bosse und Champions übernimmt ein Freund in der Nähe.
 function quitToMenu() {
+  statsRunEnd('quit');                                // Statistik (7.27), liest nur
   if (strategyMode) { stLeave(); checkAchievements(); gameState = 'menu'; setHudVisible(false); updateMenuPearlsLabel(); showScreen('screen-menu'); return; }
   if (runActive()) {
     if (Net.ride) { if (netRiding()) { player.x = Net.ride.sx; player.y = Net.ride.sy; } Net.ride = null; }
@@ -12882,11 +13274,10 @@ function renderAccount() {
       });
       back(); return;
     }
-    if (accMode === 'privacy') { accPrivacy(add); back(); return; }
     add(el('p', 'acc-note', 'Du spielst als Gast: dein Spielstand ist nur in diesem Browser. Mit einem Konto ist er auf dem Server gesichert und du kannst auf jedem Gerät weiterspielen.'));
     add(accBtn('Konto erstellen', 'btn-primary', function(){ accGo('signup'); }));
     add(accBtn('Anmelden', 'btn-secondary', function(){ accGo('login'); }));
-    add(accBtn('Datenschutz', 'btn-ghost', function(){ accGo('privacy'); }));
+    add(accBtn('Datenschutz', 'btn-ghost', function(){ openPrivacy('screen-account'); }));
     return;
   }
   // angemeldet
@@ -12929,7 +13320,6 @@ function renderAccount() {
     form([p], 'Konto endgültig löschen', function(){ if (!confirm(tr('Wirklich das Konto löschen?'))) return; accWork(accApi('delete', { password: p.input.value }, true), function(r){ if (r.status === 200) { accLocalLogout(); accGo('home', 'Dein Konto wurde gelöscht.'); } else accGo('delete', accErr(r)); }); });
     back(); return;
   }
-  if (accMode === 'privacy') { accPrivacy(add); back(); return; }
   add(el('p', 'acc-who', '👤 ' + Acc.display));
   add(el('p', 'acc-note', Acc.active === false ? 'Dein Konto ist gerade auf einem anderen Gerät aktiv.' : 'Dein Spielstand wird auf dem Server gesichert.'));
   if (Acc.active === false) add(accBtn('Hier weiterspielen', 'btn-primary', function(){ accClaim().then(function(){ accGo('home'); }); }));
@@ -12943,14 +13333,83 @@ function renderAccount() {
   }));
   add(accBtn('Abmelden', 'btn-secondary', function(){ accUpload(false).then(function(){ accApi('logout', {}, true); accLocalLogout(); accGo('home', 'Abgemeldet. Wer jetzt spielt, ist Gast.'); }); }));
   add(accBtn('Konto löschen', 'btn-ghost', function(){ accGo('delete'); }));
-  add(accBtn('Datenschutz', 'btn-ghost', function(){ accGo('privacy'); }));
+  add(accBtn('Datenschutz', 'btn-ghost', function(){ openPrivacy('screen-account'); }));
 }
-function accPrivacy(add) {
-  add(el('h3', null, 'Datenschutz'));
+function accPrivacy(add) {                             // der Konto-Teil des Datenschutz-Bildschirms (renderPrivacy)
+  add(el('h3', null, 'Konto (freiwillig)'));
   ['Gespeichert wird nur, was das Spiel braucht: dein Login-Name, dein Anzeigename, dein Spielstand, die Liste deiner angemeldeten Geräte (Browser-Art und letzter Tag) und die Zahl falscher Anmeldeversuche.',
    'Dein Passwort und dein Wiederherstellungscode werden nur verschlüsselt (als Hash) gespeichert – niemand kann sie lesen.',
-   'Keine E-Mail, kein echter Name, kein Alter, kein Ort. Netzadressen nur kurz, um zu viele Anmeldeversuche zu bremsen.',
+   'Keine E-Mail, kein echter Name, kein Alter. Ein Konto speichert keinen Ort; die Spielstatistik kennt nur das Land. Netzadressen nur kurz, um zu viele Anmeldeversuche zu bremsen.',
    'Mit „Konto löschen“ wird alles entfernt.'].forEach(function(t){ add(el('p', 'acc-note', t)); });
+}
+// ---------- Datenschutz (7.27): ein Bildschirm für Spielstatistik und Konto, erreichbar ohne Konto (Hauptmenü, Konto) ----------
+let privBack = 'screen-menu', privMsg = '';
+function openPrivacy(from) { privBack = from || 'screen-menu'; privMsg = ''; renderPrivacy(); showScreen('screen-privacy'); }
+function renderPrivacy() {
+  const box = document.getElementById('priv-body');
+  if (!box) return;
+  box.textContent = '';
+  const add = function(n){ box.appendChild(n); return n; }, P = function(t){ return add(el('p', 'acc-note', t)); };
+  const s = statsBook(), sig = statsSignal(), on = !s.out && (sig ? s.cons === 'yes' : !(s.ask && s.cons !== 'yes'));
+  add(el('h3', null, 'Spielstatistik'));
+  ['Damit wir das Spiel besser machen können, zählt es anonym mit: wann und wie lange gespielt wird, Modus, Gebiet und Blobi, wie ein Lauf endet (Zeit, Level, Besiegte, Perlen, Waffen), Sprache, Spielversion und grobe Angaben zum Gerät (Geräteart, Betriebssystem, Browser, Bildschirmgrösse).',
+   'Mit eingeschalteter Statistik zusätzlich: Fenstergrösse, Bildschärfe, Prozessorkerne, Arbeitsspeicher, Verbindungsart, Browsersprache, seit wie vielen Tagen du spielst und von welcher Website du kommst.',
+   'Das Land erkennt unser Server (bei Cloudflare) an der Netzadresse. Die Netzadresse selbst wird nicht gespeichert.',
+   'Dein Gerät bekommt eine zufällige Kennung, damit wir sehen, ob jemand wiederkommt. Sie gehört zu keinem Namen und zu keinem Konto. In der EU, im EWR und in Grossbritannien gibt es sie nur, wenn du Ja sagst.',
+   'Keine Werbung, keine Profile, kein Verkauf von Daten, keine Cookies und keine fremden Dienste, die mitlesen.'].forEach(P);
+  const lab = el('label', 'acc-check'), cb = el('input');
+  cb.type = 'checkbox'; cb.id = 'stats-switch'; cb.checked = on;
+  lab.appendChild(cb); lab.appendChild(el('span', null, 'Statistik mit Geräte-Kennung senden'));
+  add(lab);
+  P(sig && !on ? 'Dein Browser sendet das Signal „Nicht verfolgen“ (Global Privacy Control oder Do Not Track). Darum senden wir nur Zählungen ohne Kennung – ausser du schaltest die Statistik hier selbst ein.' :
+    on ? 'Eingeschaltet – danke, das hilft uns!' : 'Ausgeschaltet: Gesendet werden nur noch Zählungen ohne Kennung (zum Beispiel „ein Lauf im Korallenriff“).').id = 'stats-state';
+  cb.addEventListener('change', function(){
+    Sfx.click();
+    if (cb.checked) { s.cons = 'yes'; delete s.out; } else { s.out = 1; if (s.ask) s.cons = 'no'; }
+    privMsg = ''; statsConsent(); renderPrivacy();
+  });
+  add(accBtn('Meine Statistik löschen', 'btn-secondary', function(){
+    if (!confirm(tr('Wirklich deine Statistik löschen?'))) return;
+    box.classList.add('busy');
+    statsDelete(function(r){
+      box.classList.remove('busy');
+      privMsg = r === 'ok' ? 'Deine Statistik wurde gelöscht.' : r === 'none' ? 'Zu diesem Gerät ist keine Kennung gespeichert – es gibt nichts zu löschen.' : 'Das hat gerade nicht geklappt. Versuch es später noch einmal.';
+      renderPrivacy();
+    });
+  })).id = 'btn-stats-delete';
+  if (privMsg) add(el('p', 'acc-msg', privMsg)).id = 'stats-msg';
+  P('Löscht auf dem Server alles, was zur Kennung dieses Geräts gehört, und vergisst die Kennung. Zählungen ohne Kennung lassen sich niemandem zuordnen und bleiben.');
+  add(el('h3', null, 'Wie lange?'));
+  P('Einzelne Sitzungen und Läufe löschen wir nach 90 Tagen. Danach bleiben nur Summen ohne Kennung (zum Beispiel Läufe pro Tag).');
+  accPrivacy(add);
+  add(el('h3', null, 'Auf diesem Gerät'));
+  P('Spielstand, Einstellungen, deine Auswahl hier und – mit eingeschalteter Statistik – die Kennung und noch nicht gesendete Zählungen liegen im Speicher deines Browsers. Cookies gibt es keine.');
+  add(el('h3', null, 'Kontakt'));
+  P('Verantwortlich: Blobigames. Fragen, Auskunft oder Löschung: help.blobigames@outlook.com');
+}
+// Leiste im Hauptmenü: der Hinweis (einmal, ausserhalb der EU) oder die Frage (EU / EWR / UK, bis zur Antwort).  force: 'ask' | 'note' für Bilder im Test
+function statsBar(force) {
+  const bar = document.getElementById('stats-bar');
+  if (!bar) return;
+  const s = statsBook();
+  let kind = force || '';
+  // "Nicht verfolgen" (GPC / DNT): in der EU trotzdem die Frage, sonst keine Leiste
+  if (!kind && Stats.live && !s.out && s.ask !== undefined && (s.ask || !statsSignal())) kind = s.ask ? (s.cons === undefined ? 'ask' : '') : (s.note && bar.dataset.kind !== 'note' ? '' : 'note');
+  bar.style.display = kind ? '' : 'none';
+  bar.dataset.kind = kind;
+  if (!kind) return;
+  document.getElementById('stats-bar-text').textContent = kind === 'ask' ? 'Anonyme Statistik erlauben? Sie hilft uns, das Spiel besser zu machen – ohne Namen, ohne Werbung.' :
+    'Das Spiel zählt anonym mit, wie gespielt wird – ohne Namen, ohne Werbung. Ausschalten kannst du das unter „Datenschutz“.';
+  document.getElementById('btn-stats-yes').textContent = kind === 'ask' ? 'Ja' : 'OK';
+  document.getElementById('btn-stats-no').style.display = kind === 'ask' ? '' : 'none';
+  if (kind === 'note' && !s.note) { s.note = 1; statsStore(); }                       // der Hinweis kommt nur beim ersten Start
+}
+function statsBarClick(what) {       // 'yes' (Ja / OK) · 'no' · 'more' (zum Datenschutz)
+  const bar = document.getElementById('stats-bar'), s = statsBook(), kind = bar ? bar.dataset.kind : '';
+  Sfx.click();
+  if (bar) { bar.dataset.kind = ''; bar.style.display = 'none'; }
+  if (kind === 'ask' && what !== 'more') { if (what === 'yes') { s.cons = 'yes'; delete s.out; } else s.cons = 'no'; statsConsent(); }
+  if (what === 'more') openPrivacy('screen-menu');
 }
 
 /* ============================================================
@@ -13167,6 +13626,7 @@ function startStrategy(charId, fresh, ring) {
   stSave();
   if (away > 120 && (off.k >= 1 || off.c >= 1 || off.troops || off.built || waves.length)) stAwayShow(away, off, waves);
   if (ring && !Net.on) snConnect(ring);                // 7.8: auf eine Karte mit anderen Spielern (die Basis läuft auch ohne Verbindung)
+  statsRunStart();                                     // Statistik (7.27)
 }
 function stLeave() { snDisconnect(); stSave(); strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
 function setStratUi(on) {
@@ -16012,6 +16472,12 @@ function initUI() {
   document.getElementById('btn-goto-instructions').addEventListener('click', function(){ Sfx.click(); showScreen('screen-instructions'); });
   initGetAppButton();
   initLangSync();
+  // Datenschutz und Statistik (7.27)
+  document.getElementById('btn-goto-privacy').addEventListener('click', function(){ Sfx.click(); openPrivacy('screen-menu'); });
+  document.getElementById('btn-privacy-back').addEventListener('click', function(){ Sfx.click(); if (privBack === 'screen-account') renderAccount(); showScreen(privBack); statsBar(); });
+  document.getElementById('btn-stats-yes').addEventListener('click', function(){ statsBarClick('yes'); });
+  document.getElementById('btn-stats-no').addEventListener('click', function(){ statsBarClick('no'); });
+  document.getElementById('btn-stats-more').addEventListener('click', function(){ statsBarClick('more'); });
 
   document.getElementById('btn-character-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
   document.getElementById('btn-character-next').addEventListener('click', function(){ Sfx.click(); renderStageGrid(); showScreen('screen-stage'); });
@@ -18074,6 +18540,7 @@ function resumeOnlineRun(snap) {
   showScreen(null);
   setHudVisible(true);
   lastTime = 0;
+  statsRunStart(1);                                   // Statistik (7.27): fortgesetzt (res = 1)
 }
 
 // ---------- senden ----------
@@ -18525,6 +18992,7 @@ function netHudBoss() {
 
 document.addEventListener('DOMContentLoaded', function(){
   initUI();
+  statsInit();                                         // Statistik (7.27): sendet nie von file://, localhost oder in Tests
   accRefresh();                                        // angemeldet: Spielstand vom Server holen (7.2)
   trStart();                                   // Sprache: alles Sichtbare übersetzen, neue Texte laufend
   requestAnimationFrame(gameLoop);
