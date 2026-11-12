@@ -1318,7 +1318,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.27';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.28';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -8125,9 +8125,11 @@ const QUAL = [
   { res: 0.5,  boss: 0.6,  cap: 0,   every: 4, outline: false, fx: 0.5 },
   { res: 0.5,  boss: 0.5,  cap: 0,   every: 6, outline: false, fx: 0.35 }
 ];
-const RES_MIN_DPR = 0.6, QL_AUTO_START = 1;
+// 7.28: nie unter 1 Pixel je CSS-Pixel (vorher 0,6): auf einem normalen Bildschirm (Dichte 1) zeichnet jede Stufe in voller Auflösung (sonst gestreckt = pixelig);
+// die Stufen sparen dort nur noch bei Funken, Hintergrund, Umriss und Boss-Bildern. Handys / Macs (Dichte 2) bleiben wie bisher (Stufe 4 und 5 = 1 Pixel je CSS-Pixel).
+const RES_MIN_DPR = 1, QL_AUTO_START = 1;
 let perfAcc = 0, perfN = 0, perfBusy = 0, perfSlow = 0, perfFast = 0, resUpAfter = 12, resDownAt = 0, lastBusy = 0, qlSaveAt = 0;
-function resFor(q) {                                // Faktor für DPR: nie unter 0,6 und nie über 2 Pixel je CSS-Pixel
+function resFor(q) {                                // Faktor für DPR: nie unter 1 und nie über 2 Pixel je CSS-Pixel
   const base = Math.min(window.devicePixelRatio || 1, 2);
   return Math.min(2 / base, Math.max(QUAL[q].res, RES_MIN_DPR / base));
 }
