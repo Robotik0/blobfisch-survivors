@@ -257,6 +257,9 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .ach-bar i { display: block; height: 100%; min-width: 3px; border-radius: 99px; background: linear-gradient(90deg, var(--bioluma), #7eb6ff); }
 .ach-prog-n { font-size: 11px; font-weight: 800; color: var(--foam); white-space: nowrap; }
 #strat-ui .st-res { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 58px); z-index: 12; background: rgba(5,15,28,0.72); border: 1px solid rgba(126,224,255,0.25); border-radius: 999px; padding: 5px 12px; font: 800 12.5px 'Nunito', sans-serif; color: var(--foam); white-space: pre; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 520px) { body.stratmode #hud .xp-wrap { margin-bottom: 22px; } }   /* Strategie auf dem Handy: die Ressourcenzeile ist so breit, dass sie den Blasenring-Zähler (und die anderen Chips links) verdeckt – die Chips rutschen darunter */
+#strat-ui .st-placebar { position: fixed; left: calc(env(safe-area-inset-left) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 13; }   /* beim Platzieren: nur dieser Knopf, das Menü ist weg */
+#strat-ui .st-placebar .btn { padding: 8px 14px; font-size: 13px; }
 #strat-ui .st-btns { position: fixed; right: calc(env(safe-area-inset-right) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 12; display: flex; flex-direction: column; gap: 6px; width: 132px; }
 #strat-ui .st-btns .btn { padding: 9px 8px; font-size: 13px; }
 #strat-ui .st-b { display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; line-height: 1.1; }
@@ -897,6 +900,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
       <button class="btn btn-secondary st-b" id="st-map" style="display:none;"><i>🗺️</i><span>Karte</span></button>
     </div>
     <div class="st-panel" id="strat-panel" style="display:none;"></div>
+    <div class="st-placebar" id="st-placebar" style="display:none;"><button class="btn btn-secondary" id="st-placecancel"><i>✕</i> <span>Abbrechen</span></button></div>
   </div>
 
   <div id="toast"></div>
@@ -4823,7 +4827,8 @@ function showToast(text) {
   // im Lauf: gleich unter allem, was oben angezeigt wird (Leisten, Raum-Zeile, Punkte-Karte, Boss-Balken) – nie darüber
   if (!inMenu) { hudBottomAt = 0; el.style.top = Math.round(hudBottom() - 6) + 'px'; } else el.style.top = '';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
+  const ms = Math.min(15000, Math.max(5000, 2500 + 100 * String(el.textContent).length));       // lang genug auch für langsames Lesen: ~10 Zeichen pro Sekunde, mindestens 5 s
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, ms);
 }
 
 function bankOldRun() {
@@ -13167,6 +13172,7 @@ function stLeave() { snDisconnect(); stSave(); strategyMode = false; setStratUi(
 function setStratUi(on) {
   const rs = document.getElementById('btn-restart-pause'); if (rs) rs.style.display = on ? 'none' : '';   // Neustart gibt es in der Basis nicht
   const u = document.getElementById('strat-ui'); if (u) u.style.display = on ? 'block' : 'none';
+  document.body.classList.toggle('stratmode', !!on); hudBottomAt = 0;
   const pe = document.querySelector('#hud .hud-pearls'); if (pe) pe.style.display = on ? 'none' : '';
   if (!on) { stClosePanel(); }
 }
@@ -14307,7 +14313,12 @@ function renderStratHud() {
   vis('st-build', inBase); vis('st-deposit', stVaultUsable()); vis('st-withdraw', stVaultUsable()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
-function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
+function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'block' : 'none'; }
+function stPlaceStart(hint) {      // Platzieren / Verschieben: das Menü verschwindet, damit der ganze Bildschirm frei ist; nur "Abbrechen" bleibt
+  const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none';
+  stPlaceBar(true); if (hint) showToast(tr(hint));
+}
+function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; stPlaceBar(false); if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
 function stPanel(title, type) {
   const p = document.getElementById('strat-panel'); p.textContent = ''; p.style.display = 'block';
   const head = el('div', 'st-head'), ti = el('strong'); if (type) ti.appendChild(stIcon(type, 30)); ti.appendChild(document.createTextNode(title)); head.appendChild(ti); const x = el('button', 'icon-btn', '✕'); x.addEventListener('click', function(){ Sfx.click(); stClosePanel(); }); head.appendChild(x); p.appendChild(head);
@@ -14346,7 +14357,7 @@ function stOpenBuild() {
         b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
       }
       b.disabled = locked || full || poor || wait;
-      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); const q = stPanel(d.name, type); q.appendChild(el('p', 'acc-note', tr(ST_DESC[type]))); if (t) q.appendChild(el('p', 'acc-note', '⏱ ' + stDur(t))); q.appendChild(el('p', 'acc-note', tr('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'))); });
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
       grid.appendChild(b);
     });
     p.appendChild(grid);
@@ -14434,7 +14445,7 @@ function stOpenInfo(b) {
     else add('Ausbauen auf Stufe ' + nl, nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
   if (b.type === 'muschelburg') { if (Base.builder2) p.appendChild(el('p', 'acc-note', tr('Zwei Baumeister arbeiten für dich.'))); else add('Zweiten Baumeister anheuern', Base.mb < 5 ? '🔒 Muschelburg 5' : ST_HIRE_C + ' 💎', function(){ stHire(); }, Base.mb < 5); }
-  if (b.type !== 'muschelburg') add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; });
+  if (b.type !== 'muschelburg') add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
   if (b.type === 'perlentresor') { add('XP einzahlen', Math.floor(runXp) + ' XP vom Blobi', function(){ stDeposit(); }, !stVaultUsable()); add('XP abheben', Math.floor(Base.res.xp) + ' XP im Tresor', function(){ stWithdraw(); }, !stVaultUsable()); }
   if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
   if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t], tl = stTroopLv(t); add(tr('{} verbessern').replace('{}', tr(q.name)), Base.mb < q.from ? '🔒 Muschelburg ' + q.from : tl >= stTroopCap() ? tr('Höchste Stufe') : 'Stufe ' + tl + ' → ' + (tl + 1) + ' · ' + 30 * tl + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
@@ -15983,6 +15994,7 @@ function initUI() {
   document.getElementById('btn-st-top').addEventListener('click', function(){ Sfx.click(); SN.showTop = !SN.showTop; this.textContent = SN.showTop ? '👥 Spieler' : '🏆 Rangliste'; snMapDraw(); });
   document.getElementById('st-map-cv').addEventListener('click', snMapPick);
   tapButton(document.getElementById('st-build'), function(){ Sfx.click(); stOpenBuild(); });
+  tapButton(document.getElementById('st-placecancel'), function(){ Sfx.click(); stClosePanel(); });
   tapButton(document.getElementById('st-deposit'), function(){ stDeposit(); });
   tapButton(document.getElementById('st-withdraw'), function(){ stWithdraw(); });
   tapButton(document.getElementById('st-follow'), function(){ Sfx.click(); stSetCmd('follow'); });
