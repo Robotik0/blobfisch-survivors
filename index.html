@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 7.2: keine fremden Skripte, Verbindungen nur zum Spiel-Server (schützt die Anmeldung, falls je ein Fehler HTML durchlässt) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; media-src data: blob:; connect-src https://blobfisch-online.blobfish-survivors.workers.dev wss://blobfisch-online.blobfish-survivors.workers.dev http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; media-src data: blob:; connect-src https://blobfisch-online.blobfish-survivors.workers.dev wss://blobfisch-online.blobfish-survivors.workers.dev https://api.github.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -146,6 +146,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .getapp-ic { width: 15px; height: 15px; flex-shrink: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2304241a' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5v11.5m0 0-4.8-4.8M12 15l4.8-4.8M4.5 20h15'/%3E%3C/svg%3E") center/contain no-repeat; }
 @keyframes getappGlow { 0%, 100% { box-shadow: 0 4px 14px rgba(94,242,192,0.35); } 50% { box-shadow: 0 4px 14px rgba(94,242,192,0.35), 0 0 0 6px rgba(94,242,192,0.22), 0 0 26px rgba(94,242,192,0.55); } }
 @media (prefers-reduced-motion: reduce) { .btn-getapp { animation: none; } }
+#btn-apk-update { white-space: nowrap; }   /* 7.29: "Оновити 0.1.1" bleibt eine Zeile */
 /* Scrollbalken in Fenstern und Menüs: schmal und in den Farben des Spiels (statt grauem Standardbalken) */
 .screen, .panel, .shop-list, .achievement-list, .album-grid { scrollbar-width: thin; scrollbar-color: rgba(126,224,255,0.35) transparent; }
 .screen::-webkit-scrollbar, .panel::-webkit-scrollbar, .shop-list::-webkit-scrollbar, .achievement-list::-webkit-scrollbar, .album-grid::-webkit-scrollbar { width: 8px; }
@@ -975,6 +976,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <button class="icon-btn" id="btn-mute" aria-label="Ton umschalten">🔊</button>
         <button class="btn btn-ghost btn-mini" id="btn-goto-instructions">Anleitung</button>
         <button class="btn btn-mini btn-getapp" id="btn-get-app" style="display:none;"><span class="getapp-ic" aria-hidden="true"></span><span>App laden</span></button>
+        <button class="btn btn-mini btn-getapp" id="btn-apk-update" style="display:none;"><span class="getapp-ic" aria-hidden="true"></span><span id="apk-update-label"></span></button>
         <span class="best-time-label" id="menu-best-time"></span>
       </div>
       <div class="menu-legal"><button class="link-btn" id="btn-goto-privacy">Datenschutz</button></div>
@@ -1318,7 +1320,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.28';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.29';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -1960,6 +1962,8 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Level","Level","Рівень"],
 ["Anleitung","How to play","Як грати"],
 ["App laden","Get the app","Завантажити застосунок"],
+["Update {}","Update {}","Оновити {}"],
+["Nur in der Android-App: Höchstens alle 6 Stunden fragt sie bei GitHub nach, ob es eine neuere Version gibt. Dabei sieht GitHub die Netzadresse deines Geräts; über dich oder dein Spiel wird nichts gesendet.","Android app only: at most every 6 hours it asks GitHub whether a newer version exists. GitHub sees your device's network address; nothing about you or your game is sent.","Лише в застосунку для Android: не частіше ніж раз на 6 годин він запитує в GitHub, чи є новіша версія. При цьому GitHub бачить мережеву адресу твого пристрою; нічого про тебе чи твою гру не надсилається."],
 ["Wähle deinen Blobi","Choose your Blobi","Обери свого Блобі"],
 ["Zurück","Back","Назад"],
 ["Weiter","Next","Далі"],
@@ -3043,6 +3047,74 @@ function appPlatform(ua, isCapacitor) {
   if (/Android/.test(ua)) return 'android';
   if (/Windows NT/.test(ua)) return 'win';
   return '';
+}
+// 7.29 (Plan apk-update-button.md): im Android-APK der Knopf "Update x.y.z", wenn auf GitHub ein neueres APK liegt. Die Seite aktualisiert sich im APK
+// selbst (WebUpdater), das APK nicht: der Knopf führt auf app.html (Auswahl + Schritte "unbekannte Apps installieren"), im System-Browser.
+// Die APK-Version steht seit 0.1.1 im User-Agent ("BlobfischAPK/0.1.1"); Capacitor ohne diese Marke = 0.1.0. Höchstens alle 6 h eine Frage an GitHub.
+const APK_REL_API = 'https://api.github.com/repos/Robotik0/blobfisch-survivors/releases?per_page=15';
+const APK_DL_PREFIX = 'https://github.com/Robotik0/blobfisch-survivors/releases/download/';
+const APK_UPD_KEY = 'blobfischApkUpd', APK_UPD_EVERY = 6 * 3600 * 1000, APK_UPD_TIMEOUT = 8000;
+function apkVersion(ua, isCapacitor) {
+  const m = /BlobfischAPK\/(\d+\.\d+\.\d+)/.exec(ua || '');
+  if (m) return m[1];
+  return isCapacitor && /Android/.test(ua || '') ? '0.1.0' : '';
+}
+function apkNewer(a, b) {                           // ist Version a neuer als b? Zahl für Zahl (0.1.10 > 0.1.9)
+  const x = String(a || '').split('.'), y = String(b || '').split('.');
+  for (let i = 0; i < 3; i++) { const d = (parseInt(x[i], 10) || 0) - (parseInt(y[i], 10) || 0); if (d) return d > 0; }
+  return false;
+}
+function apkPickRelease(list) {                     // neuestes "android-v1.2.3" mit einer .apk-Datei von unserer Release-Seite (Entwürfe nie)
+  let best = null;
+  if (!Array.isArray(list)) return null;
+  list.forEach(function(r){
+    if (!r || r.draft) return;
+    const m = /^android-v(\d+\.\d+\.\d+)$/.exec(r.tag_name || '');
+    if (!m || (best && !apkNewer(m[1], best.ver))) return;
+    const a = (Array.isArray(r.assets) ? r.assets : []).filter(function(a){
+      return a && /\.apk$/i.test(a.name || '') && typeof a.browser_download_url === 'string' && a.browser_download_url.indexOf(APK_DL_PREFIX) === 0; })[0];
+    if (a) best = { ver: m[1], url: a.browser_download_url };
+  });
+  return best;
+}
+function apkUpdCache() {
+  const c = Storage.get(APK_UPD_KEY, null);
+  return c && typeof c === 'object' && typeof c.t === 'number' ? c : null;
+}
+function apkUpdShow(running) {
+  const b = document.getElementById('btn-apk-update'), lab = document.getElementById('apk-update-label');
+  if (!b || !lab) return;
+  const c = apkUpdCache(), on = !!(c && c.ver && /^\d+\.\d+\.\d+$/.test(c.ver) && apkNewer(c.ver, running));
+  b.style.display = on ? '' : 'none';
+  if (on) lab.textContent = 'Update ' + c.ver;
+}
+function checkApkUpdate(running, now) {
+  now = now || Date.now();
+  const c = apkUpdCache();
+  if (c && now - c.t < APK_UPD_EVERY && now >= c.t) return Promise.resolve(false);   // vor weniger als 6 h gefragt (Uhr zurückgestellt: neu fragen)
+  Storage.set(APK_UPD_KEY, { t: now, ver: c ? c.ver || '' : '', url: c ? c.url || '' : '' });   // auch ein Fehlversuch zählt: nie öfter als alle 6 h
+  let timer = 0;
+  const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeout = new Promise(function(res, rej){ timer = setTimeout(function(){ if (ctl) ctl.abort(); rej(new Error('timeout')); }, APK_UPD_TIMEOUT); });
+  return Promise.race([fetch(APK_REL_API, ctl ? { signal: ctl.signal, headers: { Accept: 'application/vnd.github+json' } } : {}).then(function(r){
+    if (!r.ok) throw new Error('http ' + r.status);
+    return r.json();
+  }), timeout]).then(function(list){
+    clearTimeout(timer);
+    const best = apkPickRelease(list);
+    Storage.set(APK_UPD_KEY, { t: now, ver: best ? best.ver : '', url: best ? best.url : '' });
+    apkUpdShow(running);
+    return true;
+  }).catch(function(){ clearTimeout(timer); return false; });   // still: der alte Stand bleibt
+}
+function initApkUpdateButton() {
+  const running = apkVersion(navigator.userAgent, !!window.Capacitor);
+  if (!running) return;
+  const b = document.getElementById('btn-apk-update'); if (!b) return;
+  const base = location.protocol === 'file:' ? new URL('app.html', location.href).href : APP_PAGE_URL;
+  b.addEventListener('click', function(){ Sfx.click(); window.open(base + '?lang=' + encodeURIComponent(LANG) + '&p=android', '_blank', 'noopener'); });
+  apkUpdShow(running);                              // die letzte Antwort sofort, die neue nach der Frage
+  try { checkApkUpdate(running); } catch (e) {}
 }
 function initGetAppButton() {
   const b = document.getElementById('btn-get-app'); if (!b) return;
@@ -8113,25 +8185,27 @@ setInterval(function(){ if (window.requestIdleCallback) window.requestIdleCallba
 
 // Bildqualität (7.6): sechs Stufen, 0 = hoch … 5 = einfach. Die Automatik startet bei der zuletzt gemerkten Stufe (sonst 1 = so sah das Spiel bisher aus),
 // geht bei Geruckel schnell nach unten (je langsamer, desto schneller und weiter) und nach langer Ruhe wieder nach oben; mit viel Luft sogar auf 0 (hoch):
-// feinere Auflösung, schärfere Bosse, jedes Bild neu gezeichnet. Im Pause-Menü: Automatisch / Einfach / Hoch.
+// schärfere Bosse, jedes Bild neu gezeichnet (7.29: keine feinere Auflösung mehr). Im Pause-Menü: Automatisch / Einfach / Hoch.
 //   res: Auflösung der Zeichenfläche (Faktor auf die Bildschirmdichte, höchstens 2 Pixel je CSS-Pixel), boss: Auflösung der Boss-Bilder (zusätzlicher Faktor),
 //   cap: obere Grenze der Boss-Bilder in Pixeln je Welt-Einheit (0 = hoch; sonst wie bisher die Bildschirmdichte, höchstens 1,5), every: Boss-Kunst alle n Bilder neu,
 //   outline: leuchtender Umriss um Bosse, fx: Anteil der Funken und Hintergrund-Dinge.
 const QUAL = [
-  { res: 1.5,  boss: 1,    cap: 2,   every: 1, outline: true,  fx: 1 },
+  { res: 1,    boss: 1,    cap: 2,   every: 1, outline: true,  fx: 1 },     // 7.29: res 1.5 -> 1 (feiner als der Bildschirm kostete 2,25× die Pixel, kaum sichtbar)
   { res: 1,    boss: 1,    cap: 0,   every: 2, outline: true,  fx: 1 },
   { res: 0.8,  boss: 0.9,  cap: 0,   every: 2, outline: true,  fx: 0.85 },
   { res: 0.65, boss: 0.75, cap: 0,   every: 3, outline: false, fx: 0.65 },
-  { res: 0.5,  boss: 0.6,  cap: 0,   every: 4, outline: false, fx: 0.5 },
-  { res: 0.5,  boss: 0.5,  cap: 0,   every: 6, outline: false, fx: 0.35 }
+  { res: 0.5,  boss: 0.75, cap: 0,   every: 4, outline: false, fx: 0.5 },    // 7.29: boss 0.6 / 0.5 -> 0.75 (Bosse auf "Einfach" waren unscharf); gespart wird über every
+  { res: 0.5,  boss: 0.75, cap: 0,   every: 6, outline: false, fx: 0.35 }
 ];
 // 7.28: nie unter 1 Pixel je CSS-Pixel (vorher 0,6): auf einem normalen Bildschirm (Dichte 1) zeichnet jede Stufe in voller Auflösung (sonst gestreckt = pixelig);
 // die Stufen sparen dort nur noch bei Funken, Hintergrund, Umriss und Boss-Bildern. Handys / Macs (Dichte 2) bleiben wie bisher (Stufe 4 und 5 = 1 Pixel je CSS-Pixel).
 const RES_MIN_DPR = 1, QL_AUTO_START = 1;
 let perfAcc = 0, perfN = 0, perfBusy = 0, perfSlow = 0, perfFast = 0, resUpAfter = 12, resDownAt = 0, lastBusy = 0, qlSaveAt = 0;
-function resFor(q) {                                // Faktor für DPR: nie unter 1 und nie über 2 Pixel je CSS-Pixel
+// 7.29: bis Dichte 1,5 (Laptops mit 125 % / 150 % Anzeige-Skalierung) zeichnet jede Stufe in den Pixeln des Bildschirms (vorher 1 Pixel je CSS-Pixel = 0,8 / 0,67 je Bildschirm-Pixel, gestreckt = unscharf).
+const RES_FULL_DPR = 1.5;
+function resFor(q) {                                // Faktor für DPR: nie über 2 Pixel je CSS-Pixel; bis Dichte 1,5 nie unter 1 Pixel je Bildschirm-Pixel, darüber nie unter 1 je CSS-Pixel
   const base = Math.min(window.devicePixelRatio || 1, 2);
-  return Math.min(2 / base, Math.max(QUAL[q].res, RES_MIN_DPR / base));
+  return Math.min(2 / base, Math.max(QUAL[q].res, base <= RES_FULL_DPR ? 1 : RES_MIN_DPR / base));
 }
 function setQuality(q) {
   q = Math.max(0, Math.min(QUAL.length - 1, q | 0));
@@ -8201,6 +8275,22 @@ function paceFrame(timestamp) {
   return true;
 }
 function paceTarget() { return Math.min(60, 1000 / PACE.vs / (PACE.half ? 2 : 1)); }    // Bilder pro Sekunde, die man erwarten darf
+// 7.29: ?fps=1 zeigt oben links eine kleine Zeile (nur Zahlen, nichts zu übersetzen): Bilder pro Sekunde · Rechenzeit je Bild (Mittel / 95 %) · Stufe · Zeichenflächen-Pixel je Bildschirm-Pixel · Grösse der Zeichenfläche
+const FPS_LINE = typeof location !== 'undefined' && /[?&]fps=1/.test(location.search || '');
+const FPSL = { el: null, t: 0, b: [] };
+function fpsLineTick(now) {
+  const F = FPSL; F.b.push(lastBusy);
+  if (!F.t) F.t = now;
+  if (now - F.t < 1000) return;
+  const n = F.b.length, fps = n * 1000 / (now - F.t), s = F.b.slice().sort(function(a, b){ return a - b; });
+  const avg = s.reduce(function(a, b){ return a + b; }, 0) / n, p95 = s[Math.min(n - 1, Math.floor(n * 0.95))];
+  F.t = now; F.b.length = 0;
+  if (!F.el) { F.el = document.createElement('div'); F.el.id = 'fps-line'; F.el.setAttribute('translate', 'no');
+    F.el.style.cssText = 'position:fixed;left:4px;top:4px;z-index:99999;font:12px monospace;color:#cfe;background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:4px;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(F.el); }
+  F.el.textContent = Math.round(fps) + ' fps · ' + avg.toFixed(1) + ' / ' + p95.toFixed(1) + ' ms · L' + GFX.ql + (GFX.mode !== 'auto' ? ' ' + GFX.mode : '') +
+    ' · ' + (DPR / (window.devicePixelRatio || 1)).toFixed(2) + ' px · ' + canvas.width + '×' + canvas.height + (PACE.half ? ' · ½' : '');
+}
 function gameLoop(timestamp) {
   rafId = requestAnimationFrame(gameLoop);   // zuerst neu einplanen: ein Fehler in einem Frame darf das Spiel nie anhalten
   try {
@@ -8215,6 +8305,7 @@ function gameLoop(timestamp) {
     perfTick(rawDt);
     render();
     lastBusy = performance.now() - tb;               // Rechenzeit dieses Bildes (Logik + Zeichenbefehle; die Grafikkarte arbeitet danach weiter)
+    if (FPS_LINE) fpsLineTick(timestamp);
   } catch (err) {
     if (window.console && console.error) console.error(err);
   }
@@ -13386,6 +13477,7 @@ function renderPrivacy() {
   accPrivacy(add);
   add(el('h3', null, 'Auf diesem Gerät'));
   P('Spielstand, Einstellungen, deine Auswahl hier und – mit eingeschalteter Statistik – die Kennung und noch nicht gesendete Zählungen liegen im Speicher deines Browsers. Cookies gibt es keine.');
+  P('Nur in der Android-App: Höchstens alle 6 Stunden fragt sie bei GitHub nach, ob es eine neuere Version gibt. Dabei sieht GitHub die Netzadresse deines Geräts; über dich oder dein Spiel wird nichts gesendet.');   // 7.29: checkApkUpdate
   add(el('h3', null, 'Kontakt'));
   P('Verantwortlich: Blobigames. Fragen, Auskunft oder Löschung: help.blobigames@outlook.com');
 }
@@ -16473,6 +16565,7 @@ function initUI() {
   document.getElementById('btn-gameover-achievements').addEventListener('click', function(){ Sfx.click(); netLeave(); gameState='menu'; setHudVisible(false); updateMenuPearlsLabel(); renderAchievements(); showScreen('screen-achievements'); });
   document.getElementById('btn-goto-instructions').addEventListener('click', function(){ Sfx.click(); showScreen('screen-instructions'); });
   initGetAppButton();
+  initApkUpdateButton();
   initLangSync();
   // Datenschutz und Statistik (7.27)
   document.getElementById('btn-goto-privacy').addEventListener('click', function(){ Sfx.click(); openPrivacy('screen-menu'); });
