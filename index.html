@@ -1320,7 +1320,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.30';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.31';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -2301,6 +2301,8 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Hier wachsen deine Truppen. Eine zweite Brutstätte bringt je Stufe nur 2 Plätze, trainiert aber doppelt so schnell.", "Your troops grow here. A second hatchery gives only 2 places per level but trains twice as fast.", "Тут ростуть твої загони. Друга інкубаційна дає лише 2 місця за рівень, але тренує вдвічі швидше."],
 ["Hält Gegner auf.", "Holds enemies back.", "Стримує ворогів."],
 ["Warnt 15 s statt 5 s vor einer Welle.", "Warns 15 s instead of 5 s before a wave.", "Попереджає про хвилю за 15 с замість 5 с."],
+["Sein Licht streift die Gegner: angeleuchtete Gegner nehmen 4 s lang mehr Schaden von allem. Warnt dazu 15 s vor einer Welle.", "Its light sweeps over the foes: lit foes take more damage from everything for 4 s. It also warns 15 s before a wave.", "Його світло ковзає по ворогах: освітлені вороги 4 с отримують більше шкоди від усього. А ще попереджає про хвилю за 15 с."],
+["Mehr Schaden auf Angeleuchtete", "More damage to lit foes", "Більше шкоди освітленим"],
 ["Erzeugt Kristalle, auch wenn du weg bist.", "Makes crystals, even while you are away.", "Виробляє кристали, навіть коли тебе немає."],
 ["Trifft alle Gegner in Reichweite alle 1,4 s.", "Hits every enemy in range every 1.4 s.", "Кожні 1,4 с вражає всіх ворогів у радіусі дії."],
 ["Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 8 s wieder bereit.", "Hidden. Snaps shut when an enemy comes close and is ready again after 8 s.", "Прихована. Спрацьовує, коли ворог підходить, і за 8 с знову готова."],
@@ -2455,6 +2457,10 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Stufe {} → {} · {} 💎", "Level {} → {} · {} 💎", "Рівень {} → {} · {} 💎"],
 ["Ganz reparieren", "Repair fully", "Повністю полагодити"],
 ["🏰 Muschelburg Stufe {}!", "🏰 Shell Castle level {}!", "🏰 Мушлевий замок, рівень {}!"],
+["Tippe für eine Mauer oder zieh eine ganze Reihe.", "Tap for one wall or drag a whole row.", "Торкнися для однієї стіни або протягни цілий ряд."],
+["🧱 {} Mauern gebaut.", "🧱 {} walls built.", "🧱 Збудовано стін: {}."],
+["Alle {} Mauern stehen – mehr gibt es mit der nächsten Muschelburg-Stufe.", "All {} walls are built – the next Shell Castle level allows more.", "Усі {} стін збудовано – наступний рівень мушлевого замку дозволить більше."],
+["Fertig", "Done", "Готово"],
 ["Zuerst die Muschelburg ausbauen.", "Upgrade the Shell Castle first.", "Спершу покращ мушлевий замок."],
 ["Deine Armee ist voll – baue die Brutstätte aus.", "Your army is full – upgrade the Hatchery.", "Твоя армія повна – покращ інкубатор."],
 ["Zu wenig XP im Perlentresor – zahle XP ein.", "Not enough XP in the Pearl Vault – deposit some XP.", "Замало XP у сховищі – внеси XP."],
@@ -4135,6 +4141,7 @@ function applyDamageToEnemy(en, dmg, flags, src) {
   if (en.type === 'seepferdchen' && zones.some(function(z){ return z.kind === 'duel' && z.t >= z.warn && distXY(z.x, z.y, en.x, en.y) < z.r; })) dmg *= 1.3;   // im Ehrenduell
   if (en.state === 'tired') dmg *= en.flipped ? 1.5 : BOSS_WEAK;                 // umgekippte Vulkanschildkröte: +50 %
   if (en.takeMul) dmg *= en.takeMul;                                             // aufgebläht: nimmt nur 30 %
+  if (en.stLit && en.stLit > runTime) dmg *= 1 + en.stLitB;                       // 7.31: vom Leuchtturm angeleuchtet (nur im Strategie-Modus gesetzt)
   if (en.exposed) dmg *= en.exposed;                                             // Legende mit freiliegendem Panzer / Herz
   if (en.shell) dmg *= (1 - SHELL_BLOCK);                                          // Gepanzert: der Panzer schluckt 60 %
   if (en.hpA != null) twinDamage(en, dmg); else en.hp -= dmg;                     // Anemonen-Zwillinge: zwei Hälften
@@ -8179,7 +8186,7 @@ function pauseRoomText() {
     (pauseOverlay ? 'ein Freund ist in der N\u00E4he: das Spiel l\u00E4uft weiter!' : 'deine Gegner warten, bis du weiterspielst.');
 }
 window.addEventListener('blur', function(){ clearInput(); if (gameState === 'playing' && !pauseOverlay) togglePause(); saveRunSnapshotIfActive(); });
-document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); hardPause(); saveRunSnapshotIfActive(); } });
+document.addEventListener('visibilitychange', function(){ if (document.hidden) { clearInput(); hardPause(); saveRunSnapshotIfActive(); if (strategyMode && Base) stSave(); } });   // 7.31: die Basis mit der Uhrzeit sichern (schliesst das Handy die Seite, zählt die Zeit ab hier)
 window.addEventListener('pagehide', function(){ saveRunSnapshotIfActive(); });
 setInterval(function(){ if (window.requestIdleCallback) window.requestIdleCallback(saveRunSnapshotIfActive, { timeout: 4000 }); else saveRunSnapshotIfActive(); }, 8000);   // 7.4: im Leerlauf zwischen zwei Bildern (der Schnappschuss mit allen Gegnern dauert in Boss-Kämpfen spürbar)
 
@@ -8246,6 +8253,7 @@ function perfTick(dt) {
 function stepGame(dt) {
   updateAmbientBubbles(dt);
   if (Net.on) netFrame(dt);
+  if (strategyMode && Base) stWallCatch(dt);         // 7.31: Zeit, in der die Seite versteckt war (Handy gesperrt), zählt für die Basis
   if (gameState === 'playing') update(dt);
   else if (strategyMode && Base && (gameState === 'paused' || gameState === 'levelup')) stIdleProduce(dt);   // 7.9: Pause zählt als abwesend, die Basis arbeitet weiter
   else if (gameState === 'resume') { resumeCount -= dt; if (resumeCount <= 0) { resumeCount = 0; gameState = 'playing'; } }
@@ -13572,11 +13580,11 @@ function stLevelCost(type, lv) {      // Kosten der Stufe lv (1 = bauen)
   return { k: k, c: c, t: stBuildTime(type, lv) };
 }
 // 7.23: Bauzeiten in s. Auch ein neues Gebäude (Stufe 1) und die Stufen 2 und 3 brauchen jetzt Zeit; teure Gebäude länger (Faktor aus den Grundkosten).
-// Mauern bauen sich sofort (es gibt viele davon) und brauchen erst ab Stufe 4 Zeit; Stachelfallen stehen nach 10 s.
+// Mauern bauen sich sofort (es gibt viele davon; 7.31: auch jeder Ausbau, vorher ab Stufe 4 2,5 / 6,25 min); Stachelfallen stehen nach 10 s.
 const ST_BT = [0, 0, 45, 120, 300, 600, 900, 1500, 2400, 3600, 5400];
 function stBuildTime(type, lv) {
   if (type === 'muschelburg') return (ST_MB[lv] && ST_MB[lv].t) || 0;
-  if (type === 'korallenmauer') return lv <= 3 ? 0 : lv === 4 ? 150 : 375;
+  if (type === 'korallenmauer') return 0;
   const d = ST_B[type];
   if (lv === 1) return type === 'stachelfalle' ? 10 : Math.round((15 + d.k * 0.25) / 5) * 5;
   return Math.round(ST_BT[Math.min(lv, 10)] * Math.max(0.6, Math.min(1.5, 0.5 + d.k / 400)) / 5) * 5;
@@ -13596,7 +13604,7 @@ function stNewBase() {
 function stValid(b) { return !!b && b.v === 1 && Array.isArray(b.buildings); }
 // Mit Konto liegt die Basis im Spielstand des Kontos (save.strategyBase, Strategie Schritt 2); der Server-Stand gilt, wenn er nicht älter ist als der im Browser
 function stLoad() {
-  const b = stLoad0(); if (b && b.buildings) b.buildings.forEach(function(x){ delete x.hitT; });    // hitT gehört nur zur laufenden Sitzung
+  const b = stLoad0(); if (b && b.buildings) b.buildings.forEach(function(x){ delete x.hitT; if (x.type === 'korallenmauer' && x.upUntil) x.upUntil = 1; });    // hitT gehört nur zur laufenden Sitzung; 7.31: ein laufender Mauer-Ausbau ist gleich fertig
   return b;
 }
 function stLoad0() {
@@ -13617,7 +13625,7 @@ function stSave() {
 function stOfflineWaveCount(secs) { return Math.max(0, Math.min(Math.floor(secs / 7200), 6 * Math.max(1, Math.ceil(secs / 86400)), 24)); }
 function stOfflineWaves(base, n, rnd) {
   rnd = rnd || Math.random;
-  const log = [], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle', 'korallenspeer'];
+  const log = [], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle', 'korallenspeer', 'leuchtturm'];      // 7.31: der Leuchtturm zählt mit
   for (let i = 0; i < n; i++) {
     base.waves = (base.waves || 0) + 1;
     let dl = 0; base.buildings.forEach(function(b){ if (defs.indexOf(b.type) !== -1 && !b.ruin) dl += b.lv; });
@@ -13655,9 +13663,11 @@ function stAwayShow(away, off, waves) {
   if (!el || !box) return;
   box.textContent = '';
   stAwayLines(away, off, waves).forEach(function(t){ box.appendChild(Object.assign(document.createElement('p'), { textContent: t })); });
-  el.style.display = 'flex'; gameState = 'paused';
+  el.style.display = 'flex';
+  stAwayRes = gameState === 'playing'; if (stAwayRes) gameState = 'paused';     // 7.31: kommt die Übersicht in der Pause oder Levelwahl, bleibt das Spiel danach dort
 }
-function stAwayClose() { const el = document.getElementById('st-away'); if (el) el.style.display = 'none'; if (gameState === 'paused' && strategyMode) gameState = 'playing'; }
+let stAwayRes = false;
+function stAwayClose() { const el = document.getElementById('st-away'); if (el) el.style.display = 'none'; if (stAwayRes && gameState === 'paused' && strategyMode) gameState = 'playing'; stAwayRes = false; }
 function stGrid() { return ST_MB[Base.mb].grid; }
 function stHalf() { return Math.floor(stGrid() / 2); }
 function stWorld(b) { const s = ST_B[b.type].size; return { x: (b.x + s / 2) * ST_TILE, y: (b.y + s / 2) * ST_TILE, r: s * ST_TILE * 0.5 }; }
@@ -13680,8 +13690,8 @@ function stArea() { return Base && ST_RING[Base.ring] ? Base.ring : 'riff'; }
 function stStrength() { let s = Base.mb * 3; Base.buildings.forEach(function(b){ if (['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle', 'korallenspeer'].indexOf(b.type) !== -1 && !b.ruin) s += b.lv; }); return s; }
 function stCanPay(cost) { return Base.res.k >= cost.k && Base.res.c >= cost.c; }
 function stPay(cost) { Base.res.k -= cost.k; Base.res.c -= cost.c; }
-// Produktion und Zeitgeber nach Sekunden (auch die Zeit, in der das Spiel zu war)
-function stTick(secs, offline) {
+// Produktion und Zeitgeber nach Sekunden (auch die Zeit, in der das Spiel zu war). at = Uhrzeit am Ende des Abschnitts (stTickAway), sonst jetzt
+function stTick(secs, offline, at) {
   const cp = stCaps(), out = { k: 0, c: 0, troops: 0, built: '' };
   Base.buildings.forEach(function(b){
     if (b.ruin || b.upUntil) return;
@@ -13699,8 +13709,19 @@ function stTick(secs, offline) {
     if (offline) Base.troops.push({ type: q.type, hp: stTroopMaxHp(q.type) }); else stSpawnTroop(q.type);
     out.troops++;
   }
-  Base.buildings.forEach(function(b){ if (b.upUntil && b.upUntil <= Date.now()) { if (b.nb) delete b.nb; else b.lv++; b.hp = stMaxHp(b); delete b.upUntil; out.built = ST_B[b.type].name; if (b.type === 'muschelburg') { const n0 = stGrid(); Base.mb = b.lv; if (!offline && stGrid() !== n0) stGridAnim = { n0: n0, at: Date.now() }; } if (!offline) stDoneAt.set(b, Date.now()); } });
+  const now = at || Date.now();
+  Base.buildings.forEach(function(b){ if (b.upUntil && b.upUntil <= now) { if (b.nb) delete b.nb; else b.lv++; b.hp = stMaxHp(b); delete b.upUntil; out.built = ST_B[b.type].name; if (b.type === 'muschelburg') { const n0 = stGrid(); Base.mb = b.lv; if (!offline && stGrid() !== n0) stGridAnim = { n0: n0, at: Date.now() }; } if (!offline) stDoneAt.set(b, Date.now()); } });
   stWorkshops(secs, offline);
+  return out;
+}
+// 7.31: lange Zeit weg in Abschnitten bis zu jedem Bau, der in der Zeit fertig wurde: eine Farm, deren Ausbau nach 20 min fertig war, produziert die übrige Zeit
+// (vorher erst ab dem Zurückkommen); ein Lager hebt die Grenze ab dann. Gibt die Summe zurück wie stTick (built = der zuletzt fertige Bau).
+function stTickAway(secs, offline) {
+  const now = Date.now(), out = { k: 0, c: 0, troops: 0, built: '' };
+  let t = now - secs * 1000;
+  const ends = Base.buildings.filter(function(b){ return b.upUntil && b.upUntil > t && b.upUntil < now; }).map(function(b){ return b.upUntil; }).sort(function(a, b){ return a - b; });
+  ends.push(now);
+  ends.forEach(function(e){ if (e < t) return; const o = stTick((e - t) / 1000, offline, e); t = e; out.k += o.k; out.c += o.c; out.troops += o.troops; if (o.built) out.built = o.built; });
   return out;
 }
 function stMaxHpAt(type, lv) { return Math.round(ST_B[type].hp * (1 + 0.4 * (lv - 1))); }
@@ -13716,7 +13737,7 @@ function startStrategy(charId, fresh, ring) {
   strategyMode = true;
   Base = stLoad();
   const away = Math.max(0, (Date.now() - (Base.lastAt || Date.now())) / 1000);
-  const off = stTick(away, true), waves = stOfflineWaves(Base, stOfflineWaveCount(away));
+  const off = stTickAway(away, true), waves = stOfflineWaves(Base, stOfflineWaveCount(away));
   if (ring && ST_RING[ring]) Base.ring = ring;         // 7.10: der Ring bestimmt Hintergrund, Gegner und Beute
   selectedStageId = 'riff';
   startRun(charId || selectedCharacterId, 'riff');
@@ -13732,14 +13753,14 @@ function startStrategy(charId, fresh, ring) {
   runXpToNext = xpForLevel(runLevel);
   stTroops = []; (Base.troops || []).forEach(function(t){ const q = stSpawnTroop(t.type); q.hp = Math.min(q.maxHp, t.hp || q.maxHp); });
   stCmd = 'follow'; stHold = null; stSend = null; stUi = { mode: null, type: null, ghost: null, sel: null, move: null };
-  stWaveT = ST_FIRST_WAVE; stSaveT = 10; stTrickleT = 12; stAnchor = null;
+  stWaveT = ST_FIRST_WAVE; stSaveT = 10; stTrickleT = 12; stAnchor = null; stWallAt = Date.now();
   setStratUi(true); renderStratHud();
   stSave();
   if (away > 120 && (off.k >= 1 || off.c >= 1 || off.troops || off.built || waves.length)) stAwayShow(away, off, waves);
   if (ring && !Net.on) snConnect(ring);                // 7.8: auf eine Karte mit anderen Spielern (die Basis läuft auch ohne Verbindung)
   statsRunStart();                                     // Statistik (7.27)
 }
-function stLeave() { snDisconnect(); stSave(); strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
+function stLeave() { snDisconnect(); stSave(); stWallAt = 0; strategyMode = false; setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
 function setStratUi(on) {
   const rs = document.getElementById('btn-restart-pause'); if (rs) rs.style.display = on ? 'none' : '';   // Neustart gibt es in der Basis nicht
   const u = document.getElementById('strat-ui'); if (u) u.style.display = on ? 'block' : 'none';
@@ -14470,6 +14491,28 @@ function stIdleProduce(dt) {
   if (o.built) { showToast('🏗️ Fertig: ' + o.built); stSave(); }
   stSaveT -= dt; if (stSaveT <= 0) { stSaveT = 15; stSave(); }
 }
+// 7.31: Handy gesperrt, andere App, Tab im Hintergrund: der Browser zeichnet keine Bilder, und ein Bild zählt höchstens 0,05 s – die Basis stand still.
+// stWallCatch holt die Zeit dazwischen nach der Uhr nach, wie nach dem Schliessen (Produktion, Ausbildung, Bauten, Werkstatt, eine Welle je 2 h),
+// und zeigt ab 2 min die Übersicht „Während du weg warst“. Läuft in jedem Zustand (Spiel, Pause, Levelwahl), nur im Strategie-Modus.
+let stWallAt = 0;
+function stWallCatch(dt) {
+  const now = Date.now(), gap = stWallAt ? (now - stWallAt) / 1000 - dt : 0;
+  stWallAt = now;
+  if (!(gap > 2) || !Base) return null;
+  const off = stTickAway(gap, false), n = stOfflineWaveCount(gap);
+  let waves = [];
+  if (n) {
+    const live = stTroops.filter(function(t){ return !t.dead; });
+    Base.troops = live.map(function(t){ return { type: t.type, hp: Math.round(t.hp) }; });
+    waves = stOfflineWaves(Base, n);
+    for (let i = Base.troops.length; i < live.length; i++) live[i].dead = true;     // verlorene Truppen: stOfflineWaves nimmt die letzten der Liste
+  }
+  stSave();
+  if (gap > 120 && (off.k >= 1 || off.c >= 1 || off.troops || off.built || waves.length)) stAwayShow(gap + dt, off, waves);
+  else if (off.built) showToast('🏗️ Fertig: ' + off.built);
+  renderStratHud();
+  return { gap: gap, off: off, waves: waves };
+}
 function stInBase(x, y) { const h = (stHalf() + 0.5) * ST_TILE; return Math.abs(x) < h && Math.abs(y) < h; }
 function stHeal(o, dt) {
   const q = stBuildingsOf('heilquelle').filter(function(b){ return !b.ruin; })[0];
@@ -14506,6 +14549,16 @@ function stTrickle() {
   if (n >= ST_TRICKLE_MAX + Math.floor(Base.mb / 2) || !freeEnemySlot()) return;
   const table = SPAWN_TABLE_BY_STAGE[stArea()], key = table[Math.floor(Math.random() * Math.min(3, 1 + Base.mb))];     // nur die ersten drei Sorten des Gebiets
   const e = spawnEnemy(key, false); e.hp *= 1 + 0.06 * stStrength(); e.maxHp = e.hp;
+  stOutside(e);
+}
+// 7.31: kein Gegner entsteht in der Basis. spawnEnemy setzt ihn an den Bildschirmrand um deinen Blobi; die Basis ist grösser als der Bildschirm, also lag der
+// Platz oft mitten im Bauplatz. Liegt er im Bauplatz oder bis 240 daneben, kommt der Gegner in derselben Richtung (von der Mitte aus) auf den Ring der Wellen.
+function stOutside(e) {
+  const h = (stHalf() + 0.5) * ST_TILE + 240;
+  if (Math.abs(e.x) >= h || Math.abs(e.y) >= h) return false;
+  const a = e.x || e.y ? Math.atan2(e.y, e.x) : Math.random() * 6.283, d = (stHalf() + 0.5) * ST_TILE * 1.4143 + 480 + Math.random() * 160;
+  e.x = Math.cos(a) * d; e.y = Math.sin(a) * d;
+  return true;
 }
 // Beute im Strategie-Modus: grüne XP wie sonst, dazu Korallen; Bosse und Champions bringen Kristalle; keine Perlen
 function stratLoot(k) {
@@ -14693,6 +14746,34 @@ function stSetCmd(c) {
   renderStratHud();
 }
 // ---------- Verteidigung: dieselben Wirkungen wie die Waffen ----------
+// 7.31: Leuchtturm als Scheinwerfer. Seine zwei Lichtstrahlen drehen sich wie im Bild (1,5 rad/s, je ±0,13 rad); ein Gegner in Reichweite, den ein Strahl
+// streift, ist 4 s lang angeleuchtet und nimmt von allem mehr Schaden (Türme, Truppen, dein Blobi): +20 %, +5 % je weitere Stufe. Vorher warnte er nur früher vor Wellen.
+const ST_LIGHT_T = 4, ST_LIGHT_SPIN = 1.5, ST_LIGHT_HALF = 0.13;
+function stLightReach(lv) { return (360 + 30 * lv) * ST_REACH; }
+function stLightBonus(lv) { return 0.2 + 0.05 * (lv - 1); }
+function stLightSrc(b) { return { x: (b.x + 0.5) * ST_TILE, y: (b.y + 0.22) * ST_TILE }; }        // die Laterne (im Bild bei 50 / 22 von 100)
+function stDrawLight(g, ox, oy) {     // die langen Strahlen (nur solange ein Gegner angeleuchtet ist) und ein Lichtfleck unter jedem angeleuchteten Gegner
+  let any = false;
+  for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (!e.dead && e.stLit > runTime) { any = true; break; } }
+  if (!any) return;
+  const lh = stBuildingsOf('leuchtturm').filter(function(b){ return !b.ruin && !b.upUntil; })[0], flat = GFX.ql >= 4;
+  g.save(); g.globalCompositeOperation = 'lighter';
+  if (lh) {
+    const L = stLightSrc(lh), R = stLightReach(lh.lv), a = runTime * ST_LIGHT_SPIN, x = L.x - ox, y = L.y - oy;
+    if (flat) g.fillStyle = 'rgba(255,236,160,0.08)';
+    else { const q = g.createRadialGradient(x, y, 20, x, y, R); q.addColorStop(0, 'rgba(255,236,160,0.22)'); q.addColorStop(1, 'rgba(255,236,160,0)'); g.fillStyle = q; }
+    for (let k = 0; k < 2; k++) { const aa = a + k * Math.PI; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R, aa - ST_LIGHT_HALF, aa + ST_LIGHT_HALF); g.closePath(); g.fill(); }
+  }
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i]; if (e.dead || !(e.stLit > runTime)) continue;
+    const f = Math.min(1, (e.stLit - runTime) / 0.6), r = (e.r || 20) * 1.7, x = e.x - ox, y = e.y - oy;
+    if (x < -r || y < -r || x > W + r || y > H + r) continue;
+    if (flat) { g.fillStyle = 'rgba(255,226,120,' + (0.3 * f) + ')'; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); continue; }
+    const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, 'rgba(255,226,120,' + (0.5 * f) + ')'); q.addColorStop(1, 'rgba(255,226,120,0)');
+    g.fillStyle = q; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+  }
+  g.restore();
+}
 function stDefenses(dt) {
   const list = enemies;
   Base.buildings.forEach(function(b){
@@ -14719,6 +14800,14 @@ function stDefenses(dt) {
       const e = stStrongest(list, w, (380 + 25 * lv) * ST_REACH); if (!e) return;
       b.cd = 2.2; const fx = stFxOf(b); fx.aim = Math.atan2(e.y - w.y, e.x - w.x); fx.fire = runTime;
       applyDamageToEnemy(e, 60 * (1 + 0.3 * (lv - 1))); particles.push({ x: w.x, y: w.y, tx: e.x, ty: e.y, isBolt: true, life: 0.2, maxLife: 0.2, color: '#ffb38a' }); spawnBurst(e.x, e.y, '#ffb38a', 6);
+    } else if (b.type === 'leuchtturm') {                 // 7.31: Scheinwerfer: wen einer der zwei Strahlen streift, der ist 4 s angeleuchtet und nimmt mehr Schaden
+      const L = stLightSrc(b), R = stLightReach(lv), a = runTime * ST_LIGHT_SPIN, bon = stLightBonus(lv);
+      list.forEach(function(e){
+        if (e.dead || e.raidB || e.raidG) return;
+        const dx = e.x - L.x, dy = e.y - L.y, d2 = dx * dx + dy * dy; if (d2 > R * R) return;
+        let q = (Math.atan2(dy, dx) - a) % Math.PI; if (q < 0) q += Math.PI; q = Math.min(q, Math.PI - q);
+        if (q < ST_LIGHT_HALF + (e.r || 20) / (Math.sqrt(d2) || 1)) { e.stLit = runTime + ST_LIGHT_T; e.stLitB = bon; }
+      });
     } else if (b.type === 'stachelfalle' && !b.sprung) {  // versteckt, bis jemand drauftritt
       const e = stNearest(list, w, ST_TILE * 0.7); if (!e) return;
       list.forEach(function(x){ if (!x.dead && distXY(x.x, x.y, w.x, w.y) < ST_TILE * 1.2) applyDamageToEnemy(x, 60 * (1 + 0.3 * (lv - 1))); });
@@ -14749,9 +14838,9 @@ function stFree(type, x, y, ignore) {
   return !Base.buildings.some(function(b){ if (b === ignore) return false; const t = ST_B[b.type].size; return x < b.x + t && b.x < x + s && y < b.y + t && b.y < y + s; });
 }
 function stTileAt(wx, wy, size) { return { x: Math.round(wx / ST_TILE - size / 2), y: Math.round(wy / ST_TILE - size / 2) }; }
-function stPlace(type, x, y) {
+function stPlace(type, x, y, quiet) {      // quiet: keine Meldung, kein Klang, nicht speichern (stPlaceRow macht das einmal für die ganze Reihe)
   const cost = stLevelCost(type, 1);
-  if (!stCanPay(cost)) { showToast('Nicht genug Korallen.'); return false; }
+  if (!stCanPay(cost)) { if (!quiet) showToast('Nicht genug Korallen.'); return false; }
   if (!stFree(type, x, y)) return false;
   const t = stBuildTime(type, 1);
   if (t && !stBuildFree()) { stBusyToast(); return false; }
@@ -14759,7 +14848,8 @@ function stPlace(type, x, y) {
   const nb = { id: Base.nextId++, type: type, lv: 1, x: x, y: y, hp: ST_B[type].hp };
   if (t) { nb.upUntil = Date.now() + t * 1000; nb.nb = 1; }      // 7.23: nb = Neubau (wird fertig auf Stufe 1, nicht 2)
   Base.buildings.push(nb);
-  Sfx.click(); stSave(); return true;
+  if (!quiet) { Sfx.click(); stSave(); }
+  return true;
 }
 function stUpgrade(b) {
   const nl = b.lv + 1;
@@ -14848,12 +14938,47 @@ function stNearVault() { const v = stBuildingsOf('perlentresor').filter(function
 // ---------- Eingabe: tippen (Gebäude wählen, Ziel für "Schicken"), Geist beim Bauen ----------
 function screenToWorld(sx, sy) { return { x: (sx - SW / 2) / ZOOM + camera.x, y: (sy - SH / 2) / ZOOM + camera.y }; }
 function stratGrabsTouch() { return strategyMode && (stUi.mode === 'place' || stUi.mode === 'move' || stUi.mode === 'send'); }
+// 7.31: Mauern in Reihen. Im Mauer-Modus legt Ziehen eine gerade Reihe (waagrecht oder senkrecht, die längere Richtung) vom ersten Feld bis zum Finger;
+// Loslassen baut jedes freie Feld darin, solange Korallen und Plätze reichen. Ein Tipp baut eine Mauer. Der Modus bleibt offen, bis du „Fertig“ tippst.
+function stRowType(type) { return type === 'korallenmauer'; }
+function stRowTiles(a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, hz = Math.abs(dx) >= Math.abs(dy), n = Math.max(Math.abs(dx), Math.abs(dy)), out = [];
+  for (let i = 0; i <= n; i++) out.push(hz ? { x: a.x + i * Math.sign(dx), y: a.y } : { x: a.x, y: a.y + i * Math.sign(dy) });
+  return out;
+}
+function stRowPlan(type, tiles) {       // ok[i] = Feld i wird gebaut; why = 'poor' (Korallen fehlen) / 'full' (alle Plätze besetzt) für das erste Feld, das nicht mehr geht
+  const cost = stLevelCost(type, 1);
+  let left = ST_B[type].max(Base.mb) - stBuildingsOf(type).length, k = Base.res.k, c = Base.res.c, why = '';
+  const ok = tiles.map(function(t){
+    if (!stFree(type, t.x, t.y)) return false;
+    if (left <= 0) { why = why || 'full'; return false; }
+    if (k < cost.k || c < cost.c) { why = why || 'poor'; return false; }
+    left--; k -= cost.k; c -= cost.c; return true;
+  });
+  return { ok: ok, why: why };
+}
+function stPlaceRow(type, tiles) {
+  const plan = stRowPlan(type, tiles);
+  let n = 0;
+  tiles.forEach(function(t, i){ if (plan.ok[i] && stPlace(type, t.x, t.y, true)) n++; });
+  if (n) { Sfx.click(); stSave(); }
+  if (plan.why === 'poor') showToast('Nicht genug Korallen.');
+  else if (plan.why === 'full') showToast('Alle ' + ST_B[type].max(Base.mb) + ' Mauern stehen – mehr gibt es mit der nächsten Muschelburg-Stufe.');
+  else if (n > 1) showToast('🧱 ' + n + ' Mauern gebaut.');
+  return n;
+}
 function stPointer(sx, sy, kind) {
-  if (!strategyMode || gameState !== 'playing') return;
+  if (!strategyMode || gameState !== 'playing') { stUi.row0 = null; stUi.row = null; return; }
   const w = screenToWorld(sx, sy);
   if (stUi.mode === 'place' || stUi.mode === 'move') {
     const type = stUi.mode === 'place' ? stUi.type : stUi.move.type, s = ST_B[type].size, t = stTileAt(w.x, w.y, s);
     stUi.ghost = t;
+    if (stUi.mode === 'place' && stRowType(type)) {
+      if (kind === 'down') { stUi.row0 = t; stUi.row = [t]; }
+      else if (kind === 'move' && stUi.row0) stUi.row = stRowTiles(stUi.row0, t);
+      else if (kind === 'tap' || (kind === 'up' && stUi.row0)) { const tiles = kind === 'up' ? stRowTiles(stUi.row0, t) : [t]; stUi.row0 = null; stUi.row = null; stPlaceRow(type, tiles); }
+      return;
+    }
     if (kind === 'tap') {
       if (stUi.mode === 'place') { if (stFree(type, t.x, t.y) && stPlace(type, t.x, t.y)) { stUi.mode = null; stUi.ghost = null; stClosePanel(); } }
       else if (stFree(type, t.x, t.y, stUi.move)) { stUi.move.x = t.x; stUi.move.y = t.y; stUi.mode = null; stUi.ghost = null; stUi.move = null; stSave(); stClosePanel(); }
@@ -14867,9 +14992,10 @@ function stPointer(sx, sy, kind) {
 }
 (function(){
   let down = null;
-  canvas.addEventListener('pointerdown', function(e){ down = { x: e.clientX, y: e.clientY, t: performance.now() }; if (stratGrabsTouch()) stPointer(e.clientX, e.clientY, 'move'); });
+  canvas.addEventListener('pointerdown', function(e){ down = { x: e.clientX, y: e.clientY, t: performance.now() }; if (stratGrabsTouch()) stPointer(e.clientX, e.clientY, 'down'); });
   canvas.addEventListener('pointermove', function(e){ if (stratGrabsTouch() && (stUi.mode !== 'send')) stPointer(e.clientX, e.clientY, 'move'); });
-  canvas.addEventListener('pointerup', function(e){ if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 12 && performance.now() - down.t < 450) stPointer(e.clientX, e.clientY, 'tap'); down = null; });
+  canvas.addEventListener('pointerup', function(e){ if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 12 && performance.now() - down.t < 450) stPointer(e.clientX, e.clientY, 'tap'); else if (down && stratGrabsTouch()) stPointer(e.clientX, e.clientY, 'up'); down = null; });
+  canvas.addEventListener('pointercancel', function(){ down = null; stUi.row0 = null; stUi.row = null; });
 })();
 
 // ---------- Oberfläche (alles mit textContent) ----------
@@ -14888,9 +15014,12 @@ function renderStratHud() {
 function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'block' : 'none'; }
 function stPlaceStart(hint) {      // Platzieren / Verschieben: das Menü verschwindet, damit der ganze Bildschirm frei ist; nur "Abbrechen" bleibt
   const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none';
+  const rows = stUi.mode === 'place' && stRowType(stUi.type), cb = document.getElementById('st-placecancel');     // 7.31: Mauern bleiben im Bau-Modus, der Knopf heisst dann „Fertig“
+  if (cb) { cb.firstChild.textContent = rows ? '✓' : '✕'; cb.lastChild.textContent = tr(rows ? 'Fertig' : 'Abbrechen'); }
+  stUi.row0 = null; stUi.row = null;
   stPlaceBar(true); if (hint) showToast(tr(hint));
 }
-function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; stPlaceBar(false); if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; }
+function stClosePanel() { const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none'; stPlaceBar(false); if (stUi.mode === 'place' || stUi.mode === 'move') { stUi.mode = null; stUi.ghost = null; } stUi.sel = null; stUi.row0 = null; stUi.row = null; }
 function stPanel(title, type) {
   const p = document.getElementById('strat-panel'); p.textContent = ''; p.style.display = 'block';
   const head = el('div', 'st-head'), ti = el('strong'); if (type) ti.appendChild(stIcon(type, 30)); ti.appendChild(document.createTextNode(title)); head.appendChild(ti); const x = el('button', 'icon-btn', '✕'); x.addEventListener('click', function(){ Sfx.click(); stClosePanel(); }); head.appendChild(x); p.appendChild(head);
@@ -14929,7 +15058,7 @@ function stOpenBuild() {
         b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
       }
       b.disabled = locked || full || poor || wait;
-      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart(stRowType(type) ? 'Tippe für eine Mauer oder zieh eine ganze Reihe.' : 'Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
       grid.appendChild(b);
     });
     p.appendChild(grid);
@@ -14944,7 +15073,7 @@ const ST_DESC = {
   harpunenturm: 'Schiesst alle 1,2 s einen Pfeil, der bis zu 3 Gegner durchbohrt.',
   brutstaette: 'Hier wachsen deine Truppen. Eine zweite Brutstätte bringt je Stufe nur 2 Plätze, trainiert aber doppelt so schnell.',
   korallenmauer: 'Hält Gegner auf.',
-  leuchtturm: 'Warnt 15 s statt 5 s vor einer Welle.',
+  leuchtturm: 'Sein Licht streift die Gegner: angeleuchtete Gegner nehmen 4 s lang mehr Schaden von allem. Warnt dazu 15 s vor einer Welle.',
   kristallbohrer: 'Erzeugt Kristalle, auch wenn du weg bist.',
   blasenkanone: 'Trifft alle Gegner in Reichweite alle 1,4 s.',
   stachelfalle: 'Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 8 s wieder bereit.',
@@ -14965,6 +15094,7 @@ const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
   harpunenturm: [['Reichweite', function(lv){ return (420 + 30 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(18 * (1 + 0.3 * (lv - 1))); }]],
   blasenkanone: [['Reichweite', function(lv){ return (160 + 10 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(10 * (1 + 0.3 * (lv - 1))); }]],
   tintenwerfer: [['Reichweite', function(lv){ return (180 + 10 * lv) * ST_REACH; }]],
+  leuchtturm: [['Reichweite', stLightReach], ['Mehr Schaden auf Angeleuchtete', function(lv){ return '+' + Math.round(stLightBonus(lv) * 100) + ' %'; }]],
   heilquelle: [['Heilung pro Sekunde', function(lv){ return 4 * lv + ' %'; }]],
   krabbenwerkstatt: [['Reparatur pro Sekunde', function(lv){ return stR1(stRepRate(lv) * 100) + ' %'; }], ['Reichweite (Felder)', stRepReach]],
   elektroaal: [['Reichweite', function(lv){ return (260 + 20 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(22 * (1 + 0.3 * (lv - 1))); }]],
@@ -15373,8 +15503,17 @@ function stDrawRim(g, x0, y0, n, T, front) {     // Rand: Säulen und Seile; auf
   }
 }
 function stDrawGhost(g, ox, oy, tm) {
-  const type = stUi.mode === 'place' ? stUi.type : stUi.move.type, d = ST_B[type], T = ST_TILE, S = d.size * T, gh = stUi.ghost, ok = stFree(type, gh.x, gh.y, stUi.move), gx = gh.x * T - ox, gy = gh.y * T - oy;
-  const spr = stSprite(type, stUi.mode === 'move' ? stUi.move.lv : 1, 'ok', 0);
+  const type = stUi.mode === 'place' ? stUi.type : stUi.move.type, T = ST_TILE, S = ST_B[type].size * T;
+  if (stUi.mode === 'place' && stUi.row && stUi.row.length > 1) {      // 7.31: eine Reihe Mauern: grün = wird gebaut, rot = besetzt oder kein Geld / Platz mehr
+    const plan = stRowPlan(type, stUi.row);
+    stUi.row.forEach(function(t, i){ stGhostTile(g, type, 1, t.x * T - ox, t.y * T - oy, S, plan.ok[i], tm); });
+    return;
+  }
+  const gh = stUi.ghost;
+  stGhostTile(g, type, stUi.mode === 'move' ? stUi.move.lv : 1, gh.x * T - ox, gh.y * T - oy, S, stFree(type, gh.x, gh.y, stUi.move), tm);
+}
+function stGhostTile(g, type, lv, gx, gy, S, ok, tm) {
+  const spr = stSprite(type, lv, 'ok', 0);
   g.save(); g.globalAlpha = 0.62; stBlit(g, spr, gx - ST_PAD, gy - ST_PAD); g.restore();
   g.save(); g.fillStyle = ok ? 'rgba(94,242,192,0.2)' : 'rgba(255,92,108,0.3)'; g.beginPath(); roundRect(g, gx + 2, gy + 2, S - 4, S - 4, 12); g.fill();
   g.strokeStyle = ok ? '#5ef2c0' : '#ff5c6c'; g.lineWidth = 4; g.setLineDash([14, 9]); g.lineDashOffset = -tm * 24; g.stroke(); g.setLineDash([]);
@@ -15494,6 +15633,7 @@ function drawStrategyBase() {
     }
     stDrawRim(g, px0, py0, n, pT, true);
   }
+  stDrawLight(g, ox, oy);                          // 7.31: Leuchtturm-Licht unter den Gegnern
   if (placing && stUi.ghost) stDrawGhost(g, ox, oy, tm);
   if (stCmd === 'send' && stSend) stMarker(g, stSend.x - ox, stSend.y - oy, '#ffd76a', tm, true);
   if (stCmd === 'hold' && stHold) stMarker(g, stHold.x - ox, stHold.y - oy, '#7ee0ff', tm, false);
