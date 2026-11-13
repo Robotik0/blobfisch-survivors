@@ -1320,7 +1320,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.29';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.30';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -12516,6 +12516,7 @@ function drawFloorScenery(camX, camY, stageId) {
       const sx = worldX - camX + W / 2;
       const sy = worldY - camY + H / 2;
       if (sx < -80 || sx > W + 80 || sy < -80 || sy > H + 80) continue;
+      if (bgHole && bgIn(sx, sy, 90)) continue;          // 7.30: liegt ganz unter dem Sandboden einer Basis
       drawSceneryElement(stageId, sx, sy, 0.6 + h2 * 0.9, h3);
     }
   }
@@ -12540,6 +12541,7 @@ function drawDeepGlows(camX, camY, stageId) {
       const sy = worldY - pcamY + H / 2;
       const rad = 90 + h2 * 120;
       if (sx < -rad || sx > W + rad || sy < -rad || sy > H + rad) continue;
+      if (bgHole && bgIn(sx, sy, rad)) continue;         // 7.30: ganz unter dem Sandboden einer Basis
       const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad);
       const gc = stageId === 'vulkan' ? '255,120,40' : '255,255,255';   // Vulkan: warmes Glühen im Hintergrund
       grad.addColorStop(0, 'rgba(' + gc + ',' + (stageId === 'vulkan' ? 0.085 : 0.05) + ')');
@@ -12550,8 +12552,22 @@ function drawDeepGlows(camX, camY, stageId) {
   }
 }
 
+// 7.30 (perf-gfx-2 Schritt 3): Strategie: die Sandböden der Basen (Bildschirm-Einheiten [x0, y0, x1, y1]) decken alles darunter zu; was ganz darunter läge, wird nicht gezeichnet
+let bgHole = null;
+function bgIn(x, y, m) { for (let i = 0; i < bgHole.length; i++) { const r = bgHole[i]; if (x - m >= r[0] && x + m <= r[2] && y - m >= r[1] && y + m <= r[3]) return true; } return false; }
+function stFloorRects() {
+  const out = [], T = ST_TILE, pv = stPlotView(stGrid(), T), cx = W / 2 - camera.x, cy = H / 2 - camera.y;
+  out.push([pv.c + cx, pv.c + cy, pv.c + pv.sz + cx, pv.c + pv.sz + cy]);
+  if (SN.on && SN.pl) { const o = snOrigin(); SN.peers.forEach(function(pe){
+    if (!pe.lay || pe.plot == null || pe.plot === SN.plot || !SN.pl[pe.plot]) return;
+    const n = ST_MB[Math.min(ST_MAX_MB, pe.mb)] ? ST_MB[Math.min(ST_MAX_MB, pe.mb)].grid : 9, h = Math.floor(n / 2), dx = SN.pl[pe.plot][0] - o.x + cx, dy = SN.pl[pe.plot][1] - o.y + cy;
+    out.push([dx - h * T, dy - h * T, dx - h * T + n * T, dy - h * T + n * T]);
+  }); }
+  return out;
+}
 function drawBackground() {
   const inRun = runVisible();
+  bgHole = null; if (inRun && strategyMode && Base) { try { bgHole = stFloorRects(); } catch (e) { bgHole = null; } }
   const stage = inRun ? (strategyMode && Base ? STAGES.filter(function(x){ return x.id === stArea(); })[0] : stageOf()) : STAGES[0];     // Strategie: der Ring der Karte
   const gk = stage.id + ':' + H;
   if (!bgGrad || bgGradKey !== gk) {
@@ -12577,6 +12593,7 @@ function drawBackground() {
   ctx.beginPath();
   for (let x = -offX; x < W+tile; x += tile) {
     for (let y = -offY; y < H+tile; y += tile) {
+      if (bgHole && bgIn(x, y, 3)) continue;             // 7.30: Punkte unter dem Sandboden
       ctx.moveTo(x + 2.4, y); ctx.arc(x,y,2.4,0,Math.PI*2);
     }
   }
@@ -13871,17 +13888,18 @@ function drawStratMap() {
       continue;
     }
     const n = ST_MB[Math.min(ST_MAX_MB, pe.mb)] ? ST_MB[Math.min(ST_MAX_MB, pe.mb)].grid : 9, h = Math.floor(n / 2), x0 = -h * T - ox, y0 = -h * T - oy, sz = n * T;
-    stDrawFloor(g, x0, y0, sz); stDrawRim(g, x0, y0, n, T, false);
-    stWalls = {}; for (let k = 0; k < pe.lay.length; k++) { const w = pe.lay[k]; if (w.type === 'korallenmauer') stWalls[w.x + ',' + w.y] = 1; }
-    const list = pe.lay.slice().sort(function(a, b){ return (a.y + ST_B[a.type].size) - (b.y + ST_B[b.type].size); });
-    for (let k = 0; k < list.length; k++) {
-      const b = list[k], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
-      if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
-      if (b.hp == null) b.hp = stMaxHp(b) * (b.q == null ? 1 : b.q);
-      stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
-      if (RD && RD.id === pe.id) stDrawBars(g, b, x, y, S);
+    stWalls = {}; for (let k = 0; k < pe.lay.length; k++) { const w = pe.lay[k]; if (w.type === 'korallenmauer') stWalls[w.x + ',' + w.y] = 1; if (w.hp == null) w.hp = stMaxHp(w) * (w.q == null ? 1 : w.q); }
+    const list = stSortB(pe.lay), raid = RD && RD.id === pe.id;
+    if (!(stChOn && stDrawBaseC(g, 'p' + i, list, n, -h * T, -h * T, ox, oy, tm, raid ? function(b, x, y, S){ stDrawBars(g, b, x, y, S); } : null))) {     // 7.30: Basis-Speicher (wie die eigene Basis)
+      stDrawFloor(g, x0, y0, sz); stDrawRim(g, x0, y0, n, T, false);
+      for (let k = 0; k < list.length; k++) {
+        const b = list[k], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
+        if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
+        stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
+        if (raid) stDrawBars(g, b, x, y, S);
+      }
+      stDrawRim(g, x0, y0, n, T, true);
     }
-    stDrawRim(g, x0, y0, n, T, true);
     const lx = dx - camera.x + W / 2, ly = dy - camera.y + H / 2 - (h + 1) * T, ts = txtScale();           // Name über der Basis
     g.save(); g.translate(lx, ly); g.scale(ts * 1.6, ts * 1.6); g.font = '800 14px "Nunito", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     const label = pe.name + ' · 🏰 ' + pe.mb; g.lineWidth = 4; g.strokeStyle = 'rgba(2,10,20,0.85)'; g.strokeText(label, 0, 0); g.fillStyle = NET_COLORS[pe.col % NET_COLORS.length]; g.fillText(label, 0, 0); g.restore();
@@ -15068,6 +15086,7 @@ function stBrain(g, x, y, r, col, sd) {          // Hirnkoralle: Kuppel mit Wind
 }
 function stBub(g, x, y, r) { g.strokeStyle = 'rgba(210,244,255,0.85)'; g.lineWidth = g.ow * 0.5; g.fillStyle = 'rgba(190,235,255,0.22)'; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); g.stroke(); g.fillStyle = 'rgba(255,255,255,0.8)'; g.beginPath(); g.arc(x - r * 0.35, y - r * 0.35, r * 0.28, 0, 6.2832); g.fill(); }
 function stBubbles(g, tm, x, y, spread, rise, n, seed) {   // aufsteigende Blasen
+  if (stAnimQ >= 3) n = Math.max(1, Math.round(n * QUAL[stAnimQ].fx));      // 7.30: einfachere Grafik, weniger Blasen über den Gebäuden
   for (let i = 0; i < n; i++) { const ph = (tm * (0.22 + bhash(seed + i) * 0.18) + bhash(seed + i + 9)) % 1; stBub(g, x + (bhash(seed + i + 3) - 0.5) * spread + Math.sin(tm * 2 + i) * 1.5, y - ph * rise, 0.9 + bhash(seed + i + 6) * 1.4 * (0.5 + ph)); }
 }
 
@@ -15229,28 +15248,34 @@ function stCracks(g, sev, id) {                  // Risse, wenn ein Gebäude vie
   g.restore();
 }
 // ein Gebäude an der Stelle (x, y) = links oben, im Massstab des Zeichenbretts g (Welt-Einheiten)
-function stDrawBuilding(g, b, x, y, tm, conn) {
+// 7.30: part 0 = alles, 1 = nur das stehende Bild (Bild + Risse, für den Basis-Speicher stChunk*), 2 = nur das Bewegte (Treffer-Blitz + ST_ANIM) über dem gespeicherten Bild
+let stAnimQ = 0;                                 // 7.30: Grafikstufe, solange ST_ANIM zeichnet (Stufe 3-5: weniger Blasen, 4-5: kein Leuchten); 0 beim Malen der Bilder
+function stCrackLv(b) { const q = b.hp / stMaxHp(b); return q < 0.33 ? 2 : q < 0.66 ? 1 : 0; }
+function stHitFl(b) { const ht = b.hitT ? runTime - b.hitT : -1; return ht >= 0 && ht < 0.18 ? 1 - ht / 0.18 : 0; }     // 7.9: ein gespeichertes hitT aus einer früheren Sitzung (runTime war höher) liess alles weiss aufleuchten
+function stDrawBuilding(g, b, x, y, tm, conn, part) {
   const d = ST_B[b.type], S = d.size * ST_TILE, u = S / 100, spr = stSprite(b.type, b.lv, b.ruin ? 'ruin' : 'ok', conn || 0);
+  const fl = part === 1 ? 0 : stHitFl(b), f = b.ruin || part === 1 ? null : ST_ANIM[b.type];
+  if (part === 2 && !f && fl <= 0) return;
   let a = 1;
   if (stUi.mode === 'move' && stUi.move === b) a = 0.35;
   if (b.type === 'stachelfalle' && !b.sprung && !b.ruin) a *= 0.6;
   g.save(); g.globalAlpha = a;
-  const bp = b.upUntil && !b.ruin ? stBuildProg(b) : -1, da = stDoneAt.size ? stDoneAt.get(b) : 0, dt = da ? (Date.now() - da) / 900 : 1;
+  const bp = part || !(b.upUntil && !b.ruin) ? -1 : stBuildProg(b), da = !part && stDoneAt.size ? stDoneAt.get(b) : 0, dt = da ? (Date.now() - da) / 900 : 1;
   if (da && dt >= 1) stDoneAt.delete(b);
   if (dt < 1) { const k = 1 + 0.08 * Math.sin(dt * Math.PI) * (1 - dt), cx = x + S / 2, cy = y + S; g.translate(cx, cy); g.scale(k, k); g.translate(-cx, -cy); }   // aufploppen (7.23: ruhiger, war 0,14)
-  if (bp >= 0 && b.nb) {                         // 7.23: Neubau: blasser Bauplan, das Gebäude wächst von unten
+  if (part === 2) {}
+  else if (bp >= 0 && b.nb) {                    // 7.23: Neubau: blasser Bauplan, das Gebäude wächst von unten
     g.globalAlpha = a * 0.22; stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.globalAlpha = a;
     stRevealBlit(g, spr, x, y, S, u, bp);
   } else {
     stBlit(g, spr, x - ST_PAD, y - ST_PAD);
     if (bp >= 0) stRevealBlit(g, stSprite(b.type, b.lv + 1, 'ok', conn || 0), x, y, S, u, bp);      // Ausbau: die neue Stufe wächst über die alte
   }
-  const ht = b.hitT ? runTime - b.hitT : -1, fl = ht >= 0 && ht < 0.18 ? 1 - ht / 0.18 : 0;     // 7.9: ein gespeichertes hitT aus einer früheren Sitzung (runTime war höher) liess alles weiss aufleuchten
   if (fl > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * fl * 0.5; stBlit(g, spr, x - ST_PAD, y - ST_PAD); g.globalCompositeOperation = 'source-over'; g.globalAlpha = a; }
   if (!b.ruin) {
     g.translate(x, y); g.scale(u, u); g.ow = 2.6 / u;
-    const f = ST_ANIM[b.type]; if (f && !(bp >= 0 && b.nb)) f(g, b, tm, u);
-    const q = b.hp / stMaxHp(b); if (q < 0.66) stCracks(g, q < 0.33 ? 2 : 1, b.id || 1);
+    if (f && !(bp >= 0 && b.nb)) { stAnimQ = GFX.ql; try { f(g, b, tm, u); } finally { stAnimQ = 0; } }
+    if (part !== 2) { const c = stCrackLv(b); if (c) stCracks(g, c, b.id || 1); }
     if (bp >= 0) stScaffold(g, b, tm, bp);
     if (dt < 1) stDonePop(g, dt, b.type);
   }
@@ -15287,10 +15312,11 @@ function stFloorTile() {                         // Sandboden, nahtlos wiederhol
     wrap(x, y, 12, function(X, Y){ g.fillStyle = '#f0dcc8'; g.strokeStyle = 'rgba(120,80,60,0.5)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(X, Y + 5); g.arc(X, Y + 5, 7, Math.PI * 1.1, Math.PI * 1.9); g.closePath(); g.fill(); g.stroke(); for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(X, Y + 5); g.lineTo(X + k * 2.6, Y - 1.5 + Math.abs(k) * 0.9); g.stroke(); } }); }
   return (stFloorCan = c);
 }
-function stDrawFloor(g, x0, y0, sz) {            // Sandboden: die Kachel in Bildschirm-Pixeln, ohne Skalieren und ohne grosse Füllpfade (schnell auch ohne Grafikkarte)
+function stDrawFloor(g, x0, y0, sz, vx, vy, vw, vh) {   // Sandboden: die Kachel in Bildschirm-Pixeln, ohne Skalieren und ohne grosse Füllpfade (schnell auch ohne Grafikkarte); vx..vh = sichtbarer Ausschnitt (sonst der Bildschirm; 7.30: die Kachel des Basis-Speichers)
   const m = g.getTransform(), s = m.a, tp = Math.max(48, Math.round(256 * s));
   if (!stFloorDev || stFloorDevTp !== tp) { const cv = document.createElement('canvas'); cv.width = cv.height = tp; cv.getContext('2d').drawImage(stFloorTile(), 0, 0, tp, tp); stFloorDev = cv; stFloorDevTp = tp; }
-  const vx0 = Math.max(0, x0), vy0 = Math.max(0, y0), vx1 = Math.min(W, x0 + sz), vy1 = Math.min(H, y0 + sz);
+  if (vx == null) { vx = 0; vy = 0; vw = W; vh = H; }
+  const vx0 = Math.max(vx, x0), vy0 = Math.max(vy, y0), vx1 = Math.min(vx + vw, x0 + sz), vy1 = Math.min(vy + vh, y0 + sz);
   g.save();
   g.fillStyle = 'rgba(4,16,28,0.3)'; g.fillRect(x0 - 14, y0 - 6, sz + 28, 14); g.fillRect(x0 - 14, y0 + sz - 4, sz + 28, 22); g.fillRect(x0 - 14, y0, 14, sz); g.fillRect(x0 + sz, y0, 14, sz);   // Schatten rund um den Platz
   if (vx1 > vx0 && vy1 > vy0) {
@@ -15361,27 +15387,114 @@ function stPlotView(n, T) {                      // gezeichnete Grösse des Baup
   if (stGridAnim) { const p = (Date.now() - stGridAnim.at) / 1100; if (p >= 1 || p < 0) stGridAnim = null; else { const e = 1 - Math.pow(1 - p, 3); sz = (stGridAnim.n0 + (n - stGridAnim.n0) * e) * T; } }
   return { sz: sz, c: T / 2 - sz / 2 };
 }
+// 7.30 (perf-gfx-2 Schritt 2): Basis-Speicher. Was auf einer Basis stillsteht (Sandboden, Rand, die Bilder der Gebäude samt Rissen), wird in Kacheln von
+// 512 x 512 Pixeln gemalt und danach nur noch kopiert (vorher in jedem Bild neu: ~83 Gebäude- und Säulenbilder, ~15 Bodenkacheln, ~40 Seile, 4 Verläufe).
+// Live darüber, wie bisher: ST_ANIM, Treffer-Blitz, Balken, Auswahl. Ein Gebäude im Bau, beim Aufploppen oder beim Verschieben wird ganz live gezeichnet.
+// Jede Kachel merkt sich eine Unterschrift aus allem, was in ihr liegt (Raster, Gebäude mit Stufe, Ruine, Rissen, Mauer-Verbindung); ändert sich etwas, wird sie
+// neu gemalt, höchstens 2 Kacheln pro Bild. Fehlt eine sichtbare Kachel noch ganz, zeichnet dieses Bild die Basis wie bisher (kein Ruckler beim Hineinschwimmen).
+// Alle Kacheln einer Basis teilen dieselbe Pixel-Zuordnung (nur um ganze 512 Pixel verschoben): keine Nähte. ?chunks=0 schaltet den Speicher ab (Vergleich, Tests).
+const ST_CH = 512, ST_CH_PX = 24e6, ST_CH_M = [48, 104, 48, 48];     // Kachel in Pixeln, Speichergrenze in Pixeln (~96 MB), Rand um den Bauplatz: links, oben, rechts, unten (Welt-Einheiten)
+const stChunks = new Map();
+let stChK = 0, stChPx = 0, stChBudF = -1, stChBud = 0, stChOn = !(typeof location !== 'undefined' && /[?&]chunks=0/.test(location.search || ''));
+const stChStat = { bake: 0, draw: 0, old: 0 };  // für Tests und perf_strat.js
+function stChDrop(key) { const c = stChunks.get(key); if (c) { stChPx -= c.c.width * c.c.height; stChunks.delete(key); } }
+function stChClear() { stChunks.clear(); stChPx = 0; }
+function stLiveB(b) { return (stUi.mode === 'move' && stUi.move === b) || !!(b.upUntil && !b.ruin) || !!(stDoneAt.size && stDoneAt.has(b)); }
+function stBKey(b, conn) { return b.id + ':' + b.type + ':' + b.x + ':' + b.y + ':' + b.lv + ':' + (b.ruin ? 'r' : stCrackLv(b)) + ':' + conn + (b.type === 'stachelfalle' && !b.sprung ? 's' : ''); }
+// eine Basis zeichnen. list = Gebäude nach y sortiert, n = Raster, px / py = linke obere Ecke des Bauplatzes (Basis-Einheiten), ox / oy = Basis-Einheiten minus
+// Bildschirm-Einheiten (wie in drawStrategyBase), id = Name im Speicher, bars(b, x, y, S) = Balken / Auswahl oder null. false = nicht alles bereit, bitte wie bisher zeichnen.
+function stDrawBaseC(g, id, list, n, px, py, ox, oy, tm, bars) {
+  const T = ST_TILE, sz = n * T, k = stSprScale(), m = g.getTransform(), s = m.a, f = s / k;
+  if (k !== stChK) { stChClear(); stChK = k; }
+  if (stChBudF !== renderFrame) { stChBudF = renderFrame; stChBud = 2; }
+  const Rx = px - ST_CH_M[0], Ry = py - ST_CH_M[1], RW = Math.ceil((sz + ST_CH_M[0] + ST_CH_M[2]) * k), RH = Math.ceil((sz + ST_CH_M[1] + ST_CH_M[3]) * k);
+  const NX = Math.ceil(RW / ST_CH), NY = Math.ceil(RH / ST_CH), cu = ST_CH / k;                           // cu = Kachel in Welt-Einheiten
+  const Bx = m.e + (Rx - ox) * s, By = m.f + (Ry - oy) * s, cs = ST_CH * f;                               // Bildschirm-Pixel des Bereichs-Ursprungs, Kachel in Bildschirm-Pixeln
+  const i0 = Math.max(0, Math.floor(-Bx / cs)), i1 = Math.min(NX - 1, Math.floor((g.canvas.width - Bx) / cs));
+  const j0 = Math.max(0, Math.floor(-By / cs)), j1 = Math.min(NY - 1, Math.floor((g.canvas.height - By) / cs));
+  const L = list.length, keys = new Array(L), conns = new Array(L), bx0 = new Array(L), bx1 = new Array(L), by0 = new Array(L), by1 = new Array(L);
+  for (let q = 0; q < L; q++) {
+    const b = list[q], S = ST_B[b.type].size * T;
+    conns[q] = b.type === 'korallenmauer' ? stWallConn(b) : 0;
+    keys[q] = stLiveB(b) ? null : stBKey(b, conns[q]);
+    bx0[q] = b.x * T - ST_PAD; bx1[q] = b.x * T + S + ST_PAD; by0[q] = b.y * T - ST_PAD; by1[q] = b.y * T + S + ST_PAD;
+  }
+  const ep = id + '|' + n + '|' + px + ',' + py + '|';
+  const inC = function(q, i, j){ const cx = Rx + i * cu, cy = Ry + j * cu; return bx1[q] > cx && bx0[q] < cx + cu && by1[q] > cy && by0[q] < cy + cu; };
+  const sigOf = function(i, j){ let t = ''; for (let q = 0; q < L; q++) if (keys[q] !== null && inC(q, i, j)) t += keys[q] + '/'; return t; };
+  const bake = function(key, old, i, j, sig){
+    const w = Math.min(ST_CH, RW - i * ST_CH), h = Math.min(ST_CH, RH - j * ST_CH);
+    let c = old;
+    if (c && c.c.width === w && c.c.height === h) { c.g.setTransform(1, 0, 0, 1, 0, 0); c.g.clearRect(0, 0, w, h); }
+    else {
+      if (old) stChDrop(key);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      c = { c: cv, g: cv.getContext('2d'), i: i, j: j, sig: '', use: 0 }; stChunks.set(key, c); stChPx += w * h;
+    }
+    const q2 = c.g; q2.setTransform(k, 0, 0, k, -Rx * k - i * ST_CH, -Ry * k - j * ST_CH);
+    stDrawFloor(q2, px, py, sz, Rx + i * cu, Ry + j * cu, cu, cu);
+    stDrawRim(q2, px, py, n, T, false);
+    for (let q = 0; q < L; q++) if (keys[q] !== null && inC(q, i, j)) { const b = list[q]; stDrawBuilding(q2, b, b.x * T, b.y * T, 0, conns[q], 1); }
+    stDrawRim(q2, px, py, n, T, true);
+    c.sig = sig; stChStat.bake++; stChBud--;
+    if (stChPx > ST_CH_PX) {                     // Speichergrenze: die am längsten nicht gezeigten Kacheln weg
+      const all = Array.from(stChunks).sort(function(a, b){ return a[1].use - b[1].use; });
+      for (let z = 0; z < all.length && stChPx > ST_CH_PX * 0.8; z++) if (all[z][1].use < renderFrame - 1 && all[z][1] !== c) stChDrop(all[z][0]);
+    }
+    return c;
+  };
+  const vis = []; let missing = false;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    const key = ep + i + ',' + j, sig = sigOf(i, j); let c = stChunks.get(key);
+    if (!c || c.sig !== sig) { if (stChBud > 0) c = bake(key, c, i, j, sig); else if (!c) missing = true; }
+    if (c) { c.use = renderFrame; vis.push(c); }
+  }
+  if (!missing && stChBud > 0) {                 // Luft übrig: eine fehlende Kachel gleich neben dem Bildschirm vorbereiten
+    outer: for (let j = Math.max(0, j0 - 1); j <= Math.min(NY - 1, j1 + 1); j++) for (let i = Math.max(0, i0 - 1); i <= Math.min(NX - 1, i1 + 1); i++) {
+      if (i >= i0 && i <= i1 && j >= j0 && j <= j1) continue;
+      const key = ep + i + ',' + j; if (stChunks.has(key)) continue;
+      bake(key, null, i, j, sigOf(i, j)).use = renderFrame; break outer;
+    }
+  }
+  if (missing) { stChStat.old++; return false; }
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  for (let z = 0; z < vis.length; z++) {
+    const c = vis[z], X0 = Math.round(Bx + c.i * cs), Y0 = Math.round(By + c.j * cs), X1 = Math.round(Bx + (c.i * ST_CH + c.c.width) * f), Y1 = Math.round(By + (c.j * ST_CH + c.c.height) * f);
+    g.drawImage(c.c, X0, Y0, X1 - X0, Y1 - Y0);
+  }
+  g.setTransform(m); stChStat.draw++;
+  for (let q = 0; q < L; q++) {                  // das Bewegte darüber
+    const b = list[q], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
+    if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
+    stDrawBuilding(g, b, x, y, tm, conns[q], keys[q] === null ? 0 : 2);
+    if (bars) bars(b, x, y, S);
+  }
+  return true;
+}
+function stSortB(arr) { return arr.slice().sort(function(a, b){ return (a.y + ST_B[a.type].size) - (b.y + ST_B[b.type].size); }); }
 function drawStrategyBase() {
   if (!Base) return;
   const g = ctx, ox = camera.x - W / 2, oy = camera.y - H / 2, h = stHalf(), T = ST_TILE, n = stGrid(), tm = runTime;
   const x0 = -h * T - ox, y0 = -h * T - oy, sz = n * T, pv = stPlotView(n, T), px0 = pv.c - ox, py0 = pv.c - oy, pT = pv.sz / n;
-  stDrawFloor(g, px0, py0, pv.sz);
-  if (stUi.mode === 'place' || stUi.mode === 'move') {          // Raster nur beim Bauen
-    g.save(); g.strokeStyle = 'rgba(255,255,255,0.2)'; g.lineWidth = 2; g.setLineDash([10, 12]); g.beginPath();
-    for (let i = 1; i < n; i++) { g.moveTo(x0 + i * T, y0); g.lineTo(x0 + i * T, y0 + sz); g.moveTo(x0, y0 + i * T); g.lineTo(x0 + sz, y0 + i * T); }
-    g.stroke(); g.restore();
-  }
-  stDrawRim(g, px0, py0, n, pT, false);
   stWalls = {}; for (let i = 0; i < Base.buildings.length; i++) { const w = Base.buildings[i]; if (w.type === 'korallenmauer') stWalls[w.x + ',' + w.y] = 1; }
-  const list = Base.buildings.slice().sort(function(a, b){ return (a.y + ST_B[a.type].size) - (b.y + ST_B[b.type].size); });
-  for (let i = 0; i < list.length; i++) {
-    const b = list[i], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
-    if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
-    stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
-    stDrawBars(g, b, x, y, S);
+  const list = stSortB(Base.buildings), placing = stUi.mode === 'place' || stUi.mode === 'move';
+  if (!(stChOn && !stGridAnim && !placing && stDrawBaseC(g, 'own', list, n, pv.c, pv.c, ox, oy, tm, function(b, x, y, S){ stDrawBars(g, b, x, y, S); }))) {
+    stDrawFloor(g, px0, py0, pv.sz);
+    if (placing) {                                 // Raster nur beim Bauen
+      g.save(); g.strokeStyle = 'rgba(255,255,255,0.2)'; g.lineWidth = 2; g.setLineDash([10, 12]); g.beginPath();
+      for (let i = 1; i < n; i++) { g.moveTo(x0 + i * T, y0); g.lineTo(x0 + i * T, y0 + sz); g.moveTo(x0, y0 + i * T); g.lineTo(x0 + sz, y0 + i * T); }
+      g.stroke(); g.restore();
+    }
+    stDrawRim(g, px0, py0, n, pT, false);
+    for (let i = 0; i < list.length; i++) {
+      const b = list[i], S = ST_B[b.type].size * T, x = b.x * T - ox, y = b.y * T - oy;
+      if (x > W + ST_PAD || y > H + ST_PAD || x + S < -ST_PAD || y + S < -ST_PAD) continue;
+      stDrawBuilding(g, b, x, y, tm, b.type === 'korallenmauer' ? stWallConn(b) : 0);
+      stDrawBars(g, b, x, y, S);
+    }
+    stDrawRim(g, px0, py0, n, pT, true);
   }
-  stDrawRim(g, px0, py0, n, pT, true);
-  if ((stUi.mode === 'place' || stUi.mode === 'move') && stUi.ghost) stDrawGhost(g, ox, oy, tm);
+  if (placing && stUi.ghost) stDrawGhost(g, ox, oy, tm);
   if (stCmd === 'send' && stSend) stMarker(g, stSend.x - ox, stSend.y - oy, '#ffd76a', tm, true);
   if (stCmd === 'hold' && stHold) stMarker(g, stHold.x - ox, stHold.y - oy, '#7ee0ff', tm, false);
 }
@@ -15401,6 +15514,10 @@ function stLabel(type, text) { const s = el('span', 'st-lab'); s.appendChild(stI
 // ---------- Truppen: vier Tiere mit Schal in der Farbe des Besitzers ----------
 function drawStrategyTroops() {
   const g = ctx, ox = camera.x - W / 2, oy = camera.y - H / 2, col = netMyColor ? netMyColor() : '#ff9eb5';
+  stBarQ = [];
+  try { stTroopsAll(g, ox, oy, col); } finally { stBarFlush(g); }
+}
+function stTroopsAll(g, ox, oy, col) {
   for (let i = 0; i < stTroops.length; i++) {
     const t = stTroops[i], sx = t.x - ox, sy = t.y - oy;
     if (sx < -60 || sy < -60 || sx > W + 60 || sy > H + 60) continue;
@@ -15435,32 +15552,35 @@ function stTrAt(g, s, m, x, y, f, a) {
   g.setTransform(k * f * c, k * n, -k * f * n, k * c, m.e + k * x, m.f + k * y);
   g.drawImage(s.c, -s.hw, -s.hh, 2 * s.hw, 2 * s.hh);
 }
-// Schwanzphase auf 8 Stufen gerundet (stTroopBody braucht w nur für sin(w * 1.3))
-function stTrBody(type, r, col, w) {
-  const ph = Math.floor((((w * 1.3) % 6.2832) + 6.2832) % 6.2832 / 6.2832 * 8) & 7, wq = (ph + 0.5) / 8 * 6.2832 / 1.3;
-  return stTrBake('b|' + type + '|' + r + '|' + col + '|' + ph, r * 2.6 + 4, r * 1.9 + 4, function(q){ stTroopBody(q, type, r, false, col, wq); });
-}
 // eine Truppe: own = eigene (weisser Ring + Winkel), sonst Fähnchen in der Farbe des Besitzers; hpr = Anteil Leben (Balken nur wenn verletzt)
-function stTroopDraw(g, type, sx, sy, r, face, wob, fl, col, hpr, own) {
-  const m = g.getTransform();
-  stTrAt(g, stTrBake('s|' + r, r * 1.3, r * 0.4, function(q){ stShadow(q, 0, 0, r * 1.3, r * 0.4, 0.35); }), m, sx, sy + r * 1.1, 1, 0);
-  if (fl) {
-    g.setTransform(m); g.save(); g.translate(sx, sy + Math.sin(wob * 0.5) * r * 0.08); g.scale(face || 1, 1); g.rotate(Math.sin(wob) * 0.07);
-    stTroopBody(g, type, r, true, col, wob); g.restore();
-  } else stTrAt(g, stTrBody(type, r, col, wob), m, sx, sy + Math.sin(wob * 0.5) * r * 0.08, face || 1, Math.sin(wob) * 0.07);
-  if (own) {
-    stTrAt(g, stTrBake('m|' + r, r * 1.15 + 14, r * 1.15 + 14, function(q){
+// 7.30 (perf-gfx-2 Schritt 3): Schatten + Körper + Marke (eigene: Ring und Winkel) bzw. Fähnchen in EINEM Bild je Schwanzphase und Blickrichtung,
+// der Treffer-Blitz als weisse Variante (vorher 3 Kopien pro Truppe und ein Blitz als Vektorzeichnung). Das ganze Bild wippt und kippt jetzt mit dem Körper (±4°, ~1 Einheit).
+function stTrAll(type, r, col, w, face, fl, own) {
+  const ph = Math.floor((((w * 1.3) % 6.2832) + 6.2832) % 6.2832 / 6.2832 * 8) & 7, wq = (ph + 0.5) / 8 * 6.2832 / 1.3, fc = face < 0 ? -1 : 1;
+  const hw = Math.max(r * 2.6 + 4, r * 1.15 + 16), hh = Math.max(r * 1.9 + 4, r * 1.15 + 16, r * 1.1 + 18, r * 1.5 + 2);
+  return stTrBake('a|' + type + '|' + r + '|' + col + '|' + ph + '|' + fc + (fl ? 'w' : '') + (own ? 'o' : ''), hw, hh, function(q){
+    stShadow(q, 0, r * 1.1, r * 1.3, r * 0.4, 0.35);
+    q.save(); q.scale(fc, 1); stTroopBody(q, type, r, fl, col, wq); q.restore();
+    if (own) {
       q.strokeStyle = 'rgba(255,255,255,0.85)'; q.lineWidth = 1.8; q.beginPath(); q.arc(0, 0, r * 1.15 + 2.5, 0, 6.2832); q.stroke();      // eigene Truppe: weisser Ring
       q.fillStyle = '#ffffff'; q.strokeStyle = 'rgba(12,24,36,0.8)'; q.lineWidth = 1.2; q.beginPath(); q.moveTo(-5, -r * 1.15 - 11); q.lineTo(0, -r * 1.15 - 5); q.lineTo(5, -r * 1.15 - 11); q.closePath(); q.fill(); q.stroke();   // Winkel
-    }), m, sx, sy, 1, 0);
-  } else {
-    stTrAt(g, stTrBake('f|' + r + '|' + col, 14, r * 1.1 + 16, function(q){
+    } else {
       q.strokeStyle = 'rgba(12,24,36,0.85)'; q.lineWidth = 1.4; q.beginPath(); q.moveTo(0, -r * 1.1); q.lineTo(0, -r * 1.1 - 14); q.stroke();
       q.fillStyle = col; q.beginPath(); q.moveTo(0, -r * 1.1 - 14); q.lineTo(10, -r * 1.1 - 10); q.lineTo(0, -r * 1.1 - 6); q.closePath(); q.fill(); q.stroke();
-    }), m, sx + 0, sy - (r * 1.1 + 16) + (r * 1.1 + 16), 1, 0);
-  }
+    }
+  });
+}
+let stBarQ = null;                               // 7.30: Lebensbalken der Truppen sammeln und gemeinsam zeichnen (drawStrategyTroops); null = sofort
+function stTroopDraw(g, type, sx, sy, r, face, wob, fl, col, hpr, own) {
+  const m = g.getTransform();
+  stTrAt(g, stTrAll(type, r, col, wob, face || 1, fl, own), m, sx, sy + Math.sin(wob * 0.5) * r * 0.08, 1, Math.sin(wob) * 0.07);
   g.setTransform(m);
-  if (hpr < 1) { const w = 26, y = sy + r * 1.15 + 7; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(sx - w / 2 - 1, y - 1, w + 2, 5); g.fillStyle = own ? '#5ef2c0' : '#ff6b6b'; g.fillRect(sx - w / 2, y, w * Math.max(0, hpr), 3); }
+  if (hpr < 1) { const w = 26, y = sy + r * 1.15 + 7; if (stBarQ) stBarQ.push(sx - w / 2, y, w * Math.max(0, hpr), own ? 1 : 0); else { g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(sx - w / 2 - 1, y - 1, w + 2, 5); g.fillStyle = own ? '#5ef2c0' : '#ff6b6b'; g.fillRect(sx - w / 2, y, w * Math.max(0, hpr), 3); } }
+}
+function stBarFlush(g) {                         // alle Hintergründe in einem Pfad, die Füllungen je Farbe in einem Pfad
+  const q = stBarQ; stBarQ = null; if (!q || !q.length) return;
+  g.fillStyle = 'rgba(0,0,0,0.55)'; g.beginPath(); for (let i = 0; i < q.length; i += 4) g.rect(q[i] - 1, q[i + 1] - 1, 28, 5); g.fill();
+  for (let o = 0; o < 2; o++) { g.fillStyle = o ? '#5ef2c0' : '#ff6b6b'; g.beginPath(); for (let i = 0; i < q.length; i += 4) if (q[i + 3] === o && q[i + 2] > 0) g.rect(q[i], q[i + 1], q[i + 2], 3); g.fill(); }
 }
 function stDrawOther(g, type, sx, sy, r, face, wob, fl, col, hpr) { stTroopDraw(g, type, sx, sy, r, face, wob, fl, col, hpr, false); }   // 7.13: fremde Truppe (Heimwache oder Truppe eines Mitspielers)
 function stDrawTroop(g, t, sx, sy, col) { stTroopDraw(g, t.type, sx, sy, t.r, t.face || 1, t.wob, t.hitFlash > 0, col, t.hp / t.maxHp, true); }
@@ -15690,6 +15810,7 @@ function stGlowImg(rgb, mid) {                   // weicher Leuchtfleck als klei
   return (stGlowSpr[key] = c);
 }
 function stGlow(g, x, y, r, rgb, a) {            // weicher Leuchtfleck (additiv)
+  if (stAnimQ >= 4) return;                      // 7.30: Stufe 4-5 ohne das bewegte Leuchten der Gebäude (im gemalten Bild bleibt es)
   g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha *= a; g.drawImage(stGlowImg(rgb, 0.4), x - r, y - r, r * 2, r * 2); g.restore();
 }
 function stBarrel(g, x, y, w, h, band, lid) {
