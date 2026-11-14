@@ -1343,7 +1343,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.34';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.35';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -3647,6 +3647,29 @@ canvas.addEventListener('touchcancel', touchEnded, { passive: false });
 
 canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
+// 7.35: Maussteuerung (PC): linke Maustaste auf dem Spielfeld halten = der Blobi schwimmt zum Mauszeiger (Knöpfe sind eigene Elemente: ein Klick darauf steuert nie);
+// Tasten gehen vor (wer WASD hält, wird nicht vom Zeiger gezogen), Touch geht vor der Maus. Nicht beim Bauen / Verschieben in der Strategie (da zeigt die Maus).
+const mouseSteer = { active: false, x: 0, y: 0 };
+function mouseSteerEnd() { mouseSteer.active = false; }
+canvas.addEventListener('pointerdown', function(e){
+  if (e.pointerType !== 'mouse' || e.button !== 0 || gameState !== 'playing' || (typeof stratGrabsTouch === 'function' && stratGrabsTouch())) return;
+  mouseSteer.active = true; mouseSteer.x = e.clientX; mouseSteer.y = e.clientY;
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}   // auch über einem Knopf weiter steuern, solange die Taste unten ist
+});
+canvas.addEventListener('pointermove', function(e){ if (mouseSteer.active && e.pointerType === 'mouse') { mouseSteer.x = e.clientX; mouseSteer.y = e.clientY; } });
+canvas.addEventListener('pointerup', function(e){ if (e.pointerType === 'mouse') mouseSteerEnd(); });
+canvas.addEventListener('pointercancel', mouseSteerEnd);
+canvas.addEventListener('lostpointercapture', mouseSteerEnd);
+window.addEventListener('blur', mouseSteerEnd);
+function mouseSteerVector() {
+  if (!player) return null;
+  const r = canvas.getBoundingClientRect(), k = r.width / W;
+  const dx = mouseSteer.x - (r.left + (player.x - camera.x + W / 2) * k), dy = mouseSteer.y - (r.top + (player.y - camera.y + H / 2) * k), dist = Math.hypot(dx, dy);
+  if (dist < 10) return { x: 0, y: 0, mag: 0 };
+  const m = Math.min(1, (dist - 10) / 70);          // nahe am Zeiger sanft abbremsen, kein Zittern
+  return { x: dx / dist * m, y: dy / dist * m, mag: m };
+}
+
 // Radius des Touch-Steuerknüppels: wächst mit dem Bildschirm (Tablets, grosse Handys), 46–76 px
 function stickR() { return Math.max(46, Math.min(76, Math.min(SW, SH) * 0.11)); }
 function getMoveVector() {
@@ -3666,6 +3689,7 @@ function getMoveVector() {
     return { x: 0, y: 0, mag: 0 };
   }
   const mag = Math.hypot(dx, dy);
+  if (mag === 0 && mouseSteer.active) { const mv = mouseSteerVector(); if (mv) return mv; }
   if (mag > 0) { dx /= mag; dy /= mag; }
   return { x: dx, y: dy, mag: mag > 0 ? 1 : 0 };
 }
@@ -4367,10 +4391,12 @@ function fireWeapon(id, level) {
     const count = 1 + Math.floor((level-1)/2);
     const dmg = (7 + level*3.4) * p.damage;
     const ang = leadAng(p.x, p.y, target, 420);
+    // 7.35: mehrere Blasen starten nebeneinander (12 px Abstand) und fliegen alle auf den Treffpunkt des Ziels (vorher ein Fächer von 0,18 rad: ab Stufe 3 flogen die Blasen links und rechts am Ziel vorbei)
+    const tdist = Math.max(60, distXY(p.x, p.y, target.x, target.y)), lx = p.x + Math.cos(ang) * tdist, ly = p.y + Math.sin(ang) * tdist;
     for (let i=0;i<count;i++){
-      const spread = (i - (count-1)/2) * 0.18;
-      const a = ang + spread;
-      projectiles.push({ x:p.x, y:p.y, vx:Math.cos(a)*420, vy:Math.sin(a)*420, r:6, dmg:dmg, life:1.4, color:'#bdeeff', pierce:0 });
+      const off = (i - (count-1)/2) * 12, ox = p.x - Math.sin(ang) * off, oy = p.y + Math.cos(ang) * off;
+      const a = Math.atan2(ly - oy, lx - ox);
+      projectiles.push({ x:ox, y:oy, vx:Math.cos(a)*420, vy:Math.sin(a)*420, r:6, dmg:dmg, life:1.4, color:'#bdeeff', pierce:0 });
     }
     Sfx.shoot();
   } else if (type === 'aura') {
@@ -4896,7 +4922,7 @@ function updateProjectiles(dt) {
       damagePlayer(pr.remote ? netCapHit(pr.dmg) : pr.dmg);
       if (pr.isInk) player.slowTimer = 2.2;
       if (pr.skin === 'squid' && playerDown <= 0) { player.leech = Math.min(3, (player.leech || 0) + 1); showToast('🦑 Ein Kalmarbaby hängt an dir – schwimm schnell, um es abzuschütteln!'); }
-      if (pr.vamp && !pr.remote) enemies.forEach(function(e){ if (e.type === 'vampirkalmar' && e.isBoss && !e.dead) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.03); });   // Bluttinte heilt ihn
+      if (pr.vamp && !pr.remote) enemies.forEach(function(e){ if (e.type === 'vampirkalmar' && e.isBoss && !e.dead) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * VAMP_INK_HEAL); });   // Bluttinte heilt ihn
       remove = true;
     }
     if (remove) enemyProjectiles.splice(i, 1);
@@ -5217,6 +5243,15 @@ function tapButton(el, fn) {
   });
   el.addEventListener('click', function(e){ if (performance.now() - tapGuard < 700) return; fire(e); });
 }
+// 7.35: Mehrfinger: ein zweiter Finger auf IRGENDEINEM Knopf (Bau-Menü, Strategie-Leiste, Pause ...) löst ihn sofort aus, während der erste den Blobi steuert
+// (sonst schluckt das Handy den Klick). Knöpfe mit eigenem tapButton sind schon behandelt (defaultPrevented); einen Knopf, den dieser Finger schon ausgelöst hat,
+// löst das spätere Klick-Ereignis nicht noch einmal aus (touchstart mit preventDefault = kein Klick).
+document.addEventListener('touchstart', function(e){
+  if (e.defaultPrevented || e.touches.length < 2 || !runVisible()) return;
+  const t = e.changedTouches[0], b = t && t.target && t.target.closest ? t.target.closest('button, .btn, .icon-btn, [role="button"]') : null;
+  if (!b || b === canvas || b.disabled || b.tagName === 'INPUT' || b.tagName === 'SELECT' || b.tagName === 'TEXTAREA') return;
+  e.preventDefault(); tapGuard = performance.now(); b.click();
+}, { passive: false });
 // Level-Leiste: Karten unten am Rand, Tasten 1–4 oder antippen; nach 15 s wird die erste Karte genommen
 function renderLevelBar(cl) {
   const bar = document.getElementById('lvlbar'), wrap = document.getElementById('lvlbar-cards');
@@ -5443,6 +5478,17 @@ function bossWave(en) {
   en.waveLeft--;
 }
 
+// 7.35: die Phasen verändern bei jedem Boss den Kampf (vorher nur: Brüllen, Helfer, Tempo, kürzere Wartezeit): ab Phase 2 schickt er zwischendurch einen Schussring
+// (10 Schüsse alle ~12 s), in Phase 3 einen dichteren (14 Schüsse alle ~7,5 s). Nur im Zustand "walk": nie mitten in einem eigenen Angriff.
+const PHASE_VOLLEY = [null, null, { t: 12, n: 10, dmg: 0.4 }, { t: 7.5, n: 14, dmg: 0.45 }];
+function bossPhaseVolley(en, dt) {
+  const v = PHASE_VOLLEY[Math.min(3, en.phase || 1)];
+  if (!v || en.state !== 'walk' || en.untouch || en.busy || en.dead) return;
+  en.volT = (en.volT == null ? v.t * 0.7 : en.volT) - dt;
+  if (en.volT > 0) return;
+  en.volT = v.t * (0.85 + Math.random() * 0.3);
+  bossRing(en, v.n, Math.random() * 6.283, 140, en.dmg * v.dmg, '#ffb36b'); en.atkAt = runTime;
+}
 // Einzigartige Boss-Mechanik pro Boss. Gibt ggf. eine Bewegungs-Überschreibung zurück.
 function bossAbility(en, dt, d) {
   if (en.legend) return legendUpdate(en, dt, d);       // Legenden-Bosse (7.2): eigener Ablauf mit 4 Phasen
@@ -5474,6 +5520,7 @@ function bossAbility(en, dt, d) {
     }
     return { mx: 0, my: 0 };
   }
+  bossPhaseVolley(en, dt);
   if (BOSS_SIG[en.type]) { const o = BOSS_SIG[en.type](en, dt, d, p, ph); return o === undefined ? null : o; }   // neue Bosse (7.2): eigener Ablauf
   if (en.state === 'tired') {
     en.stT -= dt; en.spd = en.speed * 0.25;
@@ -6144,14 +6191,15 @@ function shieldMul(en, src) {
   if (src && typeof src === 'number') { const pe = Net.peers.get(src); if (pe) { sx = pe.x; sy = pe.y; } }
   return Math.abs(normalizeAngle(Math.atan2(sy - en.y, sx - en.x) - en.shieldDir)) < Math.PI / 2 ? 0.4 : 1;
 }
-// Lebensband des Vampirkalmars: saugt 4 % deiner max. HP pro Sekunde (eigene und Bosse von Mitspielern)
+const VAMP_DRAIN = 0.025, VAMP_TETHER_T = 4.5, VAMP_SELF_HEAL = 0.006, VAMP_INK_HEAL = 0.02, VAMP_EAT_HEAL = 0.03, VAMP_BREAK_STUN = 2;   // 7.35: abgeschwächt (vorher 4 % / 6 s / 1,2 % / 3 % / 5 % / 1,3 s)
+// Lebensband des Vampirkalmars: saugt 2,5 % deiner max. HP pro Sekunde (eigene und Bosse von Mitspielern)
 function tetherDrain(p, dt) {
   const list = allEnemies();
   for (let i = 0; i < list.length; i++) {
     const en = list[i];
     if (en.type !== 'vampirkalmar' || en.state !== 'tether' || en.dead || en.tg !== p || distXY(en.x, en.y, p.x, p.y) > 420) continue;
     if (invulnTimer > 0 || playerDown > 0 || (Net.on && inHafen(p.x, p.y))) return;
-    p.hp -= p.maxHp * 0.04 * dt;
+    p.hp -= p.maxHp * VAMP_DRAIN * dt;
     if (p.hp <= 0) { p.hp = 0; onPlayerDeath(); }
     return;
   }
@@ -6520,12 +6568,12 @@ Object.assign(BOSS_SIG, {
     if (en.state === 'cast') { en.stT -= dt; en.spd = 0; if (en.stT <= 0) { en.state = 'curl'; en.stT = 2; en.vv = 3; en.contactMul = 1.6; en.frontGuard = true; } return { mx: 0, my: 0 }; }
     if (en.state === 'curl') { en.stT -= dt; if (en.stT <= 0) { en.state = 'walk'; en.vv = 0; en.contactMul = 1; en.frontGuard = false; } return null; }
     if (en.state === 'walk') { if (en.abil <= 0 && d < 400) { en.state = 'windup'; en.stT = bw(en, 1.0); } return null; }
-    if (en.state === 'windup') { en.stT -= dt; en.spd = 0; if (en.stT <= 0) { en.state = 'tether'; en.stT = 6; if (en.tier >= 2) pushZone({ x: en.x, y: en.y, r: 120, t: 0, warn: 0.3, life: 5, kind: 'slow', sk: 4, dmg: 0, hit: false }); } return { mx: 0, my: 0 }; }
+    if (en.state === 'windup') { en.stT -= dt; en.spd = 0; if (en.stT <= 0) { en.state = 'tether'; en.stT = VAMP_TETHER_T; if (en.tier >= 2) pushZone({ x: en.x, y: en.y, r: 120, t: 0, warn: 0.3, life: 5, kind: 'slow', sk: 4, dmg: 0, hit: false }); } return { mx: 0, my: 0 }; }
     if (en.state === 'tether') {
       en.stT -= dt; en.spd = en.speed * 0.4;
-      en.hp = Math.min(en.maxHp, en.hp + en.maxHp * 0.012 * dt);
-      if (en.tier >= 3 && !en.ate2) { en.ate2 = true; const v = enemies.filter(function(e){ return !e.dead && !e.isBoss && !e.proxyOf && distXY(e.x, e.y, en.x, en.y) < 400; })[0]; if (v) { v.dead = true; spawnBurst(v.x, v.y, '#c0102a', 10); en.hp = Math.min(en.maxHp, en.hp + en.maxHp * 0.05); } }
-      if (distXY(en.x, en.y, t.x, t.y) > 420) { en.state = 'tired'; en.stT = 1.3; en.ate2 = false; spawnBurst(en.x, en.y, '#ff4d6a', 14); showToast('Das Lebensband ist gerissen!'); return { mx: 0, my: 0 }; }
+      en.hp = Math.min(en.maxHp, en.hp + en.maxHp * VAMP_SELF_HEAL * dt);
+      if (en.tier >= 3 && !en.ate2) { en.ate2 = true; const v = enemies.filter(function(e){ return !e.dead && !e.isBoss && !e.proxyOf && distXY(e.x, e.y, en.x, en.y) < 400; })[0]; if (v) { v.dead = true; spawnBurst(v.x, v.y, '#c0102a', 10); en.hp = Math.min(en.maxHp, en.hp + en.maxHp * VAMP_EAT_HEAL); } }
+      if (distXY(en.x, en.y, t.x, t.y) > 420) { en.state = 'tired'; en.stT = VAMP_BREAK_STUN; en.ate2 = false; spawnBurst(en.x, en.y, '#ff4d6a', 14); showToast('Das Lebensband ist gerissen!'); return { mx: 0, my: 0 }; }
       if (en.stT <= 0) { en.state = 'walk'; en.abil = 8 * ph; en.ate2 = false; }
       return null;
     }
@@ -9464,7 +9512,7 @@ function seaMonsterGlow(g, R, o) {
   const t = o.t, ph = o.phase || 1, TAU = Math.PI * 2;
   // Angel-Laterne
   const lx = R * 1.18 + Math.sin(t * 1.2) * R * 0.06, ly = -R * 1.62 + Math.cos(t * 1.7) * R * 0.04;
-  const pulse = BOSS_FX.dead ? 0.15 : (o.pose === 'sog' ? 0.7 + 0.3 * Math.abs(Math.sin(o.time * 19)) : 0.8 + 0.2 * Math.sin(o.time * 5)) * (1 + 0.25 * (o.wk || 0));
+  const pulse = BOSS_FX.dead ? 0.15 : (o.pose === 'sog' ? 0.8 + 0.2 * Math.sin(o.time * 5) : 0.8 + 0.2 * Math.sin(o.time * 3)) * (1 + 0.25 * (o.wk || 0));
   const lg = g.createRadialGradient(lx, ly, 0, lx, ly, R * 0.9);
   lg.addColorStop(0, 'rgba(190,250,255,' + (0.85 * pulse) + ')'); lg.addColorStop(0.25, 'rgba(120,225,255,' + (0.4 * pulse) + ')'); lg.addColorStop(1, 'rgba(120,225,255,0)');
   g.fillStyle = lg; g.beginPath(); g.arc(lx, ly, R * 0.9, 0, TAU); g.fill();
@@ -11978,11 +12026,29 @@ const BOSS_AURA = { haikoenig: '190,225,255', kraken: '200,235,120', seeungeheue
   vulkanschildkroete: '255,140,60', schwefelrochen: '255,226,58', glutqualle: '255,175,60', schlotwurm: '255,90,60', feuerfisch: '255,160,70',
   atollon: '255,215,106', tangmutter: '170,240,110', abyssos: '160,200,255', magmaros: '255,140,60' };
 // Graben / Vulkan (ohne Legenden): das Wasser um den Boss wird dunkler, im Vulkan flimmert darüber die Hitze. Nur auf den Grafikstufen 0-3.
+const bossAuraCache = {}, bossPresCache = {};
+function bossAuraSprite(col) {   // Aura eines Bosses: Farbverlauf von 0,55 R bis 2,4 R, einmal als 128-px-Bild (Deckkraft 1, gezeichnet mit globalAlpha)
+  let c = bossAuraCache[col];
+  if (!c) {
+    c = bossAuraCache[col] = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), ag = g.createRadialGradient(64, 64, 64 * 0.55 / 2.4, 64, 64, 64);
+    ag.addColorStop(0, 'rgba(' + col + ',1)'); ag.addColorStop(1, 'rgba(' + col + ',0)'); g.fillStyle = ag; g.fillRect(0, 0, 128, 128);
+  }
+  return c;
+}
+function bossPresenceSprite(hot) {   // dunkler Hof um Graben- / Vulkan-Bosse (0,5 R bis 2,7 R, Mitte 0,2 R tiefer)
+  const k = hot ? 1 : 0;
+  let c = bossPresCache[k];
+  if (!c) {
+    c = bossPresCache[k] = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), q = g.createRadialGradient(64, 64, 64 * 0.5 / 2.7, 64, 64, 64);
+    q.addColorStop(0, hot ? 'rgba(24,4,0,1)' : 'rgba(0,2,10,1)'); q.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = q; g.fillRect(0, 0, 128, 128);
+  }
+  return c;
+}
 function bossPresence(g, R, area, ph) {
-  const hot = area === 'vulkan', a = 0.26 + 0.05 * ph;
-  const q = g.createRadialGradient(0, R * 0.2, R * 0.5, 0, R * 0.2, R * 2.7);
-  q.addColorStop(0, hot ? 'rgba(24,4,0,' + a + ')' : 'rgba(0,2,10,' + a + ')'); q.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = q; g.fillRect(-R * 2.7, -R * 2.5, R * 5.4, R * 5.4);
+  const hot = area === 'vulkan', a = 0.26 + 0.05 * Math.min(ph, 4);
+  g.save(); g.globalAlpha *= a; g.drawImage(bossPresenceSprite(hot), -R * 2.7, -R * 2.5, R * 5.4, R * 5.4); g.restore();   // 7.35: vorgezeichnet (vorher ein grosser Farbverlauf je Bild)
   if (!hot) return;
   g.save(); g.strokeStyle = 'rgb(255,200,140)'; g.lineWidth = Math.max(1.5, R * 0.03); g.lineCap = 'round';
   for (let i = 0; i < 5; i++) {
@@ -12047,7 +12113,7 @@ function drawBossSprite(en, sx, sy, mode) {
   const faceSign = en.faceS >= 0 ? 1 : -1, squeeze = sideView ? Math.max(0.12, Math.abs(en.faceS)) : 1;
   const open = (st === 'windup' || st === 'dash' || st === 'sog' || st === 'roar') ? 1 : (st === 'tired' ? 0.05 : -1);
   const champT = en.champ ? CHAMPION_TRAITS[en.champ[0]] || null : null;   // Champion-Boss: Schmuck, Umriss und Aura in der Farbe seiner Eigenschaft
-  const btp = BOSS_TYPES[en.type], area = btp && !btp.legend ? btp.area : '', glowFn = BOSS_GLOW[en.type];   // Gebiet für Auftritt und Präsenz (Legenden haben eigene)
+  const btp = BOSS_TYPES[en.type], area = btp && !btp.legend ? btp.area : '', glowFn = BOSS_GLOW[en.type], dark = !!btp && btp.area === 'graben';   // 7.35: dark = Graben-Boss samt Abyssos: bleibt dunkel, kein Blitzen   // Gebiet für Auftritt und Präsenz (Legenden haben eigene)
   const o = { color: en.color, t: en.wobble / 8, time: runTime, phase: ph, face: faceSign, champ: champT,
     lookX: Math.max(-1, Math.min(1, dxp / 160)), lookY: Math.max(-1, Math.min(1, dyp / 160)), open: open < 0 ? undefined : open, roar: st === 'roar' ? 1 : 0, vv: en.vv || 0, segI: en.segI || 0 };
   if (en.type === 'abgrundschlange') {   // Kette: Kopf und Glieder blicken in Laufrichtung (vom nächsten Glied weg), jedes Glied reicht bis zum vorderen
@@ -12081,7 +12147,7 @@ function drawBossSprite(en, sx, sy, mode) {
   o.pose = st; o.wk = wk; o.slam = slam; o.atk = atk; o.swim = en.mvS || 0;
 
   const key = en.type + '|' + ph + '|' + faceSign + '|' + open + '|' + px + '|' + (champT ? en.champ[0] : '') + '|' + (en.vv || 0) + '|' + (en.segI || 0);
-  const Q = QUAL[GFX.ql], every = Q.every;
+  const Q = QUAL[GFX.ql], segLike = en.segI > 0 || en.vv === 5 || en.vv === 6, every = segLike ? Math.max(Q.every, 4) : Q.every;   // 7.35: Glieder einer Schlange sehen fast gleich aus: nur jedes 4. Bild neu (13 Glieder je Bild kosteten über 2 ms)
   if (!en.outBuf || key !== en.artKey || renderFrame - en.artFrame >= every) {   // Kunst nur alle 2 Bilder neu zeichnen, sofort bei Pose-/Phasenwechsel
     if (!en.outBuf) { en.outBuf = document.createElement('canvas'); en.outCtx = en.outBuf.getContext('2d'); bossBufOwners.add(en); }
     if (en.outBuf.width !== px || en.outBuf.height !== px) { en.outBuf.width = en.outBuf.height = px; }   // 7.16: ein neues Canvas ist 300 x 150, bei px = 300 blieb die Hälfte weg
@@ -12128,8 +12194,8 @@ function drawBossSprite(en, sx, sy, mode) {
     tintBuf = bossTmpBuf('tint', px); const tx = bossTmp.tintX;
     tx.globalCompositeOperation = 'source-over'; tx.setTransform(1, 0, 0, 1, 0, 0); tx.clearRect(0, 0, px, px); tx.drawImage(en.outBuf, 0, 0);
     tx.globalCompositeOperation = 'source-atop';
-    if (st === 'tired') { tx.fillStyle = 'rgba(235,225,120,0.3)'; tx.fillRect(0, 0, px, px); }
-    if (flash) { tx.fillStyle = 'rgba(255,255,255,' + (0.62 * flash) + ')'; tx.fillRect(0, 0, px, px); }
+    if (st === 'tired') { tx.fillStyle = 'rgba(235,225,120,' + (dark ? 0.14 : 0.3) + ')'; tx.fillRect(0, 0, px, px); }
+    if (flash) { tx.fillStyle = 'rgba(255,255,255,' + ((dark ? 0.12 : (btp && btp.legend ? 0.22 : 0.34)) * flash) + ')'; tx.fillRect(0, 0, px, px); }   // 7.35: war 0.62 überall: Dauerfeuer wusch grosse Bosse weiss aus, im Graben blitzte es
     tx.globalCompositeOperation = 'source-over';
     img = tintBuf;
   }
@@ -12140,10 +12206,11 @@ function drawBossSprite(en, sx, sy, mode) {
   if (mode !== 1 && !seg) {   // Schatten (gibt Gewicht) und Aura: wird mit jeder Phase stärker, beim Gebrüll blitzt sie auf
     if ((area === 'graben' || area === 'vulkan') && GFX.ql <= 3) bossPresence(ctx, R, area, ph);
     ctx.fillStyle = 'rgba(0,8,18,0.26)'; ctx.beginPath(); ctx.ellipse(0, R * 0.95, R * 1.15, R * 0.3, 0, 0, Math.PI * 2); ctx.fill();
-    const pulse = 1 + 0.25 * Math.sin(runTime * (3 + ph * 2)), a = [0, 0.17, 0.25, 0.34][ph] * pulse * (st === 'roar' ? 2 : 1) * (champT ? 1.3 : 1), col = champT ? champT.rgb : BOSS_AURA[en.type];
-    const ag = ctx.createRadialGradient(0, 0, R * 0.55, 0, 0, R * 2.4);
-    ag.addColorStop(0, 'rgba(' + col + ',' + a + ')'); ag.addColorStop(1, 'rgba(' + col + ',0)');
-    ctx.fillStyle = ag; ctx.fillRect(-R * 2.4, -R * 2.4, R * 4.8, R * 4.8);
+    // 7.35: Phase 4 (Legenden: Magmaros "Herz offen") gab es hier nicht: a war NaN, addColorStop warf, der ganze Boss wurde nicht mehr gezeichnet (nur Schatten, Augen-Leuchten blieb).
+    // Die Aura ist jetzt ein vorgezeichnetes Bild (kein Farbverlauf je Bild und Boss); im Graben pulsiert sie nur ganz langsam und blitzt beim Gebrüll nicht.
+    const pulse = dark ? 1 + 0.06 * Math.sin(runTime * 1.4) : 1 + 0.25 * Math.sin(runTime * (3 + Math.min(ph, 3) * 2)), col = champT ? champT.rgb : BOSS_AURA[en.type];
+    const a = [0, 0.17, 0.25, 0.34, 0.38][Math.min(ph, 4)] * pulse * (st === 'roar' ? (dark ? 1.15 : 2) : 1) * (champT ? 1.3 : 1) * (dark ? 0.8 : 1);
+    ctx.save(); ctx.globalAlpha *= Math.min(1, a); ctx.drawImage(bossAuraSprite(col), -R * 2.4, -R * 2.4, R * 4.8, R * 4.8); ctx.restore();
   }
   // Ganzkörper-Bewegung: Atmen, Ausholen (zusammenziehen), Sturm (strecken), Sog (aufblähen, zittern), Faustschlag (stauchen)
   let ax = 1 + 0.018 * Math.sin(runTime * 2.1 + sd), ay = 2 - ax, ox = 0, oy = 0, alpha = 1;
@@ -12204,7 +12271,7 @@ function drawBossSprite(en, sx, sy, mode) {
       ctx.beginPath(); ctx.ellipse(0, R * 0.55, R * (0.8 + 1.6 * k), R * (0.3 + 0.6 * k), 0, 0, Math.PI * 2); ctx.stroke();
     }
   }
-  const sq = 1 + Math.sin(en.wobble * 0.55) * 0.035, rk = st === 'roar' ? 1.08 + 0.02 * Math.sin(runTime * 40) : 1;
+  const sq = 1 + Math.sin(en.wobble * 0.55) * 0.035, rk = st === 'roar' ? (dark ? 1.04 + 0.01 * Math.sin(runTime * 9) : 1.08 + 0.02 * Math.sin(runTime * 40)) : 1;   // 7.35: im Graben kein Zittern
   ctx.save();
   if (rise) { ctx.beginPath(); ctx.rect(-R * 3, -R * 4, R * 6, R * 4.85); ctx.clip(); }   // Vulkan-Auftritt: unter dem Boden unsichtbar
   ctx.translate(ox, oy);
@@ -12418,7 +12485,7 @@ function drawChampionBossUnder(en, sx, sy) {
   const T = CHAMPION_TRAITS[en.champ[0]], R = en.r * BOSS_VIS, C = T.rgb, TAU = Math.PI * 2, pu = 0.5 + 0.5 * Math.sin(runTime * 2.4);
   ctx.save(); ctx.globalAlpha *= champBossFade(en); ctx.translate(sx, sy);
   const gg = ctx.createRadialGradient(0, 0, R * 0.8, 0, 0, R * 1.95);
-  gg.addColorStop(0, 'rgba(' + C + ',' + (0.12 + 0.08 * pu) + ')'); gg.addColorStop(0.8, 'rgba(' + C + ',' + (0.06 + 0.04 * pu) + ')'); gg.addColorStop(1, 'rgba(' + C + ',0)');
+  gg.addColorStop(0, 'rgba(' + C + ',' + (0.05 + 0.04 * pu) + ')'); gg.addColorStop(0.8, 'rgba(' + C + ',' + (0.05 + 0.03 * pu) + ')');   // 7.35: schwächer, der Boss soll nicht eingefärbt wirken gg.addColorStop(1, 'rgba(' + C + ',0)');
   ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(0, 0, R * 1.95, 0, TAU); ctx.fill();
   ctx.save(); ctx.rotate(runTime * 0.25);                          // äusserer Ring mit Runen, dreht langsam
   ctx.strokeStyle = T.color; ctx.globalAlpha *= 0.6; ctx.lineWidth = 2;
@@ -12432,7 +12499,7 @@ function drawChampionBossUnder(en, sx, sy) {
   }
   ctx.restore();
   ctx.save(); ctx.rotate(-runTime * 0.8);                          // innerer, gestrichelter Ring dreht gegenläufig
-  ctx.strokeStyle = T.color; ctx.globalAlpha *= 0.7 + 0.25 * Math.sin(runTime * 5); ctx.lineWidth = 4; ctx.setLineDash([18, 10]);
+  ctx.strokeStyle = T.color; ctx.globalAlpha *= 0.55 + 0.1 * Math.sin(runTime * 2.5); ctx.lineWidth = 3; ctx.setLineDash([18, 10]);
   ctx.beginPath(); ctx.arc(0, 0, R * 1.5, 0, TAU); ctx.stroke();
   ctx.restore();
   ctx.restore();
@@ -12983,8 +13050,8 @@ function render() {
         if (en.state === 'windup' || en.state === 'sog' || en.state === 'roar') drawBossTelegraph(en, sx, sy);
         const segPart = en.vv === 5 || en.vv === 6;
         if (en.champ && !segPart) drawChampionBossUnder(en, sx, sy);
+        if (en.shell && !segPart) { ctx.save(); ctx.translate(sx, sy); drawChampShell(ctx, en.r * BOSS_VIS * 1.2); ctx.restore(); }   // 7.35: Panzerplatten hinter dem Boss, ausserhalb seines Körpers (vorher über ihm: verdeckten Augen und Gesicht)
         drawBossSprite(en, sx, sy, 0);
-        if (en.shell && !segPart) { ctx.save(); ctx.translate(sx, sy); drawChampShell(ctx, en.r); ctx.restore(); }
         if (en.champ && !segPart) drawChampionBossOver(en, sx, sy);
       } else {
         if (en.champ) drawChampionUnder(en, sx, sy);
