@@ -1320,7 +1320,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.31';         // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.32';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -3113,11 +3113,16 @@ function checkApkUpdate(running, now) {
     return true;
   }).catch(function(){ clearTimeout(timer); return false; });   // still: der alte Stand bleibt
 }
+// Ziel des Update-Knopfs. Im APK liefert Capacitor jede https-Adresse auf robotik0.github.io aus der App selbst (dort gibt es nur index.html:
+// app.html = schwarzer Bildschirm, APK 0.1.0 / 0.1.1). Mit http:// ist es für Capacitor eine fremde Adresse -> System-Browser; GitHub Pages leitet auf https um.
+function apkUpdBase(proto, href) {
+  return proto === 'file:' ? new URL('app.html', href).href : APP_PAGE_URL.replace(/^https:/, 'http:');
+}
 function initApkUpdateButton() {
   const running = apkVersion(navigator.userAgent, !!window.Capacitor);
   if (!running) return;
   const b = document.getElementById('btn-apk-update'); if (!b) return;
-  const base = location.protocol === 'file:' ? new URL('app.html', location.href).href : APP_PAGE_URL;
+  const base = apkUpdBase(location.protocol, location.href);
   b.addEventListener('click', function(){ Sfx.click(); window.open(base + '?lang=' + encodeURIComponent(LANG) + '&p=android', '_blank', 'noopener'); });
   apkUpdShow(running);                              // die letzte Antwort sofort, die neue nach der Frage
   try { checkApkUpdate(running); } catch (e) {}
@@ -6133,6 +6138,21 @@ function facingMul(en, src) {
 }
 // Seeschlangen: Körper aus Gliedern (Teile, nehmen 25 %), die dem Kopf auf seiner Spur folgen
 const SNAKE_SEGS = 12, SNAKE_GAP = 26;
+// 7.32: Zeichenreihenfolge: die Glieder einer Seeschlange kommen direkt vor ihren Kopf, vom Schwanz zum Hals (vorher nach dem Kopf und vom Hals zum
+// Schwanz: der Hals lag über dem Kopf, jede Brücke über dem vorderen Glied). Ohne Seeschlange bleibt die Liste, wie sie ist.
+function snakeDrawOrder(list) {
+  let any = false;
+  for (let i = 0; i < list.length; i++) if (list[i].segs && list[i].segs.length && !list[i].dead) { any = true; break; }
+  if (!any) return list;
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const en = list[i], own = en.proxyOf;
+    if (own && own.segs && !own.dead && own.segs.indexOf(en) >= 0) continue;   // kommt mit seinem Kopf
+    if (en.segs && en.segs.length && !en.dead) for (let k = en.segs.length - 1; k >= 0; k--) if (!en.segs[k].dead) out.push(en.segs[k]);
+    out.push(en);
+  }
+  return out;
+}
 function snakeEnsure(en) {
   if (!en.trail || !en.trail.length) { en.trail = []; for (let i = 1; i <= SNAKE_SEGS * SNAKE_GAP / 4 + 4; i++) en.trail.push({ x: en.x - i * 4, y: en.y }); }   // gestreckt anfangen
   if (!en.segs || en.segs.some(function(s){ return s.dead || enemies.indexOf(s) === -1; })) {
@@ -6515,7 +6535,17 @@ function schlingerAim(en) {
   zones[zones.length - 1].sk = 2;                      // Schlund: wer drin ist, wird verschluckt
   if (en.tier >= 3) pushZone({ x: en.x, y: en.y, r: 520, t: 0, warn: 0, life: w, kind: 'pull', sk: 0, dmg: 60, hit: false });
 }
-// gemeinsamer Ablauf beider Seeschlangen (abyss: die Abgrund-Variante mit Blitz an der Lücke und wandernder Lücke in Phase 3)
+// 7.32: Abgrundstoss, die eigene Signatur der Abgrundschlange (vorher derselbe Würgegriff wie die Königin): nach dem Lichtblitz wird eine Bahn durch
+// dein Ziel markiert (64 breit, 480-760 lang), die Kiefer klappen auf, dann schiesst der Kopf in 0,42 s die Bahn entlang (Treffer 1,3 × Schaden).
+// 1 Stoss, 2 ab Schwierigkeit 3, je einer mehr in Phase 3; jeder weitere Stoss zielt neu und warnt kürzer. Danach 1,2 s erschöpft.
+const ABYSS_DASH = 0.42;
+function abyssAim(en, again) {
+  const t = en.tg || player, a = angTo(en, t), L = Math.max(480, Math.min(760, distXY(en.x, en.y, t.x, t.y) + 260)), w = bw(en, again ? 0.6 : 0.95);
+  const x2 = en.x + Math.cos(a) * L, y2 = en.y + Math.sin(a) * L;
+  pushLane('lane', en.x, en.y, x2, y2, 64, w, 0.3, en.dmg * 1.3);
+  en.ang = a; en.slide = [en.x, en.y, x2, y2]; en.state = 'windup'; en.stT = w;
+}
+// gemeinsamer Ablauf beider Seeschlangen (abyss: die Abgrund-Variante mit Lichtblitz und, seit 7.32, Abgrundstoss statt Würgegriff)
 function snakeSig(en, dt, d, p, ph, abyss) {
   snakeEnsure(en);
   if (en.state === 'walk') {
@@ -6523,12 +6553,20 @@ function snakeSig(en, dt, d, p, ph, abyss) {
     if (en.abil <= 0 && d < 650) {
       const t = en.tg || player;
       en.rings = en.tier >= 3 ? 2 : 1; en.ga = Math.random() * 6.283;
-      if (abyss) { en.state = 'cast'; en.stT = bw(en, 0.6); en.flashI = Math.floor(Math.random() * en.segs.length); } else snakeStart(en, t);
+      if (abyss) { en.state = 'cast'; en.stT = bw(en, 0.6); en.flashI = Math.floor(Math.random() * en.segs.length); en.lunges = (en.tier >= 3 ? 2 : 1) + (ph >= 3 ? 1 : 0); } else snakeStart(en, t);
       en.busy = true;
     }
     return null;
   }
-  if (en.state === 'cast') { en.stT -= dt; en.spd = 0; snakeFollow(en, dt); en.vv = 7; if (en.stT <= 0) { en.vv = 0; snakeStart(en, en.tg || player); } return { mx: 0, my: 0 }; }
+  if (en.state === 'cast') { en.stT -= dt; en.spd = 0; snakeFollow(en, dt); en.vv = 7; if (en.stT <= 0) { en.vv = 0; if (abyss) abyssAim(en); else snakeStart(en, en.tg || player); } return { mx: 0, my: 0 }; }
+  if (en.state === 'windup') { en.stT -= dt; en.spd = 0; snakeFollow(en, dt); if (en.stT <= 0) { en.state = 'dash'; en.stT = ABYSS_DASH; } return { mx: 0, my: 0 }; }
+  if (en.state === 'dash') {                            // Abgrundstoss: der Kopf schiesst die Bahn entlang, der Leib folgt seiner Spur
+    en.stT -= dt; en.spd = 0;
+    const S = en.slide, k = 1 - Math.max(0, en.stT) / ABYSS_DASH, e = 1 - (1 - k) * (1 - k);
+    en.x = S[0] + (S[2] - S[0]) * e; en.y = S[1] + (S[3] - S[1]) * e; snakeFollow(en, dt);
+    if (en.stT <= 0) { en.lunges--; if (en.lunges > 0) abyssAim(en, true); else { en.state = 'tired'; en.stT = 1.2; en.busy = false; } }
+    return { mx: 0, my: 0 };
+  }
   if (en.state === 'circle') {
     en.stT -= dt; en.spd = 0;
     const k = 1 - Math.max(0, en.stT) / en.ringT, r = 300 + (80 - 300) * k;
@@ -7530,7 +7568,7 @@ function drawDarkness() {
     ctx.fillStyle = pr.color; ctx.beginPath(); ctx.arc(pr.x - ox, pr.y - oy, pr.r, 0, Math.PI * 2); ctx.fill();
   }
   for (let i = 0; i < zones.length; i++) { const z = zones[i]; if (z.sk === 1 && (z.kind === 'pull' || z.kind === 'burst')) { drawHalo(z.x - ox, z.y - oy, 70, '#ffe9a0', 0.5); ctx.save(); ctx.translate(z.x - ox, z.y - oy); drawBossZone(ctx, z); ctx.restore(); } }
-  const dl = (remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies;
+  const dl = snakeDrawOrder((remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies);
   for (let i = 0; i < dl.length; i++) {
     const en = dl[i], ex = en.x - ox, ey = en.y - oy;
     if (ex < -80 || ex > W + 80 || ey < -80 || ey > H + 80) continue;
@@ -10074,126 +10112,148 @@ function kelpEye(g, x, y, rx, ry, s, lid, k) {
   g.restore();
   g.strokeStyle = 'rgba(12,6,16,0.38)'; g.lineWidth = Math.max(1.2, ry * 0.3); g.lineCap = 'round'; g.beginPath(); g.ellipse(x, y, rx * 1.12, ry * 1.32, 0, 0.18 * 3.1416, 0.82 * 3.1416); g.stroke();
 }
-const ABY_R = [[0, -1.02], [0.42, -0.92], [0.74, -0.58], [0.8, -0.1], [0.62, 0.4], [0.4, 0.9], [0.22, 1.3]], ABY_L = [[-0.38, -0.95], [-0.7, -0.62], [-0.76, -0.12], [-0.6, 0.36], [-0.44, 0.82], [-0.2, 1.28]];
-function abyssCrest(R, o) {   // Flossenkamm hinter dem Kopf: ungleich lange, ungleich gebogene Strahlen
-  const t = o.t, A = [];
-  for (let k = 0; k < 9; k++) {
-    const u = k / 8, a = -Math.PI * 0.97 + u * Math.PI * 0.94 + (bhash(k + 300) - 0.5) * 0.12, ca = Math.cos(a), sa = Math.sin(a);
-    const l = R * (k === 3 ? 0.65 : 1.05 + 0.6 * bhash(k + 310)), bx = ca * R * 0.62, by = sa * R * 0.7 - R * 0.12, ta = a + Math.sin(t * 2.4 + k * 0.9) * 0.07, bend = (bhash(k + 320) - 0.5) * 0.7;
-    A.push({ bx: bx, by: by, tx: bx + Math.cos(ta + bend * 0.5) * l, ty: by + Math.sin(ta + bend * 0.5) * l * 0.9, cx: bx + Math.cos(ta) * l * 0.55 - Math.sin(ta) * l * 0.12 * bend * 2, cy: by + Math.sin(ta) * l * 0.5 + Math.cos(ta) * l * 0.12 * bend * 2 });
+// 7.32: Abgrundschlange neu gezeichnet (Rückmeldung: Kopf kaum zu sehen, die Strahlen wirken wie Bildfehler, zu nah an der Königin). Draufsicht, +y zeigt in die
+// Laufrichtung; im Spiel dreht erst drawBossSprite das fertige Bild (artRot), beim Wenden muss nichts neu gezeichnet werden. Kopf: schmaler Schädel zwischen zwei
+// Unterkieferhälften, die wie bei einer Schlange auseinanderklappen (beim Ausholen und Zustossen weit), innen Nadelzähne, vorn je ein Hauer; ein Köder hängt vor
+// dem Maul. Leib: glattes dunkles Band mit Rückenstacheln und einem kühlen Randlicht, je Glied zwei Leuchtpunkte, die als Welle vom Kopf zum Schwanz laufen.
+const ABY_HS = 1.25;   // der Kopf ist grösser gezeichnet als sein Trefferkreis
+const ABY_SKULL = [[0, -1.08], [0.3, -1.0], [0.5, -0.72], [0.52, -0.3], [0.44, 0.15], [0.33, 0.55], [0.2, 0.86], [0.06, 1.0], [-0.06, 1.0], [-0.2, 0.86], [-0.33, 0.55], [-0.44, 0.15], [-0.52, -0.3], [-0.5, -0.72], [-0.3, -1.0]];
+function abyssOpen(o) { const ph = o.phase || 1; return o.roar ? 1 : (o.open !== undefined ? o.open : Math.max(ph >= 3 ? 0.32 : 0, 0.1 + 0.09 * Math.sin(o.t * 1.9))); }
+function abyssJaws(R, o) {   // beide Kieferhälften als Mittellinien (Gelenk hinten, Spitze vorn); offen drehen sie um das Gelenk nach aussen
+  const op = abyssOpen(o), J = [];
+  for (let sd = 0; sd < 2; sd++) {
+    const s = sd ? -1 : 1, th = -s * (0.04 + 0.62 * op), c = Math.cos(th), sn = Math.sin(th), hx = s * 0.46 * R, hy = -0.32 * R, Q = [];
+    for (let i = 0; i <= 6; i++) {
+      const u = i / 6, dx = s * R * (0.12 * Math.sin(Math.PI * u * 0.9) - 0.4 * u * u), dy = R * 1.72 * u + Math.sin(o.t * 2.3 + i * 0.6 + sd) * R * 0.01;
+      Q.push([hx + c * dx - sn * dy, hy + sn * dx + c * dy]);
+    }
+    J.push(Q);
   }
-  return A;
+  return { op: op, R: J[0], L: J[1] };
 }
-function abyssParts(R, o) {
-  const t = o.t, open = o.roar ? 1 : (o.open !== undefined ? 0.8 : 0.42 + 0.06 * Math.sin(t * 2.2)), jw = R * (0.09 + 0.2 * open), Rm = [], Lm = [];
-  for (let i = 0; i <= 8; i++) {
-    const s = i / 8, y = R * (-0.02 + 1.34 * s), w = jw * Math.sin(Math.PI * Math.pow(s, 0.8)) * (0.85 + 0.3 * bhash(i + 330)), sw = Math.sin(t * 1.7 + i * 0.7) * R * 0.012;
-    Rm.push([R * 0.04 + w * 1.08 + sw, y]); Lm.push([R * 0.04 - w * 0.92 + sw, y]);
-  }
-  return { Rm: Rm, Lm: Lm, eyes: [{ x: -R * 0.4, y: -R * 0.5, r: R * 0.17 }, { x: R * 0.34, y: -R * 0.34, r: R * 0.14 }],
-    bar: [R * 0.12, R * 1.32, R * (-0.2 + Math.sin(t * 1.6) * 0.18), R * 1.9, R * (-0.45 + Math.sin(t * 1.9) * 0.2), R * 2.1 + Math.sin(t * 2.3) * R * 0.1] };
-}
+function abyssLure(R, o) { const t = o.t; return [0, R * 0.95, Math.sin(t * 1.3) * R * 0.18, R * 1.45, Math.sin(t * 1.6) * R * 0.25, R * 1.95 + Math.sin(t * 2.1) * R * 0.08]; }
 function abyssSerpentGlow(g, R, o) {
-  const TAU = 6.2832, vv = o.vv | 0, ph = o.phase || 1, dead = BOSS_FX.dead, tm = o.time || 0, rgb = vv === 7 ? '225,240,255' : (ph >= 3 ? '175,115,255' : '90,176,255'), sp = ph >= 3 ? 8 : 4.5, si = o.segI || 0;
-  const wv = function(i) { return dead ? 0.08 : 0.18 + 0.82 * Math.max(0, Math.sin(tm * sp - i * 0.6)); };
-  if (o.segA != null && !o.inRot) { g.save(); g.rotate(o.segA - Math.PI / 2); abyssSerpentGlow(g, R, Object.assign({}, o, { inRot: 1 })); g.restore(); return; }   // Kopf und Glieder blicken in Laufrichtung der Kette
-  const dot = function(x, y, r, a) { bkHalo(g, x, y, r * 4.5, rgb, 0.6 * a); g.fillStyle = 'rgba(' + (vv === 7 ? '255,255,255' : ph >= 3 ? '232,214,255' : '218,236,255') + ',' + (0.55 + 0.45 * a) + ')'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); };
+  const TAU = 6.2832, vv = o.vv | 0, ph = o.phase || 1, dead = BOSS_FX.dead, tm = o.time || 0, si = o.segI || 0;
+  const rgb = vv === 7 ? '225,240,255' : (ph >= 3 ? '175,115,255' : '90,176,255'), core = vv === 7 ? '255,255,255' : (ph >= 3 ? '232,214,255' : '218,236,255'), sp = ph >= 3 ? 8 : 4.5;
+  const wv = function(i) { return dead ? 0.08 : 0.18 + 0.82 * Math.max(0, Math.sin(tm * sp - i * 0.6)); };   // Lichtwelle vom Kopf zum Schwanz
+  const dot = function(x, y, r, a) { bkHalo(g, x, y, r * 4.5, rgb, 0.6 * a); g.fillStyle = 'rgba(' + core + ',' + (0.55 + 0.45 * a) + ')'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); };
   if (vv === 5 || vv === 6) {
-    const r = R * (vv === 6 ? 0.8 : 1), b = 3 + si * 1.3;
-    if (vv === 6) { dot(0, -r * 1.9, r * 0.07, wv(b)); dot(r * 0.2, -r * 0.5, r * 0.055, wv(b - 0.5)); }
-    else for (let s = -1; s <= 1; s += 2) { dot(s * r * 0.55, -r * 0.28, r * 0.065, wv(b - s * 0.15)); dot(s * r * 0.5, r * 0.34, r * 0.065, wv(b + 0.5 + s * 0.15)); }
+    const r = R * (vv === 6 ? 0.85 : 1), b = 3 + si * 1.3;
+    if (vv === 6) { dot(0, -r * 1.75, r * 0.07, wv(b)); dot(0, -r * 0.2, r * 0.06, wv(b - 0.4)); }
+    else for (let s = -1; s <= 1; s += 2) dot(s * r * 0.5, r * 0.05, r * 0.07, wv(b + s * 0.12));
     return;
   }
-  const P = abyssParts(R, o), C = abyssCrest(R, o);
-  for (let k = 0; k < C.length; k++) if (k !== 3) dot(C[k].tx, C[k].ty, R * 0.035, wv(0.5 + k * 0.35));
-  for (let i = 2; i < 6; i++) { dot(ABY_R[i][0] * R * 0.84, ABY_R[i][1] * R, R * 0.04, wv(i * 0.45)); if (i - 1 < ABY_L.length) dot(ABY_L[i - 1][0] * R * 0.84, ABY_L[i - 1][1] * R, R * 0.04, wv(i * 0.45 + 0.3)); }
-  dot(P.bar[4], P.bar[5], R * 0.05, wv(4.4));
-  for (let s = 0; s < 2; s++) {   // winzige weisse Augen
-    const e = P.eyes[s];
-    if (dead) { g.strokeStyle = '#d8e0f0'; g.lineWidth = Math.max(1, R * 0.03); g.beginPath(); g.moveTo(e.x - e.r * 0.4, e.y - e.r * 0.4); g.lineTo(e.x + e.r * 0.4, e.y + e.r * 0.4); g.moveTo(e.x + e.r * 0.4, e.y - e.r * 0.4); g.lineTo(e.x - e.r * 0.4, e.y + e.r * 0.4); g.stroke(); continue; }
-    bkHalo(g, e.x + (o.lookX || 0) * e.r * 0.25, e.y + (o.lookY || 0) * e.r * 0.2, e.r * 1.7, '215,232,255', 0.5);
-    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(e.x + (o.lookX || 0) * e.r * 0.25, e.y + (o.lookY || 0) * e.r * 0.2, e.r * (s ? 0.26 : 0.32), 0, TAU); g.fill();
+  g.save(); g.scale(ABY_HS, ABY_HS);
+  const J = abyssJaws(R, o), lu = abyssLure(R, o);
+  if (J.op > 0.2 && !dead) bkHalo(g, 0, R * 0.75, R * (0.7 + 0.5 * J.op), ph >= 3 ? '200,60,140' : '150,60,170', 0.35 * J.op);   // der Rachen glimmt
+  for (let sd = 0; sd < 2; sd++) { const Q = sd ? J.L : J.R; for (let i = 2; i <= 5; i++) dot(Q[i][0] * 1.06, Q[i][1], R * 0.035, wv(i * 0.45 + sd * 0.2)); }   // Leuchtpunkte entlang der Kiefer
+  dot(lu[4], lu[5], R * 0.07, dead ? 0.1 : 0.55 + 0.45 * Math.sin(tm * 3.1));
+  for (let s = 0; s < 2; s++) {   // kleine, bleiche, leuchtende Augen in tiefen Gruben
+    const ex = (s ? -1 : 1) * R * 0.34, ey = -R * 0.14, lx = ex + (o.lookX || 0) * R * 0.03, ly = ey + (o.lookY || 0) * R * 0.025;
+    if (dead) { g.strokeStyle = '#d8e0f0'; g.lineWidth = Math.max(1, R * 0.03); g.beginPath(); g.moveTo(ex - R * 0.05, ey - R * 0.05); g.lineTo(ex + R * 0.05, ey + R * 0.05); g.moveTo(ex + R * 0.05, ey - R * 0.05); g.lineTo(ex - R * 0.05, ey + R * 0.05); g.stroke(); continue; }
+    bkHalo(g, lx, ly, R * 0.26, ph >= 3 ? '200,150,255' : '215,232,255', 0.55);
+    g.fillStyle = '#f4f8ff'; g.beginPath(); g.ellipse(lx, ly, R * 0.06, R * 0.045, 0, 0, TAU); g.fill();
+    g.fillStyle = '#05060c'; g.beginPath(); g.ellipse(lx, ly, R * 0.012, R * 0.04, 0, 0, TAU); g.fill();   // schmale senkrechte Pupille
   }
+  g.restore();
 }
 function drawAbyssSerpent(g, R, o) {
   const TAU = 6.2832, vv = o.vv | 0, t = o.t, ph = o.phase || 1, c = o.color, si = o.segI || 0;
-  const tn = bossTones(mixCol(c, '#2a3a6a', 0.22), '#4a6aa0', '#02040c');
-  g.lineJoin = 'round'; g.lineCap = 'round';
-  if (vv === 5 || vv === 6) {   // Glied und Schwanz: knotige Wülste, an den Seiten dünne Flossenstrahlen
-    const tail = vv === 6, r = R * (tail ? 0.8 : 1);
-    g.save(); if (o.segA != null) g.rotate(o.segA - Math.PI / 2);   // +y zeigt zum Kopf
-    if (o.segD) {   // Brücke: der Wulst reicht bis unter das vordere Glied, so reisst die Kette nicht ab
-      const bl = Math.min(o.segD * 1.12, r * 2.6), Q = [[0, 0], [0, bl * 0.5], [0, bl * 1.02]];
-      g.beginPath(); orgLimb(g, Q, r * 0.6, r * 0.52, 0); g.fillStyle = mixCol(c, '#2a3a6a', 0.14); g.fill(); bossRim(g, r, 0.5);
-      g.strokeStyle = 'rgba(110,150,230,0.2)'; g.lineWidth = Math.max(1, r * 0.06); g.beginPath(); g.moveTo(0, r * 0.3); g.lineTo(0, bl); g.stroke();
+  const tn = bossTones(mixCol(c, '#2a3a6a', 0.22), '#4a6aa0', '#02040c'), edge = ph >= 3 ? 'rgba(170,130,255,0.32)' : 'rgba(100,145,235,0.3)';
+  g.save(); g.lineJoin = 'round'; g.lineCap = 'round';
+  if (o.segA != null) g.rotate(o.segA - Math.PI / 2);   // nur für Bögen ausserhalb des Spiels; im Spiel dreht drawBossSprite das Bild
+  if (vv === 5 || vv === 6) {   // Glied und Schwanz
+    const tail = vv === 6, r = R * (tail ? 0.85 : 1);
+    if (o.segD) {   // Brücke: das Band reicht bis unter das vordere Glied (gemalt wird vom Schwanz zum Kopf), so bleibt der Leib ein Stück
+      const bl = Math.min(o.segD * 1.1, r * 2.6);
+      g.beginPath(); orgLimb(g, [[0, 0], [Math.sin(t * 1.7 + si) * r * 0.05, bl * 0.5], [0, bl]], r * 0.6, r * 0.58, 0);
+      g.fillStyle = mixCol(c, '#2a3a6a', 0.14); g.fill(); bossRim(g, r, 0.4);
     }
-    g.strokeStyle = 'rgba(62,90,160,0.75)'; g.lineWidth = Math.max(1, r * 0.05); g.beginPath();
-    for (let s = -1; s <= 1; s += 2) for (let k = 0; k < 3; k++) {
-      const y = r * (-0.45 + k * 0.45) + (bhash(si * 5 + k + s + 340) - 0.5) * r * 0.15, l = r * (0.55 + 0.45 * bhash(si * 3 + k * 7 + s + 350)) * (tail ? 1.15 : 1);
-      g.moveTo(s * r * 0.8, y); g.quadraticCurveTo(s * (r * 0.8 + l * 0.6), y - l * 0.15, s * (r * 0.8 + l), y - l * 0.55 - Math.sin(t * 3 + k + si) * r * 0.08);
+    if (si === 0 && !tail) {   // Brustflossen gleich hinter dem Kopf
+      for (let s = -1; s <= 1; s += 2) {
+        const sw = Math.sin(t * 2.6 + s) * r * 0.08;
+        g.beginPath(); g.moveTo(s * r * 0.55, r * 0.3); g.quadraticCurveTo(s * r * 1.3, r * 0.25 + sw, s * r * 1.3, -r * 0.45 + sw); g.quadraticCurveTo(s * r * 0.95, -r * 0.2, s * r * 0.6, -r * 0.25); g.closePath();
+        g.fillStyle = 'rgba(22,32,76,0.85)'; g.fill(); g.strokeStyle = edge; g.lineWidth = Math.max(1, r * 0.035); g.stroke();
+      }
     }
-    g.stroke();
+    if (tail) {   // Schwanzflosse: ein langes, schwingendes Band
+      const F = [[0.3, -0.5], [0.66, -1.35], [0.38, -2.3], [0, -2.75], [-0.38, -2.3], [-0.66, -1.35], [-0.3, -0.5]].map(function(p) { return [p[0] * r + Math.sin(t * 2.6 + p[1]) * r * 0.1 * (-p[1] / 2), p[1] * r]; });
+      g.beginPath(); orgSmooth(g, F, true); g.fillStyle = 'rgba(24,36,86,0.7)'; g.fill(); g.strokeStyle = edge; g.lineWidth = Math.max(1, r * 0.04); g.stroke();
+      g.strokeStyle = 'rgba(80,110,200,0.35)'; g.beginPath(); for (let k = -2; k <= 2; k++) { g.moveTo(k * r * 0.08, -r * 0.6); g.lineTo(k * r * 0.22 + Math.sin(t * 2.6 - 2.2) * r * 0.1, -r * 2.3); } g.stroke();
+    }
     g.beginPath();
-    if (tail) orgSmooth(g, [[0, -0.7], [0.55, -0.4], [0.62, 0.3], [0.42, 1.1], [0.12, 1.9], [0.01, 2.1], [-0.12, 1.85], [-0.38, 1.1], [-0.58, 0.3], [-0.5, -0.4]].map(function(p, i) { return [p[0] * r * (1 + 0.05 * (bhash(si + i + 360) - 0.5)), -p[1] * r]; }), true);   // Schwanzspitze zeigt nach hinten (-y)
-    else orgSmooth(g, orgRing(0, 0, r * 0.95, r * 0.88, 12, 0.06, si * 3.1 + 20, t, 0.01), true);
-    g.fillStyle = bossShade(g, -r, r * (tail ? 2 : 1), tn); g.fill(); bossRim(g, r, 0.6);
+    if (tail) orgSmooth(g, [[0, 0.95], [0.6, 0.6], [0.58, 0], [0.38, -0.8], [0.16, -1.55], [0.03, -2.0], [-0.03, -2.0], [-0.16, -1.55], [-0.38, -0.8], [-0.58, 0], [-0.6, 0.6]].map(function(p) { return [p[0] * r + (p[1] < 0 ? Math.sin(t * 2.6 + p[1]) * r * 0.06 * -p[1] : 0), p[1] * r]; }), true);
+    else orgSmooth(g, orgRing(0, 0, r * 0.74, r * 0.98, 12, 0.05, si * 3.1 + 20, t, 0.01), true);
+    const bq = g.createLinearGradient(-r * 0.8, 0, r * 0.8, 0); bq.addColorStop(0, tn.dark); bq.addColorStop(0.42, tn.body); bq.addColorStop(0.58, tn.body); bq.addColorStop(1, tn.dark);
+    g.fillStyle = bq; g.fill(); bossRim(g, r, 0.6); g.strokeStyle = edge; g.lineWidth = Math.max(1, r * 0.04); g.stroke();
     g.save(); g.clip();
-    orgSpots(g, si * 9 + 60, 7, 0, r * (tail ? -0.6 : 0), r * 0.7, r * (tail ? 1.2 : 0.7), r * 0.08, r * 0.22, '2,6,20', 0.15, 0.4);
-    orgSpots(g, si * 7 + 90, 6, 0, r * (tail ? -0.6 : 0), r * 0.7, r * (tail ? 1.2 : 0.7), r * 0.012, r * 0.03, '150,190,255', 0.12, 0.3);
-    g.strokeStyle = 'rgba(2,4,14,0.45)'; g.lineWidth = Math.max(1, r * 0.06); g.beginPath(); g.moveTo(-r, -r * 0.62); g.quadraticCurveTo(0, -r * 0.4, r, -r * 0.62); g.stroke();
-    g.beginPath(); g.moveTo(0, -r * 0.5); g.lineTo(0, r * (tail ? -1.8 : 0.8)); g.strokeStyle = 'rgba(110,150,230,0.2)'; g.lineWidth = r * 0.05; g.stroke();
-    bossGloss(g, -r * 0.25, -r * 0.3, r * 0.5, 0.16, '170,200,255');
+    orgSpots(g, si * 9 + 60, 6, 0, r * (tail ? -0.6 : 0), r * 0.6, r * (tail ? 1.2 : 0.8), r * 0.07, r * 0.2, '2,6,20', 0.15, 0.4);
+    orgSpots(g, si * 7 + 90, 5, 0, r * (tail ? -0.6 : 0), r * 0.6, r * (tail ? 1.2 : 0.8), r * 0.012, r * 0.03, '150,190,255', 0.1, 0.25);
+    bossGloss(g, -r * 0.2, -r * 0.1, r * 0.5, 0.14, '170,200,255');
     g.restore();
-    g.restore();
+    g.beginPath();   // Rückenstacheln, nach hinten gelegt
+    for (let k = 0; k < (tail ? 2 : 3); k++) { const y = r * (0.55 - k * 0.5), l = r * (0.36 + 0.1 * bhash(si * 3 + k + 360)); g.moveTo(-r * 0.09, y); g.lineTo(0, y - l); g.lineTo(r * 0.09, y); }
+    g.fillStyle = mixCol(c, '#02040c', 0.55); g.fill(); g.strokeStyle = edge; g.lineWidth = Math.max(1, r * 0.025); g.stroke();
     abyssSerpentGlow(g, R, o);
+    g.restore();
     return;
   }
-  g.save(); if (o.segA != null) g.rotate(o.segA - Math.PI / 2);   // Kopf in Laufrichtung, der Kamm zeigt nach hinten zur Kette
-  const P = abyssParts(R, o), C = abyssCrest(R, o), Rm = P.Rm, Lm = P.Lm;
-  // Flossenkamm: Fetzen zwischen den Strahlen hängen unterschiedlich tief, einzelne Strahlen sind abgebrochen
-  g.beginPath(); g.moveTo(C[0].bx, C[0].by); g.lineTo(C[0].tx, C[0].ty);
-  for (let k = 1; k < C.length; k++) g.quadraticCurveTo((C[k - 1].tx + C[k].tx) / 2 * 0.8, (C[k - 1].ty + C[k].ty) / 2 * 0.8 + R * 0.1 * bhash(k + 370), C[k].tx, C[k].ty);
-  g.lineTo(C[C.length - 1].bx, C[C.length - 1].by); g.closePath();
-  g.fillStyle = 'rgba(20,28,66,0.7)'; g.fill();
-  g.strokeStyle = 'rgba(78,112,190,0.8)'; g.lineWidth = Math.max(1, R * 0.035);
-  g.beginPath(); for (let k = 0; k < C.length; k++) { g.moveTo(C[k].bx, C[k].by); g.quadraticCurveTo(C[k].cx, C[k].cy, C[k].tx, C[k].ty); } g.stroke();
-  // Kopf: langes, schmales, ungleiches Fleisch mit Flecken, Poren und Adern
-  g.beginPath(); orgSmooth(g, ABY_R.map(function(p, i) { return [p[0] * R + Math.sin(t * 1.6 + i) * R * 0.012, p[1] * R]; }).concat([[R * 0.02, R * 1.42]], ABY_L.slice().reverse().map(function(p, i) { return [p[0] * R + Math.sin(t * 1.9 + i * 1.3) * R * 0.012, p[1] * R]; })), true);
-  g.fillStyle = bossShade(g, -R * 1.0, R * 1.4, tn); g.fill(); bossRim(g, R, 0.62);
-  g.save(); g.clip();
-  orgSpots(g, 401, 16, 0, R * 0.1, R * 0.7, R * 1.0, R * 0.05, R * 0.17, '2,6,22', 0.15, 0.4);
-  orgSpots(g, 433, 10, 0, R * 0.1, R * 0.6, R * 1.0, R * 0.04, R * 0.1, '140,150,255', 0.04, 0.1);
-  orgSpots(g, 461, 22, 0, R * 0.1, R * 0.6, R * 1.0, R * 0.008, R * 0.022, '170,205,255', 0.12, 0.3);
-  g.beginPath(); orgVeins(g, -R * 0.3, -R * 0.95, 1.9, R * 0.26, 3, 405, 0.5); orgVeins(g, R * 0.3, -R * 0.9, 1.3, R * 0.26, 3, 409, 0.5);
-  g.strokeStyle = 'rgba(120,110,230,0.2)'; g.lineWidth = Math.max(1, R * 0.015); g.stroke();
-  bossGloss(g, -R * 0.2, -R * 0.55, R * 0.55, 0.14, '170,200,255');
-  g.restore();
-  // Augengruben und Brauenwülste
-  for (let s = 0; s < 2; s++) {
-    const e = P.eyes[s];
-    orgBlob(g, e.x, e.y, e.r * 1.35, e.r * 1.1, 9, 0.14, 420 + s * 9, t, 0.01); g.fillStyle = 'rgba(2,3,10,0.85)'; g.fill();
-    g.strokeStyle = mixCol(c, '#02040c', 0.4); g.lineWidth = e.r * 0.55; g.beginPath(); g.moveTo(e.x - e.r * 1.5, e.y - e.r * 0.5); g.quadraticCurveTo(e.x, e.y - e.r * 1.9, e.x + e.r * 1.5, e.y - e.r * (s ? 0.9 : 0.3)); g.stroke();
+  g.scale(ABY_HS, ABY_HS);
+  const J = abyssJaws(R, o), lu = abyssLure(R, o);
+  // Köder: ein Faden vom Kinn, schwingt vor dem Maul (das Licht kommt aus abyssSerpentGlow)
+  g.strokeStyle = 'rgba(120,150,220,0.75)'; g.lineWidth = Math.max(1, R * 0.03); g.beginPath(); g.moveTo(lu[0], lu[1]); g.quadraticCurveTo(lu[2], lu[3], lu[4], lu[5]); g.stroke();
+  g.fillStyle = 'rgba(70,100,170,0.9)'; g.beginPath(); g.arc(lu[4], lu[5], R * 0.06, 0, TAU); g.fill();
+  // Kamm: fünf kurze, nach hinten gelegte Stachelstrahlen mit zerrissener Haut dazwischen
+  const C = [];
+  for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * 0.36 + Math.sin(t * 2.4 + k * 0.9) * 0.05, l = R * (0.55 + 0.3 * bhash(k + 300) + (k === 2 ? 0.2 : 0)), bx = (k - 2) * R * 0.15, by = -R * 0.85; C.push([bx, by, bx + Math.cos(a) * l, by + Math.sin(a) * l]); }
+  g.beginPath(); g.moveTo(C[0][0], C[0][1]); for (let k = 0; k < 5; k++) g.lineTo(C[k][2], C[k][3]); g.lineTo(C[4][0], C[4][1]); g.closePath(); g.fillStyle = 'rgba(20,28,66,0.75)'; g.fill();
+  g.strokeStyle = 'rgba(90,125,205,0.7)'; g.lineWidth = Math.max(1, R * 0.035); g.beginPath(); for (let k = 0; k < 5; k++) { g.moveTo(C[k][0], C[k][1]); g.lineTo(C[k][2], C[k][3]); } g.stroke();
+  // Rachen zwischen den Kieferhälften: dunkel, innen ein violett-roter Schimmer und Rillen
+  g.beginPath(); orgSmooth(g, J.R.concat(J.L.slice().reverse()), true);
+  const mq = g.createRadialGradient(0, R * 0.8, R * 0.05, 0, R * 0.6, R * 1.3); mq.addColorStop(0, ph >= 3 ? '#5a0c3a' : '#2c0a3a'); mq.addColorStop(0.5, '#0c0412'); mq.addColorStop(1, '#030106');
+  g.fillStyle = mq; g.fill();
+  g.save(); g.clip(); g.strokeStyle = 'rgba(200,90,160,0.18)'; g.lineWidth = Math.max(1, R * 0.02); g.beginPath();
+  for (let k = 0; k < 6; k++) { const y = R * (0.2 + k * 0.22); g.moveTo(-R * 1.2, y + R * 0.15); g.quadraticCurveTo(0, y - R * 0.12, R * 1.2, y + R * 0.15); }
+  g.stroke(); g.restore();
+  // Kieferhälften: knochige Bänder, innen Nadelzähne (zeigen in den Schlund, einzelne fehlen), an der Spitze ein langer Hauer
+  for (let sd = 0; sd < 2; sd++) {
+    const Q = sd ? J.L : J.R;
+    g.beginPath(); orgLimb(g, Q, R * 0.14, R * 0.05, 0.05); g.fillStyle = bossShade(g, -R * 0.4, R * 1.5, tn); g.fill(); bossRim(g, R, 0.6); g.strokeStyle = edge; g.lineWidth = Math.max(1, R * 0.025); g.stroke();
   }
-  // Maul: schmaler, ungleich offener Spalt in dunklem Violett, Lippen als Wulst, darin Nadelzähne
-  g.beginPath(); orgSmooth(g, Rm.concat(Lm.slice().reverse()), true);
-  const mq = g.createLinearGradient(0, 0, 0, R * 1.35); mq.addColorStop(0, '#1a0a30'); mq.addColorStop(0.5, '#06030c'); mq.addColorStop(1, '#10061c');
-  g.fillStyle = mq; g.fill(); g.strokeStyle = 'rgba(150,120,230,0.3)'; g.lineWidth = Math.max(1, R * 0.03); g.stroke();
   g.beginPath();
   for (let sd = 0; sd < 2; sd++) {
-    const M = sd ? Lm : Rm, dir = sd ? 1 : -1;
-    for (let i = 1; i < 8; i++) {
-      const hs = bhash(i * 5 + sd * 17 + 380);
-      if (hs < 0.14) continue;   // einzelne Zähne fehlen
-      const len = R * (0.1 + 0.16 * bhash(i * 7 + sd * 3 + 390)) * (i === 3 ? 1.9 : 1) * (0.8 + 0.4 * Math.sin(Math.PI * i / 8)), x = M[i][0], y = M[i][1];
-      g.moveTo(x, y - R * 0.032); g.lineTo(x, y + R * 0.032); g.lineTo(x + dir * len * (0.7 + 0.5 * hs), y + len * (0.45 + 0.4 * hs));
+    const Q = sd ? J.L : J.R, mx = (J.R[3][0] + J.L[3][0]) / 2, my = (J.R[3][1] + J.L[3][1]) / 2;
+    for (let i = 0; i < 9; i++) {
+      const hs = bhash(i * 5 + sd * 17 + 380); if (hs < 0.15 && i < 8) continue;
+      const u = (i + 1) / 9.4 * 6, k = Math.min(5, Math.floor(u)), f = u - k, x = Q[k][0] + (Q[k + 1][0] - Q[k][0]) * f, y = Q[k][1] + (Q[k + 1][1] - Q[k][1]) * f;
+      const dx = Q[k + 1][0] - Q[k][0], dy = Q[k + 1][1] - Q[k][1], dl = Math.hypot(dx, dy) || 1, tx = dx / dl, ty = dy / dl;
+      let nx = -ty, ny = tx; if ((mx - x) * nx + (my - y) * ny < 0) { nx = -nx; ny = -ny; }   // Normale zeigt in den Mund
+      const fang = i === 8, l = R * (fang ? 0.2 : 0.09 + 0.12 * (i / 8) + 0.05 * hs), w = R * (fang ? 0.045 : 0.025), back = fang ? 1.6 : -0.45;   // Hauer ragen nach vorn über das Maul hinaus und kreuzen sich, die übrigen zeigen nach hinten
+      g.moveTo(x - tx * w, y - ty * w); g.lineTo(x + tx * w, y + ty * w); g.lineTo(x + (nx + tx * back) * l, y + (ny + ty * back) * l); g.closePath();
     }
   }
-  g.fillStyle = '#e4e8d6'; g.fill();
-  // ein langer Fühlfaden am Kinn, schwingt; die Spitze leuchtet
-  g.strokeStyle = 'rgba(120,150,220,0.75)'; g.lineWidth = Math.max(1, R * 0.03); g.beginPath(); g.moveTo(P.bar[0], P.bar[1]); g.quadraticCurveTo(P.bar[2], P.bar[3], P.bar[4], P.bar[5]); g.stroke();
-  g.fillStyle = 'rgba(70,100,170,0.9)'; g.beginPath(); g.arc(P.bar[4], P.bar[5], R * 0.05, 0, TAU); g.fill();
+  g.fillStyle = '#e6e8d8'; g.fill(); g.strokeStyle = 'rgba(40,30,50,0.5)'; g.lineWidth = Math.max(0.6, R * 0.008); g.stroke();
+  // Schädel: schmaler Keil, oben ein Grat, über den Augen kantige Wülste, vorn zwei Nasengruben
+  g.beginPath(); orgSmooth(g, ABY_SKULL.map(function(p, i) { return [p[0] * R + Math.sin(t * 1.6 + i) * R * 0.008, p[1] * R]; }), true);
+  g.fillStyle = bossShade(g, -R * 1.0, R * 1.1, tn); g.fill(); bossRim(g, R, 0.62); g.strokeStyle = edge; g.lineWidth = Math.max(1, R * 0.03); g.stroke();
+  g.save(); g.clip();
+  orgSpots(g, 401, 14, 0, R * 0.0, R * 0.5, R * 1.0, R * 0.04, R * 0.14, '2,6,22', 0.15, 0.4);
+  orgSpots(g, 461, 18, 0, R * 0.0, R * 0.5, R * 1.0, R * 0.008, R * 0.02, '170,205,255', 0.12, 0.28);
+  g.beginPath(); orgVeins(g, -R * 0.2, -R * 0.95, 1.7, R * 0.3, 3, 405, 0.5); orgVeins(g, R * 0.2, -R * 0.95, 1.4, R * 0.3, 3, 409, 0.5);
+  g.strokeStyle = 'rgba(120,110,230,0.18)'; g.lineWidth = Math.max(1, R * 0.014); g.stroke();
+  g.strokeStyle = 'rgba(2,4,12,0.55)'; g.lineWidth = Math.max(1, R * 0.05); g.beginPath(); g.moveTo(0, -R * 1.0); g.lineTo(0, R * 0.7); g.stroke();
+  bossGloss(g, -R * 0.15, -R * 0.45, R * 0.45, 0.13, '170,200,255');
   g.restore();
+  g.fillStyle = 'rgba(2,3,10,0.85)'; for (let s = -1; s <= 1; s += 2) { g.beginPath(); g.ellipse(s * R * 0.08, R * 0.82, R * 0.035, R * 0.05, s * 0.3, 0, TAU); g.fill(); }
+  for (let s = 0; s < 2; s++) {   // Augengruben unter schräg nach vorn abfallenden Brauenwülsten: der Blick ist immer böse
+    const sx = s ? -1 : 1, ex = sx * R * 0.34, ey = -R * 0.14;
+    orgBlob(g, ex, ey, R * 0.13, R * 0.11, 9, 0.14, 420 + s * 9, t, 0.01); g.fillStyle = 'rgba(2,3,10,0.9)'; g.fill();
+    g.strokeStyle = mixCol(c, '#02040c', 0.35); g.lineWidth = R * 0.075; g.beginPath(); g.moveTo(ex + sx * R * 0.14, ey - R * 0.16); g.quadraticCurveTo(ex, ey - R * 0.16, ex - sx * R * 0.16, ey + R * 0.1); g.stroke();
+    g.strokeStyle = edge; g.lineWidth = Math.max(1, R * 0.02); g.stroke();
+  }
+  g.scale(1 / ABY_HS, 1 / ABY_HS);
   abyssSerpentGlow(g, R, o);
+  g.restore();
 }
 // Hummer-General: Hummer mit Mütze, Orden, Schulterklappen und Monokel
 function drawLobsterGeneral(g, R, o) {
@@ -10667,6 +10727,7 @@ function gulperGlow(g, R, o) {
 function gulperOpen(o) { const t = o.t; return o.pose === 'windup' || o.pose === 'dash' || o.pose === 'hide' ? 1 : o.roar ? 0.8 : 0.2 + 0.1 * Math.sin(t * 2); }
 function drawGulper(g, R, o) {
   const TAU = 6.2832, c = o.color, t = o.t, ph = o.phase || 1, dead = BOSS_FX.dead;
+  g.save(); if (o.face < 0) g.scale(-1, 1);   // 7.32: das Maul zeigt zum Ziel (vorher immer nach rechts, auch wenn du links warst)
   const open = Math.max(gulperOpen(o), ph >= 3 ? 0.55 : 0), jaw = R * (0.25 + 0.55 * open);
   const tn = bossTones(mixCol(c, '#05060c', 0.3), '#7a5a8a', '#02030a'), mem = mixHex(c, '#8a3a6e', 0.42);
   g.lineJoin = 'round'; g.lineCap = 'round';
@@ -10727,6 +10788,7 @@ function drawGulper(g, R, o) {
   if (dead) { g.strokeStyle = '#d8e0f0'; g.lineWidth = Math.max(1, R * 0.02); g.beginPath(); g.moveTo(ex - R * 0.03, ey - R * 0.03); g.lineTo(ex + R * 0.03, ey + R * 0.03); g.moveTo(ex + R * 0.03, ey - R * 0.03); g.lineTo(ex - R * 0.03, ey + R * 0.03); g.stroke(); }
   else { g.fillStyle = ph >= 3 ? '#ff7a9a' : '#cfe6ff'; g.beginPath(); g.arc(ex + (o.lookX || 0) * R * 0.012, ey + (o.lookY || 0) * R * 0.01, R * 0.036, 0, TAU); g.fill(); g.fillStyle = '#020308'; g.beginPath(); g.arc(ex + (o.lookX || 0) * R * 0.02, ey + (o.lookY || 0) * R * 0.016, R * 0.016, 0, TAU); g.fill(); }
   gulperGlow(g, R, o);
+  g.restore();
 }
 /* ------------------------------------------------------------------ Vulkan-Bosse (7.2) */
 function bkFlame(g, x, y, s, t, sd, hot) {      // flackernde Flamme (Tropfenform mit hellem Kern)
@@ -11931,14 +11993,15 @@ function animSeed(en) {
 }
 function drawBossSprite(en, sx, sy, mode) {
   const R = en.r * BOSS_VIS, ph = en.phase || 1, st = en.state, pad = Math.ceil(R * 2.75), dim = pad * 2, px = Math.min(GFX.ql === 0 ? 1536 : BOSS_BUF_MAX, Math.ceil(dim * bossBake())), bs = px / dim;      // Stufe 0 (hoch): bis 1536 Pixel
-  const tg = en.tg || player, dxp = tg.x - en.x, dyp = tg.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer';
+  const tg = en.tg || player, dxp = tg.x - en.x, dyp = tg.y - en.y, sideView = en.type === 'haikoenig' || en.type === 'seeungeheuer' || en.type === 'schlinger';   // 7.32: der Schlinger dreht sein Maul zum Ziel
   let dirx = dxp, diry = dyp;
-  if (en.type === 'haikoenig' && (st === 'windup' || st === 'dash')) { dirx = Math.cos(en.ang); diry = Math.sin(en.ang); }
+  if ((en.type === 'haikoenig' || en.type === 'schlinger') && (st === 'windup' || st === 'dash') && en.ang != null) { dirx = Math.cos(en.ang); diry = Math.sin(en.ang); }
   if (!en.face) { en.face = dirx >= 0 ? 1 : -1; en.faceS = en.face; en.tilt = 0; }
   if (mode !== 1) {   // Blickrichtung (mit Umdreh-Animation) und Neigung zum Ziel, nur im Hauptdurchgang fortschreiben
     if (dirx > 14) en.face = 1; else if (dirx < -14) en.face = -1;
     en.faceS += (en.face - en.faceS) * 0.28;
-    en.tilt += ((sideView ? Math.max(-0.5, Math.min(0.5, Math.atan2(en.face * diry, en.face * dirx))) : 0) - en.tilt) * 0.15;
+    const tmax = en.type === 'schlinger' ? 0.95 : 0.5;   // der lange Schlinger neigt sich weiter (sein Stoss geht auch steil nach oben / unten)
+    en.tilt += ((sideView ? Math.max(-tmax, Math.min(tmax, Math.atan2(en.face * diry, en.face * dirx))) : 0) - en.tilt) * 0.15;
   }
   const faceSign = en.faceS >= 0 ? 1 : -1, squeeze = sideView ? Math.max(0.12, Math.abs(en.faceS)) : 1;
   const open = (st === 'windup' || st === 'dash' || st === 'sog' || st === 'roar') ? 1 : (st === 'tired' ? 0.05 : -1);
@@ -11949,6 +12012,15 @@ function drawBossSprite(en, sx, sy, mode) {
   if (en.type === 'abgrundschlange') {   // Kette: Kopf und Glieder blicken in Laufrichtung (vom nächsten Glied weg), jedes Glied reicht bis zum vorderen
     const own = en.proxyOf, prev = own ? (en.segI ? (own.segs || [])[en.segI - 1] : own) : (en.segs || [])[0];
     if (prev && prev !== en) { const dx = own ? prev.x - en.x : en.x - prev.x, dy = own ? prev.y - en.y : en.y - prev.y; o.segA = Math.atan2(dy, dx); o.segD = own ? Math.hypot(dx, dy) : 0; }
+  }
+  // 7.32: die Abgrundschlange wird erst beim Aufmalen gedreht (beim Wenden kein Neuzeichnen und kein Nachhinken der gebackenen Drehung);
+  // beim Abgrundstoss zielt der Kopf die markierte Bahn entlang und dreht sich weich dorthin
+  let artRot = null;
+  if (o.segA != null) {
+    let want = o.segA;
+    if (!en.proxyOf && (st === 'windup' || st === 'dash') && en.ang != null) want = en.ang;
+    if (en.proxyOf || en.rotS == null) en.rotS = want; else if (mode !== 1) en.rotS += normalizeAngle(want - en.rotS) * 0.3;
+    artRot = en.rotS - Math.PI / 2; delete o.segA;
   }
 
   // Animation: Lidschlag, Pose (Ausholen, Sturm, Sog, Faustschlag, Tentakelangriff), Auftauchen, Rückstoss bei Treffern
@@ -12098,6 +12170,7 @@ function drawBossSprite(en, sx, sy, mode) {
   if (alpha < 1) ctx.globalAlpha *= alpha;
   ctx.scale(rk / sq * ax, rk * sq * ay);
   if (en.tilt) ctx.rotate(en.tilt);
+  if (artRot !== null) ctx.rotate(artRot);
   if (sideView) ctx.scale(squeeze, 1);
   if (mode === 1) ctx.globalAlpha = 0.55;
   ctx.drawImage(img, 0, 0, px, px, -pad, -pad, dim, dim);
@@ -12108,6 +12181,7 @@ function drawBossSprite(en, sx, sy, mode) {
   ctx.restore();
   if (mode === 1 && glowFn) {   // im Dunkeln leuchten die eigenen Lichter des Bosses voll (BOSS_GLOW)
     if (en.tilt) ctx.rotate(en.tilt);
+    if (artRot !== null) ctx.rotate(artRot);
     ctx.scale(sideView ? squeeze * faceSign : 1, 1);
     BOSS_FX.blink = blink; glowFn(ctx, R, o); BOSS_FX.blink = 0;
   }
@@ -12857,7 +12931,7 @@ function render() {
     if (Net.shots.length) rtry(drawNetShots);
     rtry(drawLeaderLinks, enemies);
     if (remoteEnemyList.length || remoteFrozen.length) rtry(drawLeaderLinks, remoteDrawList());
-    const drawList = (remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies;
+    const drawList = snakeDrawOrder((remoteEnemyList.length || remoteFrozen.length) ? enemies.concat(remoteDrawList()) : enemies);
     for (let i=0;i<drawList.length;i++){
       const en = drawList[i];
       if (en.predDead) continue;                     // vorhergesagt besiegt (Gegner eines Mitspielers)
