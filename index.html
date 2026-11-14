@@ -337,6 +337,8 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .acc-input { width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 10px; border: 2px solid rgba(126,224,255,0.25); background: rgba(5,20,35,0.6); color: var(--foam); font: 700 15px 'Nunito', sans-serif; }
 .acc-pw { display: flex; gap: 6px; align-items: center; }
 .acc-pw .acc-input { flex: 1; }
+.launch-input { text-align: center; letter-spacing: 0.18em; font-size: 20px; text-transform: uppercase; }
+.menu-legal { display: flex; justify-content: center; flex-wrap: wrap; }
 .acc-note { font-size: 12.5px; color: var(--foam-dim); margin: 0; line-height: 1.35; }
 .acc-msg { font-size: 13px; font-weight: 800; color: var(--bioluma); margin: 0; }
 .acc-who { font-size: 18px; font-weight: 800; color: var(--foam); margin: 0; }
@@ -979,7 +981,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <button class="btn btn-mini btn-getapp" id="btn-apk-update" style="display:none;"><span class="getapp-ic" aria-hidden="true"></span><span id="apk-update-label"></span></button>
         <span class="best-time-label" id="menu-best-time"></span>
       </div>
-      <div class="menu-legal"><button class="link-btn" id="btn-goto-privacy">Datenschutz</button></div>
+      <div class="menu-legal"><button class="link-btn" id="btn-goto-launch">🎁 Code einlösen</button><button class="link-btn" id="btn-goto-privacy">Datenschutz</button></div>
     </div>
     <div class="stats-bar" id="stats-bar" style="display:none;">
       <p id="stats-bar-text"></p>
@@ -987,6 +989,21 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
         <button class="btn btn-primary btn-mini" id="btn-stats-yes">Ja</button>
         <button class="btn btn-ghost btn-mini" id="btn-stats-no">Nein</button>
         <button class="btn btn-ghost btn-mini" id="btn-stats-more">Datenschutz</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-launch">
+    <div class="panel">
+      <h2>🎁 Startcode</h2>
+      <p class="acc-note" id="launch-intro">Im Trailer zum Winter-Update ist ein geheimer Code versteckt. Gib ihn hier ein: Du bekommst ein Start-Abzeichen neben deinem Namen und 300 💧 – einmal pro Spieler.</p>
+      <form class="acc-form" id="launch-form" autocomplete="off">
+        <input class="acc-input launch-input" id="launch-input" type="text" maxlength="7" placeholder="XXX-XXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Startcode">
+        <button class="btn btn-primary" type="submit" id="btn-launch-go">Einlösen</button>
+      </form>
+      <p class="acc-msg" id="launch-msg" aria-live="polite"></p>
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btn-launch-back">Zum Menü</button>
       </div>
     </div>
   </div>
@@ -1320,7 +1337,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.32';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.33';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -2940,7 +2957,18 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🖼️ Grafik: automatisch", "🖼️ Graphics: automatic", "🖼️ Графіка: авто"],
 ["🖼️ Grafik: hoch", "🖼️ Graphics: high", "🖼️ Графіка: висока"],
 ["🖼️ Grafik: einfach", "🖼️ Graphics: simple", "🖼️ Графіка: проста"],
-["🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sich die Grafik einstellen.", "🖼️ Simple graphics are on because the game froze several times. You can change the graphics in the pause menu.", "🖼️ Просту графіку ввімкнено, бо гра кілька разів зависала. Налаштувати графіку можна в меню паузи."]];
+["🖼️ Einfache Grafik ist an, weil das Spiel mehrmals gehangen hat. Im Pause-Menü lässt sich die Grafik einstellen.", "🖼️ Simple graphics are on because the game froze several times. You can change the graphics in the pause menu.", "🖼️ Просту графіку ввімкнено, бо гра кілька разів зависала. Налаштувати графіку можна в меню паузи."],
+  ["🎁 Code einlösen", "🎁 Enter code", "🎁 Ввести код"],
+  ["🎁 Startcode", "🎁 Launch code", "🎁 Стартовий код"],
+  ["Im Trailer zum Winter-Update ist ein geheimer Code versteckt. Gib ihn hier ein: Du bekommst ein Start-Abzeichen neben deinem Namen und 300 💧 – einmal pro Spieler.", "A secret code is hidden in the trailer for the winter update. Type it in here: you get a launch badge next to your name and 300 💧 – once per player.", "У трейлері зимового оновлення сховано секретний код. Введи його тут: отримаєш стартовий значок біля свого імені та 300 💧 – один раз для гравця."],
+  ["Dieser Code stimmt nicht.", "That code is not right.", "Цей код неправильний."],
+  ["Der Code hat 6 Zeichen: XXX-XXX.", "The code has 6 characters: XXX-XXX.", "Код має 6 символів: XXX-XXX."],
+  ["Der Startcode ist noch nicht aktiv.", "The launch code is not active yet.", "Стартовий код ще не активний."],
+  ["Dein Start-Abzeichen ❄️ hast du schon. Danke fürs Zuschauen!", "You already have your launch badge ❄️. Thanks for watching!", "Твій стартовий значок ❄️ уже в тебе. Дякуємо, що дивишся!"],
+  ["🎉 Richtig! Du bekommst das Start-Abzeichen ❄️ und 300 💧.", "🎉 Correct! You get the launch badge ❄️ and 300 💧.", "🎉 Правильно! Ти отримуєш стартовий значок ❄️ і 300 💧."],
+  ["Startcode", "Launch code", "Стартовий код"],
+  ["Wenn du einen Startcode eingibst, schickt das Spiel nur diesen Code zur Prüfung an den Server. Die Netzadresse wird kurz für die Versuchsgrenze im Speicher gehalten; gezählt wird nur, wie oft ein Code richtig oder falsch war, ohne dich. Dass du das Abzeichen hast, steht in deinem Spielstand.", "When you type a launch code, the game only sends that code to the server to be checked. The network address is kept briefly in memory for the try limit; only how often a code was right or wrong is counted, without you. That you have the badge is kept in your save.", "Коли ти вводиш стартовий код, гра надсилає на сервер для перевірки лише цей код. Мережева адреса ненадовго зберігається в пам'яті для ліміту спроб; рахується лише, скільки разів код був правильним чи неправильним, без тебе. Те, що в тебе є значок, зберігається у твоєму збереженні."],
+];
 
 // Anleitung in drei Sprachen (Bildschirm "Anleitung"); renderInstructions() setzt die gewählte ein
 const INSTRUCTIONS = {
@@ -6959,9 +6987,12 @@ function legendResult(win) {
     showToast('Die Legende ist abgetaucht. Eine kleine Truhe für den Versuch.');
   }
 }
-function legendBadges() { return (save.legendBadges || []).map(function(a){ return LEG_BADGE[a] || ''; }).join(''); }
-function legendBadgeBits() { let b = 0; ['riff', 'kelp', 'graben', 'vulkan'].forEach(function(a, i){ if ((save.legendBadges || []).indexOf(a) !== -1) b |= 1 << i; }); return b; }
-function badgesOfBits(b) { return ['riff', 'kelp', 'graben', 'vulkan'].filter(function(a, i){ return b & (1 << i); }).map(function(a){ return LEG_BADGE[a]; }).join(''); }
+// 7.33: Start-Abzeichen (Startcode des Trailers) = Bit 4 des Feldes bd, das schon die vier Legenden-Abzeichen (Bits 0-3) trägt; ältere Seiten zeigen Bit 4 einfach nicht
+const LAUNCH_BADGE = '❄️', LAUNCH_BIT = 16, LAUNCH_PEARLS = 300;
+function launchDone() { return !!(save && save.launch === 1); }
+function legendBadges() { return (save.legendBadges || []).map(function(a){ return LEG_BADGE[a] || ''; }).join('') + (launchDone() ? LAUNCH_BADGE : ''); }
+function legendBadgeBits() { let b = 0; ['riff', 'kelp', 'graben', 'vulkan'].forEach(function(a, i){ if ((save.legendBadges || []).indexOf(a) !== -1) b |= 1 << i; }); return b | (launchDone() ? LAUNCH_BIT : 0); }
+function badgesOfBits(b) { return ['riff', 'kelp', 'graben', 'vulkan'].filter(function(a, i){ return b & (1 << i); }).map(function(a){ return LEG_BADGE[a]; }).join('') + ((b & LAUNCH_BIT) ? LAUNCH_BADGE : ''); }
 // Prozent-Treffer (Legenden): ein Anteil deiner max. HP, ohne Panzerung
 function pctHit(frac) {
   const p = player;
@@ -13354,6 +13385,7 @@ const ACC_ERR = {
   'password-long': 'Das Passwort ist zu lang.', 'password-common': 'Dieses Passwort ist zu leicht zu erraten.', 'password-pwned': 'Dieses Passwort ist aus einem Datenleck bekannt – nimm ein anderes.',
   login: 'Login-Name oder Passwort stimmt nicht.', recover: 'Login-Name oder Code stimmt nicht.', wait: 'Zu viele Versuche – bitte warte ein paar Minuten.', busy: 'Zu viele Versuche aus diesem Netz – bitte warte etwas.',
   origin: 'Anmelden geht nur auf der Seite des Spiels.', offline: 'Der Server ist gerade nicht erreichbar.', daily: 'Den Anzeigenamen kann man nur einmal pro Tag ändern.',
+  code: 'Dieser Code stimmt nicht.', 'code-format': 'Der Code hat 6 Zeichen: XXX-XXX.', off: 'Der Startcode ist noch nicht aktiv.',
   locked: 'Dieses Konto ist gesperrt.', config: 'Konten sind auf diesem Server noch nicht eingerichtet.', token: 'Bitte melde dich neu an.'
 };
 function accErr(r) { const e = r.body && r.body.error; return (e === 'locked' && r.body.reason ? ACC_ERR.locked + ' ' + r.body.reason : ACC_ERR[e]) || 'Das hat nicht geklappt.'; }
@@ -13376,7 +13408,7 @@ function accWork(promise, done) {
   const box = document.getElementById('acc-body'); if (box) box.classList.add('busy');
   promise.then(function(r){ if (box) box.classList.remove('busy'); done(r); });
 }
-function renderAccountBadge() { const b = document.getElementById('acc-badge'); if (b) b.textContent = accOn() ? Acc.display : 'Gast'; }
+function renderAccountBadge() { const b = document.getElementById('acc-badge'); if (b) b.textContent = (accOn() ? Acc.display : 'Gast') + (launchDone() ? ' ' + LAUNCH_BADGE : ''); }
 function renderAccount() {
   const box = document.getElementById('acc-body');
   if (!box) return;
@@ -13536,6 +13568,32 @@ function accPrivacy(add) {                             // der Konto-Teil des Dat
 }
 // ---------- Datenschutz (7.27): ein Bildschirm für Spielstatistik und Konto, erreichbar ohne Konto (Hauptmenü, Konto) ----------
 let privBack = 'screen-menu', privMsg = '';
+// ---------- Startcode (7.33): der Server prüft den Code (Geheimnis LAUNCH_CODE, begrenzte Versuche); Belohnung einmal pro Spielstand: Abzeichen + 300 Perlen ----------
+const LAUNCH_CHARS = 'ACDEFGHJKMNPQRTUVWXYZ234679';             // ohne 0/O, 1/I/L, 5/S, 8/B (kein Geheimnis; der Code selbst steht nur auf dem Server)
+let launchBusy = false;
+function launchNorm(s) { return String(s || '').toUpperCase().split('').filter(function(c){ return LAUNCH_CHARS.indexOf(c) !== -1; }).join('').slice(0, 6); }
+function launchShow(msg) {
+  const lock = launchDone() || launchBusy, inp = document.getElementById('launch-input'), go = document.getElementById('btn-launch-go'), m = document.getElementById('launch-msg');
+  if (inp) inp.disabled = lock;
+  if (go) go.disabled = lock;
+  if (m) m.textContent = msg != null ? msg : (launchDone() ? 'Dein Start-Abzeichen ' + LAUNCH_BADGE + ' hast du schon. Danke fürs Zuschauen!' : '');
+}
+function launchRedeem() {
+  if (launchBusy || launchDone()) return;
+  const inp = document.getElementById('launch-input'), code = launchNorm(inp.value);
+  if (code.length !== 6) { launchShow(accErr({ body: { error: 'code-format' } })); return; }
+  launchBusy = true; launchShow('…');
+  accApi('code', { code: code }).then(function(r){
+    launchBusy = false;
+    if (r.status === 200 && r.body && r.body.ok) {
+      if (!launchDone()) { save.launch = 1; save.totalPearls = (save.totalPearls || 0) + LAUNCH_PEARLS; persistSave(); }
+      inp.value = ''; updateMenuPearlsLabel(); renderAccountBadge();
+      launchShow('🎉 Richtig! Du bekommst das Start-Abzeichen ' + LAUNCH_BADGE + ' und ' + LAUNCH_PEARLS + ' 💧.');
+      if (typeof Sfx !== 'undefined' && Sfx.pickup) Sfx.pickup();
+    } else launchShow(accErr(r));
+  });
+}
+function launchOpen() { const i = document.getElementById('launch-input'); if (i) i.value = ''; launchShow(); showScreen('screen-launch'); if (i && !i.disabled) setTimeout(function(){ try { i.focus(); } catch (e) {} }, 50); }
 function openPrivacy(from) { privBack = from || 'screen-menu'; privMsg = ''; renderPrivacy(); showScreen('screen-privacy'); }
 function renderPrivacy() {
   const box = document.getElementById('priv-body');
@@ -13574,6 +13632,8 @@ function renderPrivacy() {
   add(el('h3', null, 'Wie lange?'));
   P('Einzelne Sitzungen und Läufe löschen wir nach 90 Tagen. Danach bleiben nur Summen ohne Kennung (zum Beispiel Läufe pro Tag).');
   accPrivacy(add);
+  add(el('h3', null, 'Startcode'));
+  P('Wenn du einen Startcode eingibst, schickt das Spiel nur diesen Code zur Prüfung an den Server. Die Netzadresse wird kurz für die Versuchsgrenze im Speicher gehalten; gezählt wird nur, wie oft ein Code richtig oder falsch war, ohne dich. Dass du das Abzeichen hast, steht in deinem Spielstand.');
   add(el('h3', null, 'Auf diesem Gerät'));
   P('Spielstand, Einstellungen, deine Auswahl hier und – mit eingeschalteter Statistik – die Kennung und noch nicht gesendete Zählungen liegen im Speicher deines Browsers. Cookies gibt es keine.');
   P('Nur in der Android-App: Höchstens alle 6 Stunden fragt sie bei GitHub nach, ob es eine neuere Version gibt. Dabei sieht GitHub die Netzadresse deines Geräts; über dich oder dein Spiel wird nichts gesendet.');   // 7.29: checkApkUpdate
@@ -16903,6 +16963,10 @@ function initUI() {
   initApkUpdateButton();
   initLangSync();
   // Datenschutz und Statistik (7.27)
+  document.getElementById('btn-goto-launch').addEventListener('click', function(){ Sfx.click(); launchOpen(); });
+  document.getElementById('btn-launch-back').addEventListener('click', function(){ Sfx.click(); showScreen('screen-menu'); });
+  document.getElementById('launch-form').addEventListener('submit', function(e){ e.preventDefault(); Sfx.click(); launchRedeem(); });
+  document.getElementById('launch-input').addEventListener('input', function(){ const c = launchNorm(this.value); this.value = c.length > 3 ? c.slice(0, 3) + '-' + c.slice(3) : c; });
   document.getElementById('btn-goto-privacy').addEventListener('click', function(){ Sfx.click(); openPrivacy('screen-menu'); });
   document.getElementById('btn-privacy-back').addEventListener('click', function(){ Sfx.click(); if (privBack === 'screen-account') renderAccount(); showScreen(privBack); statsBar(); });
   document.getElementById('btn-stats-yes').addEventListener('click', function(){ statsBarClick('yes'); });
