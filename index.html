@@ -2403,6 +2403,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🛡 geschützt", "🛡 protected", "🛡 під захистом"],
 ["🛡 {} Std. Schutz", "🛡 {} h protection", "🛡 {} год. захисту"],
 ["⚔ Duell", "⚔ Duel", "⚔ Поєдинок"],
+["⚔ im Kampf", "⚔ in a fight", "⚔ у бою"],
 ["🏆 Rangliste", "🏆 Leaderboard", "🏆 Рейтинг"],
 ["👥 Spieler", "👥 Players", "👥 Гравці"],
 ["🏆 Die besten 50", "🏆 Top 50", "🏆 Топ 50"],
@@ -14128,7 +14129,7 @@ function setStratUi(on) {
    Deine Welt hat die Basis bei (0, 0); auf der Karte liegt sie bei dem Platz SN.pl[SN.plot]. Zum Server geht alles in Karten-Koordinaten
    (Welt + Platz), von dort kommt es zurück und wird in deine Welt umgerechnet (Karte - dein Platz). */
 const ST_RINGS = [{ id: 'riff', name: 'Korallenriff', from: 1, to: 6 }, { id: 'kelp', name: 'Kelpwald', from: 3, to: 8 }, { id: 'graben', name: 'Tiefsee-Graben', from: 5, to: 10 }, { id: 'vulkan', name: 'Vulkanschlucht', from: 7, to: 10 }];      // to: die grösste Muschelburg, deren Basis noch auf einen Platz des Rings passt (7.15)
-const SN = { ws: null, on: false, want: false, id: 0, plot: -1, lastPlot: -1, pl: null, code: '', title: '', ring: 'riff', peers: new Map(), sendAt: 0, layAt: 0, lastLay: '', tries: 0, mapT: 0, noRaid: new Map(), pick: 0, claimAt: 0, sendId: 0, shields: {}, top: null, tr: 0, showTop: false, duelAt: 0 };
+const SN = { ws: null, on: false, want: false, id: 0, plot: -1, lastPlot: -1, pl: null, code: '', title: '', ring: 'riff', peers: new Map(), sendAt: 0, layAt: 0, lastLay: '', tries: 0, mapT: 0, noRaid: new Map(), pick: 0, claimAt: 0, sendId: 0, shields: {}, fights: [], top: null, tr: 0, showTop: false, duelAt: 0 };
 function snOrigin() { return SN.pl && SN.plot >= 0 && SN.pl[SN.plot] ? { x: SN.pl[SN.plot][0], y: SN.pl[SN.plot][1] } : { x: 0, y: 0 }; }
 function snGuards() {                       // 7.13: deine Truppen sind die Heimwache der Basis: [Art, Stufe]
   const out = [];
@@ -14195,7 +14196,7 @@ function snOpenWith(tk) {
 }
 function snDisconnect() {
   raidAbort(); SNR = null; raidBanner(); stLegendReset();
-  SN.want = false; SN.on = false; SN.peers.clear(); SN.plot = -1; SN.pl = null; SN.lastLay = ''; SN.noRaid.clear(); SN.pick = 0; SN.shields = {}; SN.top = null;
+  SN.want = false; SN.on = false; SN.peers.clear(); SN.plot = -1; SN.pl = null; SN.lastLay = ''; SN.noRaid.clear(); SN.pick = 0; SN.shields = {}; SN.fights = []; SN.top = null;
   if (SN.ws) { const ws = SN.ws; SN.ws = null; try { ws.close(1000, 'bye'); } catch (e) {} }
   snMapOpen(false);
 }
@@ -14601,6 +14602,7 @@ function snMapPickShow() {
   if (gi >= 0) info.appendChild(mk('span', null, snRingName(gi)));
   if (pe.ghost) info.appendChild(mk('span', null, '💤 schläft'));
   if (sh) info.appendChild(mk('span', null, sh === 'beginner' ? '🛡 Anfängerschutz' : '🛡 geschützt'));
+  if (snFight(pe.id)) info.appendChild(mk('span', null, '⚔ im Kampf'));
   info.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px 12px;font-weight:700;font-size:13px;opacity:0.85;';
   el.appendChild(info);
   const b = mk('button', 'btn btn-primary', '⚔ Duell'); b.addEventListener('click', function(){ Sfx.click(); duelStart(pe); }); el.appendChild(b);
@@ -14619,7 +14621,9 @@ function raidReceive(m) {
   else if (m.op === 'score') raidScore(m);
   else if (m.op === 'top') snTopReceive(m);
   else if (m.op === 'away') raidAway(m);
+  else if (m.op === 'fights') { SN.fights = Array.isArray(m.f) ? m.f.slice(0, 64) : []; if (document.getElementById('st-map-cv')) { snMapPickShow(); snMapDraw(); } }     // 7.38 (Protokoll 13): wer gerade kämpft
 }
+function snFight(id) { for (let i = 0; i < SN.fights.length; i++) if (SN.fights[i][0] === id || SN.fights[i][1] === id) return SN.fights[i]; return null; }     // Überfall oder Duell dieses Spielers (Angreifer oder Verteidiger), sonst null
 // Verteidiger: Ruinen eintragen, den Anteil des Ungeschützten abgeben (ein Viertel des Lagers bleibt immer sicher), dem Angreifer melden
 function raidResult(m) {
   if (SNR && SNR.n === m.n) { SNR = null; raidBanner(); }
@@ -14717,6 +14721,7 @@ function snMapDraw() {
     g.globalAlpha = 1;
     if (sel) { g.strokeStyle = '#ffd76a'; g.lineWidth = 2.2; g.beginPath(); g.arc(x, y, rad + 4, 0, TAU); g.stroke(); }
     if (pe && SN.shields[pe.id]) { g.font = '10px sans-serif'; g.fillStyle = '#fff'; g.fillText('🛡', x + rad, y - rad); }
+    if (mine ? snFight(SN.id) : pe && snFight(pe.id)) { g.font = '11px sans-serif'; g.fillStyle = '#fff'; g.fillText('⚔', x - rad, y - rad); }     // 7.38: Kampfzeichen (Überfall oder Duell läuft)
     lab.push({ x: x, y: y, rad: rad, t: mine ? tr('Du') : (pe.name.length > 11 ? pe.name.slice(0, 10) + '…' : pe.name), pr: mine ? 0 : sel ? 1 : 2, col: mine ? '#ffd76a' : 'rgba(255,255,255,0.92)' });
   }
   lab.sort(function(a, b){ return a.pr - b.pr; });             // Namen: der eigene und der gewaehlte zuerst; was sich ueberdeckt, bleibt weg
@@ -14737,7 +14742,7 @@ function snMapDraw() {
   if (sub && sub.dataset.k !== subT) { sub.dataset.k = subT; sub.textContent = subT; }
   const lg = document.getElementById('st-map-legend');
   if (lg && !lg.firstChild) {
-    [['#ffd76a', 'Du'], ['#7eb6ff', 'Spieler'], ['rgba(255,255,255,0.35)', 'Platz frei'], ['#7eb6ff', 'Unterwegs'], ['', '🛡 geschützt'], ['rgba(126,182,255,0.4)', '💤 schläft']].forEach(function(e){
+    [['#ffd76a', 'Du'], ['#7eb6ff', 'Spieler'], ['rgba(255,255,255,0.35)', 'Platz frei'], ['#7eb6ff', 'Unterwegs'], ['', '🛡 geschützt'], ['', '⚔ im Kampf'], ['rgba(126,182,255,0.4)', '💤 schläft']].forEach(function(e){
       const sp = document.createElement('span'); if (e[0]) { const i = document.createElement('i'); i.style.background = e[0]; if (e[2]) i.style.border = e[2]; sp.appendChild(i); } sp.appendChild(document.createTextNode(e[1])); lg.appendChild(sp);
     });
   }
@@ -14773,7 +14778,7 @@ function snMapDraw() {
           const pe = e.pe, r = mk('div', 'stm-row' + (e.me ? ' me' : ' pk' + (SN.pick === pe.id ? ' sel' : ''))), d = mk('span', 'd');
           d.style.background = e.me ? '#ffd76a' : '#7eb6ff'; r.appendChild(d);
           r.appendChild(mk('span', 'n', e.me ? onlineName() + ' (Muschelburg ' + Base.mb + ')' : pe.name + ' (Muschelburg ' + pe.mb + ')'));
-          const tg = []; if (e.me) tg.push(tr('Du')); if (pe && pe.ghost) tg.push('💤'); if (pe && SN.shields[pe.id]) tg.push('🛡');
+          const tg = []; if (e.me) tg.push(tr('Du')); if (pe && pe.ghost) tg.push('💤'); if (pe && SN.shields[pe.id]) tg.push('🛡'); if (e.me ? snFight(SN.id) : snFight(pe.id)) tg.push('⚔');
           if (tg.length) r.appendChild(mk('span', 't', tg.join(' ')));
           if (pe) r.addEventListener('click', function(){ SN.pick = SN.pick === pe.id ? 0 : pe.id; snMapPickShow(); snMapDraw(); });
           list.appendChild(r);
@@ -17516,7 +17521,7 @@ function initOnlineUI() {
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 12;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
+const NET_PROTOCOL = 13;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
