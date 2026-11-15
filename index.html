@@ -1343,7 +1343,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.36';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.37';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -12610,6 +12610,7 @@ function drawPlayerSprite(x, y, r, opts) {
   if (!img || !img.complete || !img.naturalWidth) {
     const flip = Math.cos(angle) < 0 ? -1 : 1;
     drawBlob(x, y, r, col, opts.dark || player.dark, Object.assign({ accessory: 'fin', facing: flip }, opts));
+    if (winterOn()) drawSantaHat(ctx, x, y - r * 0.82, r / 19, flip);
     return;
   }
   const wobble = opts.wobble || 0;
@@ -12643,6 +12644,7 @@ function drawPlayerSprite(x, y, r, opts) {
   }
 
   ctx.restore();
+  if (winterOn()) drawSantaHat(ctx, x, y - r * 0.82, r / 19 * bob, Math.cos(angle) < 0 ? -1 : 1);   // 7.37: Winter-Mütze
 }
 
 /* ============================================================
@@ -12828,6 +12830,71 @@ function drawBackground() {
     }
   }
   ctx.fill();
+}
+// 7.37: Winter-Optik, nur Aussehen: vom 1.12.2026 bis 6.1.2027 nach der Uhr des Geräts Schnee in den Menüs und im Hafen, Weihnachtsmützen auf den Blobis (im Spiel und im Menü-Logo).
+// Kein Spielwert, kein Math.random (der Zufallsstrom der Läufe bleibt gleich: der Schnee rechnet mit einem Hash der Flockennummer) und kein Schalter in der Seite;
+// Aufnahmewerkzeuge stellen die Uhr (?capdate= im Bildschritt-Werkzeug, studio.js --date).
+const WINTER_FROM = 20261201, WINTER_TO = 20270106;
+let winterAt = -1e12, winterVal = false;
+function winterOn() {
+  const now = Date.now();
+  if (now - winterAt > 30000 || now < winterAt) {
+    winterAt = now;
+    const d = new Date(now), k = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    winterVal = k >= WINTER_FROM && k <= WINTER_TO;
+  }
+  return winterVal;
+}
+function wHash(i, k) { const v = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return v - Math.floor(v); }
+function drawSnowFlake(x, y, rad, a) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.2832); ctx.fill(); }
+function drawSnowScreen() {              // Menüs: Schnee fällt über den ganzen Bildschirm (hinter den Tafeln)
+  const t = performance.now() / 1000, n = W * H > 700000 ? 90 : 55;
+  ctx.save(); ctx.fillStyle = '#f4fbff';
+  for (let i = 0; i < n; i++) {
+    const z = 0.35 + 0.65 * wHash(i, 3);
+    const x = (wHash(i, 1) * W + Math.sin(t * 0.55 + i * 1.7) * 16 * z + W) % W;
+    const y = (wHash(i, 2) * H + t * (18 + 46 * z)) % H;
+    drawSnowFlake(x, y, 1.4 + 2.8 * z, 0.5 + 0.5 * z);
+  }
+  ctx.restore();
+}
+function drawSnowHafen(sx, sy, R) {      // Hafen: weisser Rand und Schnee, der im Kreis fällt
+  const t = performance.now() / 1000;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(244,251,255,0.32)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(sx, sy, R + 1, 0, 6.2832); ctx.stroke();
+  ctx.fillStyle = '#f4fbff';
+  for (let i = 0; i < 70; i++) {
+    const z = 0.35 + 0.65 * wHash(i, 3), dx = (wHash(i, 1) * 2 - 1) * R * 0.98, h = Math.sqrt(R * R - dx * dx);
+    const dy = ((wHash(i, 2) * 2 * h + t * (16 + 34 * z)) % (2 * h)) - h;
+    drawSnowFlake(sx + dx + Math.sin(t * 0.6 + i * 1.3) * 5 * z, sy + dy, 0.9 + 2 * z, 0.35 + 0.5 * z);
+  }
+  ctx.restore();
+}
+function drawSantaHat(g, x, y, s, dir) {   // Mütze: (x, y) = Mitte des Randes, s = Grösse (Blobi-Radius / 19), dir = 1 rechts / -1 links
+  g.save(); g.translate(x, y); g.scale(s * dir, s); g.rotate(-0.22);
+  g.beginPath(); g.moveTo(-14, 2); g.quadraticCurveTo(-13, -14, 9, -20); g.quadraticCurveTo(13, -9, 14, 2); g.closePath();
+  g.fillStyle = '#e8394a'; g.fill(); g.lineWidth = 1.2; g.strokeStyle = 'rgba(100,10,25,0.55)'; g.stroke();
+  g.fillStyle = '#fff'; g.beginPath(); g.ellipse(0, 2, 16.5, 4.6, 0, 0, 6.2832); g.fill(); g.stroke();
+  g.beginPath(); g.arc(9, -20, 4.4, 0, 6.2832); g.fill(); g.stroke();
+  g.restore();
+}
+function menuLogoSet(lb, sp) {             // Menü-Logo: im Winter mit Mütze (das Bild wird einmal zusammengesetzt)
+  const w = winterOn(), key = sp + (w ? '|w' : '');
+  if (lb._wkey === key) return;
+  lb._wkey = key; lb.src = sp;
+  if (!w) return;
+  const im = new Image();
+  im.onload = function() {
+    try {
+      const cv = document.createElement('canvas'), n = 256; cv.width = cv.height = n;
+      const g = cv.getContext('2d'), k = Math.min(n / im.naturalWidth, n / im.naturalHeight);
+      g.drawImage(im, (n - im.naturalWidth * k) / 2, (n - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k);
+      drawSantaHat(g, n * 0.5, n * 0.3, n / 80, 1);
+      const url = cv.toDataURL('image/png');
+      if (lb._wkey === key) lb.src = url;
+    } catch (e) {}
+  };
+  im.src = sp;
 }
 function drawAmbientBubbles() {
   const inRun = runVisible();
@@ -13047,6 +13114,7 @@ function render() {
   rtry(drawAmbientBubbles);
 
   const inRun = runVisible();
+  if (!inRun && winterOn()) rtry(drawSnowScreen);
   if (inRun) {
     if (Net.on) rtry(drawHafen);
     if (Legend) rtry(drawLegendArena);                 // Arena oder Warnung einer Legende
@@ -16665,7 +16733,7 @@ function updateMenuPearlsLabel() {
   renderMenuGoal();
   const sw = document.getElementById('storage-warning'); if (sw) sw.style.display = storageAvailable ? 'none' : 'block';
   if (UI['menu-pearls-label']) UI['menu-pearls-label'].textContent = save.totalPearls + ' \uD83D\uDCA7';
-  { const lb = document.getElementById('logo-blobi'), sp = CHARACTER_SPRITES[selectedCharacterId] || CHARACTER_SPRITES.standard; if (lb && sp && lb.getAttribute('src') !== sp) lb.src = sp; }
+  { const lb = document.getElementById('logo-blobi'), sp = CHARACTER_SPRITES[selectedCharacterId] || CHARACTER_SPRITES.standard; if (lb && sp) menuLogoSet(lb, sp); }
   updateAchievementBadges();
   renderAccountBadge();
   { const ac = document.getElementById('album-count'), at = albumTotal(); if (ac) ac.textContent = at.beaten + '/' + at.all; }
@@ -19518,6 +19586,7 @@ function drawHafen() {
   const g = ctx.createRadialGradient(sx, sy, R * 0.15, sx, sy, R);
   g.addColorStop(0, 'rgba(94,242,192,0.11)'); g.addColorStop(1, 'rgba(94,242,192,0.035)');
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI * 2); ctx.fill();
+  if (winterOn()) drawSnowHafen(sx, sy, R);
   ctx.setLineDash([14, 10]); ctx.lineDashOffset = -runTime * 12;
   ctx.strokeStyle = 'rgba(94,242,192,0.5)'; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI * 2); ctx.stroke();
