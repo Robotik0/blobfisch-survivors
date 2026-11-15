@@ -12610,7 +12610,7 @@ function drawPlayerSprite(x, y, r, opts) {
   if (!img || !img.complete || !img.naturalWidth) {
     const flip = Math.cos(angle) < 0 ? -1 : 1;
     drawBlob(x, y, r, col, opts.dark || player.dark, Object.assign({ accessory: 'fin', facing: flip }, opts));
-    if (winterOn()) drawSantaHat(ctx, x, y - r * 0.82, r / 19, flip);
+    if (winterOn()) drawSantaHat(ctx, x, y - r * 0.95 * (1 + Math.sin(opts.wobble || 0) * 0.06), r / 22, flip);   // wippt mit drawBlob
     return;
   }
   const wobble = opts.wobble || 0;
@@ -12642,9 +12642,12 @@ function drawPlayerSprite(x, y, r, opts) {
     ctx.drawImage(sil, -targetW/2, -targetH/2, targetW, targetH);
     ctx.globalAlpha = baseAlpha;
   }
+  if (winterOn()) {                                // 7.37: Winter-Mütze auf dem Kopf (HAT_FIT, im Bild gemessen), im selben Rahmen wie das Bild: dreht, spiegelt und wippt mit
+    const hf = HAT_FIT[cid] || HAT_FIT_DEFAULT;
+    drawHatFit(ctx, hf, (hf[0] - 0.5) * targetW, (hf[1] - 0.5) * targetH, targetW);
+  }
 
   ctx.restore();
-  if (winterOn()) drawSantaHat(ctx, x, y - r * 0.82, r / 19 * bob, Math.cos(angle) < 0 ? -1 : 1);   // 7.37: Winter-Mütze
 }
 
 /* ============================================================
@@ -12870,6 +12873,34 @@ function drawSnowHafen(sx, sy, R) {      // Hafen: weisser Rand und Schnee, der 
   }
   ctx.restore();
 }
+// Sitz der Winter-Mütze je Blobi, gemessen mit lite/tools/hat_fit.py: [x, y] = Mitte des Randes, w = Randbreite (Anteile von Bildbreite / -höhe), dir = Zipfel nach hinten (1 = Bild rechts)
+// Spalte = Mitte zwischen den Augen, der Rand liegt auf der Kopfrundung und bleibt über den Augen. Standard ist von oben gezeichnet: Kopf = Bildoberkante (vorne).
+// top = 1: Draufsicht-Blobi (Standard, vorne = Bildoberkante): Mütze von oben gesehen, [x, y] = Mitte des Pelzrings gleich hinter den Augen, w = Ringdurchmesser, Zipfel fällt nach hinten
+const HAT_FIT = { standard: [0.485, 0.363, 0.290, 1, 1], turbo: [0.649, 0.046, 0.399, -1], panzer: [0.560, 0.225, 0.234, -1], gluecks: [0.316, 0.030, 0.261, 1] };
+const HAT_FIT_DEFAULT = [0.5, 0.05, 0.3, 1];
+function drawHatFit(g, hf, x, y, w) {      // Mütze nach HAT_FIT an (x, y), w = Bildbreite in px
+  if (hf[4]) drawSantaHatTop(g, x, y, hf[2] * w / 22, hf[3]); else drawSantaHat(g, x, y, hf[2] * w / 33, hf[3]);
+}
+function drawSantaHatTop(g, x, y, s, dir) {   // Mütze von oben: (x, y) = Mitte, Pelzring aussen etwa 11 * s, vorne = -y, der Zipfel fällt nach hinten (+y) und zur Seite dir
+  const TAU = 6.2832, rim = 'rgba(100,10,25,0.5)';
+  g.save(); g.translate(x, y); g.scale(s * dir, s);
+  g.fillStyle = 'rgba(60,0,25,0.2)'; g.beginPath(); g.arc(0.8, 1.6, 11.8, 0, TAU); g.fill();               // Schatten auf dem Kopf
+  const gr = g.createRadialGradient(-2.2, -2.6, 0.5, 0, 0, 8.4); gr.addColorStop(0, '#ff8a95'); gr.addColorStop(0.5, '#e8394a'); gr.addColorStop(1, '#a51d2e');
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 8.4, 0, TAU); g.fill();                                       // Kegel von oben
+  g.strokeStyle = 'rgba(120,10,30,0.28)'; g.lineWidth = 0.7;                                                 // weiche Falten zur Spitze
+  for (let i = 0; i < 3; i++) { const t = i * 2.094 - 0.9; g.beginPath(); g.moveTo(Math.cos(t) * 7.6, Math.sin(t) * 7.6); g.quadraticCurveTo(Math.cos(t + 0.5) * 4, Math.sin(t + 0.5) * 4, 0, 0); g.stroke(); }
+  const fur = function(cx, cy, n, R, r) {                                                                    // Pelz: Wölkchen aus kleinen Kreisen
+    g.lineWidth = 0.9; g.strokeStyle = rim;
+    for (let p = 0; p < 2; p++) { g.beginPath(); for (let i = 0; i < n; i++) { const t = i * TAU / n, rr = r * (1 + 0.14 * Math.sin(i * 2.7)); g.moveTo(cx + Math.cos(t) * R + rr, cy + Math.sin(t) * R); g.arc(cx + Math.cos(t) * R, cy + Math.sin(t) * R, rr, 0, TAU); } if (p) { g.fillStyle = '#fff'; g.fill(); } else g.stroke(); }
+    g.fillStyle = 'rgba(205,222,236,0.4)'; g.beginPath(); for (let i = 0; i < n; i++) { const t = i * TAU / n; if (Math.sin(t + 0.8) < 0.2) continue; g.moveTo(cx + Math.cos(t) * (R + r * 0.35) + r * 0.5, cy + Math.sin(t) * (R + r * 0.35)); g.arc(cx + Math.cos(t) * (R + r * 0.35), cy + Math.sin(t) * (R + r * 0.35), r * 0.5, 0, TAU); } g.fill();
+  };
+  fur(0, 0, 16, 9, 2.3);
+  g.beginPath(); g.moveTo(-3.2, -0.6); g.bezierCurveTo(-3.4, 6, -1.5, 11.5, 5.5, 14.5); g.lineTo(7.4, 12.4); g.bezierCurveTo(2.6, 9.5, 2.6, 5, 3.2, -0.6); g.closePath();   // Zipfel, über den Rand gefallen
+  const gz = g.createLinearGradient(-3, 0, 6, 12); gz.addColorStop(0, '#e8394a'); gz.addColorStop(1, '#b8243a');
+  g.fillStyle = gz; g.fill(); g.lineWidth = 0.9; g.strokeStyle = rim; g.stroke();
+  fur(7, 14.6, 6, 1.6, 2.1);                                                                                 // Bommel
+  g.restore();
+}
 function drawSantaHat(g, x, y, s, dir) {   // Mütze: (x, y) = Mitte des Randes, s = Grösse (Blobi-Radius / 19), dir = 1 rechts / -1 links
   g.save(); g.translate(x, y); g.scale(s * dir, s); g.rotate(-0.22);
   g.beginPath(); g.moveTo(-14, 2); g.quadraticCurveTo(-13, -14, 9, -20); g.quadraticCurveTo(13, -9, 14, 2); g.closePath();
@@ -12887,9 +12918,12 @@ function menuLogoSet(lb, sp) {             // Menü-Logo: im Winter mit Mütze (
   im.onload = function() {
     try {
       const cv = document.createElement('canvas'), n = 256; cv.width = cv.height = n;
-      const g = cv.getContext('2d'), k = Math.min(n / im.naturalWidth, n / im.naturalHeight);
-      g.drawImage(im, (n - im.naturalWidth * k) / 2, (n - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k);
-      drawSantaHat(g, n * 0.5, n * 0.3, n / 80, 1);
+      const iw = im.naturalWidth, ih = im.naturalHeight, id = Object.keys(CHARACTER_SPRITES).filter(function(c){ return CHARACTER_SPRITES[c] === sp; })[0];
+      const hf = HAT_FIT[id] || HAT_FIT_DEFAULT, hx = hf[0] * iw, hy = hf[1] * ih, s = hf[2] * iw / (hf[4] ? 22 : 33);   // dieselbe Stelle wie im Lauf (HAT_FIT)
+      const ex = hf[4] ? 12 : 18, x0 = Math.min(0, hx - ex * s), x1 = Math.max(iw, hx + ex * s), y0 = Math.min(0, hy - (hf[4] ? 12 : 27) * s), y1 = Math.max(ih, hf[4] ? hy + 20 * s : 0);   // Bild + Mütze passen ins Quadrat
+      const g = cv.getContext('2d'), k = n / Math.max(x1 - x0, y1 - y0), ox = (n - (x1 - x0) * k) / 2 - x0 * k, oy = (n - (y1 - y0) * k) / 2 - y0 * k;
+      g.drawImage(im, ox, oy, iw * k, ih * k);
+      drawHatFit(g, hf, ox + hx * k, oy + hy * k, iw * k);
       const url = cv.toDataURL('image/png');
       if (lb._wkey === key) lb.src = url;
     } catch (e) {}
