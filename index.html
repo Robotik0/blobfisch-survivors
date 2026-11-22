@@ -277,8 +277,13 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 #strat-ui .st-placebar .btn.st-done { padding: 16px 32px; font-size: 22px; background: linear-gradient(135deg, #7af2a4, #2fb866); color: #04200f; border: 2px solid #eafff2; box-shadow: 0 0 0 3px rgba(122,242,164,0.35), 0 8px 22px rgba(0,0,0,0.45); animation: stDonePulse 1.3s ease-in-out infinite; }
 #strat-ui .st-placebar .btn.st-done i { font-style: normal; font-size: 26px; margin-right: 4px; }
 @keyframes stDonePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(122,242,164,0.35), 0 8px 22px rgba(0,0,0,0.45); } 50% { box-shadow: 0 0 0 9px rgba(122,242,164,0.6), 0 8px 22px rgba(0,0,0,0.45); } }
-#strat-ui .st-zoom { display: flex; gap: 6px; }
-#strat-ui .st-zoom .btn { padding: 10px 14px; font-size: 18px; min-width: 52px; }
+#strat-ui .st-goal { position: fixed; left: calc(env(safe-area-inset-left) + 10px); top: calc(env(safe-area-inset-top) + 74px); z-index: 11; max-width: min(360px, 64vw); padding: 7px 12px 8px; border-radius: 14px; background: rgba(5,15,28,0.78); border: 1px solid rgba(255,215,106,0.5); font: 800 12.5px/1.3 'Nunito', sans-serif; color: #ffeec0; pointer-events: none; }   /* 7.39: das nächste Ziel */
+#strat-ui .st-goal-bar { margin-top: 5px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.14); overflow: hidden; }
+#strat-ui .st-goal-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffd76a, #7af2a4); }
+@media (max-height: 520px) { #strat-ui .st-goal { top: 62px; font-size: 11px; } }
+#strat-ui .st-zoom { position: fixed; right: calc(env(safe-area-inset-right) + 12px); top: 50%; transform: translateY(-50%); z-index: 13; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; border-radius: 40px; background: rgba(6,20,34,0.72); border: 2px solid rgba(126,224,255,0.55); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }   /* 7.39: gross und am Rand, vorher zwei kleine Knöpfe neben "Abbrechen" */
+#strat-ui .st-zoom .btn { padding: 0; width: 60px; height: 60px; border-radius: 50%; font-size: 34px; line-height: 1; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+#strat-ui .st-zoom .st-zlab { font-size: 14px; font-weight: 800; color: #bfe7ff; min-width: 52px; text-align: center; }
 #strat-ui .st-btns { position: fixed; right: calc(env(safe-area-inset-right) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 12; display: flex; flex-direction: column; gap: 6px; width: 132px; }
 #strat-ui .st-btns .btn { padding: 9px 8px; font-size: 13px; }
 #strat-ui .st-b { display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; line-height: 1.1; }
@@ -921,7 +926,7 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
       <button class="btn btn-secondary st-b" id="st-map" style="display:none;"><i>🗺️</i><span>Karte</span></button>
     </div>
     <div class="st-panel" id="strat-panel" style="display:none;"></div>
-    <div class="st-placebar" id="st-placebar" style="display:none;"><button class="btn btn-secondary" id="st-placecancel"><i>✕</i> <span>Abbrechen</span></button><div class="st-zoom"><button class="btn btn-secondary" id="st-zout">🔍−</button><button class="btn btn-secondary" id="st-zin">🔍+</button></div></div>
+    <div class="st-placebar" id="st-placebar" style="display:none;"><button class="btn btn-secondary" id="st-placecancel"><i>✕</i> <span>Abbrechen</span></button><div class="st-zoom"><button class="btn btn-secondary" id="st-zin" aria-label="+">＋</button><span class="st-zlab" id="st-zlab">100 %</span><button class="btn btn-secondary" id="st-zout" aria-label="−">－</button></div></div>
   </div>
 
   <div id="toast"></div>
@@ -1343,7 +1348,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.37';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.39';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -2973,6 +2978,22 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
   ["Der Startcode ist noch nicht aktiv.", "The launch code is not active yet.", "Стартовий код ще не активний."],
   ["Dein Start-Abzeichen ❄️ hast du schon. Danke fürs Zuschauen!", "You already have your launch badge ❄️. Thanks for watching!", "Твій стартовий значок ❄️ уже в тебе. Дякуємо, що дивишся!"],
   ["🎉 Richtig! Du bekommst das Start-Abzeichen ❄️ und 300 💧.", "🎉 Correct! You get the launch badge ❄️ and 300 💧.", "🎉 Правильно! Ти отримуєш стартовий значок ❄️ і 300 💧."],
+  ["Die Muschelburg wird ausgebaut …", "The Shell Castle is being upgraded …", "Мушлевий замок розбудовується …"],
+  ["Ziel: Baue einen Harpunenturm (Knopf „Bauen“), er schützt deine Basis vor Wellen.", "Goal: build a Harpoon Tower (the “Build” button), it protects your base from waves.", "Ціль: збудуй гарпунну вежу (кнопка «Будувати»), вона захищає базу від хвиль."],
+  ["Ziel: Baue eine Brutstätte und bilde Truppen aus (Knopf „Bauen“).", "Goal: build a Hatchery and train troops (the “Build” button).", "Ціль: збудуй інкубатор і навчай війська (кнопка «Будувати»)."],
+  ["Bereit! Tippe auf die Muschelburg und baue sie aus (Stufe {}).", "Ready! Tap the Shell Castle and upgrade it (level {}).", "Готово! Торкнися Мушлевого замку й розбудуй його (рівень {})."],
+  ["Ziel: Muschelburg Stufe {} · {}", "Goal: Shell Castle level {} · {}", "Ціль: Мушлевий замок, рівень {} · {}"],
+  ["Besiege Gegner, sie bringen Korallen.", "Defeat foes, they drop coral.", "Перемагай ворогів, вони дають корали."],
+  ["Einlagern", "Store", "Покласти на склад"],
+  ["ins Inventar · Basis ruht", "to inventory · base rests", "на склад · база відпочиває"],
+  ["Inventar", "Inventory", "Склад"],
+  ["aufstellen", "place", "поставити"],
+  ["Deine Basis läuft wieder.", "Your base is running again.", "Твоя база знову працює."],
+  ["Während eines Überfalls geht das nicht.", "You can't do that during a raid.", "Під час нападу так не можна."],
+  ["⏸ Deine Basis ruht, solange Gebäude im Inventar liegen: keine Überfälle, Wellen und Einnahmen.", "⏸ Your base rests while buildings are in the inventory: no raids, waves or income.", "⏸ Твоя база відпочиває, поки будівлі на складі: без нападів, хвиль і прибутку."],
+  ["⏸ Diese Basis ruht gerade (der Besitzer baut um).", "⏸ This base is resting right now (the owner is rearranging).", "⏸ Ця база зараз відпочиває (власник перебудовує)."],
+  ["⏸ Deine Basis ruht (Gebäude im Inventar): erst alles aufstellen, dann kannst du überfallen.", "⏸ Your base is resting (buildings in the inventory): place everything first, then you can raid.", "⏸ Твоя база відпочиває (будівлі на складі): спершу постав усе, тоді можна нападати."],
+  ["⏸ baut um", "⏸ rearranging", "⏸ перебудовує"],
   ["Startcode", "Launch code", "Стартовий код"],
   ["Wenn du einen Startcode eingibst, schickt das Spiel nur diesen Code zur Prüfung an den Server. Die Netzadresse wird kurz für die Versuchsgrenze im Speicher gehalten; gezählt wird nur, wie oft ein Code richtig oder falsch war, ohne dich. Dass du das Abzeichen hast, steht in deinem Spielstand.", "When you type a launch code, the game only sends that code to the server to be checked. The network address is kept briefly in memory for the try limit; only how often a code was right or wrong is counted, without you. That you have the badge is kept in your save.", "Коли ти вводиш стартовий код, гра надсилає на сервер для перевірки лише цей код. Мережева адреса ненадовго зберігається в пам'яті для ліміту спроб; рахується лише, скільки разів код був правильним чи неправильним, без тебе. Те, що в тебе є значок, зберігається у твоєму збереженні."],
 ];
@@ -13312,6 +13333,7 @@ function render() {
     }
 
     rtry(drawInkOverlays);                           // Tintenpfützen der Riesenkrake verdecken alles darin
+    if (strategyMode && Base) rtry(stDrawDusk);      // 7.39: Strategie-Basis im Tiefsee-Graben liegt im Dunkeln (Laternen leuchten)
     if (stageOf().id === 'graben') { rtry(drawDarkness); if (Net.on) rtry(drawPeers); }
     if (gameState === 'playing' || gameState === 'resume' || gameState === 'chance') rtry(updateHud);
     screenSpace();                                   // ab hier Bildschirm-Pixel: Pfeile am Rand, Meldungen, Steuerknüppel
@@ -13895,7 +13917,7 @@ const STRAT_KEY = 'blobfischStrategyBase';
 // Massstab (7.3): eine Kachel = 144 (der Blobi hat Radius 19): Muschelburg und Brutstätte sind 3 Kacheln = 11 Blobis breit, die Basis 34–49 Blobis.
 // ST_REACH: die Reichweiten der Verteidigung, gemessen an der früheren Kachel von 48.
 const ST_FOE_DMG = 0.7, ST_BOSS_HP = 0.5, ST_BOSS_DMG = 0.35, ST_CHAMP_HP = 0.5;   // 7.8: Gegner der Strategie sind schwächer (Bosse und Champions am meisten); 7.21: Boss-HP 0,7 -> 0,5, Boss-Schaden 0,5 -> 0,35
-const ST_TILE = 115, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 6, ST_MAX_MB = 10, ST_ARMY_MAX = 36, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
+const ST_EARLY_LOOT = 3, ST_TILE = 115, ST_REACH = 2, ST_XP_MULT = 5, ST_WAVE_GAP = 150, ST_FIRST_WAVE = 40, ST_BOSS_EVERY = 6, ST_MAX_MB = 10, ST_ARMY_MAX = 36, ST_TRICKLE_GAP = 20, ST_TRICKLE_MAX = 2;
 const ST_TRAP = { dmg: 90, trig: 0.9, blast: 1.6, rearm: 5 };       // 7.34: Stachelfalle verstärkt (vorher 60 Schaden, Auslöser 0,7 Kacheln, Wirkung 1,2 Kacheln, 8 s)
 const ST_MB = [null, { grid: 9 }, { grid: 9, k: 300, c: 0, t: 60 }, { grid: 11, k: 800, c: 0, t: 120 }, { grid: 13, k: 1500, c: 60, t: 300 }, { grid: 15, k: 3000, c: 150, t: 600 },
   { grid: 15, k: 5000, c: 300, t: 900 }, { grid: 17, k: 8000, c: 500, t: 2700 }, { grid: 19, k: 12000, c: 800, t: 5400 }, { grid: 19, k: 17000, c: 1200, t: 7200 }, { grid: 21, k: 25000, c: 2000, t: 10800 }];     // 7.15: Stufen 6-10 (Plan: Muschelburg-Tabelle); 7.23: Bauzeiten ×1,5, Stufe 2 und 3 brauchen jetzt auch Zeit; 7.34: Raster 9 / 9 / 11 / 13 / 15 / 15 / 17 / 19 / 19 / 21 (alle Gebäude und Mauern der Stufe passen mit Platz für Wege hinein)     // 7.15: Stufen 6-10 (Plan: Muschelburg-Tabelle); 7.23: Bauzeiten ×1,5, Stufe 2 und 3 brauchen jetzt auch Zeit
@@ -13952,14 +13974,14 @@ function stDur(s) {                    // 45 s · 3 min · 2 min 30 s · 1 h 30 
 }
 function stDay() { return Math.floor(Date.now() / 86400000); }
 function stNewBase() {
-  return { v: 1, mb: 1, res: { k: 200, c: 0, xp: 0 }, nextId: 4, waves: 0, lastAt: Date.now(), chanceDay: -1, troopLv: {}, train: [], build: null,
+  return { v: 1, mb: 1, res: { k: 200, c: 0, xp: 0 }, nextId: 4, waves: 0, lastAt: Date.now(), chanceDay: -1, troopLv: {}, train: [], build: null, inv: [],
     buildings: [{ id: 1, type: 'muschelburg', lv: 1, x: -1, y: -1, hp: 1500 }, { id: 2, type: 'korallenfarm', lv: 1, x: 2, y: -1, hp: 300 }, { id: 3, type: 'perlentresor', lv: 1, x: -3, y: -1, hp: 400 }],
     troops: [], blobi: null };
 }
 function stValid(b) { return !!b && b.v === 1 && Array.isArray(b.buildings); }
 // Mit Konto liegt die Basis im Spielstand des Kontos (save.strategyBase, Strategie Schritt 2); der Server-Stand gilt, wenn er nicht älter ist als der im Browser
 function stLoad() {
-  const b = stLoad0(); if (b && b.buildings) b.buildings.forEach(function(x){ delete x.hitT; if (x.type === 'korallenmauer' && x.upUntil) x.upUntil = 1; });    // hitT gehört nur zur laufenden Sitzung; 7.31: ein laufender Mauer-Ausbau ist gleich fertig
+  const b = stLoad0(); if (b && !Array.isArray(b.inv)) b.inv = []; if (b && b.buildings) b.buildings.forEach(function(x){ delete x.hitT; if (x.type === 'korallenmauer' && x.upUntil) x.upUntil = 1; });    // hitT gehört nur zur laufenden Sitzung; 7.31: ein laufender Mauer-Ausbau ist gleich fertig
   return b;
 }
 function stLoad0() {
@@ -13978,13 +14000,12 @@ function stSave() {
 // Wellen, die kamen, während du weg warst: eine je 2 Stunden, höchstens 6 pro Tag (Plan: „Offline waves“). Stark genug = nichts verloren, kleine Belohnung;
 // zu schwach = bis 10 % der Rohstoffe weg, eine Truppe verloren, mit der Lücke als Wahrscheinlichkeit ein Gebäude in Ruinen. Gibt je Welle einen Eintrag zurück.
 function stOfflineWaveCount(secs) { return Math.max(0, Math.min(Math.floor(secs / 7200), 6 * Math.max(1, Math.ceil(secs / 86400)), 24)); }
-function stOfflineWaves(base, n, rnd) {
+function stOfflineWaves(base, n, rnd) {     // 7.39: zählt base.waves nicht weiter (Champion- und Bossrhythmus und Boss-Stärke gehören nur den Wellen, die du erlebst)
   rnd = rnd || Math.random;
   const log = [], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle', 'korallenspeer', 'leuchtturm'];      // 7.31: der Leuchtturm zählt mit
   for (let i = 0; i < n; i++) {
-    base.waves = (base.waves || 0) + 1;
     let dl = 0; base.buildings.forEach(function(b){ if (defs.indexOf(b.type) !== -1 && !b.ruin) dl += b.lv; });
-    const wave = base.mb * 3 + dl, guard = base.mb * 2 + dl * 2 + (base.troops || []).length * 1.5, e = { n: base.waves, won: guard >= wave, k: 0, c: 0, troop: false, ruin: '' };
+    const wave = base.mb * 3 + dl, guard = base.mb * 2 + dl * 2 + (base.troops || []).length * 1.5, e = { n: i + 1, won: guard >= wave, k: 0, c: 0, troop: false, ruin: '' };
     if (e.won) { e.k = 10 * base.mb; base.res.k += e.k; }
     else {
       const gap = Math.min(1, (wave - guard) / wave), cut = 0.1 * gap + 0.02;
@@ -14042,14 +14063,18 @@ function stTroopCap() { return Base.mb >= 9 ? 5 : Math.min(4, Base.mb); }       
 // 7.10: der Ring der Karte bestimmt Hintergrund, Gegner und Beute (f = Wellenfaktor, k / c = Zuschlag auf Korallen / Kristalle)
 const ST_RING = { riff: { f: 1, k: 1, c: 1 }, kelp: { f: 1.4, k: 1.25, c: 1 }, graben: { f: 1.9, k: 1, c: 1.25 }, vulkan: { f: 2.5, k: 1, c: 1.5 } };
 function stArea() { return Base && ST_RING[Base.ring] ? Base.ring : 'riff'; }
+// 7.39: Inventar. Gebäude lassen sich einlagern (Base.inv = [{ type, lv, hp }]); solange etwas darin liegt, ruht die Basis: keine Überfälle (weder auf dich noch von dir), keine Wellen, kein Einkommen. Wieder aufgestellt wird gratis und sofort.
+function stPaused() { return !!(Base && Base.inv && Base.inv.length); }
+function stCountOf(type) { return stBuildingsOf(type).length + (Base.inv || []).filter(function(i){ return i.type === type; }).length; }
+const ST_PAUSE_TXT = '⏸ Deine Basis ruht, solange Gebäude im Inventar liegen: keine Überfälle, Wellen und Einnahmen.';
 function stStrength() { let s = Base.mb * 3; Base.buildings.forEach(function(b){ if (['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'stachelfalle', 'korallenspeer'].indexOf(b.type) !== -1 && !b.ruin) s += b.lv; }); return s; }
 function stCanPay(cost) { return Base.res.k >= cost.k && Base.res.c >= cost.c; }
 function stPay(cost) { Base.res.k -= cost.k; Base.res.c -= cost.c; }
 // Produktion und Zeitgeber nach Sekunden (auch die Zeit, in der das Spiel zu war). at = Uhrzeit am Ende des Abschnitts (stTickAway), sonst jetzt
 function stTick(secs, offline, at) {
-  const cp = stCaps(), out = { k: 0, c: 0, troops: 0, built: '' };
+  const cp = stCaps(), out = { k: 0, c: 0, troops: 0, built: '' }, paused = stPaused();
   Base.buildings.forEach(function(b){
-    if (b.ruin || b.upUntil) return;
+    if (b.ruin || b.upUntil || paused) return;
     if (b.type === 'korallenfarm') out.k += 60 * Math.pow(1.5, b.lv - 1) * ST_RING[stArea()].k * secs / 3600;
     if (b.type === 'kristallbohrer') out.c += 6 * Math.pow(1.5, b.lv - 1) * ST_RING[stArea()].c * secs / 3600;
   });
@@ -14223,7 +14248,7 @@ function snReceive(data) {
   else if (m.t === 'leave') { if (RD && RD.id === m.id) raidAbort(); SN.peers.delete(m.id); }
   else if (m.t === 'raid') raidReceive(m);
   else if (m.t === 'lg') stLegendMsg(m);
-  else if (m.t === 'base') { const pe = SN.peers.get(m.id) || snAddPeer({ id: m.id, plot: m.plot, mb: m.mb }); if (pe && Array.isArray(m.gd)) pe.gd = m.gd.slice(0, 16); if (pe && RD && RD.id === pe.id) { pe.mb = m.mb || pe.mb; } else if (pe) { pe.plot = m.plot; pe.mb = m.mb || pe.mb; pe.lay = snCleanLay(m.lay); } }
+  else if (m.t === 'base') { const pe = SN.peers.get(m.id) || snAddPeer({ id: m.id, plot: m.plot, mb: m.mb }); if (pe && Array.isArray(m.gd)) pe.gd = m.gd.slice(0, 16); if (pe) pe.pz = m.pz ? 1 : 0; if (pe && RD && RD.id === pe.id) { pe.mb = m.mb || pe.mb; } else if (pe) { pe.plot = m.plot; pe.mb = m.mb || pe.mb; pe.lay = snCleanLay(m.lay); } }
   else if (m.t === 's' || m.t === 'p') {
     const pe = SN.peers.get(m.f); if (!pe || !(typeof m.x === 'number' && isFinite(m.x) && typeof m.y === 'number' && isFinite(m.y))) return;
     if (pe.seen) pe.a = Math.atan2(m.y - pe.my, m.x - pe.mx) || pe.a; else { pe.x = m.x; pe.y = m.y; }
@@ -14246,8 +14271,8 @@ function snTick(dt) {
   }
   if (now - SN.claimAt >= 60000) { SN.claimAt = now; snSend({ t: 'raid', op: 'claim' }); }       // Überfälle auf deine schlafende Basis abholen
   if (now - SN.layAt >= 2000) {
-    const lay = snLayout(), gd = snGuards(), txt = JSON.stringify(lay) + Base.mb + JSON.stringify(gd);
-    if (txt !== SN.lastLay || now - SN.layAt >= 60000) { SN.lastLay = txt; SN.layAt = now; snSend({ t: 'b', mb: Base.mb, lay: lay, fr: stLootFree(), gd: gd }); }   // der Server vergisst Umrisse beim Schlafen: einmal pro Minute wieder melden
+    const lay = snLayout(), gd = snGuards(), pz = stPaused() ? 1 : 0, txt = JSON.stringify(lay) + Base.mb + JSON.stringify(gd) + pz;
+    if (txt !== SN.lastLay || now - SN.layAt >= 60000) { SN.lastLay = txt; SN.layAt = now; snSend({ t: 'b', mb: Base.mb, lay: lay, fr: stLootFree(), gd: gd, pz: pz }); }   // der Server vergisst Umrisse beim Schlafen: einmal pro Minute wieder melden
   }
 }
 function drawStratMap() {
@@ -14387,6 +14412,7 @@ function raidWatch() {                    // schwimmst du in die Basis eines and
   if (gameState !== 'playing' || playerDown > 0 || stInBase(player.x, player.y) || performance.now() < raidReqAt) return;
   const now = performance.now();
   let hit = null; SN.peers.forEach(function(pe){ if (!hit && pe.lay && raidArea(pe, 0) && !((SN.noRaid.get(pe.id) || 0) > now)) hit = pe; });
+  if (hit && (stPaused() || hit.pz)) { raidReqAt = now + 8000; showToast(stPaused() ? RAID_DENY.selfpaused : RAID_DENY.paused); return; }      // 7.39: Umbau-Pause, bei dir oder bei ihnen
   if (hit) { raidReqAt = now + 6000; raidLastDef = hit.id; snSend({ t: 'raid', op: 'start', def: hit.id }); }
 }
 function raidBegin(m) {
@@ -14539,12 +14565,13 @@ function raidBanner() {                  // zeigt, was gerade läuft: dein Über
 }
 const RAID_DENY = { busy: '⚔ Diese Basis wird gerade von jemand anderem überfallen.', raiding: '⚔ Du bist schon in einem Überfall.', login: '🔑 Basen mit Konto kannst du nur überfallen, wenn du angemeldet bist.',
   shield: '🛡 Diese Basis ist nach einem Überfall geschützt.', beginner: '🛡 Diese Basis steht unter Anfängerschutz.', strength: '⚖ Diese Basis passt nicht zu deiner Stärke (70 bis 140 %).',
-  limit: '⚔ Diese Basis wurde heute schon dreimal überfallen.', again: '⚔ Du hast diese Basis heute schon überfallen.' };
+  limit: '⚔ Diese Basis wurde heute schon dreimal überfallen.', again: '⚔ Du hast diese Basis heute schon überfallen.',
+  paused: '⏸ Diese Basis ruht gerade (der Besitzer baut um).', selfpaused: '⏸ Deine Basis ruht (Gebäude im Inventar): erst alles aufstellen, dann kannst du überfallen.' };
 function raidDeny(m) {
   SN.sendId = 0;
   if (m.why === 'none' && raidLastDef) { const gp = SN.peers.get(raidLastDef); if (gp && gp.ghost) { SN.peers.delete(gp.id); SN.pick = SN.pick === gp.id ? 0 : SN.pick; } }       // die schlafende Basis gibt es auf dem Server nicht mehr                   // der Server sagt, warum ein Überfall oder Duell nicht beginnt; die Basis wird eine Weile nicht noch einmal versucht
   if (RAID_DENY[m.why]) showToast(RAID_DENY[m.why]);
-  if (raidLastDef && ['shield', 'beginner', 'strength', 'limit', 'again', 'login'].indexOf(m.why) !== -1) SN.noRaid.set(raidLastDef, performance.now() + 60000);
+  if (raidLastDef && ['shield', 'beginner', 'strength', 'limit', 'again', 'login', 'paused'].indexOf(m.why) !== -1) SN.noRaid.set(raidLastDef, performance.now() + 60000);
   else if (raidLastDef && (m.why === 'busy' || m.why === 'raiding')) SN.noRaid.set(raidLastDef, performance.now() + 12000);
 }
 function raidScore(m) {                  // Trophäen und Schutz nach einem Überfall (Schritt 4)
@@ -14561,11 +14588,13 @@ function snTopReceive(m) {               // Rangliste, eigene Trophäen und der 
 }
 function troopsSend(pe) {                    // 7.13: die Truppen allein losschicken (du bleibst zu Hause), ein ganz normaler Überfall mit allen Regeln
   const now = performance.now(); if (RD || !SN.on || now < SN.duelAt) return;
+  if (stPaused() || pe.pz) { showToast(stPaused() ? RAID_DENY.selfpaused : RAID_DENY.paused); return; }
   if (!stTroops.some(function(t){ return !t.dead; })) { showToast('Du hast keine Truppen zum Schicken.'); return; }
   SN.duelAt = now + 4000; SN.sendId = pe.id; raidLastDef = pe.id; snSend({ t: 'raid', op: 'start', def: pe.id });
 }
 function duelStart(pe) {
   const now = performance.now(); if (RD || !SN.on || now < SN.duelAt) return;
+  if (stPaused() || pe.pz) { showToast(stPaused() ? RAID_DENY.selfpaused : RAID_DENY.paused); return; }
   SN.duelAt = now + 4000; raidLastDef = pe.id; snSend({ t: 'raid', op: 'start', def: pe.id, duel: 1 });
 }
 // 7.18: Kartenform: der Radius wird gestaucht (Wurzel), damit der innere Ring nicht winzig neben dem Vulkanring liegt; N = Kartenbreite in Pixeln
@@ -14601,7 +14630,8 @@ function snMapPickShow() {
   const gi = SN.pl && SN.pl[pe.plot] ? SN.pl[pe.plot][2] : -1, sh = SN.shields[pe.id], info = mk('div', 't');
   if (gi >= 0) info.appendChild(mk('span', null, snRingName(gi)));
   if (pe.ghost) info.appendChild(mk('span', null, '💤 schläft'));
-  if (sh) info.appendChild(mk('span', null, sh === 'beginner' ? '🛡 Anfängerschutz' : '🛡 geschützt'));
+  if (pe.pz) info.appendChild(mk('span', null, '⏸ baut um'));
+  if (sh && sh !== 'paused') info.appendChild(mk('span', null, sh === 'beginner' ? '🛡 Anfängerschutz' : '🛡 geschützt'));
   if (snFight(pe.id)) info.appendChild(mk('span', null, '⚔ im Kampf'));
   info.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px 12px;font-weight:700;font-size:13px;opacity:0.85;';
   el.appendChild(info);
@@ -14827,11 +14857,13 @@ function stratUpdate(dt) {
   if (!Base) return;
   const o = stTick(dt, false);
   if (o.built) { showToast('🏗️ Fertig: ' + o.built); stSave(); }
-  stWaveT -= dt;
-  const warnAt = stLv('leuchtturm') ? 15 : 5;
-  if (stWaveT <= warnAt && stWaveT + dt > warnAt) showToast('🌊 Eine Welle kommt in ' + Math.ceil(stWaveT) + ' s!');
-  if (stWaveT <= 0) { stWaveT = ST_WAVE_GAP; stWave(); }
-  stTrickleT -= dt; if (stTrickleT <= 0) { stTrickleT = ST_TRICKLE_GAP * (0.7 + Math.random() * 0.6); stTrickle(); }
+  if (!stPaused()) {                                                      // 7.39: Umbau-Pause: Zeitgeber stehen still
+    stWaveT -= dt;
+    const warnAt = stLv('leuchtturm') ? 15 : 5;
+    if (stWaveT <= warnAt && stWaveT + dt > warnAt) showToast('🌊 Eine Welle kommt in ' + Math.ceil(stWaveT) + ' s!');
+    if (stWaveT <= 0) { stWaveT = ST_WAVE_GAP; stWave(); }
+    stTrickleT -= dt; if (stTrickleT <= 0) { stTrickleT = ST_TRICKLE_GAP * (0.7 + Math.random() * 0.6); stTrickle(); }
+  }
   stFoeLoad.clear(); for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (!e.dead && e.stTg && e.stTg !== player) stFoeLoad.set(e.stTg, (stFoeLoad.get(e.stTg) || 0) + 1); }
   stTrackFoes(dt);
   stLegendUpdate(dt);
@@ -14937,7 +14969,7 @@ function stratLoot(k) {
   spawnXpOrb(k.x, k.y, k.xp * (k.grp || 1));
   if (!Base) return;
   const cp = stCaps();
-  let kk = (1 + Math.floor(Math.random() * 2)) * (1 + 0.1 * Base.mb), cc = 0;
+  let kk = (1 + Math.floor(Math.random() * 2)) * (1 + 0.1 * Base.mb) * (Base.mb < 2 ? ST_EARLY_LOOT : 1), cc = 0;      // 7.39: bis zur Muschelburg 2 gibt jede Beute dreimal so viele Korallen (das erste Ziel ist in wenigen Minuten erreicht)
   if (k.isBoss) { cc = 20 + 10 * Base.mb; kk += 60; } else if (k.champ) cc = 8;
   const rb = ST_RING[stArea()]; kk *= rb.k; cc = Math.round(cc * rb.c);
   Base.res.k = Math.min(cp.k, Base.res.k + kk); Base.res.c = Math.min(cp.c, Base.res.c + cc);
@@ -15320,7 +15352,7 @@ function stRowTiles(a, b) {
 }
 function stRowPlan(type, tiles) {       // ok[i] = Feld i wird gebaut; why = 'poor' (Korallen fehlen) / 'full' (alle Plätze besetzt) für das erste Feld, das nicht mehr geht
   const cost = stLevelCost(type, 1);
-  let left = ST_B[type].max(Base.mb) - stBuildingsOf(type).length, k = Base.res.k, c = Base.res.c, why = '';
+  let left = ST_B[type].max(Base.mb) - stCountOf(type), k = Base.res.k, c = Base.res.c, why = '';
   const ok = tiles.map(function(t){
     if (!stFree(type, t.x, t.y)) return false;
     if (left <= 0) { why = why || 'full'; return false; }
@@ -15345,14 +15377,14 @@ function stPointer(sx, sy, kind) {
   if (stUi.mode === 'place' || stUi.mode === 'move') {
     const type = stUi.mode === 'place' ? stUi.type : stUi.move.type, s = ST_B[type].size, t = stTileAt(w.x, w.y, s);
     stUi.ghost = t;
-    if (stUi.mode === 'place' && stRowType(type)) {
+    if (stUi.mode === 'place' && stUi.inv == null && stRowType(type)) {
       if (kind === 'down') { stUi.row0 = t; stUi.row = [t]; }
       else if (kind === 'move' && stUi.row0) stUi.row = stRowTiles(stUi.row0, t);
       else if (kind === 'tap' || (kind === 'up' && stUi.row0)) { const tiles = kind === 'up' ? stRowTiles(stUi.row0, t) : [t]; stUi.row0 = null; stUi.row = null; stPlaceRow(type, tiles); }
       return;
     }
     if (kind === 'tap') {
-      if (stUi.mode === 'place') { if (stFree(type, t.x, t.y) && stPlace(type, t.x, t.y)) { stUi.mode = null; stUi.ghost = null; stClosePanel(); } }
+      if (stUi.mode === 'place') { if (stFree(type, t.x, t.y) && (stUi.inv != null ? stPlaceInv(stUi.inv, t.x, t.y) : stPlace(type, t.x, t.y))) { stUi.mode = null; stUi.ghost = null; stUi.inv = null; stClosePanel(); } }
       else if (stFree(type, t.x, t.y, stUi.move)) { stUi.move.x = t.x; stUi.move.y = t.y; stUi.mode = null; stUi.ghost = null; stUi.move = null; stSave(); stClosePanel(); }
     }
     return;
@@ -15372,23 +15404,45 @@ function stPointer(sx, sy, kind) {
 })();
 
 // ---------- Oberfläche (alles mit textContent) ----------
+// 7.39: das nächste Ziel (Leiste links oben): am Anfang sieht man, was als Nächstes kommt und wie weit es ist
+function stGoal() {
+  const mbB = stBuildingsOf('muschelburg')[0], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'korallenspeer'];
+  if (mbB && mbB.upUntil) return { t: tr('Die Muschelburg wird ausgebaut …'), p: stBuildProg(mbB) };
+  if (Base.mb >= 2 && !Base.buildings.some(function(b){ return defs.indexOf(b.type) !== -1; })) return { t: tr('Ziel: Baue einen Harpunenturm (Knopf „Bauen“), er schützt deine Basis vor Wellen.'), p: 0 };
+  if (Base.mb >= 2 && !stBuildingsOf('brutstaette').length) return { t: tr('Ziel: Baue eine Brutstätte und bilde Truppen aus (Knopf „Bauen“).'), p: 0 };
+  if (Base.mb >= ST_MAX_MB) return null;
+  const nx = Base.mb + 1, c = ST_MB[nx], k = Math.floor(Base.res.k);
+  const p = Math.min(1, Base.res.k / c.k, c.c ? Base.res.c / c.c : 1);
+  if (p >= 1) return { t: tr('Bereit! Tippe auf die Muschelburg und baue sie aus (Stufe {}).').replace('{}', nx), p: 1 };
+  const cost = '🪸 ' + k + ' / ' + c.k + (c.c ? ' · 💎 ' + Math.floor(Base.res.c) + ' / ' + c.c : '');
+  return { t: tr('Ziel: Muschelburg Stufe {} · {}').replace('{}', nx).replace('{}', cost) + (Base.mb < 2 ? ' · ' + tr('Besiege Gegner, sie bringen Korallen.') : ''), p: p };
+}
+function stGoalShow() {
+  let g = document.getElementById('st-goal');
+  if (!g) { const u = document.getElementById('strat-ui'); if (!u) return; g = el('div', 'st-goal'); g.id = 'st-goal'; g.appendChild(el('span', 'st-goal-t')); const b = el('div', 'st-goal-bar'); b.appendChild(el('i')); g.appendChild(b); u.appendChild(g); }
+  const goal = Base && !SNR && !RD ? stGoal() : null, open = stUi.mode === 'place' || stUi.mode === 'move';
+  g.style.display = goal && !open ? 'block' : 'none'; if (!goal || open) return;
+  const t = g.firstChild; if (t.textContent !== goal.t) t.textContent = goal.t;
+  g.lastChild.firstChild.style.width = Math.round(goal.p * 100) + '%';
+}
 function renderStratHud() {
   const h = document.getElementById('strat-res'); if (!h || !Base) return;
   const cp = stCaps();
   if (!stHudEls || !h.firstChild) stHudBuild(h);
   stHudEls.k.textContent = Math.floor(Base.res.k) + '/' + cp.k; stHudEls.c.textContent = Math.floor(Base.res.c) + '/' + cp.c; stHudEls.xp.textContent = Math.floor(Base.res.xp) + '/' + cp.xp;
-  stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = Math.max(0, Math.ceil(stWaveT)) + ' s';
+  stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = stPaused() ? '⏸' : Math.max(0, Math.ceil(stWaveT)) + ' s';
   const bl = stBuilds(); stHudEls.buildBox.style.display = bl.length ? '' : 'none'; if (bl.length) stHudEls.build.textContent = bl.map(function(x){ return stDur((x.upUntil - Date.now()) / 1000); }).join(' · ');
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
+  stGoalShow();
   vis('st-build', inBase); vis('st-deposit', stVaultUsable()); vis('st-withdraw', stVaultUsable()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
-function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'flex' : 'none'; if (!on && ZOOM_K !== 1) { ZOOM_K = 1; applyZoom(); worldSpace(); } }
-function stZoomBy(f) { ZOOM_K = Math.max(0.4, Math.min(1.8, ZOOM_K * f)); applyZoom(); worldSpace(); }       // 7.34: Platzieren / Verschieben: heran- und herauszoomen (Knöpfe, Mausrad)
+function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'flex' : 'none'; if (!on && ZOOM_K !== 1) { ZOOM_K = 1; applyZoom(); worldSpace(); } const l = document.getElementById('st-zlab'); if (l) l.textContent = '100 %'; }
+function stZoomBy(f) { ZOOM_K = Math.max(0.4, Math.min(1.8, ZOOM_K * f)); applyZoom(); worldSpace(); const l = document.getElementById('st-zlab'); if (l) l.textContent = Math.round(ZOOM_K * 100) + ' %'; }       // 7.34: Platzieren / Verschieben: heran- und herauszoomen (Knöpfe, Mausrad)
 function stPlaceStart(hint) {      // Platzieren / Verschieben: das Menü verschwindet, damit der ganze Bildschirm frei ist; nur "Abbrechen" bleibt
   const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none';
-  const rows = stUi.mode === 'place' && stRowType(stUi.type), cb = document.getElementById('st-placecancel');     // 7.31: Mauern bleiben im Bau-Modus, der Knopf heisst dann „Fertig“
+  const rows = stUi.mode === 'place' && stUi.inv == null && stRowType(stUi.type), cb = document.getElementById('st-placecancel');     // 7.31: Mauern bleiben im Bau-Modus, der Knopf heisst dann „Fertig“
   if (cb) { cb.firstChild.textContent = rows ? '✓' : '✕'; cb.lastChild.textContent = tr(rows ? 'Fertig' : 'Abbrechen'); cb.classList.toggle('st-done', !!rows); }
   stUi.row0 = null; stUi.row = null;
   stPlaceBar(true); if (hint) showToast(tr(hint));
@@ -15416,11 +15470,23 @@ function stOpenBuild() {
     if (stBuilders() < 2 && Base.mb >= 5) n.appendChild(el('span', 'st-note', tr('Ein zweiter Baumeister lässt dich zwei Dinge auf einmal bauen.')));
     p.appendChild(n);
   }
+  if (stPaused()) {                                          // 7.39: Inventar zuerst
+    p.appendChild(el('div', 'st-group', '📦 ' + tr('Inventar')));
+    p.appendChild(el('p', 'acc-note', tr(ST_PAUSE_TXT)));
+    const ig = el('div', 'st-cards');
+    Base.inv.forEach(function(it, idx){
+      const d = ST_B[it.type], b = el('button', 'st-card'), top = el('span', 'st-card-top'); top.appendChild(stIcon(it.type, 34)); top.appendChild(el('span', 'st-card-name', d.name)); b.appendChild(top);
+      b.appendChild(el('span', 'st-card-cost', tr('Stufe') + ' ' + it.lv)); b.appendChild(el('span', 'st-card-meta', '⚡ ' + tr('gratis') + ' · ' + tr('aufstellen')));
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = it.type; stUi.inv = idx; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+      ig.appendChild(b);
+    });
+    p.appendChild(ig);
+  }
   ST_GROUPS.forEach(function(gr){
     p.appendChild(el('div', 'st-group', tr(gr[0])));
     const grid = el('div', 'st-cards');
     gr[1].forEach(function(type){
-      const d = ST_B[type], have = stBuildingsOf(type).length, max = Base.mb >= d.from ? d.max(Base.mb) : 0, cost = stLevelCost(type, 1), t = stBuildTime(type, 1);
+      const d = ST_B[type], have = stCountOf(type), max = Base.mb >= d.from ? d.max(Base.mb) : 0, cost = stLevelCost(type, 1), t = stBuildTime(type, 1);
       const locked = Base.mb < d.from, full = !locked && have >= max, poor = !stCanPay(cost), wait = t > 0 && busy > 0;
       const b = el('button', 'st-card' + (locked ? ' locked' : full ? ' full' : ''));
       const top = el('span', 'st-card-top'); top.appendChild(stIcon(type, 34)); top.appendChild(el('span', 'st-card-name', d.name)); b.appendChild(top);
@@ -15432,7 +15498,7 @@ function stOpenBuild() {
         b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
       }
       b.disabled = locked || full || poor || wait;
-      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart(stRowType(type) ? 'Tippe für eine Mauer oder zieh eine ganze Reihe.' : 'Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.inv = null; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart(stRowType(type) ? 'Tippe für eine Mauer oder zieh eine ganze Reihe.' : 'Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
       grid.appendChild(b);
     });
     p.appendChild(grid);
@@ -15498,6 +15564,21 @@ function stUpInfo(p, b) {            // der Block „Das bringt der Ausbau“
   if (!A.length) box.appendChild(el('div', 'st-note', tr('Nur mehr Lebenspunkte.')));
   p.appendChild(box);
 }
+function stStore(b) {            // 7.39: Gebäude ins Inventar legen
+  if (RD || SNR) { showToast('Während eines Überfalls geht das nicht.'); return; }
+  const i = Base.buildings.indexOf(b); if (i < 0 || b.type === 'muschelburg') return;
+  const was = stPaused();
+  Base.buildings.splice(i, 1); Base.inv.push({ type: b.type, lv: b.lv, hp: Math.round(b.hp) });
+  stUi.sel = null; stClosePanel(); stSave(); Sfx.click(); renderStratHud();
+  showToast(was ? '📦 ' + tr(ST_B[b.type].name) + ' → ' + tr('Inventar') : ST_PAUSE_TXT);
+}
+function stPlaceInv(idx, x, y) {   // 7.39: Gebäude aus dem Inventar aufstellen: gratis, sofort, mit Stufe und Lebenspunkten von vorher
+  const it = Base.inv[idx]; if (!it || !stFree(it.type, x, y)) return false;
+  Base.buildings.push({ id: Base.nextId++, type: it.type, lv: it.lv, x: x, y: y, hp: Math.min(it.hp, stMaxHp({ type: it.type, lv: it.lv })) });
+  Base.inv.splice(idx, 1);
+  if (!Base.inv.length) { stWaveT = Math.max(stWaveT, 30); showToast('▶ ' + tr('Deine Basis läuft wieder.')); }
+  Sfx.click(); stSave(); renderStratHud(); return true;
+}
 function stOpenInfo(b) {
   const d = ST_B[b.type], p = stPanel(d.name + ' · ' + tr('Stufe') + ' ' + b.lv, b.type);
   p.appendChild(el('p', 'acc-note', (b.ruin ? '💥 ' + tr('Ruine') + ' · ' : '') + 'HP ' + Math.max(0, Math.round(b.hp)) + '/' + stMaxHp(b)));
@@ -15522,6 +15603,7 @@ function stOpenInfo(b) {
     else add('Ausbauen auf Stufe ' + nl, nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
   if (b.type === 'muschelburg') { if (Base.builder2) p.appendChild(el('p', 'acc-note', tr('Zwei Baumeister arbeiten für dich.'))); else add('Zweiten Baumeister anheuern', Base.mb < 5 ? '🔒 Muschelburg 5' : ST_HIRE_C + ' 💎', function(){ stHire(); }, Base.mb < 5); }
+  if (b.type !== 'muschelburg' && !b.ruin && !b.upUntil) add('Einlagern', 'ins Inventar · Basis ruht', function(){ stStore(b); });
   add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
   if (b.type === 'perlentresor') { add('XP einzahlen', Math.floor(runXp) + ' XP vom Blobi', function(){ stDeposit(); }, !stVaultUsable()); add('XP abheben', Math.floor(Base.res.xp) + ' XP im Tresor', function(){ stWithdraw(); }, !stVaultUsable()); }
   if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
@@ -16008,10 +16090,88 @@ function drawStrategyBase() {
     }
     stDrawRim(g, px0, py0, n, pT, true);
   }
+  stDrawRange(g, ox, oy, tm);                      // 7.39: Reichweite des angetippten Gebäudes
   stDrawLight(g, ox, oy);                          // 7.31: Leuchtturm-Licht unter den Gegnern
   if (placing && stUi.ghost) stDrawGhost(g, ox, oy, tm);
   if (stCmd === 'send' && stSend) stMarker(g, stSend.x - ox, stSend.y - oy, '#ffd76a', tm, true);
   if (stCmd === 'hold' && stHold) stMarker(g, stHold.x - ox, stHold.y - oy, '#7ee0ff', tm, false);
+}
+// 7.39: Ist die Karte der Tiefsee-Graben, liegt die Basis im Dunkeln; Laternen an einigen Gebäuden und am Tor leuchten, dazu ein Kreis um deinen Blobi.
+// Ein Dunkel-Bild in 0,3-facher Auflösung (Ränder sind weich), die Lichter stanzen Löcher hinein, danach liegt es über der Welt (vor der Anzeige).
+const ST_LAMP = { leuchtturm: [430, '255,232,150'], muschelburg: [250, '255,214,140'], harpunenturm: [190, '255,226,150'], korallenspeer: [190, '255,190,140'], elektroaal: [210, '110,255,210'], heilquelle: [210, '150,255,200'], blasenkanone: [170, '126,224,255'], brutstaette: [180, '255,200,235'] };
+const ST_DUSK_A = 0.82;
+let stDuskCv = null;
+function stDuskAdd(L, list, n, ox, oy) {         // Lichter einer Basis: Laternen der Gebäude und die zwei Tor-Laternen; ox, oy wie in drawStrategyBase
+  const T = ST_TILE, h = Math.floor(n / 2), gi = (n - 1) / 2;
+  for (let i = 0; i < list.length; i++) {
+    const b = list[i], l = ST_LAMP[b.type]; if (!l || b.ruin || b.upUntil) continue;
+    L.push({ x: (b.x + ST_B[b.type].size / 2) * T - ox, y: (b.y + 0.3) * T - oy, R: l[0], c: l[1], lamp: true });
+  }
+  const gy = (-h + n) * T - oy - 101;
+  L.push({ x: (-h + gi) * T - ox, y: gy, R: 150, c: '255,225,140' }, { x: (-h + gi + 1) * T - ox, y: gy, R: 150, c: '255,225,140' });
+}
+function stDrawDusk() {
+  if (!Base || stArea() !== 'graben') return;
+  const k = 0.3, cw = Math.ceil(W * k), ch = Math.ceil(H * k), g = ctx, L = [];
+  stDuskAdd(L, Base.buildings, stGrid(), camera.x - W / 2, camera.y - H / 2);
+  if (SN.on && SN.pl) {
+    const o = snOrigin(), owner = {}; SN.peers.forEach(function(pe){ owner[pe.plot] = pe; });
+    for (let i = 0; i < SN.pl.length; i++) {
+      const pe = owner[i]; if (i === SN.plot || !pe || !pe.lay) continue;
+      const dx = SN.pl[i][0] - o.x, dy = SN.pl[i][1] - o.y; if (Math.abs(dx - camera.x) > W / 2 + 1500 || Math.abs(dy - camera.y) > H / 2 + 1500) continue;
+      stDuskAdd(L, pe.lay, ST_MB[Math.min(ST_MAX_MB, pe.mb)] ? ST_MB[Math.min(ST_MAX_MB, pe.mb)].grid : 9, camera.x - W / 2 - dx, camera.y - H / 2 - dy);
+    }
+  }
+  if (player) L.push({ x: player.x - camera.x + W / 2, y: player.y - camera.y + H / 2, R: 230, c: '190,240,255' });
+  const vis = L.filter(function(l){ return l.x > -l.R && l.y > -l.R && l.x < W + l.R && l.y < H + l.R; });
+  if (!stDuskCv) stDuskCv = document.createElement('canvas');
+  if (stDuskCv.width !== cw || stDuskCv.height !== ch) { stDuskCv.width = cw; stDuskCv.height = ch; }
+  const q = stDuskCv.getContext('2d');
+  q.setTransform(1, 0, 0, 1, 0, 0); q.globalCompositeOperation = 'source-over'; q.clearRect(0, 0, cw, ch);
+  q.fillStyle = 'rgba(2,8,20,' + ST_DUSK_A + ')'; q.fillRect(0, 0, cw, ch);
+  q.setTransform(k, 0, 0, k, 0, 0); q.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < vis.length; i++) {
+    const l = vis[i], r = l.R * (1 + 0.025 * Math.sin(runTime * 1.7 + i * 2.1)), q2 = q.createRadialGradient(l.x, l.y, 0, l.x, l.y, r);
+    q2.addColorStop(0, 'rgba(0,0,0,1)'); q2.addColorStop(0.4, 'rgba(0,0,0,0.8)'); q2.addColorStop(1, 'rgba(0,0,0,0)');
+    q.fillStyle = q2; q.fillRect(l.x - r, l.y - r, 2 * r, 2 * r);
+  }
+  g.drawImage(stDuskCv, 0, 0, W, H);
+  g.save(); g.globalCompositeOperation = 'lighter';                                      // warmer Schein um die Laternen
+  for (let i = 0; i < vis.length; i++) {
+    const l = vis[i]; if (l.c === '190,240,255') continue;
+    const r = l.R * 0.5, q3 = g.createRadialGradient(l.x, l.y, 0, l.x, l.y, r); q3.addColorStop(0, 'rgba(' + l.c + ',0.28)'); q3.addColorStop(1, 'rgba(' + l.c + ',0)');
+    g.fillStyle = q3; g.fillRect(l.x - r, l.y - r, 2 * r, 2 * r);
+  }
+  g.restore();
+  for (let i = 0; i < vis.length; i++) {                                                  // die Laterne selbst: Haken und leuchtende Kugel
+    const l = vis[i]; if (!l.lamp) continue;
+    g.strokeStyle = 'rgba(30,24,16,0.9)'; g.lineWidth = 3; g.beginPath(); g.moveTo(l.x, l.y - 18); g.lineTo(l.x, l.y - 9); g.stroke();
+    g.fillStyle = 'rgba(255,248,214,0.95)'; g.strokeStyle = 'rgba(30,24,16,0.9)'; g.lineWidth = 2.5; g.beginPath(); g.arc(l.x, l.y, 9, 0, 6.2832); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(' + l.c + ',0.9)'; g.beginPath(); g.arc(l.x, l.y, 5, 0, 6.2832); g.fill();
+  }
+}
+// 7.39: Reichweite eines Gebäudes in Welt-Einheiten (dieselben Zahlen wie in stDefenses / stLightReach / stRepairs), 0 = keine
+function stRangeOf(b) {
+  const lv = b.lv;
+  switch (b.type) {
+    case 'harpunenturm': return (420 + 30 * lv) * ST_REACH;
+    case 'blasenkanone': return (160 + 10 * lv) * ST_REACH;
+    case 'elektroaal': return (260 + 20 * lv) * ST_REACH;
+    case 'tintenwerfer': return (180 + 10 * lv) * ST_REACH;
+    case 'korallenspeer': return (380 + 25 * lv) * ST_REACH;
+    case 'leuchtturm': return stLightReach(lv);
+    case 'krabbenwerkstatt': return stRepReach(lv) * ST_TILE;
+  }
+  return 0;
+}
+function stDrawRange(g, ox, oy, tm) {            // gestrichelter Ring um das gewählte Gebäude (Farbe des Gebäudes)
+  const b = stUi.sel; if (!b || b.ruin || b.upUntil || !Base || Base.buildings.indexOf(b) < 0) return;
+  const R = stRangeOf(b); if (!R) return;
+  const w = stWorld(b), x = w.x - ox, y = w.y - oy, col = ST_B[b.type].col;
+  g.save();
+  g.fillStyle = col; g.globalAlpha = 0.1; g.beginPath(); g.arc(x, y, R, 0, 6.2832); g.fill();
+  g.globalAlpha = 0.85; g.strokeStyle = col; g.lineWidth = 4; g.setLineDash([22, 14]); g.lineDashOffset = -tm * 30; g.beginPath(); g.arc(x, y, R, 0, 6.2832); g.stroke();
+  g.restore();
 }
 function stMarker(g, x, y, col, tm, send) {      // Ziel für "Schicken" (Fahne) und Standort für "Halten" (Schild)
   g.save(); g.translate(x, y);
@@ -17521,7 +17681,7 @@ function initOnlineUI() {
    ============================================================ */
 // Adresse des Online-Servers: nach dem Einrichten bei Cloudflare hier eintragen (siehe blobfisch-online/README.md)
 const ONLINE_SERVER = 'https://blobfisch-online.blobfish-survivors.workers.dev';
-const NET_PROTOCOL = 13;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
+const NET_PROTOCOL = 14;             // Spielversion fürs Netz: Räume mischen nur gleiche Versionen (der Server nimmt jede ab 3; ab 4 Leitfisch und Teams; ab 5 auch PvP 'Jeder gegen jeden'; 6: PvP-Treffer mit Ort, Laufzeit rs)
 const NET_NEAR = 1600;              // Sync-Reichweite: deine Gegner jagen einen Mitspieler nur, wenn er so nah ist (er sieht sie dann sicher)
 const NET_LIVE = 2400;              // ab dieser Nähe gehen deine Gegner, Schüsse und Zonen an den Mitspieler (wie beim Server)
 const NET_TICK_NEAR = 100, NET_TICK_FAR = 1000, NET_TICK_IDLE = 2000;   // ms zwischen zwei Nachrichten: Freund in der Nähe / sonst / Pause, Menü
