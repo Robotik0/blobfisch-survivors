@@ -269,7 +269,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .ach-bar { flex: 1; height: 6px; border-radius: 99px; background: rgba(126,224,255,0.14); overflow: hidden; }
 .ach-bar i { display: block; height: 100%; min-width: 3px; border-radius: 99px; background: linear-gradient(90deg, var(--bioluma), #7eb6ff); }
 .ach-prog-n { font-size: 11px; font-weight: 800; color: var(--foam); white-space: nowrap; }
-#strat-ui .st-res { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 58px); z-index: 12; background: rgba(5,15,28,0.72); border: 1px solid rgba(126,224,255,0.25); border-radius: 999px; padding: 5px 12px; font: 800 12.5px 'Nunito', sans-serif; color: var(--foam); white-space: pre; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+#strat-ui .st-res { position: fixed; left: 50%; width: max-content; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 58px); z-index: 12; background: rgba(5,15,28,0.72); border: 1px solid rgba(126,224,255,0.25); border-radius: 999px; padding: 5px 12px; font: 800 12.5px 'Nunito', sans-serif; color: var(--foam); max-width: calc(100vw - 32px); }
 @media (max-width: 520px) { body.stratmode #hud .xp-wrap { margin-bottom: 22px; } }   /* Strategie auf dem Handy: die Ressourcenzeile ist so breit, dass sie den Blasenring-Zähler (und die anderen Chips links) verdeckt – die Chips rutschen darunter */
 #strat-ui .st-placebar { position: fixed; left: calc(env(safe-area-inset-left) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 13; }   /* beim Platzieren: nur dieser Knopf, das Menü ist weg */
 #strat-ui .st-placebar { display: flex; align-items: center; gap: 8px; }
@@ -278,12 +278,13 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 #strat-ui .st-placebar .btn.st-done i { font-style: normal; font-size: 26px; margin-right: 4px; }
 @keyframes stDonePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(122,242,164,0.35), 0 8px 22px rgba(0,0,0,0.45); } 50% { box-shadow: 0 0 0 9px rgba(122,242,164,0.6), 0 8px 22px rgba(0,0,0,0.45); } }
 #strat-ui .st-goal { position: fixed; left: calc(env(safe-area-inset-left) + 10px); top: calc(env(safe-area-inset-top) + 74px); z-index: 11; max-width: min(360px, 64vw); padding: 7px 12px 8px; border-radius: 14px; background: rgba(5,15,28,0.78); border: 1px solid rgba(255,215,106,0.5); font: 800 12.5px/1.3 'Nunito', sans-serif; color: #ffeec0; pointer-events: none; }   /* 7.39: das nächste Ziel */
+#strat-ui .st-goal-h { margin-top: 3px; font-size: 11px; font-weight: 700; color: #9effc9; }   /* 7.41: Hinweis auf ausbaubare Gebäude */
 #strat-ui .st-goal-bar { margin-top: 5px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.14); overflow: hidden; }
 #strat-ui .st-goal-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffd76a, #7af2a4); }
 @media (max-height: 520px) { #strat-ui .st-goal { top: 62px; font-size: 11px; } }
-#strat-ui .st-zoom { position: fixed; right: calc(env(safe-area-inset-right) + 12px); top: 50%; transform: translateY(-50%); z-index: 13; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; border-radius: 40px; background: rgba(6,20,34,0.72); border: 2px solid rgba(126,224,255,0.55); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }   /* 7.39: gross und am Rand, vorher zwei kleine Knöpfe neben "Abbrechen" */
-#strat-ui .st-zoom .btn { padding: 0; width: 60px; height: 60px; border-radius: 50%; font-size: 34px; line-height: 1; font-weight: 800; display: flex; align-items: center; justify-content: center; }
-#strat-ui .st-zoom .st-zlab { font-size: 14px; font-weight: 800; color: #bfe7ff; min-width: 52px; text-align: center; }
+#strat-ui .st-zoom { position: fixed; right: calc(env(safe-area-inset-right) + 12px); top: 38%; transform: translateY(-50%); z-index: 13; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 5px; border-radius: 30px; background: rgba(6,20,34,0.6); border: 1px solid rgba(126,224,255,0.45); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }   /* 7.39: gross und am Rand, vorher zwei kleine Knöpfe neben "Abbrechen" */
+#strat-ui .st-zoom .btn { padding: 0; width: 42px; height: 42px; border-radius: 50%; font-size: 24px; line-height: 1; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+#strat-ui .st-zoom .st-zlab { font-size: 11px; font-weight: 800; color: #bfe7ff; min-width: 42px; text-align: center; }
 #strat-ui .st-btns { position: fixed; right: calc(env(safe-area-inset-right) + 10px); bottom: calc(env(safe-area-inset-bottom) + 10px); z-index: 12; display: flex; flex-direction: column; gap: 6px; width: 132px; }
 #strat-ui .st-btns .btn { padding: 9px 8px; font-size: 13px; }
 #strat-ui .st-b { display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; line-height: 1.1; }
@@ -305,6 +306,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .st-list { display: flex; flex-direction: column; gap: 5px; }
 .st-item { display: flex; flex-direction: column; align-items: flex-start; padding: 7px 9px; font-size: 13px; text-align: left; }
 .st-item .btn-sub { margin-left: 0; }
+.st-item .st-tdesc { font-weight: 600; opacity: 0.7; line-height: 1.25; margin-top: 2px; }
 #strat-ui .st-panel.st-wide { width: min(430px, calc(100vw - 166px)); }
 /* 7.23: panels never cover the Blobi (the camera keeps it in the middle): upright screens keep them in the lower part, wide screens left of the middle */
 @media (orientation: portrait) { #strat-ui .st-panel { max-height: calc(50vh - 50px); } }
@@ -337,10 +339,10 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
 .st-lab { display: flex; align-items: center; gap: 8px; }
 .st-ico { flex: none; border-radius: 7px; background: rgba(0,0,0,0.2); vertical-align: middle; margin-right: 8px; }
 .st-lab .st-ico { margin-right: 0; }
-#strat-ui .st-res { display: flex; align-items: center; gap: 12px; }
-#strat-ui .st-res .st-stat { display: inline-flex; align-items: center; gap: 4px; margin-top: 0; }
+#strat-ui .st-res { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px 12px; border-radius: 16px; }   /* 7.40: bei grossen Zahlen umbrechen statt aus dem Bild zu laufen */
+#strat-ui .st-res .st-stat { display: inline-flex; align-items: center; gap: 4px; margin-top: 0; white-space: nowrap; }
 .st-i { flex: none; }
-@media (max-width: 520px) { #strat-ui .st-res { gap: 7px; padding: 5px 9px; font-size: 11.5px; } }
+@media (max-width: 520px) { #strat-ui .st-res { gap: 2px 7px; padding: 5px 9px; font-size: 11.5px; } }
 .acc-body { display: flex; flex-direction: column; gap: 8px; text-align: left; }
 .acc-body.busy { opacity: 0.55; pointer-events: none; }
 .acc-body h3 { color: var(--foam); font-size: 17px; margin: 4px 0; }
@@ -690,7 +692,7 @@ body:has(#screen-levelup.active, #screen-pause.active, #screen-gameover.active) 
   .online-panel .online-box > .btn { margin-top: 8px; padding-block: 10px; }
 }
 
-#toast{position:absolute;top:86px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+#toast{position:absolute;top:86px;left:50%;width:max-content;transform:translateX(-50%);z-index:20;background:rgba(5,20,35,.9);border:1px solid rgba(255,215,106,.5);color:var(--pearl);font-weight:800;font-size:12px;line-height:1.25;padding:5px 11px;border-radius:14px;pointer-events:none;opacity:0;transition:opacity .3s;max-width:min(88vw,360px);text-align:center}
 #toast.show{opacity:1}
 #toast.low{top:122px}
 #toast.net{top:134px}
@@ -926,7 +928,8 @@ body:has(.screen.active) #toast{top:auto !important;bottom:max(8px, env(safe-are
       <button class="btn btn-secondary st-b" id="st-map" style="display:none;"><i>🗺️</i><span>Karte</span></button>
     </div>
     <div class="st-panel" id="strat-panel" style="display:none;"></div>
-    <div class="st-placebar" id="st-placebar" style="display:none;"><button class="btn btn-secondary" id="st-placecancel"><i>✕</i> <span>Abbrechen</span></button><div class="st-zoom"><button class="btn btn-secondary" id="st-zin" aria-label="+">＋</button><span class="st-zlab" id="st-zlab">100 %</span><button class="btn btn-secondary" id="st-zout" aria-label="−">－</button></div></div>
+    <div class="st-placebar" id="st-placebar" style="display:none;"><button class="btn btn-secondary" id="st-placecancel"><i>✕</i> <span>Abbrechen</span></button></div>
+    <div class="st-zoom"><button class="btn btn-secondary" id="st-zin" aria-label="+">＋</button><span class="st-zlab" id="st-zlab">100 %</span><button class="btn btn-secondary" id="st-zout" aria-label="−">－</button></div>
   </div>
 
   <div id="toast"></div>
@@ -1348,7 +1351,7 @@ const Storage = {
    Die Statistik liest nur: kein Math.random (Kennungen kommen aus crypto), kein Eingriff ins Spiel, jeder Fehler bleibt still.
    ============================================================ */
 const STATS_ON = true;               // false: es wird nie etwas gesendet (der Datenschutz-Bildschirm bleibt)
-const GAME_VERSION = '7.39';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
+const GAME_VERSION = '7.40';        // Spielversion für die Statistik: bei jeder neuen Version mitziehen
 const STATS_STORE = 'blobfischSurvivorsStats';
 const STATS_Q_MAX = 12000;           // Zeichen: so gross darf die Warteschlange in localStorage höchstens werden
 const STATS_EV_MAX = 40;             // Ereignisse pro Paket (wie der Server)
@@ -2336,7 +2339,15 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 5 s wieder bereit.", "Hidden. Snaps shut when an enemy comes close and is ready again after 5 s.", "Прихована. Спрацьовує, коли ворог підходить, і за 5 с знову готова."],
 ["Verlangsamt alle Gegner in Reichweite.", "Slows every enemy in range.", "Сповільнює всіх ворогів у радіусі дії."],
 ["Heilt deinen Blobi und die Truppen in der Basis.", "Heals your Blobi and the troops in the base.", "Лікує твого Блобі та загони на базі."],
-["Verbessert Truppen für 30 💎 × Stufe: +20 % Leben und Schaden. Wie hoch, bestimmt die Muschelburg.", "Upgrades troops for 30 💎 × level: +20 % health and damage. How high is set by the Shell Castle.", "Покращує загони за 30 💎 × рівень: +20 % здоров'я та шкоди. Як високо — визначає мушлевий замок."],
+["Verbessert eine Truppenart für 30 💎 × Stufe: jede Stufe gibt +20 % Leben und Schaden (der Heilqualle: Leben und Heilung). Wie hoch, bestimmt die Muschelburg.", "Upgrades one troop type for 30 💎 × level: each level gives +20 % health and damage (Healing Jelly: health and healing). How high is set by the Shell Castle.", "Покращує один вид загону за 30 💎 × рівень: кожен рівень дає +20 % здоров'я та шкоди (медуза-цілителька: здоров'я та лікування). Наскільки високо — вирішує мушлевий замок."],
+["Nahkämpfer: schwimmt zum nächsten Gegner und beisst zu. Billig und flink, hält aber wenig aus.", "Melee: swims to the nearest foe and bites. Cheap and quick, but takes little punishment.", "Ближній бій: пливе до найближчого ворога й кусає. Дешевий і спритний, але слабкий."],
+["Fernkämpfer: schiesst aus 260 Entfernung und hält Abstand. Wenig Leben.", "Ranged: shoots from 260 away and keeps its distance. Low health.", "Дальній бій: стріляє з 260 відстані й тримає дистанцію. Мало здоров'я."],
+["Nahkämpfer mit sehr viel Leben, aber langsam: steht vorn und hält die Schläge aus.", "Melee with lots of health but slow: stands in front and soaks up the hits.", "Ближній бій із великим запасом здоров'я, але повільний: стоїть попереду й приймає удари."],
+["Platzt bei 3 oder mehr Gegnern (bei Boss oder Champion nach 2 s) und trifft alle in 110 Umkreis mit 70 Schaden. Danach ist er weg.", "Bursts near 3 or more foes (near a boss or champion after 2 s) and hits everything within 110 for 70 damage. Then it is gone.", "Лопається біля 3 чи більше ворогів (біля боса чи чемпіона — за 2 с) і б'є все в радіусі 110 на 70 шкоди. Потім зникає."],
+["Kämpft nicht: gibt Truppen in 240 Umkreis Leben zurück (9 pro s) und schwimmt zur am stärksten verletzten.", "Does not fight: gives troops within 240 health back (9 per s) and swims to the most wounded one.", "Не б'ється: повертає загонам у радіусі 240 здоров'я (9 за с) і пливе до найпораненішого."],
+["Schneller Nahkämpfer. Bei Überfällen geht er zuerst auf Farmen, Bohrer und Lager los.", "Fast melee fighter. In raids it goes for farms, drills and stores first.", "Швидкий боєць ближнього бою. Під час нападів першими б'є ферми, бури та склади."],
+["Leben {} → {} · Schaden {} → {}", "Health {} → {} · Damage {} → {}", "Здоров'я {} → {} · Шкода {} → {}"],
+["Leben {} → {} · Heilung {} → {} pro s", "Health {} → {} · Healing {} → {} per s", "Здоров'я {} → {} · Лікування {} → {} за с"],
 ["Ein Blitz springt alle 1,3 s auf bis zu 4 Gegner.", "A bolt jumps to up to 4 enemies every 1.3 s.", "Кожні 1,3 с блискавка перестрибує на до 4 ворогів."],
 ["Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.", "Throws a spear at the strongest enemy every 2.2 s: the answer to bosses.", "Кожні 2,2 с кидає спис у найсильнішого ворога: відповідь босам."],
 ["Basis-Raster", "Base grid", "Сітка бази"],
@@ -2364,7 +2375,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🔵 {} XP abgehoben.", "🔵 {} XP withdrawn.", "🔵 Знято {} XP."],
 ["{} trainieren", "Train {}", "Тренувати: {}"],
 ["🔒 Muschelburg {}", "🔒 Shell Castle {}", "🔒 Мушлевий замок {}"],
-["Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).", "Tap a free spot on the grid (the outline shows whether it fits).", "Торкнися вільного місця на сітці (контур покаже, чи влазить)."],
+["Tippe auf einen freien Platz.", "Tap a free spot.", "Торкнися вільного місця."],
 ["Tippe auf die Stelle, zu der deine Truppen schwimmen sollen.", "Tap the spot your troops should swim to.", "Торкнися місця, куди мають плисти твої війська."],
 ["🐟 Deine Truppen schwimmen los.", "🐟 Your troops are on their way.", "🐟 Твої війська вирушили."],
 ["⚔ Überfall auf {} · {} s · {} von {} zerstört", "⚔ Raid on {} · {} s · {} of {} destroyed", "⚔ Напад на {} · {} с · знищено {} з {}"],
@@ -2457,7 +2468,7 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["🌊 Welle {} greift deine Basis an!", "🌊 Wave {} attacks your base!", "🌊 Хвиля {} атакує твою базу!"],
 ["💚 Zweite Chance (einmal pro Tag) – weiter mit halbem Leben.", "💚 Second chance (once a day) – go on with half your health.", "💚 Другий шанс (раз на день) – далі з половиною здоров'я."],
 ["💔 Dein Blobi wurde besiegt – zurück in der Muschelburg, wieder Level 1.", "💔 Your Blobi was defeated – back in the Shell Castle, level 1 again.", "💔 Твого Блобі переможено – знову в замку, знову рівень 1."],
-["💥 {} ist zerstört – reparieren kostet 30 % der letzten Stufe.", "💥 {} is destroyed – repairing costs 30 % of its last level.", "💥 {} зруйновано – ремонт коштує 30 % останнього рівня."],
+["💥 {} ist zerstört – Reparatur 30 %.", "💥 {} is destroyed – repair costs 30 %.", "💥 {} зруйновано – ремонт 30 %."],
 ["Nicht genug Korallen.", "Not enough coral.", "Замало коралів."],
 ["Nicht genug Rohstoffe.", "Not enough resources.", "Замало ресурсів."],
 ["Nicht genug Kristalle.", "Not enough crystals.", "Замало кристалів."],
@@ -2468,10 +2479,11 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Zweiten Baumeister anheuern", "Hire a second builder", "Найняти другого будівельника"],
 ["Ein zweiter Baumeister lässt dich zwei Dinge auf einmal bauen.", "A second builder lets you build two things at a time.", "Другий будівельник дозволяє будувати дві речі одночасно."],
 ["Zwei Baumeister arbeiten für dich.", "Two builders work for you.", "На тебе працюють два будівельники."],
-["👷 Ein zweiter Baumeister hilft jetzt mit – zwei Bauten auf einmal.", "👷 A second builder now helps – two builds at a time.", "👷 Тепер допомагає другий будівельник – два будівництва одночасно."],
+["👷 Zweiter Baumeister: zwei Bauten gleichzeitig.", "👷 Second builder: two builds at once.", "👷 Другий будівельник: два будівництва одночасно."],
 ["Nicht genug Kristalle.", "Not enough crystals.", "Недостатньо кристалів."],
 ["Krabbenwerkstatt", "Crab Workshop", "Крабова майстерня"],
-["Repariert beschädigte Gebäude in der Nähe, eins nach dem anderen, und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.", "Repairs damaged buildings nearby, one after another, and rebuilds ruins for free. Works while you are away too.", "Ремонтує пошкоджені будівлі поруч, одну за одною, і безкоштовно відбудовує руїни. Працює й коли тебе немає."],
+["Repariert beschädigte Gebäude in der Nähe (ab Stufe 5 zwei, auf Stufe 10 drei gleichzeitig) und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.", "Repairs damaged buildings nearby (two at once from level 5, three at level 10) and rebuilds ruins for free. Works while you are away too.", "Ремонтує пошкоджені будівлі поруч (з 5-го рівня дві одночасно, на 10-му три) і безкоштовно відбудовує руїни. Працює й коли тебе немає."],
+["Gleichzeitig repariert", "Repaired at once", "Ремонтується одночасно"],
 ["Reparatur pro Sekunde", "Repair per second", "Ремонт за секунду"],
 ["Reichweite (Felder)", "Reach (tiles)", "Дальність (клітинки)"],
 ["🔧 {} ist wieder aufgebaut.", "🔧 {} is rebuilt.", "🔧 {} знову відбудовано."],
@@ -2486,15 +2498,15 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
 ["Stufe {} → {} · {} 💎", "Level {} → {} · {} 💎", "Рівень {} → {} · {} 💎"],
 ["Ganz reparieren", "Repair fully", "Повністю полагодити"],
 ["🏰 Muschelburg Stufe {}!", "🏰 Shell Castle level {}!", "🏰 Мушлевий замок, рівень {}!"],
-["Tippe für eine Mauer oder zieh eine ganze Reihe.", "Tap for one wall or drag a whole row.", "Торкнися для однієї стіни або протягни цілий ряд."],
+["Tippe oder zieh eine Reihe.", "Tap, or drag a row.", "Торкнися або протягни ряд."],
 ["🧱 {} Mauern gebaut.", "🧱 {} walls built.", "🧱 Збудовано стін: {}."],
-["Alle {} Mauern stehen – mehr gibt es mit der nächsten Muschelburg-Stufe.", "All {} walls are built – the next Shell Castle level allows more.", "Усі {} стін збудовано – наступний рівень мушлевого замку дозволить більше."],
+["Alle {} Mauern stehen (mehr mit der nächsten Stufe).", "All {} walls built (more at the next level).", "Усі {} стін збудовано (більше на наступному рівні)."],
 ["Fertig", "Done", "Готово"],
 ["Zuerst die Muschelburg ausbauen.", "Upgrade the Shell Castle first.", "Спершу покращ мушлевий замок."],
 ["Deine Armee ist voll – baue die Brutstätte aus.", "Your army is full – upgrade the Hatchery.", "Твоя армія повна – покращ інкубатор."],
 ["Zu wenig XP im Perlentresor – zahle XP ein.", "Not enough XP in the Pearl Vault – deposit some XP.", "Замало XP у сховищі – внеси XP."],
 ["Basis zu gross", "Base too big", "База завелика"],
-["🌟 Eine Legende erwacht im Großen Strudel! In {} s – schwimm zur Mitte der Karte.", "🌟 A legend awakens in the Great Maelstrom! In {} s – swim to the middle of the map.", "🌟 Легенда прокидається у Великому вирі! Через {} с – пливи до середини карти."],
+["🌟 Eine Legende erwacht! In {} s – schwimm zur Mitte.", "🌟 A legend awakens! In {} s – swim to the middle.", "🌟 Легенда прокидається! Через {} с – пливи до середини."],
 ["⚔ {} ist im Großen Strudel erschienen – schwimm zur Mitte!", "⚔ {} has appeared in the Great Maelstrom – swim to the middle!", "⚔ {} з'явився у Великому вирі – пливи до середини!"],
 ["🏆 {} ist besiegt!", "🏆 {} is defeated!", "🏆 {} переможено!"],
 ["🌊 {} ist abgetaucht – der Strudel wird ruhig.", "🌊 {} dived away – the Maelstrom calms down.", "🌊 {} пірнув – вир стихає."],
@@ -2983,6 +2995,12 @@ const I18N_DATA = [["Blobfish Survivors – Blobigames","Blobfish Survivors – 
   ["Ziel: Baue eine Brutstätte und bilde Truppen aus (Knopf „Bauen“).", "Goal: build a Hatchery and train troops (the “Build” button).", "Ціль: збудуй інкубатор і навчай війська (кнопка «Будувати»)."],
   ["Bereit! Tippe auf die Muschelburg und baue sie aus (Stufe {}).", "Ready! Tap the Shell Castle and upgrade it (level {}).", "Готово! Торкнися Мушлевого замку й розбудуй його (рівень {})."],
   ["Ziel: Muschelburg Stufe {} · {}", "Goal: Shell Castle level {} · {}", "Ціль: Мушлевий замок, рівень {} · {}"],
+  ["Muschelburg Stufe {} braucht:", "Shell Castle level {} needs:", "Мушлевий замок, рівень {}, потребує:"],
+  ["Verteidigung auf Stufe {} (jetzt {})", "a defense building at level {} (now {})", "оборонна споруда рівня {} (зараз {})"],
+  ["Brutstätte auf Stufe {} (jetzt {})", "a Hatchery at level {} (now {})", "Інкубатор рівня {} (зараз {})"],
+  ["Erst Gebäude ausbauen", "Upgrade buildings first", "Спершу покращ споруди"],
+  ["Zuerst Verteidigung und Brutstätte ausbauen.", "Upgrade your defense and Hatchery first.", "Спершу покращ оборону та Інкубатор."],
+  ["▲ Jetzt ausbaubar: {} (grüner Pfeil am Gebäude)", "▲ Can be upgraded now: {} (green arrow on the building)", "▲ Можна покращити зараз: {} (зелена стрілка на споруді)"],
   ["Besiege Gegner, sie bringen Korallen.", "Defeat foes, they drop coral.", "Перемагай ворогів, вони дають корали."],
   ["Einlagern", "Store", "Покласти на склад"],
   ["ins Inventar · Basis ruht", "to inventory · base rests", "на склад · база відпочиває"],
@@ -3258,6 +3276,10 @@ function trFind(core, depth) {
   if (mm) { const r = trFind(mm[2], depth + 1); if (r !== null) return mm[1] + r; }
   mm = /^([\s\S]*?[A-Za-zÄÖÜäöüß.!?)“])(\s*[^0-9A-Za-zÄÖÜäöüß]+)$/.exec(core);   // Zeichen danach: "Kelpwald ✔"
   if (mm) { const r = trFind(mm[1], depth + 1); if (r !== null) return r + mm[2]; }
+  // Bezeichnung mit Zahl, längste bekannte zuerst: "Perlen-Bonus 10 % → 20 %", "Chance auf 4. Karte 6 % → 12 %"
+  let lab = null;
+  for (const re = /\s+(?=[0-9×+\-−→])/g; (mm = re.exec(core)); ) { const r = I18N_EXACT.get(core.slice(0, mm.index)); if (r) lab = r[li] + core.slice(mm.index); }
+  if (lab !== null) return lab;
   mm = /^([A-Za-zÄÖÜäöüß][^0-9×+\-−→]*?)(\s*[0-9×+\-−→][\s\S]*)$/.exec(core);   // Bezeichnung mit Zahl: "Schaden 12 → 15"
   if (mm) { const r = I18N_EXACT.get(mm[1]); if (r) return r[li] + mm[2]; }
   return null;
@@ -5399,7 +5421,7 @@ function showToast(text) {
   // im Lauf: gleich unter allem, was oben angezeigt wird (Leisten, Raum-Zeile, Punkte-Karte, Boss-Balken) – nie darüber
   if (!inMenu) { hudBottomAt = 0; el.style.top = Math.round(hudBottom() - 6) + 'px'; } else el.style.top = '';
   clearTimeout(toastTimer);
-  const ms = Math.min(15000, Math.max(5000, 2500 + 100 * String(el.textContent).length));       // lang genug auch für langsames Lesen: ~10 Zeichen pro Sekunde, mindestens 5 s
+  const ms = Math.min(9000, Math.max(3500, 2000 + 70 * String(el.textContent).length));       // 7.40: ~14 Zeichen pro Sekunde, mindestens 3,5 s (vorher 10 / 5 s)
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, ms);
 }
 
@@ -5486,9 +5508,10 @@ function krakenWhip(en) {
   }
   Sfx.boss();
 }
+const LAVA_RING_DMG = 0.6;      // 7.41: die Ringe des Lava-Titans (Magmawelle und Phasen-Schussring) tun 40 % weniger Schaden
 function magmaWave(en, shift) {
   const g0 = en.gap + shift;
-  pushWave({ x: en.x, y: en.y, r: en.r, gaps: [g0, g0 + Math.PI * 2 / 3, g0 + Math.PI * 4 / 3], dmg: en.dmg, hit: false });
+  pushWave({ x: en.x, y: en.y, r: en.r, gaps: [g0, g0 + Math.PI * 2 / 3, g0 + Math.PI * 4 / 3], dmg: en.dmg * LAVA_RING_DMG, hit: false });
   spawnBurst(en.x, en.y, '#ff7a30', 18); Sfx.boss();
 }
 // Folgeangriffe (zweite/dritte Salve, Welle oder Schussring) kommen nach en.waveT Sekunden
@@ -5512,7 +5535,7 @@ function bossPhaseVolley(en, dt) {
   en.volT = (en.volT == null ? v.t * 0.7 : en.volT) - dt;
   if (en.volT > 0) return;
   en.volT = v.t * (0.85 + Math.random() * 0.3);
-  bossRing(en, v.n, Math.random() * 6.283, 140, en.dmg * v.dmg, '#ffb36b'); en.atkAt = runTime;
+  bossRing(en, v.n, Math.random() * 6.283, 140, en.dmg * v.dmg * (en.type === 'lavatitan' ? LAVA_RING_DMG : 1), '#ffb36b'); en.atkAt = runTime;
 }
 // Einzigartige Boss-Mechanik pro Boss. Gibt ggf. eine Bewegungs-Überschreibung zurück.
 function bossAbility(en, dt, d) {
@@ -7720,7 +7743,7 @@ function hudBottom() {
     if (el.offsetParent === null) return;
     const r = el.getBoundingClientRect(); if (r.height > 0 && r.bottom > b) b = r.bottom;
   });
-  if (typeof strategyMode !== 'undefined' && strategyMode) ['strat-res', 'st-raid'].forEach(function(id){      // 7.10: die Ressourcenzeile und das Überfall-Band gehören zum oberen Rand
+  if (typeof strategyMode !== 'undefined' && strategyMode) ['strat-res', 'st-raid', 'st-goal'].forEach(function(id){      // 7.10: die Ressourcenzeile und das Überfall-Band gehören zum oberen Rand
     const el = document.getElementById(id); if (!el || el.style.display === 'none') return;
     const r = el.getBoundingClientRect(); if (r.height > 0 && r.bottom > b) b = r.bottom;
   });
@@ -9547,22 +9570,18 @@ function seaMonsterGlow(g, R, o) {
     g.fillStyle = 'rgba(' + o.champ.rgb + ',0.35)'; g.beginPath(); g.arc(qx, qy, R * 0.075, 0, TAU); g.fill();
     g.fillStyle = 'rgb(' + o.champ.rgb + ')'; g.beginPath(); g.arc(qx, qy, R * 0.03, 0, TAU); g.fill();
   }
-  // Leuchtpunkte an der Flanke
-  for (let i = 0; i < 9; i++) {
-    const x = R * 0.75 - i * R * 0.19, y = R * 0.2 + Math.sin(i * 0.7) * R * 0.1;
-    const a = 0.45 + 0.55 * Math.max(0, Math.sin(o.time * 2.4 - i * 0.55));
-    g.fillStyle = 'rgba(127,230,255,' + (a * 0.26) + ')'; g.beginPath(); g.arc(x, y, R * 0.115, 0, TAU); g.fill();
-    g.fillStyle = 'rgba(170,245,255,' + a + ')'; g.beginPath(); g.arc(x, y, R * 0.05, 0, TAU); g.fill();
-  }
+  // keine Leuchtpunkte an der Flanke (11-22: Wunsch des Nutzers)
   // Auge (blinzelt; besiegt: ein X)
-  const iris = ph >= 3 ? '#ff4a2a' : (ph === 2 ? '#ffd23a' : '#d6ff5c'), bl = Math.min(1, BOSS_FX.blink || 0);
+  const iris = ph >= 3 ? '#8c3526' : (ph === 2 ? '#8f7a35' : '#7f8f52'), bl = Math.min(1, BOSS_FX.blink || 0);
   if (BOSS_FX.dead) {
     g.strokeStyle = '#d8f0ff'; g.lineWidth = Math.max(1.5, R * 0.05); g.lineCap = 'round';
     g.beginPath(); g.moveTo(R * 0.52, -R * 0.28); g.lineTo(R * 0.68, -R * 0.12); g.moveTo(R * 0.68, -R * 0.28); g.lineTo(R * 0.52, -R * 0.12); g.stroke();
     return;
   }
-  g.fillStyle = iris; g.globalAlpha = 0.25 * (1 - bl); g.beginPath(); g.ellipse(R * 0.6, -R * 0.2, R * 0.22, R * 0.19, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
-  g.beginPath(); g.ellipse(R * 0.6, -R * 0.2, R * 0.12, Math.max(0.5, R * 0.1 * (1 - bl)), 0, 0, TAU); g.fill();
+  // 11-22: das Auge leuchtet nicht (kein Halo, matte Iris, dunkle Pupille); die Phase zeigt sich nur noch in der Irisfarbe
+  const ey = Math.max(0.5, R * 0.1 * (1 - bl));
+  g.fillStyle = iris; g.beginPath(); g.ellipse(R * 0.6, -R * 0.2, R * 0.12, ey, 0, 0, TAU); g.fill();
+  g.fillStyle = '#04101c'; g.beginPath(); g.ellipse(R * 0.6, -R * 0.2, R * 0.035, ey, 0, 0, TAU); g.fill();
 }
 function drawSeaMonster(g, R, o) {
   const t = o.t, ph = o.phase || 1, TAU = Math.PI * 2;
@@ -9673,7 +9692,7 @@ function drawSeaMonster(g, R, o) {
     g.beginPath(); g.ellipse(rx, ry, R * 0.055, R * 0.03, 0.2, 0, TAU); g.fill(); g.stroke();
   }
 
-  // leuchtende Teile (Laterne, Punkte, Auge)
+  // leuchtende Teile (Laterne, Auge ohne Leuchten)
   seaMonsterGlow(g, R, o);
   // Lid über dem Auge
   g.fillStyle = 'rgba(3,8,20,0.9)';
@@ -12765,7 +12784,7 @@ function drawFloorScenery(camX, camY, stageId) {
   for (let cy = startRow; cy <= endRow; cy++) {
     for (let cx = startCol; cx <= endCol; cx++) {
       const h = hashCell(cx, cy);
-      if (h > 0.5 * QUAL[GFX.ql].fx) continue;           // einfachere Grafik: weniger Hintergrund-Dinge (die übrigen bleiben an ihrem Platz)
+      if (h > 0.5 * QUAL[GFX.ql].fx * Math.max(0.3, Math.min(1, ZOOM_K))) continue;   // 7.40: herausgezoomt weniger (die Fläche wächst mit 1/ZOOM_K²); einfachere Grafik: weniger Hintergrund-Dinge (die übrigen bleiben an ihrem Platz)
       const h2 = hashCell(cx * 3 + 7, cy * 5 + 11);
       const h3 = hashCell(cx * 13 + 1, cy * 17 + 3);
       const worldX = cx * cell + h2 * cell * 0.6 + cell * 0.2;
@@ -12839,7 +12858,7 @@ function drawBackground() {
 
   const camX = inRun ? camera.x : 0, camY = inRun ? camera.y : 0;
 
-  if (GFX.ql < 3) drawDeepGlows(camX, camY, stage.id);
+  if (GFX.ql < 3 && ZOOM_K >= 0.7) drawDeepGlows(camX, camY, stage.id);
   drawFloorScenery(camX, camY, stage.id);
   if (stage.id === 'kelp' && !strategyMode) drawKelp(camX, camY);
 
@@ -13270,6 +13289,16 @@ function render() {
         drawHalo(sx, sy, 22, '#ff6a2a', 0.6); ctx.fillStyle = '#3a1a10'; ctx.beginPath(); ctx.arc(sx, sy, 12, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#ff8a2a'; ctx.beginPath(); ctx.arc(sx - 3, sy - 3, 5, 0, Math.PI * 2); ctx.fill();
         continue;
+      }
+      if (pt.isSpear) {                               // 8.0: Dreizack im Flug, Spitze voran, mit kurzem Leuchtschweif
+        const p = 1 - Math.max(0, pt.life) / pt.maxLife, e = 1 - (1 - p) * (1 - p), dx = pt.tx - pt.x, dy = pt.ty - pt.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+        const hx = pt.x + dx * e - camera.x + W / 2, hy = pt.y + dy * e - camera.y + H / 2, bx = hx - ux * 44, by = hy - uy * 44, vx = -uy, vy = ux;
+        ctx.save(); ctx.lineCap = 'round';
+        ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = 'rgba(255,190,140,0.35)'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(hx - ux * 90, hy - uy * 90); ctx.lineTo(hx, hy); ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = 'rgba(12,24,36,0.9)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(hx, hy); ctx.stroke();
+        ctx.strokeStyle = '#dfeaf2'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(hx, hy); ctx.stroke();
+        for (const s of [-1, 0, 1]) { const px = hx - ux * (s ? 8 : 0) + vx * s * 7, py = hy - uy * (s ? 8 : 0) + vy * s * 7; ctx.fillStyle = '#f4fbff'; ctx.strokeStyle = 'rgba(12,24,36,0.9)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(px + ux * (s ? 11 : 16), py + uy * (s ? 11 : 16)); ctx.lineTo(px + vx * 3.2, py + vy * 3.2); ctx.lineTo(px - vx * 3.2, py - vy * 3.2); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+        ctx.restore(); continue;
       }
       if (pt.isBolt) {
         const sx=pt.x-camera.x+W/2, sy=pt.y-camera.y+H/2, tx=pt.tx-camera.x+W/2, ty=pt.ty-camera.y+H/2;
@@ -13939,7 +13968,7 @@ const ST_B = {
   fischschule:    { name: 'Fischschule',     icon: '🏫', size: 2, from: 4, hp: 300,  k: 300, col: '#ffd76a', max: function(){ return 1; } },
   elektroaal:     { name: 'Elektroaal-Turm', icon: '⚡', size: 2, from: 5, hp: 350,  k: 400, col: '#5ef2c0', max: function(m){ return m >= 8 ? 2 : 1; } },
   korallenspeer:  { name: 'Korallenspeer-Turm', icon: '🔱', size: 2, from: 7, hp: 450, k: 520, col: '#ffb38a', max: function(m){ return m >= 8 ? 2 : 1; } },
-  krabbenwerkstatt: { name: 'Krabbenwerkstatt', icon: '🔧', size: 2, from: 3, hp: 350, k: 180, col: '#ffb070', max: function(m){ return m >= 7 ? 2 : 1; } }      // 7.23: repariert Gebäude in Reichweite
+  krabbenwerkstatt: { name: 'Krabbenwerkstatt', icon: '🔧', size: 2, from: 3, hp: 350, k: 180, col: '#ffb070', max: function(m){ return m >= 8 ? 3 : m >= 5 ? 2 : 1; } }      // 7.23: repariert Gebäude in Reichweite; 7.41: zwei ab Muschelburg 5, drei ab 8 (vorher zwei ab 7)
 };
 // Truppen: ab Muschelburg, Kosten (eingezahlte XP), Trainingszeit (s), HP, Schaden, Tempo, Reichweite, Takt
 const ST_T = {
@@ -14140,7 +14169,7 @@ function startStrategy(charId, fresh, ring) {
   if (ring && !Net.on) snConnect(ring);                // 7.8: auf eine Karte mit anderen Spielern (die Basis läuft auch ohne Verbindung)
   statsRunStart();                                     // Statistik (7.27)
 }
-function stLeave() { snDisconnect(); stSave(); stWallAt = 0; strategyMode = false; stUi.mode = null; if (ZOOM_K !== 1) { ZOOM_K = 1; applyZoom(); worldSpace(); } setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
+function stLeave() { snDisconnect(); stSave(); stWallAt = 0; strategyMode = false; stUi.mode = null; if (ZOOM_K !== 1) { ZOOM_K = 1; applyZoom(); worldSpace(); const zl = document.getElementById('st-zlab'); if (zl) zl.textContent = '100 %'; } setStratUi(false); stTroops = []; stAnchor = null; Base = null; }
 function setStratUi(on) {
   const rs = document.getElementById('btn-restart-pause'); if (rs) rs.style.display = on ? 'none' : '';   // Neustart gibt es in der Basis nicht
   const u = document.getElementById('strat-ui'); if (u) u.style.display = on ? 'block' : 'none';
@@ -14335,7 +14364,7 @@ function stLegendMsg(m) {
     if (!SN.lg || SN.lg.id !== m.id) SN.lg = { id: m.id | 0, ty: ty, st: '', s: 0, f: 1, n: 0, at: 0, fresh: false, warned: false };
     const lg = SN.lg, was = lg.st;
     lg.st = m.st === 'fight' ? 'fight' : 'call'; lg.s = Math.max(0, +m.s || 0); lg.f = Math.max(0, Math.min(1, +m.f || 0)); lg.n = m.n | 0; lg.at = performance.now(); lg.fresh = true;
-    if (!was && lg.st === 'call') { showToast('🌟 Eine Legende erwacht im Großen Strudel! In ' + Math.ceil(lg.s) + ' s – schwimm zur Mitte der Karte.'); Sfx.boss(); }
+    if (!was && lg.st === 'call') { showToast('🌟 Eine Legende erwacht! In ' + Math.ceil(lg.s) + ' s – schwimm zur Mitte.'); Sfx.boss(); }
     else if (was !== 'fight' && lg.st === 'fight') { showToast('⚔ ' + d.name + ' ist im Großen Strudel erschienen – schwimm zur Mitte!'); Sfx.boss(); }
   } else if (m.op === 'end') {
     if (!SN.lg || SN.lg.id !== m.id) return;
@@ -14513,7 +14542,7 @@ function raidDefenses(dt) {             // die Türme der überfallenen Basis sc
       for (let k = 0; k < stTroops.length; k++) if (distXY(stTroops[k].x, stTroops[k].y, w.x, w.y) < R) stTroops[k].slowTimer = 0.3;
     } else if (ty === 'korallenspeer' && t.cd <= 0) {
       const f = stStrongest(foes, w, (380 + 25 * lv) * ST_REACH); if (!f) continue;
-      t.cd = 2.2; raidFoeHurt(f, 60 * (1 + 0.3 * (lv - 1))); particles.push({ x: w.x, y: w.y, tx: f.x, ty: f.y, isBolt: true, life: 0.2, maxLife: 0.2, color: '#ffb38a' });
+      t.cd = 2.2; raidFoeHurt(f, 60 * (1 + 0.3 * (lv - 1))); const fxr = stFxOf(t); fxr.aim = Math.atan2(f.y - w.y, f.x - w.x); fxr.fire = runTime; stSpearShot(w, f);
     } else if (ty === 'stachelfalle' && !t.sprung) {
       if (!stNearest(foes, w, ST_TILE * ST_TRAP.trig)) continue;
       foes.forEach(function(f){ if (distXY(f.x, f.y, w.x, w.y) < ST_TILE * ST_TRAP.blast) raidFoeHurt(f, ST_TRAP.dmg * (1 + 0.3 * (lv - 1))); });
@@ -15056,7 +15085,7 @@ function stHurt(b, dmg) {
     const w = stWorld(b);
     if (b.type === 'muschelburg') { b.hp = 1; return; }       // die Muschelburg wird nie zur Ruine
     b.hp = 0; b.ruin = true; spawnBurst(w.x, w.y, '#8a7a6a', 24); Sfx.crack();
-    showToast('💥 ' + ST_B[b.type].name + ' ist zerstört – reparieren kostet 30 % der letzten Stufe.');
+    showToast('💥 ' + ST_B[b.type].name + ' ist zerstört – Reparatur 30 %.');
   }
 }
 // ---------- Truppen ----------
@@ -15178,6 +15207,10 @@ function stDrawLight(g, ox, oy) {     // die langen Strahlen (nur solange ein Ge
   }
   g.restore();
 }
+function stSpearShot(w, e) {                    // 8.0: der Dreizack fliegt von der Spitze des Turms zum Ziel (nur Bild; Schaden wie vorher sofort)
+  const x0 = w.x, y0 = w.y - ST_TILE * 0.8, d = distXY(e.x, e.y, x0, y0), life = Math.max(0.09, Math.min(0.22, d / 1800));
+  particles.push({ x: x0, y: y0, tx: e.x, ty: e.y, isSpear: true, life: life, maxLife: life });
+}
 function stDefenses(dt) {
   const list = enemies;
   Base.buildings.forEach(function(b){
@@ -15203,7 +15236,7 @@ function stDefenses(dt) {
     } else if (b.type === 'korallenspeer' && b.cd <= 0) {  // 7.15: ein Wurf auf den stärksten Gegner in Reichweite (Antwort auf Bosse)
       const e = stStrongest(list, w, (380 + 25 * lv) * ST_REACH); if (!e) return;
       b.cd = 2.2; const fx = stFxOf(b); fx.aim = Math.atan2(e.y - w.y, e.x - w.x); fx.fire = runTime;
-      applyDamageToEnemy(e, 60 * (1 + 0.3 * (lv - 1))); particles.push({ x: w.x, y: w.y, tx: e.x, ty: e.y, isBolt: true, life: 0.2, maxLife: 0.2, color: '#ffb38a' }); spawnBurst(e.x, e.y, '#ffb38a', 6);
+      applyDamageToEnemy(e, 60 * (1 + 0.3 * (lv - 1))); stSpearShot(w, e); spawnBurst(e.x, e.y, '#ffb38a', 6);
     } else if (b.type === 'leuchtturm') {                 // 7.31: Scheinwerfer: wen einer der zwei Strahlen streift, der ist 4 s angeleuchtet und nimmt mehr Schaden
       const L = stLightSrc(b), R = stLightReach(lv), a = runTime * ST_LIGHT_SPIN, bon = stLightBonus(lv);
       list.forEach(function(e){
@@ -15259,6 +15292,7 @@ function stUpgrade(b) {
   const nl = b.lv + 1;
   if (b.type === 'muschelburg') {
     if (nl > ST_MAX_MB) { showToast('Mehr Stufen kommen in einem späteren Schritt.'); return; }
+    if (stGate(nl)) { showToast(tr('Zuerst Verteidigung und Brutstätte ausbauen.')); return; }
     const c = ST_MB[nl]; if (!stCanPay(c)) { showToast('Nicht genug Rohstoffe.'); return; }
     if (c.t && !stBuildFree()) { stBusyToast(); return; }
     stPay(c); if (c.t) { b.upUntil = Date.now() + c.t * 1000; } else { b.lv = nl; Base.mb = nl; b.hp = stMaxHp(b); showToast('🏰 Muschelburg Stufe ' + nl + '!'); }
@@ -15284,34 +15318,39 @@ function stBusyToast() { showToast(stBuilders() > 1 ? 'Beide Baumeister sind bes
 function stHire() {
   if (Base.builder2 || Base.mb < 5) return;
   if (!stCanPay({ k: 0, c: ST_HIRE_C })) { showToast('Nicht genug Kristalle.'); return; }
-  stPay({ k: 0, c: ST_HIRE_C }); Base.builder2 = 1; showToast('👷 Ein zweiter Baumeister hilft jetzt mit – zwei Bauten auf einmal.'); stSave();
+  stPay({ k: 0, c: ST_HIRE_C }); Base.builder2 = 1; showToast('👷 Zweiter Baumeister: zwei Bauten gleichzeitig.'); stSave();
 }
 // 7.23: Krabbenwerkstatt. Flickt das am stärksten beschädigte Gebäude in Reichweite (3 % seiner Lebenspunkte pro s, +25 % je Stufe), danach Ruinen (halb so schnell, gratis).
 // Läuft in stTick, also auch in der Pause und für die Zeit, in der du weg warst.
 function stRepRate(lv) { return 0.03 * (1 + 0.25 * (lv - 1)); }
-function stRepReach(lv) { return 4 + 0.5 * lv; }
+function stRepReach(lv) { return 5 + 0.6 * lv; }      // 7.41: 5,6 (Stufe 1) bis 11 Felder (vorher 4,5 bis 9)
+function stRepCount(lv) { return lv >= 10 ? 3 : lv >= 5 ? 2 : 1; }      // 7.41: so viele Gebäude flickt eine Werkstatt gleichzeitig, jedes mit der vollen Rate
 function stWorkshops(secs, offline) {
   Base.buildings.forEach(function(ws){
     if (ws.type !== 'krabbenwerkstatt' || ws.ruin || ws.upUntil || !(secs > 0)) return;
     const w = stWorld(ws), R = stRepReach(ws.lv) * ST_TILE, fx = offline ? null : stFxOf(ws);
+    const used = new Map();      // Sekunden, die diese Werkstatt schon an einem Gebäude gearbeitet hat: jedes bekommt höchstens die Rate von secs (gleichzeitig = mehrere Plätze)
+    for (let slot = 0, n = stRepCount(ws.lv); slot < n; slot++) {
     let left = secs;
     for (let guard = 0; guard < 40 && left > 1e-6; guard++) {
       let best = null, bq = 9;
       for (let i = 0; i < Base.buildings.length; i++) {
-        const b = Base.buildings[i]; if (b === ws || b.upUntil) continue;
+        const b = Base.buildings[i]; if (b === ws || b.upUntil || (used.get(b) || 0) >= secs - 1e-6) continue;
         const m = stMaxHp(b), hp = b.hp || 0; if (!b.ruin && hp >= m) continue;
         const v = stWorld(b); if (distXY(v.x, v.y, w.x, w.y) > R) continue;
         const q = (b.ruin ? 2 : 0) + hp / m;                 // erst Schäden, dann Ruinen
         if (q < bq) { bq = q; best = b; }
       }
       if (!best) break;
-      const m = stMaxHp(best), rate = m * stRepRate(ws.lv) * (best.ruin ? 0.5 : 1), use = Math.min(left, (m - (best.hp || 0)) / rate);
+      const m = stMaxHp(best), rate = m * stRepRate(ws.lv) * (best.ruin ? 0.5 : 1), use = Math.min(left, secs - (used.get(best) || 0), (m - (best.hp || 0)) / rate);
+      used.set(best, (used.get(best) || 0) + use);
       best.hp = Math.min(m, (best.hp || 0) + rate * use); left -= use;
       if (best.hp >= m - 1e-6) { best.hp = m; if (best.ruin) { best.ruin = false; if (!offline) { stDoneAt.set(best, Date.now()); showToast('🔧 ' + ST_B[best.type].name + ' ist wieder aufgebaut.'); } } }
       if (fx) {
         fx.rep = best; fx.repT = runTime; fx.pt = (fx.pt || 0) - secs;
         if (fx.pt <= 0) { fx.pt = 0.9; const v = stWorld(best); particles.push({ x: v.x + (Math.random() - 0.5) * v.r, y: v.y - v.r * 0.3, vx: 0, vy: -28, life: 0.9, maxLife: 0.9, isText: true, text: '🔧', color: '#ffe9a0' }); }
       }
+    }
     }
   });
 }
@@ -15367,7 +15406,7 @@ function stPlaceRow(type, tiles) {
   tiles.forEach(function(t, i){ if (plan.ok[i] && stPlace(type, t.x, t.y, true)) n++; });
   if (n) { Sfx.click(); stSave(); }
   if (plan.why === 'poor') showToast('Nicht genug Korallen.');
-  else if (plan.why === 'full') showToast('Alle ' + ST_B[type].max(Base.mb) + ' Mauern stehen – mehr gibt es mit der nächsten Muschelburg-Stufe.');
+  else if (plan.why === 'full') showToast('Alle ' + ST_B[type].max(Base.mb) + ' Mauern stehen (mehr mit der nächsten Stufe).');
   else if (n > 1) showToast('🧱 ' + n + ' Mauern gebaut.');
   return n;
 }
@@ -15400,18 +15439,41 @@ function stPointer(sx, sy, kind) {
   canvas.addEventListener('pointermove', function(e){ if (stratGrabsTouch() && (stUi.mode !== 'send')) stPointer(e.clientX, e.clientY, 'move'); });
   canvas.addEventListener('pointerup', function(e){ if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 12 && performance.now() - down.t < 450) stPointer(e.clientX, e.clientY, 'tap'); else if (down && stratGrabsTouch()) stPointer(e.clientX, e.clientY, 'up'); down = null; });
   canvas.addEventListener('pointercancel', function(){ down = null; stUi.row0 = null; stUi.row = null; });
-  canvas.addEventListener('wheel', function(e){ if (strategyMode && (stUi.mode === 'place' || stUi.mode === 'move')) { e.preventDefault(); stZoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15); } }, { passive: false });
+  canvas.addEventListener('wheel', function(e){ if (strategyMode) { e.preventDefault(); stZoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15); } }, { passive: false });
 })();
 
 // ---------- Oberfläche (alles mit textContent) ----------
 // 7.39: das nächste Ziel (Leiste links oben): am Anfang sieht man, was als Nächstes kommt und wie weit es ist
+// 7.41: Tor der Muschelburg: Stufe N (ab 3) braucht eine Verteidigung und die Brutstätte auf Stufe N-2 (nur weitere Ausbauten sind gesperrt, Gebautes bleibt)
+const ST_DEFS = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'korallenspeer'];
+function stGate(nl) {
+  if (nl < 3) return null;
+  let d = 0, h = 0;
+  Base.buildings.forEach(function(b){ if (b.ruin || b.nb) return; if (ST_DEFS.indexOf(b.type) !== -1) d = Math.max(d, b.lv); else if (b.type === 'brutstaette') h = Math.max(h, b.lv); });
+  const miss = [], need = nl - 2;
+  if (d < need) miss.push({ t: 'Verteidigung auf Stufe {} (jetzt {})', need: need, have: d });
+  if (h < need) miss.push({ t: 'Brutstätte auf Stufe {} (jetzt {})', need: need, have: h });
+  return miss.length ? miss : null;
+}
+function stGateText(miss) { return miss.map(function(m){ return tr(m.t).replace('{}', m.need).replace('{}', m.have); }).join(' · '); }
+const ST_NOHINT = { muschelburg: 1, korallenmauer: 1, stachelfalle: 1 };
+function stCanUp(b) {                // 7.41: lässt sich dieses Gebäude jetzt mit den vorhandenen Rohstoffen ausbauen? (Pfeil am Gebäude)
+  if (Base.mb < 2 || ST_NOHINT[b.type] || b.ruin || b.nb || b.upUntil || b.lv >= Math.min(10, Base.mb)) return false;
+  const c = stLevelCost(b.type, b.lv + 1); return stCanPay(c) && (!c.t || stBuildFree());
+}
 function stGoal() {
+  const g = stGoal0(), n = Base.buildings.filter(stCanUp).length, h = n ? tr('▲ Jetzt ausbaubar: {} (grüner Pfeil am Gebäude)').replace('{}', n) : '';
+  if (!g) return h ? { t: h, p: 1 } : null;
+  g.h = h; return g;
+}
+function stGoal0() {
   const mbB = stBuildingsOf('muschelburg')[0], defs = ['harpunenturm', 'blasenkanone', 'tintenwerfer', 'elektroaal', 'korallenspeer'];
   if (mbB && mbB.upUntil) return { t: tr('Die Muschelburg wird ausgebaut …'), p: stBuildProg(mbB) };
   if (Base.mb >= 2 && !Base.buildings.some(function(b){ return defs.indexOf(b.type) !== -1; })) return { t: tr('Ziel: Baue einen Harpunenturm (Knopf „Bauen“), er schützt deine Basis vor Wellen.'), p: 0 };
   if (Base.mb >= 2 && !stBuildingsOf('brutstaette').length) return { t: tr('Ziel: Baue eine Brutstätte und bilde Truppen aus (Knopf „Bauen“).'), p: 0 };
   if (Base.mb >= ST_MAX_MB) return null;
-  const nx = Base.mb + 1, c = ST_MB[nx], k = Math.floor(Base.res.k);
+  const nx = Base.mb + 1, c = ST_MB[nx], k = Math.floor(Base.res.k), gate = stGate(nx);
+  if (gate) return { t: tr('Muschelburg Stufe {} braucht:').replace('{}', nx) + ' ' + stGateText(gate), p: gate.reduce(function(a, m){ return a + m.have / m.need; }, 0) / gate.length };
   const p = Math.min(1, Base.res.k / c.k, c.c ? Base.res.c / c.c : 1);
   if (p >= 1) return { t: tr('Bereit! Tippe auf die Muschelburg und baue sie aus (Stufe {}).').replace('{}', nx), p: 1 };
   const cost = '🪸 ' + k + ' / ' + c.k + (c.c ? ' · 💎 ' + Math.floor(Base.res.c) + ' / ' + c.c : '');
@@ -15419,26 +15481,28 @@ function stGoal() {
 }
 function stGoalShow() {
   let g = document.getElementById('st-goal');
-  if (!g) { const u = document.getElementById('strat-ui'); if (!u) return; g = el('div', 'st-goal'); g.id = 'st-goal'; g.appendChild(el('span', 'st-goal-t')); const b = el('div', 'st-goal-bar'); b.appendChild(el('i')); g.appendChild(b); u.appendChild(g); }
-  const goal = Base && !SNR && !RD ? stGoal() : null, open = stUi.mode === 'place' || stUi.mode === 'move';
+  if (!g) { const u = document.getElementById('strat-ui'); if (!u) return; g = el('div', 'st-goal'); g.id = 'st-goal'; g.appendChild(el('span', 'st-goal-t')); g.appendChild(el('div', 'st-goal-h')); const b = el('div', 'st-goal-bar'); b.appendChild(el('i')); g.appendChild(b); u.appendChild(g); }
+  const goal = Base && !SNR && !RD ? stGoal() : null, pn = document.getElementById('strat-panel'), open = stUi.mode === 'place' || stUi.mode === 'move' || !!(pn && pn.style.display !== 'none');      // 7.40: auch weg, solange ein Fenster offen ist (sie lagen übereinander)
   g.style.display = goal && !open ? 'block' : 'none'; if (!goal || open) return;
   const t = g.firstChild; if (t.textContent !== goal.t) t.textContent = goal.t;
+  const hh = g.children[1]; if (hh.textContent !== (goal.h || '')) hh.textContent = goal.h || ''; hh.style.display = goal.h ? 'block' : 'none';
   g.lastChild.firstChild.style.width = Math.round(goal.p * 100) + '%';
 }
+function stK(n) { n = Math.floor(n); return n < 10000 ? String(n) : (Math.floor(n / 100) / 10).toString().replace('.', ',') + 'k'; }   // 7.40: 13527 -> 13,5k (die Ressourcenleiste bleibt im Bild)
 function renderStratHud() {
   const h = document.getElementById('strat-res'); if (!h || !Base) return;
   const cp = stCaps();
   if (!stHudEls || !h.firstChild) stHudBuild(h);
-  stHudEls.k.textContent = Math.floor(Base.res.k) + '/' + cp.k; stHudEls.c.textContent = Math.floor(Base.res.c) + '/' + cp.c; stHudEls.xp.textContent = Math.floor(Base.res.xp) + '/' + cp.xp;
+  stHudEls.k.textContent = stK(Base.res.k) + '/' + stK(cp.k); stHudEls.c.textContent = stK(Base.res.c) + '/' + stK(cp.c); stHudEls.xp.textContent = stK(Base.res.xp) + '/' + stK(cp.xp);
   stHudEls.army.textContent = stTroops.length + '/' + stArmyCap() + (Base.train.length ? ' (+' + Base.train.length + ')' : ''); stHudEls.wave.textContent = stPaused() ? '⏸' : Math.max(0, Math.ceil(stWaveT)) + ' s';
   const bl = stBuilds(); stHudEls.buildBox.style.display = bl.length ? '' : 'none'; if (bl.length) stHudEls.build.textContent = bl.map(function(x){ return stDur((x.upUntil - Date.now()) / 1000); }).join(' · ');
   const inBase = stInBase(player.x, player.y);
   const vis = function(id, on){ const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
-  stGoalShow();
+  stGoalShow(); const gl = document.getElementById('st-goal'); if (gl) gl.style.top = Math.round(h.getBoundingClientRect().bottom + 6) + 'px';
   vis('st-build', inBase); vis('st-deposit', stVaultUsable()); vis('st-withdraw', stVaultUsable()); vis('st-map', SN.on);
   ['follow', 'hold', 'send'].forEach(function(c){ const e = document.getElementById('st-' + c); if (e) e.classList.toggle('active', stCmd === c); });
 }
-function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'flex' : 'none'; if (!on && ZOOM_K !== 1) { ZOOM_K = 1; applyZoom(); worldSpace(); } const l = document.getElementById('st-zlab'); if (l) l.textContent = '100 %'; }
+function stPlaceBar(on) { const b = document.getElementById('st-placebar'); if (b) b.style.display = on ? 'flex' : 'none'; }      // 7.40: der Zoom bleibt nach dem Platzieren (Zurücksetzen nur beim Verlassen)
 function stZoomBy(f) { ZOOM_K = Math.max(0.4, Math.min(1.8, ZOOM_K * f)); applyZoom(); worldSpace(); const l = document.getElementById('st-zlab'); if (l) l.textContent = Math.round(ZOOM_K * 100) + ' %'; }       // 7.34: Platzieren / Verschieben: heran- und herauszoomen (Knöpfe, Mausrad)
 function stPlaceStart(hint) {      // Platzieren / Verschieben: das Menü verschwindet, damit der ganze Bildschirm frei ist; nur "Abbrechen" bleibt
   const p = document.getElementById('strat-panel'); if (p) p.style.display = 'none';
@@ -15477,7 +15541,7 @@ function stOpenBuild() {
     Base.inv.forEach(function(it, idx){
       const d = ST_B[it.type], b = el('button', 'st-card'), top = el('span', 'st-card-top'); top.appendChild(stIcon(it.type, 34)); top.appendChild(el('span', 'st-card-name', d.name)); b.appendChild(top);
       b.appendChild(el('span', 'st-card-cost', tr('Stufe') + ' ' + it.lv)); b.appendChild(el('span', 'st-card-meta', '⚡ ' + tr('gratis') + ' · ' + tr('aufstellen')));
-      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = it.type; stUi.inv = idx; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = it.type; stUi.inv = idx; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart('Tippe auf einen freien Platz.'); });
       ig.appendChild(b);
     });
     p.appendChild(ig);
@@ -15498,7 +15562,7 @@ function stOpenBuild() {
         b.appendChild(el('span', 'st-card-meta', (t ? '⏱ ' + stDur(t) : '⚡ sofort') + ' · ' + have + '/' + max));
       }
       b.disabled = locked || full || poor || wait;
-      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.inv = null; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart(stRowType(type) ? 'Tippe für eine Mauer oder zieh eine ganze Reihe.' : 'Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+      b.addEventListener('click', function(){ Sfx.click(); stUi.mode = 'place'; stUi.type = type; stUi.inv = null; stUi.ghost = stTileAt(player.x, player.y - 120, d.size); stPlaceStart(stRowType(type) ? 'Tippe oder zieh eine Reihe.' : 'Tippe auf einen freien Platz.'); });
       grid.appendChild(b);
     });
     p.appendChild(grid);
@@ -15519,12 +15583,25 @@ const ST_DESC = {
   stachelfalle: 'Versteckt. Springt zu, wenn ein Gegner nahe kommt, und ist nach 5 s wieder bereit.',
   tintenwerfer: 'Verlangsamt alle Gegner in Reichweite.',
   heilquelle: 'Heilt deinen Blobi und die Truppen in der Basis.',
-  fischschule: 'Verbessert Truppen für 30 💎 × Stufe: +20 % Leben und Schaden. Wie hoch, bestimmt die Muschelburg.',
+  fischschule: 'Verbessert eine Truppenart für 30 💎 × Stufe: jede Stufe gibt +20 % Leben und Schaden (der Heilqualle: Leben und Heilung). Wie hoch, bestimmt die Muschelburg.',
   elektroaal: 'Ein Blitz springt alle 1,3 s auf bis zu 4 Gegner.',
   korallenspeer: 'Wirft alle 2,2 s einen Speer auf den stärksten Gegner: die Antwort auf Bosse.',
-  krabbenwerkstatt: 'Repariert beschädigte Gebäude in der Nähe, eins nach dem anderen, und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.'
+  krabbenwerkstatt: 'Repariert beschädigte Gebäude in der Nähe (ab Stufe 5 zwei, auf Stufe 10 drei gleichzeitig) und baut Ruinen gratis wieder auf. Arbeitet auch, wenn du weg bist.'
 };
 function stR1(v) { return Math.round(v * 10) / 10; }
+// 7.40: was jede Truppe tut (Hatchery-Fenster) und was ein Ausbau in der Fischschule ändert (+20 % Leben und Schaden / Heilung je Stufe; Zahlen aus stTroopMaxHp / stTroopDmg)
+const ST_TDESC = {
+  schwarmfisch: 'Nahkämpfer: schwimmt zum nächsten Gegner und beisst zu. Billig und flink, hält aber wenig aus.',
+  pfeilfisch: 'Fernkämpfer: schiesst aus 260 Entfernung und hält Abstand. Wenig Leben.',
+  panzerkrebs: 'Nahkämpfer mit sehr viel Leben, aber langsam: steht vorn und hält die Schläge aus.',
+  kugelfisch: 'Platzt bei 3 oder mehr Gegnern (bei Boss oder Champion nach 2 s) und trifft alle in 110 Umkreis mit 70 Schaden. Danach ist er weg.',
+  heilqualle: 'Kämpft nicht: gibt Truppen in 240 Umkreis Leben zurück (9 pro s) und schwimmt zur am stärksten verletzten.',
+  minihai: 'Schneller Nahkämpfer. Bei Überfällen geht er zuerst auf Farmen, Bohrer und Lager los.'
+};
+function stTroopUp(type) {       // "Leben 40 → 48 · Schaden 6 → 7,2": die Werte der aktuellen und der nächsten Stufe
+  const d = ST_T[type], l = stTroopLv(type), f = function(v){ return String(stR1(v)).replace('.', ','); };
+  return tr(d.heal ? 'Leben {} → {} · Heilung {} → {} pro s' : 'Leben {} → {} · Schaden {} → {}').replace('{}', f(stTroopMaxHp(type))).replace('{}', f(Math.round(d.hp * (1 + 0.2 * l)))).replace('{}', f(stTroopDmg(type))).replace('{}', f(d.dmg * (1 + 0.2 * l)));
+}
 const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
   muschelburg: [['Basis-Raster', function(lv){ return ST_MB[lv].grid + '×' + ST_MB[lv].grid; }], ['Höchste Gebäudestufe', function(lv){ return lv; }], ['Höchste Truppenstufe', function(lv){ return lv >= 9 ? 5 : Math.min(4, lv); }]],
   korallenfarm: [['Korallen pro Stunde', function(lv){ return stR1(60 * Math.pow(1.5, lv - 1) * ST_RING[stArea()].k); }]],
@@ -15536,7 +15613,7 @@ const ST_STAT = {      // [Bezeichnung, Wert(Stufe, Gebäude)]
   tintenwerfer: [['Reichweite', function(lv){ return (180 + 10 * lv) * ST_REACH; }]],
   leuchtturm: [['Reichweite', stLightReach], ['Mehr Schaden auf Angeleuchtete', function(lv){ return '+' + Math.round(stLightBonus(lv) * 100) + ' %'; }]],
   heilquelle: [['Heilung pro Sekunde', function(lv){ return 4 * lv + ' %'; }]],
-  krabbenwerkstatt: [['Reparatur pro Sekunde', function(lv){ return stR1(stRepRate(lv) * 100) + ' %'; }], ['Reichweite (Felder)', stRepReach]],
+  krabbenwerkstatt: [['Reparatur pro Sekunde', function(lv){ return stR1(stRepRate(lv) * 100) + ' %'; }], ['Reichweite (Felder)', function(lv){ return stR1(stRepReach(lv)); }], ['Gleichzeitig repariert', stRepCount]],
   elektroaal: [['Reichweite', function(lv){ return (260 + 20 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(22 * (1 + 0.3 * (lv - 1))); }]],
   korallenspeer: [['Reichweite', function(lv){ return (380 + 25 * lv) * ST_REACH; }], ['Schaden', function(lv){ return stR1(60 * (1 + 0.3 * (lv - 1))); }]],
   stachelfalle: [['Schaden', function(lv){ return stR1(ST_TRAP.dmg * (1 + 0.3 * (lv - 1))); }]],
@@ -15593,21 +15670,21 @@ function stOpenInfo(b) {
   if (ST_DESC[b.type]) p.appendChild(el('p', 'acc-note', tr(ST_DESC[b.type])));
   if (!b.ruin && !b.upUntil) stUpInfo(p, b);
   const row = el('div', 'st-list');
-  const add = function(label, sub, fn, off){ const x = el('button', 'btn btn-secondary st-item'); x.appendChild(el('span', null, label)); if (sub) x.appendChild(el('span', 'btn-sub', sub)); x.disabled = !!off; x.addEventListener('click', function(){ Sfx.click(); fn(); if (stUi.mode !== 'move') stOpenInfo(b); /* 7.34: Verschieben lässt das Fenster zu, wie beim ersten Bauen */ renderStratHud(); }); row.appendChild(x); };
+  const add = function(label, sub, fn, off, desc){ const x = el('button', 'btn btn-secondary st-item'); x.appendChild(el('span', null, label)); if (sub) x.appendChild(el('span', 'btn-sub', sub)); if (desc) x.appendChild(el('span', 'btn-sub st-tdesc', desc)); x.disabled = !!off; x.addEventListener('click', function(){ Sfx.click(); fn(); if (stUi.mode !== 'move') stOpenInfo(b); /* 7.34: Verschieben lässt das Fenster zu, wie beim ersten Bauen */ renderStratHud(); }); row.appendChild(x); };
   if (b.ruin) add('Reparieren', stCostText(stRepairCost(b)), function(){ stRepair(b); });
   else if (!b.upUntil) {
     const nl = b.lv + 1, top = nl > (b.type === 'muschelburg' ? ST_MAX_MB : 10);
     if (b.hp < stMaxHp(b) - 0.5 && b.type !== 'muschelburg') add('Ganz reparieren', stCostText(stRepairCost(b)), function(){ stRepair(b); });
     if (top) add('Höchste Stufe', null, function(){}, true);
-    else if (b.type === 'muschelburg') add('Ausbauen auf Stufe ' + nl, stCostText(ST_MB[nl]), function(){ stUpgrade(b); });
+    else if (b.type === 'muschelburg') { const gt = stGate(nl); if (gt) p.appendChild(el('p', 'acc-note', tr('Muschelburg Stufe {} braucht:').replace('{}', nl) + ' ' + stGateText(gt))); add('Ausbauen auf Stufe ' + nl, gt ? '🔒 ' + tr('Erst Gebäude ausbauen') : stCostText(ST_MB[nl]), function(){ stUpgrade(b); }, !!gt); }
     else add('Ausbauen auf Stufe ' + nl, nl > Base.mb ? '🔒 Muschelburg ' + nl : stCostText(stLevelCost(b.type, nl)), function(){ stUpgrade(b); }, nl > Base.mb);
   }
   if (b.type === 'muschelburg') { if (Base.builder2) p.appendChild(el('p', 'acc-note', tr('Zwei Baumeister arbeiten für dich.'))); else add('Zweiten Baumeister anheuern', Base.mb < 5 ? '🔒 Muschelburg 5' : ST_HIRE_C + ' 💎', function(){ stHire(); }, Base.mb < 5); }
   if (b.type !== 'muschelburg' && !b.ruin && !b.upUntil) add('Einlagern', 'ins Inventar · Basis ruht', function(){ stStore(b); });
-  add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; stPlaceStart('Tippe auf einen freien Platz im Raster (der Umriss zeigt, ob es passt).'); });
+  add('Verschieben', 'gratis', function(){ stUi.mode = 'move'; stUi.move = b; stUi.ghost = { x: b.x, y: b.y }; stPlaceStart('Tippe auf einen freien Platz.'); });
   if (b.type === 'perlentresor') { add('XP einzahlen', Math.floor(runXp) + ' XP vom Blobi', function(){ stDeposit(); }, !stVaultUsable()); add('XP abheben', Math.floor(Base.res.xp) + ' XP im Tresor', function(){ stWithdraw(); }, !stVaultUsable()); }
-  if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from); });
-  if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t], tl = stTroopLv(t); add(tr('{} verbessern').replace('{}', tr(q.name)), Base.mb < q.from ? '🔒 Muschelburg ' + q.from : tl >= stTroopCap() ? tr('Höchste Stufe') : 'Stufe ' + tl + ' → ' + (tl + 1) + ' · ' + 30 * tl + ' 💎', function(){ stSchool(t); }, Base.mb < q.from); });
+  if (b.type === 'brutstaette' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t]; add(q.name + ' trainieren', Base.mb < q.from ? '🔒 Muschelburg ' + q.from : q.xp + ' XP · ' + q.train + ' s', function(){ stTrain(t); }, Base.mb < q.from, tr(ST_TDESC[t])); });
+  if (b.type === 'fischschule' && !b.ruin) Object.keys(ST_T).forEach(function(t){ const q = ST_T[t], tl = stTroopLv(t); add(tr('{} verbessern').replace('{}', tr(q.name)), Base.mb < q.from ? '🔒 Muschelburg ' + q.from : tl >= stTroopCap() ? tr('Höchste Stufe') : 'Stufe ' + tl + ' → ' + (tl + 1) + ' · ' + 30 * tl + ' 💎', function(){ stSchool(t); }, Base.mb < q.from, tl >= stTroopCap() || Base.mb < q.from ? '' : stTroopUp(t)); });
   p.appendChild(row);
 }
 
@@ -15616,8 +15693,8 @@ function stOpenInfo(b) {
 // Jedes Gebäude ist ein gezeichnetes Bild (Sprite): einmal pro Typ, Stufe und Zustand in ein Canvas gemalt, danach nur noch kopiert.
 // Was sich bewegt (Flaggen, Blasen, Licht, Zielrichtung, die Plätze der Truppen) zeichnet ST_ANIM in jedem Bild live darüber.
 // Gemalt wird in einem Kasten von 100 x 100 Einheiten (links oben = 0,0; die Seite des Gebäudes entspricht 100); g.ow = Umrissbreite in Einheiten.
-const ST_PAD = 30, ST_ART = {}, ST_ANIM = {};
-const stSprites = {}; let stSprK = 0, stSprN = 0, stWalls = {};
+const ST_PAD = 30, ST_ART = {}, ST_ANIM = {}, ST_ANIM_MIN = 0.5;   // 7.40: unter diesem Bildschirm-Zoom (ZOOM) keine Gebäude-Animationen, keine Stern-Reihen: zu klein zum Sehen, aber der Hauptgrund fürs Ruckeln beim Herauszoomen
+const stSprites = {}; let stSprK = 0, stSprN = 0, stSprPx = 0, stWalls = {}; const ST_SPR_PX = 12e6;   // 7.40: Speichergrenze der Bildchen in Pixeln statt 56 Stück (grosse Basen mit vielen Stufen / Mauer-Formen brauchen mehr, sonst wurden sie jedes Bild neu gemalt)
 const stFx = new WeakMap();                      // Zielrichtung und Schusszeit der Verteidigung (nicht im Speicherstand)
 function stFxOf(b) { let f = stFx.get(b); if (!f) { f = { aim: -0.6, fire: -9 }; stFx.set(b, f); } return f; }
 function stHex(a, b, t) { const A = hexToRgb(a), B = hexToRgb(b), h = function(v){ return ('0' + Math.round(v).toString(16)).slice(-2); }; return '#' + h(A.r + (B.r - A.r) * t) + h(A.g + (B.g - A.g) * t) + h(A.b + (B.b - A.b) * t); }
@@ -15680,14 +15757,14 @@ function stBubbles(g, tm, x, y, spread, rise, n, seed) {   // aufsteigende Blase
 function stSprScale() { return Math.max(0.5, Math.min(1.5, Math.round(DPR * ZOOM * 100) / 100)); }
 function stBitmap(key, wU, hU, pad, fn) {        // kleines Bild im Cache; fn malt in Welt-Einheiten (0,0 = links oben ohne Rand)
   const k = stSprScale();
-  if (k !== stSprK) { for (const q in stSprites) delete stSprites[q]; stSprK = k; stSprN = 0; }
+  if (k !== stSprK) { for (const q in stSprites) delete stSprites[q]; stSprK = k; stSprN = 0; stSprPx = 0; }
   let s = stSprites[key];
   if (s) { s.use = renderFrame; return s; }
-  if (stSprN >= 56) { const ks = Object.keys(stSprites).sort(function(a, b){ return stSprites[a].use - stSprites[b].use; }); for (let i = 0; i < 14; i++) { delete stSprites[ks[i]]; stSprN--; } }
+  if (stSprPx > ST_SPR_PX) { const ks = Object.keys(stSprites).sort(function(a, b){ return stSprites[a].use - stSprites[b].use; }); for (let i = 0; i < ks.length && stSprPx > ST_SPR_PX * 0.75; i++) { const o = stSprites[ks[i]]; if (o.use >= renderFrame - 1) break; stSprPx -= o.c.width * o.c.height; delete stSprites[ks[i]]; stSprN--; } }   // nur Bildchen, die gerade nicht gebraucht werden
   const c = document.createElement('canvas'); c.width = Math.ceil((wU + 2 * pad) * k); c.height = Math.ceil((hU + 2 * pad) * k);
   const g = c.getContext('2d'); g.scale(c.width / (wU + 2 * pad), c.height / (hU + 2 * pad)); g.translate(pad, pad);
   fn(g);
-  s = stSprites[key] = { c: c, pad: pad, k: k, use: renderFrame }; stSprN++;
+  s = stSprites[key] = { c: c, pad: pad, k: k, use: renderFrame }; stSprN++; stSprPx += c.width * c.height;
   return s;
 }
 function stBlit(g, spr, wx, wy) {                // Bild mit linker oberer Ecke bei (wx, wy) in Welt-Einheiten als Pixel-Kopie (1:1, wenn der Massstab des Bildes zum Bildschirm passt)
@@ -15840,9 +15917,10 @@ let stAnimQ = 0;                                 // 7.30: Grafikstufe, solange S
 function stCrackLv(b) { const q = b.hp / stMaxHp(b); return q < 0.33 ? 2 : q < 0.66 ? 1 : 0; }
 function stHitFl(b) { const ht = b.hitT ? runTime - b.hitT : -1; return ht >= 0 && ht < 0.18 ? 1 - ht / 0.18 : 0; }     // 7.9: ein gespeichertes hitT aus einer früheren Sitzung (runTime war höher) liess alles weiss aufleuchten
 function stDrawBuilding(g, b, x, y, tm, conn, part) {
-  const d = ST_B[b.type], S = d.size * ST_TILE, u = S / 100, spr = stSprite(b.type, b.lv, b.ruin ? 'ruin' : 'ok', conn || 0);
-  const fl = part === 1 ? 0 : stHitFl(b), f = b.ruin || part === 1 ? null : ST_ANIM[b.type];
+  const d = ST_B[b.type], S = d.size * ST_TILE, u = S / 100;
+  const fl = part === 1 ? 0 : stHitFl(b), f = b.ruin || part === 1 || (ZOOM < ST_ANIM_MIN && !ST_SPEAR_ALWAYS[b.type]) ? null : ST_ANIM[b.type];
   if (part === 2 && !f && fl <= 0) return;
+  const spr = stSprite(b.type, b.lv, b.ruin ? 'ruin' : 'ok', conn || 0);
   let a = 1;
   if (stUi.mode === 'move' && stUi.move === b) a = 0.35;
   if (b.type === 'stachelfalle' && !b.sprung && !b.ruin) a *= 0.6;
@@ -15873,7 +15951,12 @@ function stDrawBars(g, b, x, y, S) {             // Leben, Stufe, Auswahl
   if (b.ruin) return;
   const mh = stMaxHp(b);
   if (b.hp < mh) { const w = S * 0.7, bx = x + (S - w) / 2, by = y + 4; stRectC(g, bx - 2, by - 2, w + 4, 11, 'rgba(6,20,32,0.75)'); g.fillStyle = b.hp / mh > 0.4 ? '#ff9a5c' : '#ff4f62'; g.beginPath(); roundRect(g, bx, by, Math.max(4, w * b.hp / mh), 7, 3); g.fill(); }
-  if (ST_B[b.type].size > 1 && !b.upUntil) {
+  if (ZOOM >= ST_ANIM_MIN && b !== stUi.sel && stCanUp(b)) {      // 7.41: grüner Pfeil: dieses Gebäude lässt sich jetzt ausbauen
+    const cx = x + S - 16, cy = y + 16, bob = Math.sin(runTime * 3 + b.x) * 2;
+    g.save(); g.fillStyle = 'rgba(6,20,32,0.82)'; g.strokeStyle = '#7af2a4'; g.lineWidth = 2.5; g.beginPath(); g.arc(cx, cy, 13, 0, 6.283); g.fill(); g.stroke();
+    g.fillStyle = '#7af2a4'; g.beginPath(); g.moveTo(cx, cy - 7 + bob); g.lineTo(cx + 7, cy + 4 + bob); g.lineTo(cx - 7, cy + 4 + bob); g.closePath(); g.fill(); g.restore();
+  }
+  if (ST_B[b.type].size > 1 && !b.upUntil && ZOOM >= ST_ANIM_MIN) {
     const n = Math.min(5, b.lv), pw = n * 13 + 8, px = x + (S - pw) / 2, py = y + S - 18;
     stRectC(g, px, py, pw, 15, 'rgba(6,20,32,0.7)');
     g.save(); g.ow = 1.2; for (let i = 0; i < n; i++) stStar(g, px + 10 + i * 13, py + 7.8, 5.2, i < b.lv - 5 ? '#ff7ab0' : '#ffd76a', 0.5); g.restore();      // 7.23: ab Stufe 6 rosa Sterne
@@ -15882,26 +15965,46 @@ function stDrawBars(g, b, x, y, S) {             // Leben, Stufe, Auswahl
 function stRectC(g, x, y, w, h, fill) { g.fillStyle = fill; g.beginPath(); roundRect(g, x, y, w, h, h / 2); g.fill(); }
 function stWallConn(b) { const k = function(dx, dy){ return stWalls[(b.x + dx) + ',' + (b.y + dy)] ? 1 : 0; }; return k(0, -1) | (k(1, 0) << 1) | (k(0, 1) << 2) | (k(-1, 0) << 3); }
 
-let stFloorCan = null, stFloorDev = null, stFloorDevTp = 0;
-function stFloorTile() {                         // Sandboden, nahtlos wiederholbar
-  if (stFloorCan) return stFloorCan;
-  const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d');
+// 8.0 (Kunst-Paket): jede Karte (Ring) hat ihren eigenen Basis-Boden, Rand und ihre Stimmung (stDrawMood). Boden-Farben je Ring; x = Zierde: shell Muscheln, tuft Seegras, glim Leuchtpunkte, crack Lava-Risse
+const ST_FLOOR = {
+  riff:   { base: '#b9a276', warm: 'rgba(226,206,160,0.38)', cool: 'rgba(112,92,62,0.3)', hi: 'rgba(236,220,178,0.35)', lo: 'rgba(110,88,58,0.28)', g1: 'rgba(244,230,196,0.5)', g2: 'rgba(90,72,48,0.4)', peb: ['#d4c6a6', '#a89c84'], band: '40,28,14', x: 'shell' },
+  kelp:   { base: '#7d8c5a', warm: 'rgba(168,190,108,0.4)', cool: 'rgba(40,64,40,0.38)', hi: 'rgba(190,214,140,0.3)', lo: 'rgba(36,60,38,0.3)', g1: 'rgba(200,226,150,0.45)', g2: 'rgba(30,52,34,0.45)', peb: ['#9aa57c', '#5e6e4c'], band: '14,34,16', x: 'tuft' },
+  graben: { base: '#6a7488', warm: 'rgba(150,164,190,0.34)', cool: 'rgba(24,32,56,0.4)', hi: 'rgba(160,176,206,0.28)', lo: 'rgba(20,28,50,0.32)', g1: 'rgba(176,190,220,0.4)', g2: 'rgba(16,22,40,0.45)', peb: ['#8a94aa', '#4c5670'], band: '8,12,30', x: 'glim' },
+  vulkan: { base: '#4a3836', warm: 'rgba(120,84,70,0.4)', cool: 'rgba(20,12,14,0.5)', hi: 'rgba(150,100,80,0.22)', lo: 'rgba(14,8,10,0.4)', g1: 'rgba(190,120,80,0.35)', g2: 'rgba(12,8,10,0.5)', peb: ['#6a5450', '#2c2224'], band: '30,8,4', x: 'crack' }
+};
+let stFloorCans = {}, stFloorDevs = {}, stFloorDevTp = 0;
+function stFloorTile() {                         // Boden des Rings, nahtlos wiederholbar
+  const A = stArea(); if (stFloorCans[A]) return stFloorCans[A];
+  const P = ST_FLOOR[A], N = 256, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d');
   const wrap = function(x, y, r, fn){ for (let ax = -1; ax <= 1; ax++) for (let ay = -1; ay <= 1; ay++) { const X = x + ax * N, Y = y + ay * N; if (X > -r && X < N + r && Y > -r && Y < N + r) fn(X, Y); } };
-  g.fillStyle = '#b9a276'; g.fillRect(0, 0, N, N);
+  g.fillStyle = P.base; g.fillRect(0, 0, N, N);
   for (let i = 0; i < 16; i++) { const x = bhash(i * 3.1) * N, y = bhash(i * 5.7 + 2) * N, r = 34 + bhash(i * 9.3) * 54, warm = bhash(i * 2.2) > 0.5;
-    wrap(x, y, r, function(X, Y){ g.fillStyle = stRG(g, X, Y, 0, r, warm ? 'rgba(226,206,160,0.38)' : 'rgba(112,92,62,0.3)', 'rgba(0,0,0,0)'); g.fillRect(X - r, Y - r, r * 2, r * 2); }); }
+    wrap(x, y, r, function(X, Y){ g.fillStyle = stRG(g, X, Y, 0, r, warm ? P.warm : P.cool, 'rgba(0,0,0,0)'); g.fillRect(X - r, Y - r, r * 2, r * 2); }); }
   g.lineWidth = 1.4;
-  for (let i = 0; i < 9; i++) { const y0 = (i + 0.5) * N / 9, ph = bhash(i + 3) * 6.28, amp = 3 + bhash(i + 7) * 3; g.strokeStyle = i % 2 ? 'rgba(236,220,178,0.35)' : 'rgba(110,88,58,0.28)'; g.beginPath(); for (let x = 0; x <= N; x += 8) { const y = y0 + Math.sin(x / N * 6.2832 * 2 + ph) * amp; if (x) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); }
-  for (let i = 0; i < 520; i++) { g.fillStyle = bhash(i * 1.7) > 0.5 ? 'rgba(244,230,196,0.5)' : 'rgba(90,72,48,0.4)'; g.fillRect(bhash(i * 2.3 + 1) * N, bhash(i * 3.9 + 4) * N, 1.6, 1.6); }
+  for (let i = 0; i < 9; i++) { const y0 = (i + 0.5) * N / 9, ph = bhash(i + 3) * 6.28, amp = 3 + bhash(i + 7) * 3; g.strokeStyle = i % 2 ? P.hi : P.lo; g.beginPath(); for (let x = 0; x <= N; x += 8) { const y = y0 + Math.sin(x / N * 6.2832 * 2 + ph) * amp; if (x) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); }
+  for (let i = 0; i < 520; i++) { g.fillStyle = bhash(i * 1.7) > 0.5 ? P.g1 : P.g2; g.fillRect(bhash(i * 2.3 + 1) * N, bhash(i * 3.9 + 4) * N, 1.6, 1.6); }
   for (let i = 0; i < 12; i++) { const x = bhash(i * 6.1 + 9) * N, y = bhash(i * 4.3 + 2) * N, rx = 3 + bhash(i + 40) * 4;
-    wrap(x, y, 10, function(X, Y){ g.fillStyle = 'rgba(70,58,44,0.35)'; g.beginPath(); g.ellipse(X + 1, Y + 1.5, rx, rx * 0.65, 0, 0, 6.2832); g.fill(); g.fillStyle = bhash(i * 5) > 0.5 ? '#d4c6a6' : '#a89c84'; g.beginPath(); g.ellipse(X, Y, rx, rx * 0.65, 0, 0, 6.2832); g.fill(); }); }
-  for (let i = 0; i < 5; i++) { const x = bhash(i * 8.3 + 5) * N, y = bhash(i * 2.9 + 11) * N;
-    wrap(x, y, 12, function(X, Y){ g.fillStyle = '#f0dcc8'; g.strokeStyle = 'rgba(120,80,60,0.5)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(X, Y + 5); g.arc(X, Y + 5, 7, Math.PI * 1.1, Math.PI * 1.9); g.closePath(); g.fill(); g.stroke(); for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(X, Y + 5); g.lineTo(X + k * 2.6, Y - 1.5 + Math.abs(k) * 0.9); g.stroke(); } }); }
-  return (stFloorCan = c);
+    wrap(x, y, 10, function(X, Y){ g.fillStyle = 'rgba(70,58,44,0.35)'; g.beginPath(); g.ellipse(X + 1, Y + 1.5, rx, rx * 0.65, 0, 0, 6.2832); g.fill(); g.fillStyle = bhash(i * 5) > 0.5 ? P.peb[0] : P.peb[1]; g.beginPath(); g.ellipse(X, Y, rx, rx * 0.65, 0, 0, 6.2832); g.fill(); }); }
+  if (P.x === 'shell') for (let i = 0; i < 5; i++) { const x = bhash(i * 8.3 + 5) * N, y = bhash(i * 2.9 + 11) * N;
+    wrap(x, y, 12, function(X, Y){ g.fillStyle = '#f0dcc8'; g.strokeStyle = 'rgba(120,80,60,0.5)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(X, Y + 5); g.arc(X, Y + 5, 7, Math.PI * 1.1, Math.PI * 1.9); g.closePath(); g.fill(); g.stroke(); for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(X, Y + 5); g.lineTo(X + k * 2.6, Y - 1.5 + Math.abs(k) * 0.9); g.stroke(); } });
+  }
+  if (P.x === 'tuft') for (let i = 0; i < 9; i++) { const x = bhash(i * 8.3 + 5) * N, y = bhash(i * 2.9 + 11) * N;
+    wrap(x, y, 16, function(X, Y){ g.lineCap = 'round'; for (let k = -1; k <= 1; k++) { g.strokeStyle = k ? '#2f8a4e' : '#4fb866'; g.lineWidth = 2; g.beginPath(); g.moveTo(X + k * 3, Y + 6); g.quadraticCurveTo(X + k * 6, Y - 2, X + k * 4 + (k || 1) * 2, Y - 11 + Math.abs(k) * 3); g.stroke(); } });
+  }
+  if (P.x === 'glim') for (let i = 0; i < 16; i++) { const x = bhash(i * 8.3 + 5) * N, y = bhash(i * 2.9 + 11) * N, r = 1 + bhash(i + 70) * 1.3;
+    wrap(x, y, 8, function(X, Y){ g.fillStyle = 'rgba(90,200,255,0.2)'; g.beginPath(); g.arc(X, Y, r * 3.2, 0, 6.2832); g.fill(); g.fillStyle = 'rgba(170,236,255,0.9)'; g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.fill(); });
+  }
+  if (P.x === 'crack') for (let i = 0; i < 4; i++) { const x = bhash(i * 8.3 + 5) * N, y = bhash(i * 2.9 + 11) * N, pts = [[0, 0]];
+    for (let k = 1; k < 7; k++) { const q = pts[k - 1]; pts.push([q[0] + (bhash(i * 9 + k) - 0.35) * 46, q[1] + (bhash(i * 7 + k + 3) - 0.5) * 30]); }
+    wrap(x, y, 150, function(X, Y){ g.lineJoin = 'round'; [['rgba(255,90,30,0.16)', 8], ['rgba(255,110,40,0.5)', 2.8], ['rgba(255,200,130,0.85)', 1.1]].forEach(function(s){ g.strokeStyle = s[0]; g.lineWidth = s[1]; g.beginPath(); pts.forEach(function(p, k){ if (k) g.lineTo(X + p[0], Y + p[1]); else g.moveTo(X + p[0], Y + p[1]); }); g.stroke(); }); });
+  }
+  return (stFloorCans[A] = c);
 }
 function stDrawFloor(g, x0, y0, sz, vx, vy, vw, vh) {   // Sandboden: die Kachel in Bildschirm-Pixeln, ohne Skalieren und ohne grosse Füllpfade (schnell auch ohne Grafikkarte); vx..vh = sichtbarer Ausschnitt (sonst der Bildschirm; 7.30: die Kachel des Basis-Speichers)
   const m = g.getTransform(), s = m.a, tp = Math.max(48, Math.round(256 * s));
-  if (!stFloorDev || stFloorDevTp !== tp) { const cv = document.createElement('canvas'); cv.width = cv.height = tp; cv.getContext('2d').drawImage(stFloorTile(), 0, 0, tp, tp); stFloorDev = cv; stFloorDevTp = tp; }
+  const A = stArea(); if (stFloorDevTp !== tp) { stFloorDevs = {}; stFloorDevTp = tp; }
+  if (!stFloorDevs[A]) { const cv = document.createElement('canvas'); cv.width = cv.height = tp; cv.getContext('2d').drawImage(stFloorTile(), 0, 0, tp, tp); stFloorDevs[A] = cv; }
+  const stFloorDev = stFloorDevs[A];
   if (vx == null) { vx = 0; vy = 0; vw = W; vh = H; }
   const vx0 = Math.max(vx, x0), vy0 = Math.max(vy, y0), vx1 = Math.min(vx + vw, x0 + sz), vy1 = Math.min(vy + vh, y0 + sz);
   g.save();
@@ -15911,20 +16014,27 @@ function stDrawFloor(g, x0, y0, sz, vx, vy, vw, vh) {   // Sandboden: die Kachel
     g.setTransform(1, 0, 0, 1, 0, 0); g.beginPath(); g.rect(dx0, dy0, dx1 - dx0, dy1 - dy0); g.clip();
     for (let ty = Math.floor((dy0 - oy) / tp); oy + ty * tp < dy1; ty++) for (let tx = Math.floor((dx0 - ox) / tp); ox + tx * tp < dx1; tx++) g.drawImage(stFloorDev, ox + tx * tp, oy + ty * tp);
     g.setTransform(m);                                                                                                           // zurück in Welt-Einheiten (die Auswahl bleibt)
-    const band = function(xa, ya, xb, yb, rx, ry, rw, rh) { const q = g.createLinearGradient(xa, ya, xb, yb); q.addColorStop(0, 'rgba(40,28,14,0.34)'); q.addColorStop(1, 'rgba(40,28,14,0)'); g.fillStyle = q; g.fillRect(rx, ry, rw, rh); };
+    const band = function(xa, ya, xb, yb, rx, ry, rw, rh) { const q = g.createLinearGradient(xa, ya, xb, yb); q.addColorStop(0, 'rgba(' + ST_FLOOR[A].band + ',0.34)'); q.addColorStop(1, 'rgba(' + ST_FLOOR[A].band + ',0)'); g.fillStyle = q; g.fillRect(rx, ry, rw, rh); };
     band(0, y0, 0, y0 + 90, x0, y0, sz, 90); band(0, y0 + sz, 0, y0 + sz - 70, x0, y0 + sz - 70, sz, 70); band(x0, 0, x0 + 70, 0, x0, y0, 70, sz); band(x0 + sz, 0, x0 + sz - 70, 0, x0 + sz - 70, y0, 70, sz);
   }
   g.restore();
 }
+// Rand je Ring: Säule (hell, dunkel, Mitte), Deckel, zwei Zier-Korallen, Seil (aussen, innen), Boje (Kugel, Streifen)
+const ST_RIM = {
+  riff:   { p: ['#f5ead4', '#b3a082', '#dccdaf'], cap: ['#fff7e4', '#bfae8e'], base: ['#e8dcc2', '#9c8a6c'], line: 'rgba(110,84,56,0.3)', c1: '#ff8a6a', c2: '#ff6f9c', rope: ['#6c5636', '#e6d2a2'], buoy: ['#ff7a5c', '#fff2e0'] },
+  kelp:   { p: ['#b08a58', '#5e4628', '#8a6a40'], cap: ['#c8a46c', '#6e5430'], base: ['#8a6a40', '#4a3820'], line: 'rgba(40,26,10,0.4)', c1: '#3fbf7a', c2: '#7fd650', rope: ['#3a4a22', '#a4c070'], buoy: ['#d7e07a', '#3a5a2a'] },
+  graben: { p: ['#9aa6c4', '#4a5470', '#6e7a9c'], cap: ['#c8d4f0', '#5a6688'], base: ['#7a86a6', '#3c4660'], line: 'rgba(20,28,56,0.45)', c1: '#5a78f0', c2: '#8a62e8', rope: ['#2a3452', '#8aa0d0'], buoy: ['#5ad0ff', '#d8f4ff'] },
+  vulkan: { p: ['#6a504a', '#1e1416', '#3c2a2a'], cap: ['#ff9a50', '#6a2a14'], base: ['#4a3430', '#150d0e'], line: 'rgba(255,100,40,0.35)', c1: '#ff7a45', c2: '#ffb040', rope: ['#241818', '#c8683a'], buoy: ['#ff5a2a', '#ffd89a'] }
+};
 function stPostSprite(gate) {                    // Säule am Rand (Tor: höher, mit Laterne)
-  const w = gate ? 56 : 38, h = gate ? 124 : 80;
-  return stBitmap('post' + (gate ? 'G' : ''), w, h, 8, function(g){
+  const w = gate ? 56 : 38, h = gate ? 124 : 80, A = stArea(), R = ST_RIM[A];
+  return stBitmap('post' + (gate ? 'G' : '') + A, w, h, 8, function(g){
     g.ow = 2.4; stShadow(g, w / 2, h - 5, w * 0.55, 7, 0.5);
     const x0 = w * 0.2, x1 = w * 0.8, top = gate ? 36 : 22, bot = h - 7;
-    stPoly(g, [[x0 - 2, bot], [x0 + w * 0.05, top + 6], [x1 - w * 0.05, top + 6], [x1 + 2, bot]], stLG(g, x0, 0, x1, 0, '#f5ead4', '#b3a082', '#dccdaf'), 1);
-    g.strokeStyle = 'rgba(110,84,56,0.3)'; g.lineWidth = 1; g.beginPath(); for (let y = top + 16; y < bot - 4; y += 12) { g.moveTo(x0 + 1, y); g.lineTo(x1 - 1, y); } g.stroke();
-    stEll(g, w / 2, top + 6, (x1 - x0) / 2 - 1, 4.5, stLG(g, x0, 0, x1, 0, '#fff7e4', '#bfae8e'), 1);
-    stEll(g, w / 2, bot, (x1 - x0) / 2 + 4, 4.5, stLG(g, x0, 0, x1, 0, '#e8dcc2', '#9c8a6c'), 1);
+    stPoly(g, [[x0 - 2, bot], [x0 + w * 0.05, top + 6], [x1 - w * 0.05, top + 6], [x1 + 2, bot]], stLG(g, x0, 0, x1, 0, R.p[0], R.p[1], R.p[2]), 1);
+    g.strokeStyle = R.line; g.lineWidth = 1; g.beginPath(); for (let y = top + 16; y < bot - 4; y += 12) { g.moveTo(x0 + 1, y); g.lineTo(x1 - 1, y); } g.stroke();
+    stEll(g, w / 2, top + 6, (x1 - x0) / 2 - 1, 4.5, stLG(g, x0, 0, x1, 0, R.cap[0], R.cap[1]), 1);
+    stEll(g, w / 2, bot, (x1 - x0) / 2 + 4, 4.5, stLG(g, x0, 0, x1, 0, R.base[0], R.base[1]), 1);
     if (gate) {
       g.strokeStyle = '#6b5a44'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(w / 2, top + 2); g.lineTo(w / 2, top - 10); g.stroke();
       const gl = stRG(g, w / 2, top - 18, 1, 22, 'rgba(255,230,140,0.5)', 'rgba(255,230,140,0)'); g.fillStyle = gl; g.beginPath(); g.arc(w / 2, top - 18, 22, 0, 6.2832); g.fill();
@@ -15932,20 +16042,20 @@ function stPostSprite(gate) {                    // Säule am Rand (Tor: höher,
       g.strokeStyle = 'rgba(60,40,20,0.85)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(w / 2 - 9, top - 20); g.lineTo(w / 2 + 9, top - 20); g.moveTo(w / 2, top - 29); g.lineTo(w / 2, top - 11); g.stroke();
       stRect(g, w / 2 - 6, top - 32, 12, 4, 2, '#8a6a44', 0.8);
     } else stPearl(g, w / 2, top - 1, 6.5);
-    stCoral(g, x0 - 1, bot - 2, 9, '#ff8a6a', 3.3, 2.6, -Math.PI / 2 - 0.5);
-    stCoral(g, x1 + 1, bot - 2, 7, '#ff6f9c', 7.1, 2.2, -Math.PI / 2 + 0.55);
+    stCoral(g, x0 - 1, bot - 2, 9, R.c1, 3.3, 2.6, -Math.PI / 2 - 0.5);
+    stCoral(g, x1 + 1, bot - 2, 7, R.c2, 7.1, 2.2, -Math.PI / 2 + 0.55);
   });
 }
 function stDrawRim(g, x0, y0, n, T, front) {     // Rand: Säulen und Seile; auf der Südseite das Tor
-  const post = stPostSprite(false), gate = stPostSprite(true), gi = (n - 1) / 2;
+  const post = stPostSprite(false), gate = stPostSprite(true), gi = (n - 1) / 2, RR = ST_RIM[stArea()];
   const put = function(px, py, isGate){ const s = isGate ? gate : post, w = isGate ? 56 : 38, h = isGate ? 124 : 80; stBlit(g, s, px - w / 2 - s.pad, py - h + 7 - s.pad); };
   const rope = function(ax, ay, bx, by, sag){
     const mx = (ax + bx) / 2, my = (ay + by) / 2 + sag;
-    g.strokeStyle = '#6c5636'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(mx, my + 2, bx, by); g.stroke();
-    g.strokeStyle = '#e6d2a2'; g.lineWidth = 3; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(mx, my + 2, bx, by); g.stroke();
+    g.strokeStyle = RR.rope[0]; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(mx, my + 2, bx, by); g.stroke();
+    g.strokeStyle = RR.rope[1]; g.lineWidth = 3; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(mx, my + 2, bx, by); g.stroke();
     const fx = (ax + 2 * mx + bx) / 4 + (bx - ax) * 0, fy = (ay + 2 * (my + 2) + by) / 4;      // Boje in der Mitte
-    g.fillStyle = '#ff7a5c'; g.strokeStyle = 'rgba(12,24,36,0.85)'; g.lineWidth = 2; g.beginPath(); g.arc(fx, fy + 4, 6, 0, 6.2832); g.fill(); g.stroke();
-    g.fillStyle = '#fff2e0'; g.fillRect(fx - 5, fy + 2.5, 10, 2.6);
+    g.fillStyle = RR.buoy[0]; g.strokeStyle = 'rgba(12,24,36,0.85)'; g.lineWidth = 2; g.beginPath(); g.arc(fx, fy + 4, 6, 0, 6.2832); g.fill(); g.stroke();
+    g.fillStyle = RR.buoy[1]; g.fillRect(fx - 5, fy + 2.5, 10, 2.6);
   };
   const H0 = 46;                                  // Höhe, in der das Seil an den Säulen hängt
   if (!front) {
@@ -15971,7 +16081,9 @@ function stDrawGhost(g, ox, oy, tm) {
 }
 function stGhostTile(g, type, lv, gx, gy, S, ok, tm) {
   const spr = stSprite(type, lv, 'ok', 0);
-  g.save(); g.globalAlpha = 0.62; stBlit(g, spr, gx - ST_PAD, gy - ST_PAD); g.restore();
+  g.save(); g.globalAlpha = 0.62; stBlit(g, spr, gx - ST_PAD, gy - ST_PAD);
+  if (type === 'korallenspeer') { g.translate(gx, gy); g.scale(S / 100, S / 100); g.ow = 2.6 / (S / 100); stSpearDraw(g, lv, 0, 0, 0); }       // 8.0: der Dreizack ist nicht im Bild
+  g.restore();
   g.save(); g.fillStyle = ok ? 'rgba(94,242,192,0.2)' : 'rgba(255,92,108,0.3)'; g.beginPath(); roundRect(g, gx + 2, gy + 2, S - 4, S - 4, 12); g.fill();
   g.strokeStyle = ok ? '#5ef2c0' : '#ff5c6c'; g.lineWidth = 4; g.setLineDash([14, 9]); g.lineDashOffset = -tm * 24; g.stroke(); g.setLineDash([]);
   if (!ok) { g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(gx + S * 0.38, gy + S * 0.38); g.lineTo(gx + S * 0.62, gy + S * 0.62); g.moveTo(gx + S * 0.62, gy + S * 0.38); g.lineTo(gx + S * 0.38, gy + S * 0.62); g.stroke(); }
@@ -16015,7 +16127,7 @@ function stDrawBaseC(g, id, list, n, px, py, ox, oy, tm, bars) {
     keys[q] = stLiveB(b) ? null : stBKey(b, conns[q]);
     bx0[q] = b.x * T - ST_PAD; bx1[q] = b.x * T + S + ST_PAD; by0[q] = b.y * T - ST_PAD; by1[q] = b.y * T + S + ST_PAD;
   }
-  const ep = id + '|' + n + '|' + px + ',' + py + '|';
+  const ep = id + '|' + stArea() + '|' + n + '|' + px + ',' + py + '|';
   const inC = function(q, i, j){ const cx = Rx + i * cu, cy = Ry + j * cu; return bx1[q] > cx && bx0[q] < cx + cu && by1[q] > cy && by0[q] < cy + cu; };
   const sigOf = function(i, j){ let t = ''; for (let q = 0; q < L; q++) if (keys[q] !== null && inC(q, i, j)) t += keys[q] + '/'; return t; };
   const bake = function(key, old, i, j, sig){
@@ -16110,8 +16222,41 @@ function stDuskAdd(L, list, n, ox, oy) {         // Lichter einer Basis: Laterne
   const gy = (-h + n) * T - oy - 101;
   L.push({ x: (-h + gi) * T - ox, y: gy, R: 150, c: '255,225,140' }, { x: (-h + gi + 1) * T - ox, y: gy, R: 150, c: '255,225,140' });
 }
+// 8.0: Stimmung der anderen Ringe, billig: Riff = Sonnenstrahlen von oben, Kelp = grüner Dunst mit Sporen, Vulkan = rotes Glühen mit aufsteigender Glut.
+// Unter ST_ANIM_MIN (weit herausgezoomt) bleiben nur Tönung und Rand (ein Rechteck, ein Verlauf), keine Teilchen.
+function stDrawMood(A) {
+  const g = ctx, t = runTime, W2 = W / 2, H2 = H / 2, rr = Math.hypot(W, H) / 2, near = ZOOM >= ST_ANIM_MIN;
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+  const vig = function(r0, c){ const q = g.createRadialGradient(W2, H2, rr * r0, W2, H2, rr); q.addColorStop(0, 'rgba(' + c + ',0)'); q.addColorStop(1, 'rgba(' + c + ',0.5)'); g.fillStyle = q; g.fillRect(0, 0, W, H); };
+  const bits = function(n, sp, dr, rad, col, par){                // n Punkte steigen von unten nach oben, seitlich schwankend
+    for (let i = 0; i < n; i++) {
+      const sx = bhash(i * 3.7 + 1) * W, ph = bhash(i * 5.3 + 2), yy = H + 20 - ((t * sp * (0.6 + ph) + ph * H * 3) % (H + 40)), xx = ((sx - camera.x * par + Math.sin(t * 0.6 + i * 2.3) * dr) % W + W) % W;
+      g.fillStyle = col.replace('A', (0.25 + 0.5 * bhash(i * 9.1 + t * 0.0 + Math.floor(t * 2 + i) * 0.37)).toFixed(2)); g.beginPath(); g.arc(xx, yy, rad * (0.5 + ph), 0, 6.2832); g.fill();
+    }
+  };
+  if (A === 'riff') {
+    if (near) {
+      g.globalCompositeOperation = 'lighter';
+      const q = g.createLinearGradient(0, 0, 0, H * 0.95); q.addColorStop(0, 'rgba(255,246,196,0.95)'); q.addColorStop(1, 'rgba(255,244,190,0)'); g.fillStyle = q;
+      for (let i = 0; i < 5; i++) {
+        const x0 = (i * 0.23 + 0.06) * W + Math.sin(t * 0.25 + i * 1.7) * W * 0.04, w = W * (0.05 + 0.035 * bhash(i + 4)), sl = H * 0.4;
+        g.globalAlpha = 0.14 + 0.08 * Math.sin(t * 0.6 + i * 1.9); g.beginPath(); g.moveTo(x0, 0); g.lineTo(x0 + w, 0); g.lineTo(x0 + w - sl, H); g.lineTo(x0 - sl, H); g.closePath(); g.fill();
+      }
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    }
+  } else if (A === 'kelp') {
+    g.fillStyle = 'rgba(14,70,38,0.2)'; g.fillRect(0, 0, W, H); vig(0.3, '4,34,18');
+    if (near) { g.globalCompositeOperation = 'lighter'; bits(16, 9, 26, 2.6, 'rgba(190,240,150,A)', 0.4); }
+  } else if (A === 'vulkan') {
+    g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(255,60,20,' + (0.045 + 0.02 * Math.sin(t * 1.3)).toFixed(3) + ')'; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'source-over'; vig(0.35, '60,6,0');
+    if (near) { g.globalCompositeOperation = 'lighter'; bits(34, 36, 18, 2.2, 'rgba(255,150,60,A)', 0.3); }
+  }
+  g.restore();
+}
 function stDrawDusk() {
-  if (!Base || stArea() !== 'graben') return;
+  if (!Base) return;
+  if (stArea() !== 'graben') { stDrawMood(stArea()); return; }
   const k = 0.3, cw = Math.ceil(W * k), ch = Math.ceil(H * k), g = ctx, L = [];
   stDuskAdd(L, Base.buildings, stGrid(), camera.x - W / 2, camera.y - H / 2);
   if (SN.on && SN.pl) {
@@ -16183,7 +16328,9 @@ function stMarker(g, x, y, col, tm, send) {      // Ziel für "Schicken" (Fahne)
 
 function stIcon(type, px) {                      // kleines Bild eines Gebäudes für Menüs
   const c = document.createElement('canvas'), q = Math.ceil(px * 2); c.width = c.height = q; c.className = 'st-ico'; c.style.width = c.style.height = px + 'px';
-  const s = stSprite(type, 1, 'ok', 0); c.getContext('2d').drawImage(s.c, 0, 0, q, q); return c;
+  const s = stSprite(type, 1, 'ok', 0), g = c.getContext('2d'); g.drawImage(s.c, 0, 0, q, q);
+  if (type === 'korallenspeer') { const S = ST_B[type].size * ST_TILE, sc = q / (S + 2 * ST_PAD), u = S / 100; g.translate(ST_PAD * sc, ST_PAD * sc); g.scale(sc * u, sc * u); g.ow = 2.6 / u; stSpearDraw(g, 1, 0, 0, 0); }       // 8.0: der Dreizack ist nicht im Bild
+  return c;
 }
 function stLabel(type, text) { const s = el('span', 'st-lab'); s.appendChild(stIcon(type, 38)); s.appendChild(el('span', 'st-name', text)); return s; }
 // ---------- Truppen: vier Tiere mit Schal in der Farbe des Besitzers ----------
@@ -16903,15 +17050,33 @@ ST_ART.korallenspeer = function(g, lv) {
   g.strokeStyle = 'rgba(80,20,10,0.35)'; g.lineWidth = g.ow * 0.55; g.beginPath(); for (let y = 34; y < 60; y += 8) { g.moveTo(43, y); g.quadraticCurveTo(50, y + 3, 57, y); } g.stroke();
   for (const s of [-1, 1]) { g.beginPath(); g.moveTo(50 + s * 7, 52); g.quadraticCurveTo(50 + s * 22, 44, 50 + s * 20, 30); g.quadraticCurveTo(50 + s * 15, 40, 50 + s * 7, 42); g.closePath(); stDo(g, stLG(g, 0, 30, 0, 52, '#ffb09a', cor), 0.9); }
   stRect(g, 38, 22, 24, 7, 2, stLG(g, 0, 22, 0, 29, '#cfd8de', '#7b8993'), 0.9);
-  stLine(g, 50, 24, 50, 4, 'rgba(12,24,36,0.92)', g.ow * 4.2); stLine(g, 50, 24, 50, 4, tip, g.ow * 2.4);
-  for (const s of [-1, 1]) { stLine(g, 50 + s * 9, 24, 50 + s * 9, 8, 'rgba(12,24,36,0.92)', g.ow * 3.6); stLine(g, 50 + s * 9, 24, 50 + s * 9, 8, tip, g.ow * 1.9); }
   g.beginPath(); g.moveTo(41, 24); g.quadraticCurveTo(41, 28, 50, 28); g.quadraticCurveTo(59, 28, 59, 24); g.strokeStyle = 'rgba(12,24,36,0.92)'; g.lineWidth = g.ow * 3.6; g.stroke(); g.strokeStyle = tip; g.lineWidth = g.ow * 1.9; g.stroke();
-  for (const x of [41, 50, 59]) stPoly(g, [[x, x === 50 ? -4 : 2], [x - 3.2, x === 50 ? 6 : 12], [x + 3.2, x === 50 ? 6 : 12]], '#f4fbff', 0.8);
   if (lv >= 5) stCirc(g, 50, 44, 3, '#ffd76a', 0.6);
 };
+// 8.0: der Dreizack steckt im Halter der Säule und wird live gemalt: Schuss = er fliegt davon, Nachladen = er gleitet aus dem Halter, vor dem Schuss weicht er zurück und neigt sich zum Ziel.
+// dy = wie weit er im Halter steckt (0 = ganz oben), tilt = Neigung (rad), hot = Leuchten an der Spitze (0..1); das Bild ohne ihn (Bauplatz-Vorschau) bekommt ihn mit stSpearDraw(g, lv, 0, 0, 0).
+function stSpearDraw(g, lv, dy, tilt, hot) {
+  const tip = lv >= 4 ? '#ffd76a' : '#dfeaf2';
+  g.save(); g.beginPath(); g.rect(-30, -60, 160, 84); g.clip();                          // unter dem Halter (y 24) ist nichts zu sehen
+  g.translate(50, 24); g.rotate(tilt); g.translate(-50, -24 + dy);
+  stLine(g, 50, 24, 50, 4, 'rgba(12,24,36,0.92)', g.ow * 4.2); stLine(g, 50, 24, 50, 4, tip, g.ow * 2.4);
+  for (const s of [-1, 1]) { stLine(g, 50 + s * 9, 24, 50 + s * 9, 8, 'rgba(12,24,36,0.92)', g.ow * 3.6); stLine(g, 50 + s * 9, 24, 50 + s * 9, 8, tip, g.ow * 1.9); }
+  for (const x of [41, 50, 59]) stPoly(g, [[x, x === 50 ? -4 : 2], [x - 3.2, x === 50 ? 6 : 12], [x + 3.2, x === 50 ? 6 : 12]], '#f4fbff', 0.8);
+  if (hot > 0.02 && ZOOM >= ST_ANIM_MIN) stGlow(g, 50, -2, 9 + hot * 9, '255,190,150', 0.25 + hot * 0.5);
+  g.restore();
+}
+// Takt: Schuss (fx.fire) -> 0,45 s leerer Halter mit Druckwelle -> bis 1,25 s gleitet der neue Dreizack hinauf -> bereit (Glimmen) -> in den letzten 0,5 s vor dem nächsten Wurf (b.cd) weicht er 5 Einheiten zurück und neigt sich zum Ziel
+const ST_SPEAR_ALWAYS = { korallenspeer: 1 };    // wird auch weit herausgezoomt gemalt (der Dreizack ist nicht im Bild des Gebäudes)
 ST_ANIM.korallenspeer = function(g, b, tm) {
-  const fx = stFxOf(b), rec = Math.max(0, 1 - (runTime - fx.fire) * 2), charge = 0.5 + 0.5 * Math.sin(tm * 2.4);
-  stGlow(g, 50, 4, 10 + charge * 6 + rec * 10, '255,190,150', 0.25 + charge * 0.2 + rec * 0.4);
+  const fx = stFxOf(b), since = runTime - fx.fire, cd = b.cd || 0, near = ZOOM >= ST_ANIM_MIN;
+  const rise = since < 0.45 ? 0 : since > 1.25 ? 1 : 1 - Math.pow(1 - (since - 0.45) / 0.8, 3), wind = rise >= 1 && cd > 0 && cd < 0.5 ? 1 - Math.pow(cd / 0.5, 2) : 0;
+  const charge = rise >= 1 ? 0.5 + 0.5 * Math.sin(tm * 3) : 0;
+  stSpearDraw(g, b.lv, (1 - rise) * 34 + wind * 5, Math.max(-0.5, Math.min(0.5, Math.cos(fx.aim) * 0.4)) * wind, rise >= 1 ? 0.2 + charge * 0.25 + wind * 0.55 : 0);
+  if (!near) return;
+  if (since >= 0 && since < 0.3) {                // Druckwelle am Halter + Blitz an der Spitze
+    const e = since / 0.3; g.save(); g.strokeStyle = 'rgba(255,214,176,' + (0.6 * (1 - e)) + ')'; g.lineWidth = g.ow * 1.4; g.beginPath(); g.ellipse(50, 25, 8 + e * 28, 3 + e * 9, 0, 0, 6.2832); g.stroke(); g.restore();
+    stGlow(g, 50, 2, 16 * (1 - e) + 6, '255,200,150', 0.7 * (1 - e));
+  }
   stBubbles(g, tm, 50, 70, 24, 16, 3, 7);
 };
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
